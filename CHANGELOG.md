@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.2.2] – 2026-09-29 (versionCode 5)
+
+### Geändert
+- Die App ist jetzt deutlich kleiner und startet schneller: Beim Bauen wird nicht benötigter Code automatisch entfernt und der Rest optimiert.
+
 ## [0.2.1] – 2026-09-29 (versionCode 4)
 
 ### Geändert

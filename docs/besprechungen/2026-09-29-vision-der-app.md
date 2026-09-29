@@ -111,8 +111,9 @@ Im Anschluss an die Besprechung hat der Projektinhaber die Vision festgelegt. Di
 - Kernsatz: „Moltobene sammelt Kochrezepte aus allen Quellen an einem Ort, gespeichert nur auf dem eigenen Handy.“
 - #24: Englisch ist die Rückfallsprache, Deutsch kommt als Übersetzung dazu.
 
+- Streitpunkt 1 / #19: R8 wird sofort eingeschaltet (Version 0.2.2). Jede neue Version wird kurz auf dem Handy ausprobiert.
+
 **Noch offen:**
-- Streitpunkt 1 (R8/#19)
 - Welche Beschlussvorschläge als Issues angelegt werden
 
 **Offene Fachfrage für die nächste Besprechung:** Werden Zutaten als Freitext gespeichert oder strukturiert (Menge, Einheit, Zutat)? Davon hängen die Suche nach Zutaten und das Umrechnen von Portionen ab.
