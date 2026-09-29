@@ -34,8 +34,11 @@ _Platzhalter – wird später ausgefüllt (Zweck der App, Zielgruppe, geplante F
 - **Vor jeder Erhöhung der ersten Stelle der Versionsnummer** (z. B. 1.x → 2.0.0) wird **automatisch eine /pruefrunde** durchgeführt, bevor die neue Version veröffentlicht wird.
 - **Umgesetzt wird nur, was der Projektinhaber freigibt.** Issues aus Prüfrunden sind Vorschläge, keine Aufträge.
 - Erledigte Issues werden im Commit referenziert (z. B. `Behebt #12` bzw. `Fixes #12`), damit GitHub sie beim Push auf `main` automatisch schließt.
+- `/besprechung [Thema]` ist eine gemeinsame Besprechung aller Spezialisten: Beiträge, Aussprache untereinander, gemeinsame Rangfolge. Das Protokoll wird unter `docs/besprechungen/` gespeichert. **Issues daraus werden erst angelegt, wenn der Projektinhaber festlegt, welche Punkte übernommen werden.**
 
 ## Ablauf nach jeder Änderung
+
+**Ausnahme für reine Dokumentation:** Ändern sich ausschließlich Dokumente (`docs/`, `CLAUDE.md`, `README.md`), entfallen Schritt 1 und 2 – keine neue Versionsnummer, kein CHANGELOG-Eintrag, kein neues Release. Commit, Push und Build-Prüfung (Schritt 3–5) gelten weiterhin. Sobald App-Code, Ressourcen oder Build-Dateien betroffen sind, gilt der volle Ablauf.
 
 1. **CHANGELOG.md** auf Deutsch ergänzen (neuer Eintrag oben, mit Version, Datum und versionCode).
 2. **Versionsnummer erhöhen** in `app/build.gradle.kts`:
