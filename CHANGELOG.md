@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.2.0] – 2026-09-29 (versionCode 3)
+
+### Neu
+- Die Startseite zeigt jetzt unter dem App-Namen dezent die aktuelle Versionsnummer an. Sie wird beim Bauen automatisch übernommen.
+
 ## [0.1.1] – 2026-09-29 (versionCode 2)
 
 ### Geändert
