@@ -85,6 +85,16 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 - Mitgelieferte Werte (z. B. vorgeschlagene Schlagwörter) werden mit fester englischer Kennung gespeichert (z. B. `main_course`), angezeigt wird der Text aus `strings.xml`. Eigene Eingaben der Nutzer werden nie übersetzt.
 - Rezeptinhalte bleiben in ihrer Originalsprache.
 
+## Gestaltung
+
+- **Farbpalette „Schiefer“** (ruhiges Blaugrau, vom Projektinhaber gewählt): Hauptfarbe hell `#3E5A6E`, dunkel `#A9C6DB`; Hintergrund hell `#F7F8F9`, dunkel `#121518`. Die vollständige Palette steht in `ui/theme/Color.kt`, die Fensterfarben in `res/values(-night)/colors.xml` – beide müssen zueinander passen. Keine Farben vom Hintergrundbild (dynamische Farben).
+- Farben im Code **nur** über `MaterialTheme.colorScheme`, Schriftgrößen nur über `MaterialTheme.typography`, Ecken über `MaterialTheme.shapes`, Abstände über `Spacing` – nie feste Werte.
+- Schrift: Standardschrift von Android, Material-3-Größenskala.
+- Hell- und Dunkelmodus gleichwertig; Kontraste mindestens WCAG AA.
+- Tippflächen mindestens 48 dp; Informationen nie nur über Farbe.
+- Jeder Bildschirm funktioniert mit Schriftgröße 200 % (Vorschau mit `fontScale = 2f`) und mit dem Screenreader: Überschriften mit `semantics { heading() }`, jedes Symbol ohne Text mit Beschreibung aus `strings.xml`.
+- Jeder Bildschirm hat einen gestalteten Lade-, Leer- und Fehlerzustand.
+
 ## Kommunikation
 
 - Immer auf **Deutsch** kommunizieren.

@@ -3,6 +3,16 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.2.5] – 2026-09-29 (versionCode 8)
+
+### Geändert
+- Neues Farbkonzept „Schiefer“: ein ruhiges Blaugrau für hellen und dunklen Modus, das den Fotos der Gerichte den Vortritt lässt. Die App übernimmt nicht mehr die Farben vom Hintergrundbild.
+- Das App-Symbol hat jetzt die neue Hauptfarbe.
+
+### Behoben
+- Beim Start im Dunkelmodus blitzt der Bildschirm nicht mehr weiß auf.
+- Die Startseite ist mit großer Schrift und mit der Vorlesefunktion (Screenreader) besser nutzbar.
+
 ## [0.2.4] – 2026-09-29 (versionCode 7)
 
 ### Geändert

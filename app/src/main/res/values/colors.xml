@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#FF6750A4</color>
+    <!-- Palette „Schiefer“; muss zu ui/theme/Color.kt passen. -->
+    <color name="window_background">#FFF7F8F9</color>
+    <color name="ic_launcher_background">#FF3E5A6E</color>
 </resources>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Heller Modus. Die Fensterfarbe entspricht dem App-Hintergrund, damit beim Start nichts aufblitzt. -->
-    <style name="Theme.Moltobene" parent="android:Theme.Material.Light.NoActionBar">
+    <!-- Dunkler Modus: dunkles Grundthema, damit beim Start nichts weiß aufblitzt (#1). -->
+    <style name="Theme.Moltobene" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/window_background</item>
         <item name="android:colorBackground">@color/window_background</item>
     </style>
