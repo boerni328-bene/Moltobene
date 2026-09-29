@@ -113,8 +113,7 @@ Im Anschluss an die Besprechung hat der Projektinhaber die Vision festgelegt. Di
 
 - Streitpunkt 1 / #19: R8 wird sofort eingeschaltet (Version 0.2.2). Jede neue Version wird kurz auf dem Handy ausprobiert.
 
-**Noch offen:**
-- Welche Beschlussvorschläge als Issues angelegt werden
+- Issues aus dieser Besprechung: keine neuen. Die Beschlussvorschläge Rang 1–5 sind in der Vision (`CLAUDE.md`) aufgegangen.
 
 **Offene Fachfrage für die nächste Besprechung:** Werden Zutaten als Freitext gespeichert oder strukturiert (Menge, Einheit, Zutat)? Davon hängen die Suche nach Zutaten und das Umrechnen von Portionen ab.
 
