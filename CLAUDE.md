@@ -35,10 +35,55 @@ Keine Werbung, kein Konto oder Anmelden, kein soziales Netzwerk, kein Tracking, 
 - **Offene Formate:** Einzelrezepte werden im Standard schema.org/Recipe geteilt; die Sicherung ist eine Datei mit Rezepten, Fotos und Formatversion. Alte Sicherungen bleiben immer lesbar.
 - **Sprache:** Oberfläche auf Deutsch und Englisch (Englisch als Rückfallsprache), weitere Sprachen später. Rezepte bleiben in ihrer Originalsprache (keine automatische Übersetzung). Mengen und Einheiten werden wie im Original übernommen, eine Umrechnung kann später folgen.
 - **Texte:** ohne direkte Anrede, neutral und knapp („Rezept hinzufügen“, „Rezept wirklich löschen?“, „Noch keine Rezepte vorhanden“).
-- **Feste Begriffe:** Rezept, Sammlung, Quelle; *hinzufügen* (neues Rezept), *übernehmen* (aus einer Quelle, nicht „importieren“), *teilen* (an andere), *sichern / wiederherstellen* (ganze Sammlung, nicht „Backup“/„Export“), *Handy*.
+- **Feste Begriffe:** siehe Abschnitt „Texte und Übersetzungen“.
 - **Gestaltung:** modern und schlicht, Fotos der Gerichte im Mittelpunkt, eigene ruhige Farbpalette. Voll nutzbar mit großer Schrift und Screenreader.
 - **Leistung:** Auch mit 1.000 Rezepten mit Fotos bleibt die App auf einem günstigen Android-8-Handy beim Start, Blättern und Suchen flüssig.
 - **Fokus:** Neue Funktionen müssen zu einer Kernfunktion passen. Lieber eine Funktion fertig als mehrere halb.
+
+## Texte und Übersetzungen
+
+### Feste Begriffe
+
+Immer dieses Wort verwenden, nie die Alternativen in Klammern.
+
+| Deutsch | Englisch | Nicht verwenden |
+|---|---|---|
+| Rezept | Recipe | |
+| Sammlung | Collection | Bibliothek, Liste |
+| Titel | Title | Name |
+| Zutaten | Ingredients | |
+| Zubereitung (einzelner Eintrag: Schritt) | Instructions (Step) | Anleitung |
+| Portionen | Servings | Personen |
+| Quelle | Source | Herkunft |
+| Notizen | Notes | Kommentar |
+| Foto | Photo | Bild |
+| Schlagwort | Tag | Kategorie, Tag |
+| Favorit | Favorite | |
+| Entwurf | Draft | |
+| hinzufügen (neues Rezept) | add | anlegen, erstellen |
+| übernehmen (aus einer Quelle) | import | importieren |
+| teilen (an andere) | share | exportieren |
+| sichern / wiederherstellen (ganze Sammlung) | back up / restore | Backup, Export |
+| Handy | device | Gerät, Smartphone |
+| Einstellungen | Settings | |
+
+### Textregeln
+
+- Keine direkte Anrede, neutral und knapp: „Rezept hinzufügen“, „Rezept wirklich löschen?“, „Noch keine Rezepte vorhanden“.
+- Schaltflächen nennen die Aktion („Löschen“, „Speichern“, „Verwerfen“), nie „OK“ oder „Ja“.
+- Meldungen sagen, was passiert ist und was man tun kann; keine Fachbegriffe, kein Amtsdeutsch.
+- Deutsche Anführungszeichen „…“, im Englischen “…”.
+
+### Übersetzbarkeit
+
+- Englisch ist die Rückfallsprache (`res/values/strings.xml`, `tools:locale="en"`), Deutsch die Übersetzung (`res/values-de/strings.xml`). Jeder neue Text kommt **immer in beide Dateien**. Mitgeliefert werden nur diese Sprachen (`resourceConfigurations`).
+- Alle sichtbaren Texte inkl. Beschreibungen für den Screenreader stehen in `strings.xml`, nie im Code.
+- Mengenangaben als Mehrzahlformen (`plurals`): „1 Rezept“ / „2 Rezepte“.
+- Platzhalter nummeriert (`%1$s`, `%2$d`); Sätze nie aus Einzelteilen zusammensetzen.
+- Datum und Zahlen über das Format des Handys, nie fest zusammengesetzt.
+- Namen, die nicht übersetzt werden (z. B. `app_name`), mit `translatable="false"`.
+- Mitgelieferte Werte (z. B. vorgeschlagene Schlagwörter) werden mit fester englischer Kennung gespeichert (z. B. `main_course`), angezeigt wird der Text aus `strings.xml`. Eigene Eingaben der Nutzer werden nie übersetzt.
+- Rezeptinhalte bleiben in ihrer Originalsprache.
 
 ## Kommunikation
 
