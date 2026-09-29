@@ -12,13 +12,16 @@ android {
         applicationId = "com.moltobene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "0.2.2"
+        versionCode = 6
+        versionName = "0.2.3"
     }
 
     // Der Signaturschlüssel kommt aus Umgebungsvariablen (auf GitHub aus den Secrets).
-    // Fehlen sie, wird die Release-Version unsigniert gebaut.
+    // Auf GitHub (CI=true) ist er Pflicht, damit nie eine unsignierte APK veröffentlicht wird.
     val keystoreFile = System.getenv("KEYSTORE_FILE")
+    if (System.getenv("CI") == "true" && keystoreFile == null) {
+        throw GradleException("Signaturschlüssel fehlt (KEYSTORE_FILE). Ohne Signatur wird auf GitHub nicht gebaut.")
+    }
     signingConfigs {
         if (keystoreFile != null) {
             create("release") {
@@ -71,4 +74,6 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     debugImplementation(libs.androidx.ui.tooling)
+
+    testImplementation(libs.junit)
 }

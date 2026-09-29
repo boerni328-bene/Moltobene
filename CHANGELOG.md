@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.2.3] – 2026-09-29 (versionCode 6)
+
+### Geändert
+- Der automatische Bau ist sicherer und gründlicher geworden: Jede neue Version wird jetzt vor der Veröffentlichung automatisch auf Fehler geprüft und getestet. Außerdem wird sie nur noch veröffentlicht, wenn sie korrekt signiert ist. An der App selbst ändert sich nichts.
+
 ## [0.2.2] – 2026-09-29 (versionCode 5)
 
 ### Geändert
