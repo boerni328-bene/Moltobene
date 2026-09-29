@@ -1,8 +1,44 @@
 # CLAUDE.md – Arbeitsregeln für das Projekt Moltobene
 
-## Projektbeschreibung
+## Projektbeschreibung (Vision)
 
-_Platzhalter – wird später ausgefüllt (Zweck der App, Zielgruppe, geplante Funktionen)._
+Festgelegt vom Projektinhaber am 29.09.2026 (siehe `docs/besprechungen/2026-09-29-vision-der-app.md`). Änderungen nur mit seiner Zustimmung. Neue Vorschläge werden an dieser Vision gemessen.
+
+**Kernsatz** (wörtlich gleich in README, GitHub und Releases): _Moltobene sammelt Kochrezepte aus allen Quellen an einem Ort, gespeichert nur auf dem eigenen Handy._
+
+**Für wen:** Alle, die gern kochen. Öffentlich und kostenlos, verteilt über GitHub Releases.
+
+### Kernfunktionen
+
+1. **Rezept hinzufügen:** Rezepte selbst eintippen (Titel, Zutaten, Zubereitung, eigenes Foto).
+2. **Rezept übernehmen** aus anderen Quellen, in dieser Reihenfolge:
+   1. Internetseiten und Koch-Portale (Teilen aus dem Browser oder Link einfügen); geteilter Text aus beliebigen Apps (z. B. WhatsApp, E-Mail) und Zwischenablage.
+   2. Foto oder Bildschirmfoto von Kochbuch, Zettel oder PDF mit Texterkennung.
+   3. YouTube (Videobeschreibung; nur als bestmöglicher Versuch ohne Zusage) sowie Dateien oder andere Rezept-Apps.
+   Weitere Erfassungswege sind erwünscht und werden von den Spezialisten vorgeschlagen.
+3. **Sammlung finden und ordnen:** suchen, sortieren, einordnen.
+4. **Mit dem Rezept kochen:** Bildschirm bleibt an, aus Armlänge lesbar, Zutaten und Schritte abhakbar, Portionen umrechnen, eigene Notizen zum Rezept.
+5. **Teilen, sichern und umziehen:** einzelne Rezepte teilen; die ganze Sammlung inklusive Fotos als Datei sichern, wiederherstellen und auf ein neues Handy umziehen.
+
+### Bewusst nicht
+
+Keine Werbung, kein Konto oder Anmelden, kein soziales Netzwerk, kein Tracking, keine Cloud, keine Weitergabe von Daten an Dritte.
+
+### Grundsätze
+
+- **Alles lokal:** Alle Inhalte liegen nur auf dem Gerät. Die automatische Android-Cloud-Sicherung ist abgeschaltet; gesichert wird über die eigene Sicherungsdatei (direkter Umzug von Handy zu Handy bleibt erlaubt).
+- **Internet nur auf Wunsch:** Nur wenn der Nutzer ein Rezept übernehmen lässt oder in den Einstellungen „Nach neuer Version suchen“ antippt. Keine automatische Update-Prüfung, keine sonstigen Verbindungen.
+- **Nichts geht verloren:** Jede Übernahme endet in einem bearbeitbaren Entwurf. Klappt sie nicht (kein Netz, Seite nicht lesbar), bleiben Link bzw. Text als Entwurf erhalten. Die App weist ehrlich darauf hin, dass übernommene Inhalte geprüft werden sollten.
+- **Quelle:** Übernommene Rezepte behalten immer ihre Quelle (Link, Buch), sie wird angezeigt und beim Teilen mitgegeben.
+- **Texterkennung** läuft ausschließlich auf dem Gerät und ist in die App eingebaut (funktioniert auch ohne Google-Dienste).
+- **Fotos:** werden beim Speichern verkleinert; Listen zeigen nur Vorschaubilder; beim Teilen und Sichern wird der Aufnahmeort entfernt. Jedes Rezept sieht auch ohne Foto vollständig aus.
+- **Offene Formate:** Einzelrezepte werden im Standard schema.org/Recipe geteilt; die Sicherung ist eine Datei mit Rezepten, Fotos und Formatversion. Alte Sicherungen bleiben immer lesbar.
+- **Sprache:** Oberfläche auf Deutsch und Englisch (Englisch als Rückfallsprache), weitere Sprachen später. Rezepte bleiben in ihrer Originalsprache (keine automatische Übersetzung). Mengen und Einheiten werden wie im Original übernommen, eine Umrechnung kann später folgen.
+- **Texte:** ohne direkte Anrede, neutral und knapp („Rezept hinzufügen“, „Rezept wirklich löschen?“, „Noch keine Rezepte vorhanden“).
+- **Feste Begriffe:** Rezept, Sammlung, Quelle; *hinzufügen* (neues Rezept), *übernehmen* (aus einer Quelle, nicht „importieren“), *teilen* (an andere), *sichern / wiederherstellen* (ganze Sammlung, nicht „Backup“/„Export“), *Handy*.
+- **Gestaltung:** modern und schlicht, Fotos der Gerichte im Mittelpunkt, eigene ruhige Farbpalette. Voll nutzbar mit großer Schrift und Screenreader.
+- **Leistung:** Auch mit 1.000 Rezepten mit Fotos bleibt die App auf einem günstigen Android-8-Handy beim Start, Blättern und Suchen flüssig.
+- **Fokus:** Neue Funktionen müssen zu einer Kernfunktion passen. Lieber eine Funktion fertig als mehrere halb.
 
 ## Kommunikation
 
