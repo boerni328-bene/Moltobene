@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.1.1] – 2026-09-29 (versionCode 2)
+
+### Geändert
+- Build-Werkzeuge (GitHub Actions) auf aktuelle Versionen aktualisiert. Das behebt eine Warnung wegen veraltetem Node.js. An der App selbst ändert sich nichts.
+
 ## [0.1.0] – 2026-09-29 (versionCode 1)
 
 ### Neu
