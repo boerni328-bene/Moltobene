@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.2.1] – 2026-09-29 (versionCode 4)
+
+### Geändert
+- Arbeitsregeln ergänzt: Prüfrunden mit dem Spezialisten-Team (Design, Funktionalität, Sicherheit, Kreativität, Konnektivität, Performance, Texte, Übersetzungen), deren Vorschläge als GitHub-Issues erfasst werden. An der App selbst ändert sich nichts.
+
 ## [0.2.0] – 2026-09-29 (versionCode 3)
 
 ### Neu

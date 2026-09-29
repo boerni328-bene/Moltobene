@@ -27,6 +27,14 @@ _Platzhalter – wird später ausgefüllt (Zweck der App, Zielgruppe, geplante F
 - Der Keystore liegt **außerhalb** des Repositorys unter `D:\Claude\Schluessel\moltobene`. Er darf niemals ins Repository gelangen und nicht ersetzt werden, sonst lassen sich Updates nicht mehr installieren.
 - Portables JDK (nur für Werkzeuge wie `keytool`): `D:\Claude\Werkzeuge\jdk-21.0.12.1+1`. GitHub CLI: `C:\Program Files\GitHub CLI\gh.exe`.
 
+## Spezialisten-Team und Prüfrunden
+
+- Auf Benutzerebene gibt es acht nur lesende Spezialisten (Subagents): `design`, `funktionalitaet`, `sicherheit`, `kreativitaet`, `konnektivitaet`, `performance`, `texte`, `uebersetzungen`.
+- `/pruefrunde` ruft alle nacheinander auf und legt ihre Vorschläge als GitHub-Issues an (Etikett des Spezialisten + `Priorität: hoch|mittel|niedrig`).
+- **Vor jeder Erhöhung der ersten Stelle der Versionsnummer** (z. B. 1.x → 2.0.0) wird **automatisch eine /pruefrunde** durchgeführt, bevor die neue Version veröffentlicht wird.
+- **Umgesetzt wird nur, was der Projektinhaber freigibt.** Issues aus Prüfrunden sind Vorschläge, keine Aufträge.
+- Erledigte Issues werden im Commit referenziert (z. B. `Behebt #12` bzw. `Fixes #12`), damit GitHub sie beim Push auf `main` automatisch schließt.
+
 ## Ablauf nach jeder Änderung
 
 1. **CHANGELOG.md** auf Deutsch ergänzen (neuer Eintrag oben, mit Version, Datum und versionCode).
