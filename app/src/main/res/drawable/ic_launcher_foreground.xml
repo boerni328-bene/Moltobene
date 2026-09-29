@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Vorläufiges App-Symbol: ein großes "M" -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M36,72L36,36L44,36L54,52L64,36L72,36L72,72L64,72L64,50L54,65L44,50L44,72Z" />
+</vector>

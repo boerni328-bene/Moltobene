@@ -1,0 +1,37 @@
+# Gradle
+.gradle/
+build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Lokale Einstellungen (enthalten z. B. Pfade zum Android SDK)
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+.navigation/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Kotlin
+.kotlin/
+
+# Erzeugte App-Dateien
+*.apk
+*.aab
+*.ap_
+*.dex
+output-metadata.json
+
+# Signaturschlüssel – niemals ins öffentliche Repository!
+*.jks
+*.keystore
+keystore.properties
+
+# Logs und Betriebssystem-Dateien
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini
