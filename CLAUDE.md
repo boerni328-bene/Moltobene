@@ -110,6 +110,23 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 - Abhängigkeiten und Versionen stehen zentral in `gradle/libs.versions.toml`.
 - Git-Commits verwenden die GitHub-noreply-Adresse (im Repository lokal eingestellt). Keine privaten E-Mail-Adressen, Passwörter, Schlüssel oder Keystores ins Repository, denn es ist **öffentlich**.
 
+### Aufbau des Codes
+
+- `data/` – Rezept-Modell (`Recipe.kt`), Textumwandlung und Suche (reines Kotlin, per Unit-Test prüfbar), `db/` (Room-Datenbank mit Volltextsuche), `photos/` (einzige Stelle für Fotos), `backup/` (Sicherungsdatei), `RecipeRepository` als zentrale Stelle für Speichern und Laden.
+- `ui/` – je Bildschirm ein Ordner mit Screen und ViewModel; Navigation Compose mit typsicheren Zielen (`ui/navigation/Routes.kt`). Die gemeinsamen Bausteine hält `AppContainer` (in `MoltobeneApplication.kt`), alles wird erst bei Bedarf erzeugt.
+- Datei-, Datenbank- und Bildzugriffe laufen nie auf dem Hauptthread. Formulareingaben liegen im `SavedStateHandle`.
+- Freigegebene Bibliotheken: Room (mit KSP), Navigation Compose, Coil (ohne Internet-Modul), kotlinx.serialization. Weitere nur nach Rückfrage.
+
+### Daten dürfen nie verloren gehen
+
+- **Datenbank:** Bei jeder Änderung am Aufbau `version` in `MoltobeneDatabase` erhöhen, eine Migration schreiben und testen. Der Build legt den Bauplan als Artefakt „datenbank-schema-…“ ab; die JSON-Datei wird nach `app/schemas/` ins Repository übernommen.
+- **Sicherungsdatei:** Alte Sicherungen müssen immer lesbar bleiben (Regeln in `data/backup/BackupFormat.kt`). Die Beispiel-Sicherung unter `app/src/test/resources/backup/` wird nie verändert, nur um neue Formatversionen ergänzt.
+- Die App braucht keine Berechtigungen. Neue Berechtigungen (auch Internet) nur nach Rückfrage.
+
+### Größere Arbeiten
+
+Umfangreiche Versionen werden auf einem Arbeitszweig entwickelt und dort über „Run workflow“ (`gh workflow run build.yml --ref <zweig>`) gebaut – ohne Release. Erst wenn der Build grün ist, kommt alles zusammengefasst auf `main`.
+
 ## Build, Signatur und Veröffentlichung
 
 - Workflow: `.github/workflows/build.yml` läuft bei jedem Push auf `main` und baut eine **signierte Release-APK**.
@@ -124,7 +141,7 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 - `/pruefrunde` ruft alle nacheinander auf und legt ihre Vorschläge als GitHub-Issues an (Etikett des Spezialisten + `Priorität: hoch|mittel|niedrig`).
 - **Vor jeder Erhöhung der ersten Stelle der Versionsnummer** (z. B. 1.x → 2.0.0) wird **automatisch eine /pruefrunde** durchgeführt, bevor die neue Version veröffentlicht wird.
 - **Umgesetzt wird nur, was der Projektinhaber freigibt.** Issues aus Prüfrunden sind Vorschläge, keine Aufträge.
-- Erledigte Issues werden im Commit referenziert (z. B. `Behebt #12` bzw. `Fixes #12`), damit GitHub sie beim Push auf `main` automatisch schließt.
+- Erledigte Issues werden im Commit mit `Fixes #12` referenziert (GitHub erkennt nur die englischen Schlüsselwörter), damit sie beim Push auf `main` automatisch geschlossen werden.
 - `/besprechung [Thema]` ist eine gemeinsame Besprechung aller Spezialisten: Beiträge, Aussprache untereinander, gemeinsame Rangfolge. Das Protokoll wird unter `docs/besprechungen/` gespeichert. **Issues daraus werden erst angelegt, wenn der Projektinhaber festlegt, welche Punkte übernommen werden.**
 
 ## Ablauf nach jeder Änderung

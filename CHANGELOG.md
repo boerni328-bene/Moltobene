@@ -3,6 +3,22 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.3.0] – 2026-09-29 (versionCode 9)
+
+Die erste Version der Rezeptsammlung.
+
+### Neu
+- **Rezepte hinzufügen, bearbeiten und löschen:** Titel, Foto, Portionen, Zutaten (eine pro Zeile, Zwischenüberschriften mit Doppelpunkt), Zubereitung (ein Schritt pro Zeile), Quelle und Notizen.
+- **Sammlung:** Liste aller Rezepte mit Vorschaubild und Suche in Titeln, Zutaten und Notizen.
+- **Rezeptansicht:** Foto, Zutaten und Zubereitung übersichtlich. Beim Ansehen bleibt der Bildschirm an.
+- **Fotos** aus der Galerie auswählen oder mit der Kamera aufnehmen. Sie werden verkleinert und ohne Aufnahmeort gespeichert.
+- **Sammlung sichern und wiederherstellen** (Einstellungen): alle Rezepte mit Fotos in einer Datei. Beim Wiederherstellen wird nichts gelöscht.
+- **Nichts geht verloren:** Eingaben überstehen Anrufe und das Drehen des Handys. Ein neues Rezept wird automatisch als „Entwurf“ gespeichert, wenn die App in den Hintergrund geht.
+
+### Geändert
+- Die App speichert nichts mehr in der Google-Cloud-Sicherung. Gesichert wird über die eigene Sicherungsdatei. Ab Android 12 bleibt der direkte Umzug von Handy zu Handy möglich.
+- Die App braucht weiterhin keine einzige Berechtigung und keinen Internetzugang.
+
 ## [0.2.5] – 2026-09-29 (versionCode 8)
 
 ### Geändert

@@ -2,4 +2,104 @@
 <!-- Deutsche Übersetzung. Jeder Eintrag aus values/strings.xml (außer translatable="false") muss hier stehen. -->
 <resources>
     <string name="version_label">Version %1$s</string>
+
+    <!-- Allgemein -->
+    <string name="back">Zurück</string>
+    <string name="close">Schließen</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="save">Speichern</string>
+    <string name="delete">Löschen</string>
+
+    <!-- Sammlung -->
+    <string name="collection_title">Sammlung</string>
+    <string name="add_recipe">Rezept hinzufügen</string>
+    <string name="search_placeholder">Rezepte suchen</string>
+    <string name="search_clear">Suche löschen</string>
+    <string name="search_no_results">Keine passenden Rezepte gefunden</string>
+    <string name="collection_empty_title">Noch keine Rezepte vorhanden</string>
+    <string name="collection_empty_text">Mit dem ersten Rezept beginnt die Sammlung.</string>
+    <string name="collection_error">Die Sammlung konnte nicht geladen werden.</string>
+    <string name="untitled_recipe">Ohne Titel</string>
+    <string name="draft_label">Entwurf</string>
+
+    <!-- Rezept -->
+    <string name="photo">Foto</string>
+    <string name="ingredients">Zutaten</string>
+    <string name="instructions">Zubereitung</string>
+    <string name="notes">Notizen</string>
+    <string name="source">Quelle</string>
+    <string name="servings">Portionen</string>
+    <plurals name="servings_count">
+        <item quantity="one">%d Portion</item>
+        <item quantity="other">%d Portionen</item>
+    </plurals>
+    <string name="servings_with_unit">%1$d %2$s</string>
+    <string name="edit_recipe">Rezept bearbeiten</string>
+    <string name="delete_recipe">Rezept löschen</string>
+    <string name="delete_confirm_title">Rezept wirklich löschen?</string>
+    <string name="delete_confirm_text">„%1$s“ wird endgültig gelöscht.</string>
+    <string name="recipe_deleted">Rezept gelöscht</string>
+    <string name="recipe_saved">Rezept gespeichert</string>
+    <string name="recipe_not_found">Dieses Rezept gibt es nicht mehr.</string>
+    <string name="recipe_load_error">Das Rezept konnte nicht geladen werden.</string>
+    <string name="source_link_error">Der Link konnte nicht geöffnet werden.</string>
+
+    <!-- Bearbeiten -->
+    <string name="field_title">Titel</string>
+    <string name="field_title_missing">Titel fehlt</string>
+    <string name="field_servings_unit">Angabe (optional)</string>
+    <string name="field_servings_unit_hint">z. B. Stück, Springform 26 cm</string>
+    <string name="field_ingredients_hint">Eine Zutat pro Zeile, z. B. 200 g Mehl. Zwischenüberschriften enden mit Doppelpunkt, z. B. Für den Teig:</string>
+    <string name="field_instructions_hint">Ein Schritt pro Zeile</string>
+    <string name="field_source_hint">z. B. Omas Kochbuch, S. 42, oder ein Link</string>
+    <string name="photo_choose">Foto auswählen</string>
+    <string name="photo_take">Foto aufnehmen</string>
+    <string name="photo_remove">Foto entfernen</string>
+    <string name="photo_processing">Foto wird verarbeitet …</string>
+    <string name="photo_error">Das Foto konnte nicht übernommen werden.</string>
+    <string name="camera_unavailable">Keine Kamera-App gefunden.</string>
+    <string name="discard_title">Änderungen verwerfen?</string>
+    <string name="discard">Verwerfen</string>
+    <string name="keep_editing">Weiter bearbeiten</string>
+    <string name="save_error">Das Rezept konnte nicht gespeichert werden.</string>
+
+    <!-- Einstellungen -->
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_section_about">Info</string>
+    <string name="backup_title">Sammlung sichern</string>
+    <string name="backup_text">Alle Rezepte und Fotos in einer Datei speichern. Die Sicherungsdatei ist nicht verschlüsselt.</string>
+    <string name="backup_file_name">moltobene-sicherung-%1$s.zip</string>
+    <string name="backup_running">Sammlung wird gesichert …</string>
+    <plurals name="backup_done">
+        <item quantity="one">Sammlung gesichert: %d Rezept</item>
+        <item quantity="other">Sammlung gesichert: %d Rezepte</item>
+    </plurals>
+    <string name="backup_error">Die Sammlung konnte nicht gesichert werden.</string>
+    <string name="restore_title">Sammlung wiederherstellen</string>
+    <string name="restore_text">Rezepte aus einer Sicherungsdatei übernehmen. Vorhandene Rezepte bleiben erhalten.</string>
+    <string name="restore_checking">Sicherung wird geprüft …</string>
+    <string name="restore_running">Rezepte werden wiederhergestellt …</string>
+    <string name="restore_confirm_title">Sammlung wiederherstellen?</string>
+    <string name="restore_confirm_date">Sicherung vom %1$s</string>
+    <plurals name="restore_confirm_total">
+        <item quantity="one">%d Rezept in der Sicherung</item>
+        <item quantity="other">%d Rezepte in der Sicherung</item>
+    </plurals>
+    <string name="restore_confirm_counts">Neu: %1$d · Schon vorhanden: %2$d</string>
+    <plurals name="restore_confirm_skipped">
+        <item quantity="one">%d beschädigtes Rezept wird übersprungen.</item>
+        <item quantity="other">%d beschädigte Rezepte werden übersprungen.</item>
+    </plurals>
+    <string name="restore_confirm_rule">Vorhandene Rezepte werden nur ersetzt, wenn die Sicherung neuer ist. Es wird nichts gelöscht.</string>
+    <string name="restore_action">Wiederherstellen</string>
+    <plurals name="restore_done">
+        <item quantity="one">%d Rezept wiederhergestellt</item>
+        <item quantity="other">%d Rezepte wiederhergestellt</item>
+    </plurals>
+    <string name="restore_nothing_new">Die Sammlung ist bereits auf dem neuesten Stand.</string>
+    <string name="restore_error_not_backup">Diese Datei ist keine Moltobene-Sicherung.</string>
+    <string name="restore_error_newer">Diese Sicherung stammt von einer neueren App-Version. Bitte Moltobene aktualisieren.</string>
+    <string name="restore_error_damaged">Die Sicherungsdatei ist beschädigt.</string>
+    <string name="restore_error_too_large">Die Sicherungsdatei ist zu groß.</string>
+    <string name="restore_error_failed">Die Sicherung konnte nicht wiederhergestellt werden. Die Sammlung ist unverändert.</string>
 </resources>

@@ -6,3 +6,12 @@
 # wird beim Build auf GitHub mit abgelegt.
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
+
+# Navigationsziele: werden über ihren Klassennamen und ihre Serialisierung gefunden.
+-keep class com.moltobene.app.ui.navigation.*Route { *; }
+-keep class com.moltobene.app.ui.navigation.*Route$* { *; }
+
+# Aufbau der Sicherungsdatei: Feldnamen und Serialisierer müssen erhalten bleiben,
+# damit alte Sicherungen immer lesbar bleiben.
+-keep class com.moltobene.app.data.backup.Backup* { *; }
+-keep class com.moltobene.app.data.backup.Backup*$* { *; }

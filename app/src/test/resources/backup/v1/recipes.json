@@ -1,0 +1,30 @@
+{
+  "recipes": [
+    {
+      "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      "title": "Apfelkuchen",
+      "language": "de",
+      "servings": 12,
+      "servingsUnit": "Stück",
+      "source": { "type": "book", "name": "Omas Kochbuch", "page": "42" },
+      "notes": "Mit Sahne servieren.",
+      "favorite": true,
+      "draft": false,
+      "ingredients": [
+        { "text": "Für den Teig", "heading": true },
+        { "text": "200 g Mehl", "quantity": 200.0, "unit": "g" }
+      ],
+      "steps": ["Ofen vorheizen.", "Backen."],
+      "tags": [{ "name": "Kuchen", "key": "cake" }, { "name": "sonntags" }],
+      "photos": [],
+      "createdAt": 1790000000000,
+      "updatedAt": 1790000000000
+    },
+    {
+      "id": "bbbbbbbb-cccc-dddd-eeee-ffffffffffff",
+      "title": "Suppe",
+      "draft": true,
+      "feldAusEinerNeuerenVersion": "wird ignoriert"
+    }
+  ]
+}

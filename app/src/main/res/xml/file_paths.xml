@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Nur dieser Ordner darf an die Kamera-App übergeben werden. -->
+<paths>
+    <cache-path name="camera" path="camera/" />
+</paths>

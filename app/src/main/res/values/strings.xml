@@ -3,4 +3,104 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
     <string name="app_name" translatable="false">Moltobene</string>
     <string name="version_label">Version %1$s</string>
+
+    <!-- Allgemein -->
+    <string name="back">Back</string>
+    <string name="close">Close</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+
+    <!-- Sammlung -->
+    <string name="collection_title">Collection</string>
+    <string name="add_recipe">Add recipe</string>
+    <string name="search_placeholder">Search recipes</string>
+    <string name="search_clear">Clear search</string>
+    <string name="search_no_results">No matching recipes found</string>
+    <string name="collection_empty_title">No recipes yet</string>
+    <string name="collection_empty_text">The collection starts with the first recipe.</string>
+    <string name="collection_error">The collection could not be loaded.</string>
+    <string name="untitled_recipe">Untitled</string>
+    <string name="draft_label">Draft</string>
+
+    <!-- Rezept -->
+    <string name="photo">Photo</string>
+    <string name="ingredients">Ingredients</string>
+    <string name="instructions">Instructions</string>
+    <string name="notes">Notes</string>
+    <string name="source">Source</string>
+    <string name="servings">Servings</string>
+    <plurals name="servings_count">
+        <item quantity="one">%d serving</item>
+        <item quantity="other">%d servings</item>
+    </plurals>
+    <string name="servings_with_unit">%1$d %2$s</string>
+    <string name="edit_recipe">Edit recipe</string>
+    <string name="delete_recipe">Delete recipe</string>
+    <string name="delete_confirm_title">Delete recipe?</string>
+    <string name="delete_confirm_text">“%1$s” will be deleted permanently.</string>
+    <string name="recipe_deleted">Recipe deleted</string>
+    <string name="recipe_saved">Recipe saved</string>
+    <string name="recipe_not_found">This recipe no longer exists.</string>
+    <string name="recipe_load_error">The recipe could not be loaded.</string>
+    <string name="source_link_error">The link could not be opened.</string>
+
+    <!-- Bearbeiten -->
+    <string name="field_title">Title</string>
+    <string name="field_title_missing">Title missing</string>
+    <string name="field_servings_unit">Unit (optional)</string>
+    <string name="field_servings_unit_hint">e.g. pieces, 26 cm tin</string>
+    <string name="field_ingredients_hint">One ingredient per line, e.g. 200 g flour. Subheadings end with a colon, e.g. For the dough:</string>
+    <string name="field_instructions_hint">One step per line</string>
+    <string name="field_source_hint">e.g. Grandma’s cookbook, p. 42, or a link</string>
+    <string name="photo_choose">Choose photo</string>
+    <string name="photo_take">Take photo</string>
+    <string name="photo_remove">Remove photo</string>
+    <string name="photo_processing">Processing photo …</string>
+    <string name="photo_error">The photo could not be added.</string>
+    <string name="camera_unavailable">No camera app found.</string>
+    <string name="discard_title">Discard changes?</string>
+    <string name="discard">Discard</string>
+    <string name="keep_editing">Keep editing</string>
+    <string name="save_error">The recipe could not be saved.</string>
+
+    <!-- Einstellungen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_about">About</string>
+    <string name="backup_title">Back up collection</string>
+    <string name="backup_text">Saves all recipes and photos in one file. The backup file is not encrypted.</string>
+    <string name="backup_file_name">moltobene-backup-%1$s.zip</string>
+    <string name="backup_running">Backing up collection …</string>
+    <plurals name="backup_done">
+        <item quantity="one">Collection backed up: %d recipe</item>
+        <item quantity="other">Collection backed up: %d recipes</item>
+    </plurals>
+    <string name="backup_error">The collection could not be backed up.</string>
+    <string name="restore_title">Restore collection</string>
+    <string name="restore_text">Imports recipes from a backup file. Existing recipes are kept.</string>
+    <string name="restore_checking">Checking backup …</string>
+    <string name="restore_running">Restoring recipes …</string>
+    <string name="restore_confirm_title">Restore collection?</string>
+    <string name="restore_confirm_date">Backup from %1$s</string>
+    <plurals name="restore_confirm_total">
+        <item quantity="one">%d recipe in the backup</item>
+        <item quantity="other">%d recipes in the backup</item>
+    </plurals>
+    <string name="restore_confirm_counts">New: %1$d · Already present: %2$d</string>
+    <plurals name="restore_confirm_skipped">
+        <item quantity="one">%d damaged recipe will be skipped.</item>
+        <item quantity="other">%d damaged recipes will be skipped.</item>
+    </plurals>
+    <string name="restore_confirm_rule">Existing recipes are only replaced if the backup is newer. Nothing is deleted.</string>
+    <string name="restore_action">Restore</string>
+    <plurals name="restore_done">
+        <item quantity="one">%d recipe restored</item>
+        <item quantity="other">%d recipes restored</item>
+    </plurals>
+    <string name="restore_nothing_new">The collection is already up to date.</string>
+    <string name="restore_error_not_backup">This file is not a Moltobene backup.</string>
+    <string name="restore_error_newer">This backup comes from a newer app version. Please update Moltobene.</string>
+    <string name="restore_error_damaged">The backup file is damaged.</string>
+    <string name="restore_error_too_large">The backup file is too large.</string>
+    <string name="restore_error_failed">The backup could not be restored. The collection is unchanged.</string>
 </resources>
