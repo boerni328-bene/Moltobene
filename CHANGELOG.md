@@ -11,3 +11,5 @@ Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 - Unterstützt Android 8.0 (API 26) und neuer.
 - Gradle-Wrapper hinzugefügt, damit die App später über GitHub Actions gebaut werden kann.
 - Arbeitsregeln (CLAUDE.md), dieses Änderungsprotokoll und .gitignore angelegt.
+- Automatischer Build über GitHub Actions: Bei jeder Änderung wird eine signierte APK gebaut.
+- Für jede neue Version wird automatisch ein GitHub-Release mit der APK veröffentlicht.
