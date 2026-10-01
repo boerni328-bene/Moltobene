@@ -61,6 +61,36 @@ class PageLayoutTest {
     }
 
     @Test
+    fun dunkleLeisteEnthaeltKeineTrennlinien() {
+        val width = 400
+        val height = 600
+        val pixels = ByteArray(width * height) { 255.toByte() }
+        fun fill(top: Int, bottom: Int, left: Int, right: Int, gray: Int) {
+            for (y in top until bottom) for (x in left until right) pixels[y * width + x] = gray.toByte()
+        }
+        // Dunkle Leiste oben (wie Status- und Browserleiste) mit heller Schrift in zwei Zeilen;
+        // dazwischen liegen drei ganz dunkle Bildzeilen, die wie eine Trennlinie aussehen.
+        fill(0, 80, 0, width, 30)
+        for (x in 40 until 330 step 8) {
+            fill(15, 30, x, x + 3, 255)
+            fill(33, 60, x, x + 3, 255)
+        }
+        // Tabelle darunter: drei hellgraue Trennlinien, dazwischen Zutat und Menge.
+        for (y in listOf(200, 260, 320)) fill(y, y + 1, 20, 380, 225)
+        fill(220, 240, 30, 150, 20)
+        fill(220, 240, 320, 370, 20)
+        fill(280, 300, 30, 180, 20)
+        fill(280, 300, 330, 370, 20)
+
+        val bands = requireNotNull(PageLayout.analyze(GrayImage(width, height, pixels)))
+        val rows = bands.filterIsInstance<LayoutBand.Row>()
+        assertEquals(2, rows.size)
+        // Die Leiste gehört zum ersten, gewöhnlichen Abschnitt über der Tabelle.
+        assertTrue(rows.all { it.band.top >= 200 })
+        assertTrue(bands.first() is LayoutBand.Text)
+    }
+
+    @Test
     fun ausschnittWirdVergroessertUndUmrandet() {
         val image = GrayImage(10, 10, ByteArray(100) { 255.toByte() }.also { it[55] = 0 })
         val cell = PageLayout.cropScaled(image, Box(4, 4, 8, 8), targetHeight = 16, border = 2)

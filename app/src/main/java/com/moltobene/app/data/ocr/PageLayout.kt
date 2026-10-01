@@ -123,7 +123,11 @@ object PageLayout {
         return counts.indices.maxBy { counts[it] }
     }
 
-    /** Waagrechte, dünne Linien über mindestens gut ein Drittel der Breite. */
+    /**
+     * Waagrechte, dünne Linien über mindestens gut ein Drittel der Breite. Darüber und darunter muss
+     * überwiegend Hintergrund liegen – sonst ist es keine Trennlinie, sondern z. B. ein Streifen in einer
+     * dunklen Leiste (Statusleiste, Browserleiste) zwischen zwei Symbolen.
+     */
     private fun findRules(image: GrayImage, background: Int): List<IntRange> {
         val minLength = image.width * 35 / 100
         val maxThickness = max(4, image.height / 400)
@@ -133,11 +137,19 @@ object PageLayout {
             val isRule = y < image.height && longestRun(image, y, background) >= minLength
             if (isRule && start < 0) start = y
             if (!isRule && start >= 0) {
-                if (y - start <= maxThickness) rules += start until y
+                val quiet = isMostlyBackground(image, start - 3, background) && isMostlyBackground(image, y + 2, background)
+                if (y - start <= maxThickness && quiet) rules += start until y
                 start = -1
             }
         }
         return rules
+    }
+
+    /** Liegt in Zeile [y] zur Hälfte oder mehr Hintergrund? Zeilen außerhalb des Bildes zählen als Hintergrund. */
+    private fun isMostlyBackground(image: GrayImage, y: Int, background: Int): Boolean {
+        if (y < 0 || y >= image.height) return true
+        val differing = (0 until image.width).count { x -> abs(gray(image, x, y) - background) >= RULE_DIFF }
+        return differing * 2 < image.width
     }
 
     /** Längste zusammenhängende Strecke in Zeile [y], die sich vom Hintergrund abhebt (Lücken bis 2 px zählen mit). */

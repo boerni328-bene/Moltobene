@@ -127,11 +127,14 @@ class TextRecognizer(private val context: Context) {
         return recognize(tess)
     }
 
-    /** Erkennt das gesetzte Bild bzw. den Ausschnitt; getHOCRText lässt sich abbrechen, getUTF8Text liefert danach den Text. */
+    /**
+     * Erkennt das gesetzte Bild bzw. den Ausschnitt. getHOCRText lässt sich abbrechen und liefert zu jedem
+     * Wort, wie sicher es gelesen wurde – damit fallen Reste von Symbolen, Knöpfen und Fotos weg.
+     */
     private fun recognize(tess: TessBaseAPI): String {
-        tess.getHOCRText(0)
+        val hocr = tess.getHOCRText(0).orEmpty()
         if (cancelRequested) throw CancelledException()
-        return tess.getUTF8Text().orEmpty().trim()
+        return HocrText.compose(hocr).trim()
     }
 
     /** Kopiert das Sprachpaket einmal je App-Version aus den mitgelieferten Dateien. */
