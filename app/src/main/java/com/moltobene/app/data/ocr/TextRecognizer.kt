@@ -13,12 +13,14 @@ import java.io.IOException
 /**
  * Texterkennung mit Tesseract, ausschließlich auf dem Handy und ohne Internet.
  * Die Sprachpakete liegen in assets/tessdata und werden beim ersten Gebrauch in den App-Speicher kopiert.
- * Die erste Seite wird mit der zuletzt erkannten Sprache gelesen; passt die Sprache des Textes nicht dazu,
- * wird sie mit dem richtigen Sprachpaket noch einmal gelesen (sonst gehen z. B. Akzente verloren).
+ * Ohne gewählte Sprache wird mit der zuletzt erkannten begonnen. Bis die Sprache am Text eindeutig erkannt
+ * ist, wird jede Seite geprüft; passt sie nicht, wird die Seite mit dem richtigen Sprachpaket noch einmal
+ * gelesen (sonst gehen z. B. Akzente verloren).
  */
 class TextRecognizer(private val context: Context) {
 
-    class Result(val text: String, val language: String)
+    /** @param detected die Sprache wurde am Text eindeutig erkannt oder gewählt – sonst ist sie nur vermutet */
+    class Result(val text: String, val language: String, val detected: Boolean = true)
 
     /** Die Erkennung wurde über [cancel] abgebrochen. */
     class CancelledException : Exception()
@@ -34,31 +36,37 @@ class TextRecognizer(private val context: Context) {
 
     /**
      * @param pages lädt die Seiten nacheinander, damit nie mehrere Fotos zugleich im Speicher liegen
+     * @param chosenLanguage vom Nutzer gewählte Sprache – dann wird sie nicht am Text erkannt
      * @param onPage wird vor jeder Seite mit ihrer Nummer (ab 0) aufgerufen
      */
     suspend fun recognize(
         pages: List<suspend () -> GrayImage>,
         preferredLanguage: String,
+        chosenLanguage: String?,
         onPage: (Int) -> Unit,
     ): Result = mutex.withLock {
         cancelRequested = false
         withContext(Dispatchers.Default) {
-            var language = TextLanguage.supportedOrDefault(preferredLanguage)
+            var language = TextLanguage.supportedOrDefault(chosenLanguage ?: preferredLanguage)
+            var detected = chosenLanguage != null
             val texts = mutableListOf<String>()
             pages.forEachIndexed { index, load ->
                 onPage(index)
                 val image = load()
                 var text = read(image, language)
-                if (index == 0) {
-                    val detected = TextLanguage.detect(text)
-                    if (detected != null && detected != language) {
-                        language = detected
-                        text = read(image, language)
+                // Ist die erste Seite unklar (z. B. nur ein kurzer Ausschnitt), entscheidet der Text bis hierher.
+                if (!detected) {
+                    TextLanguage.detect((texts + text).joinToString("\n"))?.let { found ->
+                        detected = true
+                        if (found != language) {
+                            language = found
+                            text = read(image, language)
+                        }
                     }
                 }
                 text.trim().takeIf { it.isNotEmpty() }?.let { texts += it }
             }
-            Result(texts.joinToString("\n\n"), language)
+            Result(texts.joinToString("\n\n"), language, detected)
         }
     }
 

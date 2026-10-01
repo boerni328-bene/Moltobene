@@ -69,6 +69,8 @@
     <string name="ocr_error">Der Text konnte nicht erkannt werden. Erneut versuchen oder ein anderes Foto wählen.</string>
     <string name="ocr_interrupted">Texterkennung wurde unterbrochen.</string>
     <string name="ocr_retry">Erneut erkennen</string>
+    <string name="ocr_language">Sprache des Textes</string>
+    <string name="ocr_language_auto">Automatisch erkennen</string>
     <string name="recognized_text">Erkannter Text</string>
     <string name="recognized_text_show">Erkannten Text anzeigen</string>
     <string name="recognized_text_hide">Erkannten Text ausblenden</string>
@@ -105,9 +107,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>„Seiten ansehen“: Nach der Texterkennung lassen sich die gelesenen Seiten groß ansehen und vergrößern – so fallen Lesefehler schneller auf.</item>
-        <item>Originalseiten: Beim Speichern lassen sich die gelesenen Seiten beim Rezept behalten, getrennt vom Foto des Gerichts. Sie werden mitgesichert, aber nie geteilt.</item>
-        <item>Der Hinweis zum Prüfen bleibt bis zum Speichern sichtbar, und der erkannte Text lässt sich entfernen.</item>
+        <item>„Sprache des Textes“: Im Menü oben rechts in „Bereich auswählen“ lässt sich die Sprache festlegen – hilfreich bei kurzen Ausschnitten. Sonst erkennt die App sie wie bisher selbst.</item>
+        <item>Weitere Seiten ergänzen Zutaten und Zubereitung jetzt zuverlässiger, und dieselbe Seite zweimal gelesen ergibt keine doppelten Zeilen.</item>
     </string-array>
 
     <!-- Bearbeiten -->

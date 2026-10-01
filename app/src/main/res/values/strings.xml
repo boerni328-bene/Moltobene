@@ -70,6 +70,8 @@
     <string name="ocr_error">The text could not be recognized. Try again or choose another photo.</string>
     <string name="ocr_interrupted">Text recognition was interrupted.</string>
     <string name="ocr_retry">Recognize again</string>
+    <string name="ocr_language">Language of the text</string>
+    <string name="ocr_language_auto">Detect automatically</string>
     <string name="recognized_text">Recognized text</string>
     <string name="recognized_text_show">Show recognized text</string>
     <string name="recognized_text_hide">Hide recognized text</string>
@@ -108,9 +110,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>“Show pages”: after text recognition, the pages that were read can be viewed full screen and zoomed in – reading errors are easier to spot.</item>
-        <item>Original pages: when saving, the pages that were read can be kept with the recipe, separate from the photo of the dish. They are included in backups but never shared.</item>
-        <item>The reminder to check stays visible until saving, and the recognized text can be removed.</item>
+        <item>“Language of the text”: the menu at the top right of “Select area” sets the language – helpful for short sections. Otherwise the app detects it by itself as before.</item>
+        <item>Further pages now add to the ingredients and instructions more reliably, and reading the same page twice no longer creates duplicate lines.</item>
     </string-array>
 
     <!-- Bearbeiten -->

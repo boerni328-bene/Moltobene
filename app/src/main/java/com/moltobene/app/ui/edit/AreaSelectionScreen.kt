@@ -5,6 +5,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,9 +13,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,8 +32,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -39,6 +46,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
@@ -47,8 +55,10 @@ import androidx.compose.ui.unit.dp
 import com.moltobene.app.R
 import com.moltobene.app.data.ocr.CropArea
 import com.moltobene.app.data.ocr.CropHandle
+import com.moltobene.app.data.ocr.TextLanguage
 import com.moltobene.app.ui.components.CenteredMessage
 import com.moltobene.app.ui.theme.Spacing
+import java.util.Locale
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -64,12 +74,15 @@ fun AreaSelectionScreen(
     preview: Bitmap?,
     failed: Boolean,
     snackbarHostState: SnackbarHostState,
+    language: String?,
+    onLanguageChange: (String?) -> Unit,
     onAreaChange: (CropArea) -> Unit,
     onWholePage: () -> Unit,
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
 ) {
     BackHandler(onBack = onCancel)
+    var languageMenuOpen by remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -87,6 +100,37 @@ fun AreaSelectionScreen(
                 navigationIcon = {
                     IconButton(onClick = onCancel) {
                         Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.cancel))
+                    }
+                },
+                actions = {
+                    // Sprache des Textes (#42): meist erkennt die App sie selbst; bei kurzen Ausschnitten hilft die Wahl.
+                    Box {
+                        IconButton(onClick = { languageMenuOpen = true }) {
+                            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.ocr_language))
+                        }
+                        DropdownMenu(expanded = languageMenuOpen, onDismissRequest = { languageMenuOpen = false }) {
+                            Text(
+                                text = stringResource(R.string.ocr_language),
+                                style = MaterialTheme.typography.titleSmall,
+                                modifier = Modifier
+                                    .padding(horizontal = Spacing.m, vertical = Spacing.s)
+                                    .semantics { heading() },
+                            )
+                            (listOf<String?>(null) + TextLanguage.SUPPORTED).forEach { code ->
+                                val selected = code == language
+                                DropdownMenuItem(
+                                    text = { Text(code?.let { languageName(it) } ?: stringResource(R.string.ocr_language_auto)) },
+                                    leadingIcon = {
+                                        if (selected) Icon(Icons.Filled.Check, contentDescription = null)
+                                    },
+                                    onClick = {
+                                        languageMenuOpen = false
+                                        onLanguageChange(code)
+                                    },
+                                    modifier = Modifier.semantics { this.selected = selected },
+                                )
+                            }
+                        }
                     }
                 },
             )
@@ -223,3 +267,9 @@ private fun CropFrame(
 
 /** Abdunklung außerhalb des Rahmens. */
 private const val SCRIM_ALPHA = 0.55f
+
+/** Name einer Sprache in ihr selbst („Italiano“, „Français“), damit jeder seine Sprache findet. */
+private fun languageName(code: String): String {
+    val locale = Locale.forLanguageTag(code)
+    return locale.getDisplayLanguage(locale).replaceFirstChar { it.titlecase(locale) }
+}

@@ -11,6 +11,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.moltobene.app.R
 import com.moltobene.app.data.AppPreferences
+import com.moltobene.app.data.DraftMerge
+import com.moltobene.app.data.DraftText
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeIds
 import com.moltobene.app.data.RecipeRepository
@@ -83,7 +85,10 @@ class EditViewModel(
     private val notesField = SavedField(handle, "notes", "")
     /** Vollständiger erkannter Text; wird als Originaltext gespeichert, damit nichts verloren geht. */
     private val recognizedTextField = SavedField(handle, "recognizedText", "")
+    /** Sprache des Rezepts; durch die Texterkennung nur gesetzt, wenn sie eindeutig erkannt wurde (#42). */
     private val languageField = SavedField<String?>(handle, "language", null)
+    /** In „Bereich auswählen“ gewählte Sprache des Textes; null = automatisch erkennen. */
+    private val languageChoiceField = SavedField<String?>(handle, "languageChoice", null)
     private val startPromptShownField = SavedField(handle, "startPromptShown", false)
     /** Nach einer Erkennung bleibt der Hinweis zum Prüfen bis zum Speichern sichtbar. */
     private val checkHintField = SavedField(handle, "checkHint", false)
@@ -230,6 +235,7 @@ class EditViewModel(
                 pageIdsField.value = recipe.pageIds.joinToString("\n")
                 originalPageIdsField.value = pageIdsField.value
                 recognizedTextField.value = recipe.originalText.orEmpty()
+                languageField.value = recipe.language
             }
             loadedField.value = true
             isLoading = false
@@ -303,6 +309,13 @@ class EditViewModel(
     }
 
     fun resetArea() = changeArea(CropArea.WHOLE_PAGE)
+
+    /** Gewählte Sprache des Textes; null = automatisch erkennen. */
+    val languageChoice: String? get() = languageChoiceField.value
+
+    fun chooseLanguage(language: String?) {
+        languageChoiceField.value = language?.takeIf { it in TextLanguage.SUPPORTED }
+    }
 
     /** Weiter zur nächsten Seite; nach der letzten startet die Texterkennung. */
     fun confirmArea() {
@@ -449,10 +462,11 @@ class EditViewModel(
                 session?.let { runCatching { pending.deleteResult(it) } }
                 val preferred = preferences.recognitionLanguage()
                     ?: TextLanguage.supportedOrDefault(Locale.getDefault().language)
-                val result = recognizer.recognize(pages, preferred) { index ->
+                val result = recognizer.recognize(pages, preferred, languageChoiceField.value) { index ->
                     recognition = RecognitionState.Running(index + 1, pages.size)
                 }
-                preferences.setRecognitionLanguage(result.language)
+                // Nur eine sicher erkannte oder gewählte Sprache gilt beim nächsten Mal als zuletzt genutzt.
+                if (result.detected) preferences.setRecognitionLanguage(result.language)
                 if (result.text.isBlank()) {
                     message = R.string.ocr_nothing
                 } else {
@@ -481,33 +495,31 @@ class EditViewModel(
         if (inBackground) saveDraft()
     }
 
-    /**
-     * Übernimmt den erkannten Text: Leere Felder werden ausgefüllt, Zutaten und Zubereitung ergänzt
-     * (z. B. bei einer weiteren Seite). Der vollständige Text bleibt als Originaltext erhalten.
-     */
+    /** Übernimmt den erkannten Text in das Formular, nach den Regeln von [DraftMerge]. */
     private fun applyRecognized(result: TextRecognizer.Result) {
         val text = result.text.trim()
-        if (!recognizedTextField.value.contains(text)) {
-            recognizedTextField.value = listOf(recognizedTextField.value.trim(), text).filter { it.isNotEmpty() }.joinToString("\n\n")
-        }
-        val parsed = RecipeTextParser.parse(text, result.language)
-        if (title.isBlank()) parsed.title?.let { title = it }
-        if (servings.isBlank()) parsed.servings?.takeIf { it <= 999 }?.let { servingsField.value = it.toString() }
-        if (servingsUnit.isBlank()) parsed.servingsUnit?.let { servingsUnitField.value = it }
-        ingredientsField.value = appendBlock(ingredients, parsed.ingredients)
-        stepsField.value = appendBlock(steps, parsed.steps)
-        languageField.value = result.language
+        val merged = DraftMerge.merge(
+            draft = DraftText(
+                title = title,
+                servings = servings,
+                servingsUnit = servingsUnit,
+                ingredients = ingredients,
+                steps = steps,
+                originalText = recognizedText,
+                language = languageField.value,
+            ),
+            text = text,
+            parsed = RecipeTextParser.parse(text, result.language),
+            language = result.language.takeIf { result.detected },
+        )
+        if (merged.title != title) title = merged.title
+        servingsField.value = merged.servings
+        servingsUnitField.value = merged.servingsUnit
+        ingredientsField.value = merged.ingredients
+        stepsField.value = merged.steps
+        recognizedTextField.value = merged.originalText
+        languageField.value = merged.language
         dirtyField.value = true
-    }
-
-    private fun appendBlock(current: String, lines: List<String>): String {
-        if (lines.isEmpty()) return current
-        val block = lines.joinToString("\n")
-        return when {
-            current.isBlank() -> block
-            current.contains(block) -> current
-            else -> current.trimEnd() + "\n" + block
-        }
     }
 
     /** Entfernt den gespeicherten erkannten Text, z. B. weil ein Bildschirmfoto fremde Namen enthielt. */

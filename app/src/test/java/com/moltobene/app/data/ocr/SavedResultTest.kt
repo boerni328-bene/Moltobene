@@ -1,8 +1,10 @@
 package com.moltobene.app.data.ocr
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /** Ergebnis einer Texterkennung, das fertig wurde, während die App im Hintergrund war (Issue #37). */
@@ -15,6 +17,14 @@ class SavedResultTest {
         assertNotNull(saved)
         assertEquals("fr", saved!!.language)
         assertEquals(text, saved.text)
+        assertTrue(saved.detected)
+    }
+
+    @Test
+    fun vermuteteSpracheBleibtVermutet() {
+        val saved = SavedResult.decode(SavedResult.encode(TextRecognizer.Result("Salz", "de", detected = false)))
+        assertEquals("de", saved!!.language)
+        assertFalse(saved.detected)
     }
 
     @Test

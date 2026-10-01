@@ -121,15 +121,22 @@ class PendingRecognition(private val context: Context, private val photoStore: P
     }
 }
 
-/** Aufbau der Ergebnisdatei: in der ersten Zeile die Sprache, danach der erkannte Text. */
+/**
+ * Aufbau der Ergebnisdatei: in der ersten Zeile die Sprache – mit angehängtem „?“, wenn sie nur vermutet
+ * ist –, danach der erkannte Text.
+ */
 internal object SavedResult {
 
-    fun encode(result: TextRecognizer.Result): String = result.language + "\n" + result.text
+    private const val GUESSED = "?"
+
+    fun encode(result: TextRecognizer.Result): String =
+        result.language + (if (result.detected) "" else GUESSED) + "\n" + result.text
 
     fun decode(content: String): TextRecognizer.Result? {
-        val language = content.substringBefore('\n', missingDelimiterValue = "").trim()
+        val head = content.substringBefore('\n', missingDelimiterValue = "").trim()
+        val language = head.removeSuffix(GUESSED)
         val text = content.substringAfter('\n', missingDelimiterValue = "")
         if (language.isEmpty() || text.isBlank()) return null
-        return TextRecognizer.Result(text, language)
+        return TextRecognizer.Result(text, language, detected = !head.endsWith(GUESSED))
     }
 }

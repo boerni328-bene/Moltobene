@@ -3,6 +3,16 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.8.0] – 2026-10-01 (versionCode 19)
+
+### Neu
+- **Sprache des Textes:** Im Menü oben rechts in „Bereich auswählen“ lässt sich festlegen, in welcher Sprache der Text geschrieben ist – Deutsch, English, Italiano, Français oder Español. Das hilft bei kurzen Ausschnitten, an denen sich die Sprache nicht erkennen lässt. Voreingestellt ist „Automatisch erkennen“.
+
+### Behoben
+- Beim Lesen einer weiteren Seite fehlten manchmal Zutaten oder Schritte: Stand ein Wort wie „Salz“ schon als Teil einer längeren Zeile („1 TL Salz“) da, wurde es nicht ergänzt. Jetzt werden ganze Zeilen verglichen. Wird dieselbe Seite zweimal gelesen, entstehen trotzdem keine doppelten Zeilen.
+- Die Sprache eines Rezepts wird nur noch übernommen, wenn sie eindeutig erkannt oder gewählt wurde, und eine schon vorhandene Angabe wird nicht mehr überschrieben. Beim Teilen geht so keine bloß geratene Sprache mehr mit.
+- Ist die erste Seite zu kurz, um die Sprache zu erkennen, prüft die App die folgenden Seiten.
+
 ## [0.7.0] – 2026-10-01 (versionCode 18)
 
 Erkannte Rezepte leichter prüfen – und die Vorlage beim Rezept behalten.

@@ -128,6 +128,8 @@ fun EditScreen(
             preview = viewModel.areaPreview,
             failed = viewModel.areaPreviewFailed,
             snackbarHostState = snackbarHostState,
+            language = viewModel.languageChoice,
+            onLanguageChange = viewModel::chooseLanguage,
             onAreaChange = viewModel::changeArea,
             onWholePage = viewModel::resetArea,
             onConfirm = viewModel::confirmArea,
