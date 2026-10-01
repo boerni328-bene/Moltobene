@@ -187,6 +187,36 @@ class RecipeTextParserTest {
     }
 
     @Test
+    fun ueberschriftenOhneRuecksichtAufAkzente() {
+        // Mit dem deutschen Sprachpaket gelesen: „Elaboración“ wurde zu „Elaboraciön“.
+        val recipe = RecipeTextParser.parse(resource("es_mit_deu_gelesen.txt"), "es")
+        assertEquals(listOf("6 huevos", "750 g de patatas", "1 cebolla grande", "200 ml de aceite de oliva", "sal"), recipe.ingredients)
+        assertEquals(3, recipe.steps.size)
+        assertTrue(recipe.steps.first().startsWith("Pela las patatas"))
+        assertEquals(listOf("2 œufs"), RecipeTextParser.parse("Ingrédients\n2 œufs\nPréparation\nBattre les œufs.", "fr").ingredients)
+    }
+
+    @Test
+    fun seitenzahlenJeSeiteUndZahlAlleinIstKeineZutat() {
+        val recipe = RecipeTextParser.parseParts(
+            listOf(
+                AreaKind.ALL to "Linsensuppe\nZutaten\n250 g Linsen\n1 Zwiebel\n46",
+                AreaKind.ALL to "47\n2 Karotten\nZubereitung\nAlles weich kochen.\n48",
+            ),
+            language = "de",
+        )
+        assertEquals(listOf("250 g Linsen", "1 Zwiebel", "2 Karotten"), recipe.ingredients)
+        assertEquals(listOf("Alles weich kochen."), recipe.steps)
+        // Eine einzelne Zahl mitten im Text gilt nicht als Zutat (früher: „4“ als Menge, „7“ als Zutat).
+        val withNumber = RecipeTextParser.parse(
+            "Linsensuppe\nAlles in einen Topf geben und weich kochen.\n\n47\n\nDann mit Salz abschmecken und servieren.",
+            "de",
+        )
+        assertTrue(withNumber.ingredients.isEmpty())
+        assertEquals("Zeile", RecipeTextParser.withoutPageNumbers("12\nZeile\n13"))
+    }
+
+    @Test
     fun spracheWirdErkannt() {
         assertEquals("de", TextLanguage.detect(resource("de.txt")))
         assertEquals("en", TextLanguage.detect(resource("en.txt")))

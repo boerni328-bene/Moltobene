@@ -3,6 +3,18 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.9.1] – 2026-10-01 (versionCode 21)
+
+### Behoben
+- Bei Rezepten über mehrere Seiten blieben Seitenzahlen mitten in Zutaten oder Zubereitung stehen. Sie werden jetzt auf jeder Seite einzeln entfernt.
+- Eine Zeile, die nur aus einer Zahl besteht (z. B. „47“), gilt nicht mehr als Zutat.
+- Überschriften werden auch erkannt, wenn ein Akzent falsch gelesen wurde: Aus „Elaboración“ wurde mit dem falschen Sprachpaket „Elaboraciön“, und die Überschrift landete bei den Zutaten.
+- Mehr Einheiten werden erkannt, sodass Mengen am Zeilenende nach vorne kommen: „gr“ (z. B. „Farina 00 300 gr“), „Esslöffel“, „Teelöffel“, „Gramm“, „Liter“, „Stange“, „tablespoon“, „teaspoon“, „tbsp.“, „c. à s.“, „c. à c.“, „cda.“, „cdta.“ und weitere.
+
+### Geändert
+- Die App ist gut ein Drittel kleiner zum Herunterladen und Aktualisieren (14,0 statt 21,9 MB): Die Bausteine der Texterkennung werden jetzt gepackt ausgeliefert. Auf dem Handy belegt sie etwa gleich viel Platz wie bisher.
+- Die Sprachpakete der Texterkennung gehen beim Umzug auf ein neues Handy nicht mehr mit (rund 12 MB weniger). Sie werden dort beim ersten Lesen wieder bereitgestellt.
+
 ## [0.9.0] – 2026-10-01 (versionCode 20)
 
 ### Neu

@@ -14,8 +14,8 @@ android {
         applicationId = "com.moltobene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 20
-        versionName = "0.9.0"
+        versionCode = 21
+        versionName = "0.9.1"
 
         // Nur die unterstützten Sprachen mitliefern (Englisch als Rückfall, Deutsch).
         resourceConfigurations += listOf("en", "de")
@@ -29,6 +29,14 @@ android {
     androidResources {
         // Sprachliste für die Android-Einstellung „App-Sprache“ (ab Android 13) automatisch erzeugen.
         generateLocaleConfig = true
+    }
+
+    packaging {
+        // Programmbibliotheken der Texterkennung gepackt ausliefern (#45): Download und Updates werden
+        // deutlich kleiner; Android entpackt bei der Installation nur die passende Variante.
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 
     // Der Signaturschlüssel kommt aus Umgebungsvariablen (auf GitHub aus den Secrets).

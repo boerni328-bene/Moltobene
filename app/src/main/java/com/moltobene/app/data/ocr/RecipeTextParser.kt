@@ -1,5 +1,7 @@
 package com.moltobene.app.data.ocr
 
+import java.text.Normalizer
+
 /** Ergebnis der Aufteilung: Zutaten im Format des Eingabefelds (Zwischenüberschriften enden mit „:“). */
 data class ParsedRecipe(
     val title: String?,
@@ -17,20 +19,23 @@ data class ParsedRecipe(
  */
 object RecipeTextParser {
 
+    // Überschriften werden ohne Akzente verglichen (siehe [isIngredientHeading]): Mit einem falschen Sprachpaket
+    // gelesen, wird aus „Elaboración“ z. B. „Elaboraciön“.
     private val INGREDIENT_HEADING = Regex(
-        "^(zutaten|ingredients?|ingredienti|ingrédients|ingredientes|einkaufsliste)\\b.{0,40}$",
+        "^(zutaten|ingredients?|ingredienti|ingredientes|einkaufsliste)\\b.{0,40}$",
         RegexOption.IGNORE_CASE,
     )
     private val STEPS_HEADING = Regex(
         "^(zubereitung|anleitung|so geht'?s|so wird'?s gemacht|arbeitsschritte|instructions?|directions?|method|" +
-            "preparation|steps|preparazione|procedimento|préparation|réalisation|preparación|elaboración|" +
-            "instrucciones|modo de preparación)\\b[^0-9]{0,30}$",
+            "preparation|steps|preparazione|procedimento|realisation|preparacion|elaboracion|" +
+            "instrucciones|modo de preparacion)\\b[^0-9]{0,30}$",
         RegexOption.IGNORE_CASE,
     )
     private val TIME_WORDS = Regex("(zeit|time|tempo|temps|tiempo)", RegexOption.IGNORE_CASE)
 
     private const val QUANTITY = "(?:\\d+(?:[.,/]\\d+)?|[½¼¾⅓⅔⅛])"
-    private val STARTS_WITH_QUANTITY = Regex("^$QUANTITY\\s*(?:-\\s*\\d+)?\\s*\\S")
+    // (?!\d): Eine Zahl allein ist keine Menge – sonst gälte „47“ als „4“ plus „7“.
+    private val STARTS_WITH_QUANTITY = Regex("^$QUANTITY(?!\\d)\\s*(?:-\\s*\\d+)?\\s*\\S")
     private val BULLET = Regex("^[•·▪◦●○■□\\-–*]\\s+")
     private val NUMBERED_STEP = Regex("^(\\d{1,2})[.)]\\s+(\\S.*)$")
     private val SECOND_QUANTITY = Regex("(?<=\\s)$QUANTITY(?:\\s*-\\s*\\d+)?\\s*(?=\\p{L})")
@@ -70,7 +75,7 @@ object RecipeTextParser {
         val content = lines.indices.filter { lines[it].isNotEmpty() }
         if (content.isEmpty()) return EMPTY
 
-        val ingredientHeading = content.firstOrNull { INGREDIENT_HEADING.matches(lines[it].trimEnd(':')) }
+        val ingredientHeading = content.firstOrNull { isIngredientHeading(lines[it]) }
         val stepsHeading = content.firstOrNull { isStepsHeading(lines[it]) }
 
         val found = findServings(lines, content, ingredientHeading, stepsHeading)
@@ -141,7 +146,9 @@ object RecipeTextParser {
      * Ein Bereich „Titel“ geht vor einem gefundenen Titel.
      */
     fun parseParts(parts: List<Pair<AreaKind, String>>, language: String? = null): ParsedRecipe {
-        val allText = parts.filter { it.first == AreaKind.ALL }.map { it.second.trim() }.filter { it.isNotEmpty() }
+        // Jeder Bereich stammt von einer Seite: Seitenzahlen oben und unten werden je Bereich entfernt,
+        // sonst blieben sie beim Zusammenfügen mehrerer Seiten mitten im Text stehen.
+        val allText = parts.filter { it.first == AreaKind.ALL }.map { withoutPageNumbers(it.second) }.filter { it.isNotEmpty() }
         val whole = if (allText.isEmpty()) EMPTY else parse(allText.joinToString("\n\n"), language)
         val sections = parts.filter { it.first != AreaKind.ALL }.map { (kind, text) -> parseSection(kind, text, language) }
         val servingsFrom = if (whole.servings != null) whole else sections.firstOrNull { it.servings != null }
@@ -164,7 +171,7 @@ object RecipeTextParser {
             AreaKind.ALL -> parse(text, language)
             AreaKind.TITLE -> EMPTY.copy(title = content.joinToString(" ") { lines[it] })
             AreaKind.INGREDIENTS -> {
-                val heading = content.firstOrNull { INGREDIENT_HEADING.matches(lines[it].trimEnd(':')) }
+                val heading = content.firstOrNull { isIngredientHeading(lines[it]) }
                 val found = findServings(lines, content, heading, stepsHeading = null)
                 EMPTY.copy(
                     servings = found?.count,
@@ -198,6 +205,16 @@ object RecipeTextParser {
 
     private val EMPTY = ParsedRecipe(null, null, null, emptyList(), emptyList())
 
+    /** Text ohne eine Seitenzahl in der ersten und letzten Zeile. */
+    internal fun withoutPageNumbers(text: String): String {
+        val lines = text.trim().lines().toMutableList()
+        if (lines.firstOrNull()?.trim()?.matches(PAGE_NUMBER) == true) lines.removeAt(0)
+        if (lines.lastOrNull()?.trim()?.matches(PAGE_NUMBER) == true) lines.removeAt(lines.lastIndex)
+        return lines.joinToString("\n").trim()
+    }
+
+    private val PAGE_NUMBER = Regex("\\d{1,3}")
+
     /** Bereinigt die Zeilen: Ligaturen, Rauschen, Seitenzahlen und Trennstriche am Zeilenende. */
     internal fun cleanLines(text: String): List<String> {
         val raw = text
@@ -210,9 +227,8 @@ object RecipeTextParser {
             .toMutableList()
 
         // Seitenzahlen am Anfang oder Ende
-        val pageNumber = Regex("^\\d{1,3}$")
-        raw.indexOfFirst { it.isNotEmpty() }.takeIf { it >= 0 && pageNumber.matches(raw[it]) }?.let { raw[it] = "" }
-        raw.indexOfLast { it.isNotEmpty() }.takeIf { it >= 0 && pageNumber.matches(raw[it]) }?.let { raw[it] = "" }
+        raw.indexOfFirst { it.isNotEmpty() }.takeIf { it >= 0 && PAGE_NUMBER.matches(raw[it]) }?.let { raw[it] = "" }
+        raw.indexOfLast { it.isNotEmpty() }.takeIf { it >= 0 && PAGE_NUMBER.matches(raw[it]) }?.let { raw[it] = "" }
 
         // Trennstriche: „Vanille-“ + „zucker“ → „Vanillezucker“, aber „Salz-“ + „und …“ bleibt getrennt.
         val result = mutableListOf<String>()
@@ -251,10 +267,18 @@ object RecipeTextParser {
         return false
     }
 
+    private fun isIngredientHeading(line: String): Boolean = INGREDIENT_HEADING.matches(withoutAccents(line.trimEnd(':')))
+
     private fun isStepsHeading(line: String): Boolean {
         val text = line.trimEnd(':').trim()
-        return STEPS_HEADING.matches(text) && !TIME_WORDS.containsMatchIn(text)
+        return STEPS_HEADING.matches(withoutAccents(text)) && !TIME_WORDS.containsMatchIn(text)
     }
+
+    /** „Préparation“ → „Preparation“, „Elaboraciön“ → „Elaboracion“. */
+    private fun withoutAccents(text: String): String =
+        Normalizer.normalize(text, Normalizer.Form.NFD).replace(COMBINING_MARKS, "")
+
+    private val COMBINING_MARKS = Regex("\\p{Mn}+")
 
     private fun isTitleCandidate(line: String): Boolean =
         line.length in 2..70 && !isIngredientLike(line) && !isStepLike(line) && !line.endsWith(":")

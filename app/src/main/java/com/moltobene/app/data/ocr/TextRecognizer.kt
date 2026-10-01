@@ -46,7 +46,8 @@ class TextRecognizer(private val context: Context) {
     @Volatile
     private var cancelRequested = false
 
-    private val dataDir: File get() = File(context.filesDir, DATA_DIR)
+    /** In noBackupFilesDir: Die Sprachpakete lassen sich jederzeit neu kopieren und gehören weder in Sicherungen noch zum Umzug. */
+    private val dataDir: File get() = File(context.noBackupFilesDir, DATA_DIR)
 
     /**
      * @param pages lädt die Seiten nacheinander, damit nie mehrere Fotos zugleich im Speicher liegen
@@ -162,6 +163,8 @@ class TextRecognizer(private val context: Context) {
 
     /** Kopiert das Sprachpaket einmal je App-Version aus den mitgelieferten Dateien. */
     private suspend fun ensureLanguageData(code: String) = withContext(Dispatchers.IO) {
+        // Bis 0.9.0 lagen die Sprachpakete in filesDir und gingen beim Umzug auf ein neues Handy mit (#45).
+        File(context.filesDir, DATA_DIR).takeIf { it.exists() }?.deleteRecursively()
         val dir = File(dataDir, "tessdata").apply { mkdirs() }
         val target = File(dir, "$code.traineddata")
         val marker = File(dir, "$code.version")
