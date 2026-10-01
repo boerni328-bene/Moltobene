@@ -1,9 +1,13 @@
 package com.moltobene.app.ui.recipe
 
 import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -16,10 +20,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,6 +39,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +62,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moltobene.app.R
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeText
+import com.moltobene.app.data.share.PreparedShare
+import com.moltobene.app.data.share.ShareLabels
 import com.moltobene.app.ui.components.CenteredMessage
 import com.moltobene.app.ui.components.DraftLabel
 import com.moltobene.app.ui.components.RecipePhoto
@@ -73,9 +83,22 @@ fun RecipeScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
+    var menuOpen by remember { mutableStateOf(false) }
     val deletedMessage = stringResource(R.string.recipe_deleted)
+    val context = LocalContext.current
+    val resources = context.resources
 
     KeepScreenOn()
+
+    viewModel.shareEvent?.let { event ->
+        val chooserTitle = stringResource(R.string.share_recipe)
+        val errorText = stringResource(R.string.share_error)
+        LaunchedEffect(event) {
+            val opened = event is ShareEvent.Ready && openShareMenu(context, event.share, chooserTitle)
+            if (!opened) snackbarHostState.showSnackbar(errorText)
+            viewModel.shareEvent = null
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -88,11 +111,36 @@ fun RecipeScreen(
                 },
                 actions = {
                     if (state is RecipeUiState.Content && !deleting) {
+                        IconButton(
+                            onClick = { viewModel.share(asFile = false, labels = shareLabels(resources)) },
+                            enabled = !viewModel.preparingShare,
+                        ) {
+                            Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.share_recipe))
+                        }
                         IconButton(onClick = { onEdit(viewModel.recipeId) }) {
                             Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.edit_recipe))
                         }
-                        IconButton(onClick = { confirmDelete = true }) {
-                            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete_recipe))
+                        Box {
+                            IconButton(onClick = { menuOpen = true }) {
+                                Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options))
+                            }
+                            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.share_as_file)) },
+                                    enabled = !viewModel.preparingShare,
+                                    onClick = {
+                                        menuOpen = false
+                                        viewModel.share(asFile = true, labels = shareLabels(resources))
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.delete_recipe)) },
+                                    onClick = {
+                                        menuOpen = false
+                                        confirmDelete = true
+                                    },
+                                )
+                            }
                         }
                     }
                 },
@@ -135,6 +183,41 @@ fun RecipeScreen(
                 TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.cancel)) }
             },
         )
+    }
+}
+
+/** Texte für den geteilten Rezepttext, in der Sprache der Oberfläche. */
+private fun shareLabels(resources: Resources) = ShareLabels(
+    untitled = resources.getString(R.string.untitled_recipe),
+    ingredients = resources.getString(R.string.ingredients),
+    instructions = resources.getString(R.string.instructions),
+    servings = { count, unit ->
+        if (unit == null) {
+            resources.getQuantityString(R.plurals.servings_count, count, count)
+        } else {
+            resources.getString(R.string.servings_with_unit, count, unit)
+        }
+    },
+    source = { resources.getString(R.string.share_source, it) },
+)
+
+/** Öffnet das Android-Teilen-Menü. Andere Apps dürfen nur die übergebene Datei lesen. */
+private fun openShareMenu(context: Context, share: PreparedShare, chooserTitle: String): Boolean {
+    val send = Intent(Intent.ACTION_SEND).apply {
+        type = share.mimeType
+        putExtra(Intent.EXTRA_SUBJECT, share.subject)
+        share.text?.let { putExtra(Intent.EXTRA_TEXT, it) }
+        share.fileUri?.let { uri ->
+            putExtra(Intent.EXTRA_STREAM, uri)
+            clipData = ClipData.newRawUri(share.subject, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+    }
+    return try {
+        context.startActivity(Intent.createChooser(send, chooserTitle))
+        true
+    } catch (e: ActivityNotFoundException) {
+        false
     }
 }
 

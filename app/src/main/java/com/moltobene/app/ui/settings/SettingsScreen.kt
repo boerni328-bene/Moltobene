@@ -27,6 +27,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -40,6 +44,8 @@ import com.moltobene.app.BuildConfig
 import com.moltobene.app.R
 import com.moltobene.app.data.backup.BackupReader
 import com.moltobene.app.ui.theme.Spacing
+import com.moltobene.app.ui.whatsnew.WhatsNew
+import com.moltobene.app.ui.whatsnew.WhatsNewDialog
 import java.text.DateFormat
 import java.time.LocalDate
 import java.util.Date
@@ -54,6 +60,7 @@ fun SettingsScreen(
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
+    var showWhatsNew by rememberSaveable { mutableStateOf(false) }
     val createBackup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
         if (uri != null) viewModel.backup(uri)
     }
@@ -106,8 +113,14 @@ fun SettingsScreen(
                 headlineContent = { Text(stringResource(R.string.app_name)) },
                 supportingContent = { Text(stringResource(R.string.version_label, BuildConfig.VERSION_NAME)) },
             )
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.whats_new_title, WhatsNew.VERSION_NAME)) },
+                modifier = Modifier.clickable { showWhatsNew = true },
+            )
         }
     }
+
+    if (showWhatsNew) WhatsNewDialog(onDismiss = { showWhatsNew = false })
 
     when (val current = viewModel.state) {
         is SettingsUiState.Working -> WorkingDialog(stringResource(current.label))

@@ -9,9 +9,10 @@ Kostenlos, ohne Werbung, ohne Konto und ohne Tracking. Die App braucht keine ein
 - Rezepte hinzufügen und bearbeiten: Titel, Foto, Portionen, Zutaten, Zubereitung, Quelle und eigene Notizen
 - Die Sammlung durchsuchen, mit Vorschaubildern
 - Beim Kochen bleibt der Bildschirm an
+- Einzelne Rezepte teilen: als gut lesbaren Text mit Foto oder als Rezeptdatei im offenen Standard schema.org. Eigene Notizen bleiben dabei privat.
 - Die ganze Sammlung inklusive Fotos als Datei sichern und wiederherstellen, z. B. für den Umzug auf ein neues Handy
 
-Geplant sind unter anderem: Rezepte teilen, Rezepte aus Internetseiten und anderen Apps übernehmen, Texterkennung aus Fotos sowie eine Kochansicht zum Abhaken und Umrechnen der Portionen.
+Geplant sind unter anderem: Rezepte aus Internetseiten und anderen Apps übernehmen, Texterkennung aus Fotos sowie eine Kochansicht zum Abhaken und Umrechnen der Portionen.
 
 ## Installation
 
@@ -38,7 +39,7 @@ Moltobene wird nicht über den Play Store verteilt. Ob eine APK wirklich aus die
 
 - Rezepte und Fotos liegen nur auf dem Handy. Keine Cloud, kein Konto, keine Weitergabe an Dritte.
 - Die automatische Android-Cloud-Sicherung ist abgeschaltet. Gesichert wird über die eigene Sicherungsdatei.
-- Fotos werden verkleinert und ohne Aufnahmeort gespeichert.
+- Fotos werden verkleinert und ohne Aufnahmeort gespeichert und geteilt.
 
 ## Weiteres
 

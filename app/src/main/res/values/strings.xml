@@ -44,6 +44,21 @@
     <string name="recipe_not_found">This recipe no longer exists.</string>
     <string name="recipe_load_error">The recipe could not be loaded.</string>
     <string name="source_link_error">The link could not be opened.</string>
+    <string name="more_options">More options</string>
+
+    <!-- Teilen -->
+    <string name="share_recipe">Share recipe</string>
+    <string name="share_as_file">Share as recipe file</string>
+    <string name="share_source">Source: %1$s</string>
+    <string name="share_error">The recipe could not be shared.</string>
+
+    <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
+    <string name="whats_new_title">New in version %1$s</string>
+    <string-array name="whats_new_items">
+        <item>Share recipes as text with photo, e.g. via a messenger or by email. Notes stay private.</item>
+        <item>Share recipes as a recipe file in the schema.org standard, which other recipe apps can read too.</item>
+        <item>“Delete recipe” has moved to the ⋮ menu at the top right of a recipe.</item>
+    </string-array>
 
     <!-- Bearbeiten -->
     <string name="field_title">Title</string>

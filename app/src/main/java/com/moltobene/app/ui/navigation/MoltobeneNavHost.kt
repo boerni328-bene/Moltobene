@@ -19,6 +19,8 @@ import com.moltobene.app.ui.recipe.RecipeScreen
 import com.moltobene.app.ui.recipe.RecipeViewModel
 import com.moltobene.app.ui.settings.SettingsScreen
 import com.moltobene.app.ui.settings.SettingsViewModel
+import com.moltobene.app.ui.whatsnew.WhatsNewDialog
+import com.moltobene.app.ui.whatsnew.WhatsNewViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -43,7 +45,12 @@ fun MoltobeneNavHost() {
         composable<RecipeRoute> {
             RecipeScreen(
                 viewModel = viewModel {
-                    RecipeViewModel(createSavedStateHandle(), container.repository, container.photoStore)
+                    RecipeViewModel(
+                        createSavedStateHandle(),
+                        container.repository,
+                        container.photoStore,
+                        container.recipeSharer,
+                    )
                 },
                 snackbarHostState = snackbarHostState,
                 onBack = { navController.popBackStack() },
@@ -81,4 +88,8 @@ fun MoltobeneNavHost() {
             )
         }
     }
+
+    // „Neu in Version …“ einmal nach einem Update, über dem jeweiligen Bildschirm.
+    val whatsNew = viewModel { WhatsNewViewModel(container.preferences) }
+    if (whatsNew.visible) WhatsNewDialog(onDismiss = whatsNew::dismiss)
 }

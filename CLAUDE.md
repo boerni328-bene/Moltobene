@@ -112,7 +112,7 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 
 ### Aufbau des Codes
 
-- `data/` – Rezept-Modell (`Recipe.kt`), Textumwandlung und Suche (reines Kotlin, per Unit-Test prüfbar), `db/` (Room-Datenbank mit Volltextsuche), `photos/` (einzige Stelle für Fotos), `backup/` (Sicherungsdatei), `RecipeRepository` als zentrale Stelle für Speichern und Laden.
+- `data/` – Rezept-Modell (`Recipe.kt`), Textumwandlung und Suche (reines Kotlin, per Unit-Test prüfbar), `db/` (Room-Datenbank mit Volltextsuche), `photos/` (einzige Stelle für Fotos), `backup/` (Sicherungsdatei), `share/` (Teilen als Text und als schema.org-Rezeptdatei; Notizen werden nie geteilt), `AppPreferences` (kleine Merkwerte), `RecipeRepository` als zentrale Stelle für Speichern und Laden.
 - `ui/` – je Bildschirm ein Ordner mit Screen und ViewModel; Navigation Compose mit typsicheren Zielen (`ui/navigation/Routes.kt`). Die gemeinsamen Bausteine hält `AppContainer` (in `MoltobeneApplication.kt`), alles wird erst bei Bedarf erzeugt.
 - Datei-, Datenbank- und Bildzugriffe laufen nie auf dem Hauptthread. Formulareingaben liegen im `SavedStateHandle`.
 - Freigegebene Bibliotheken: Room (mit KSP), Navigation Compose, Coil (ohne Internet-Modul), kotlinx.serialization. Weitere nur nach Rückfrage.
@@ -166,6 +166,7 @@ Umfangreiche Versionen werden auf einem Arbeitszweig entwickelt und dort über �
      - Patch (x.y.**Z**): Fehlerbehebungen, Kleinigkeiten
      - Minor (x.**Y**.0): neue Funktionen
      - Major (**X**.0.0): große, grundlegende Änderungen
+   - Bei neuen sichtbaren Funktionen „Neu in Version …“ aktualisieren: `whats_new_items` in beiden `strings.xml` sowie `VERSION_CODE` und `VERSION_NAME` in `ui/whatsnew/WhatsNew.kt`.
 3. **Commit** mit einer deutschen, verständlichen Beschreibung.
 4. **Push** zu GitHub (`main`).
 5. **Build auf GitHub prüfen** (GitHub Actions, z. B. mit `gh run list` / `gh run watch`). Schlägt der Build fehl: Fehler selbstständig analysieren und beheben (jeweils wieder mit Schritt 1–4), **bis der Build grün ist**. Erst danach die Aufgabe als erledigt melden.

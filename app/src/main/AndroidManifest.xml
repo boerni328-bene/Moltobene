@@ -31,7 +31,7 @@
             </intent-filter>
         </activity>
 
-        <!-- Übergabe einer Zieldatei an die Kamera-App (nur der Ordner cache/camera). -->
+        <!-- Übergabe von Dateien an andere Apps: Kamera-App und Teilen (nur die Ordner in file_paths.xml). -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

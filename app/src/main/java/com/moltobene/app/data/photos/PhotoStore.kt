@@ -9,6 +9,7 @@ import android.net.Uri
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.util.UUID
@@ -20,6 +21,7 @@ import kotlin.math.roundToInt
  * verkleinert auf ein Detailbild und ein Vorschaubild, richtig gedreht,
  * ohne Zusatzdaten wie den Aufnahmeort (das Neu-Speichern übernimmt keine EXIF-Daten).
  * Fotos liegen im privaten App-Speicher; es sind keine Berechtigungen nötig.
+ * Zum Teilen werden Fotos ebenfalls neu gespeichert ([encodeForSharing]).
  */
 class PhotoStore(private val context: Context) {
 
@@ -94,6 +96,22 @@ class PhotoStore(private val context: Context) {
             copyAtomically(thumb, thumbFile(photoId))
         } else {
             copyAtomically(full, thumbFile(photoId))
+        }
+    }
+
+    /**
+     * Foto zum Teilen: neu als JPEG gespeichert, damit garantiert keine Zusatzdaten wie der
+     * Aufnahmeort mitgehen. null, wenn das Foto fehlt oder nicht lesbar ist.
+     */
+    suspend fun encodeForSharing(photoId: String): ByteArray? = withContext(Dispatchers.IO) {
+        val file = photoFile(photoId)
+        if (!file.isFile) return@withContext null
+        val bitmap = BitmapFactory.decodeFile(file.path) ?: return@withContext null
+        try {
+            val out = ByteArrayOutputStream()
+            if (bitmap.compress(Bitmap.CompressFormat.JPEG, SHARE_JPEG_QUALITY, out)) out.toByteArray() else null
+        } finally {
+            bitmap.recycle()
         }
     }
 
@@ -179,6 +197,8 @@ class PhotoStore(private val context: Context) {
         const val MAX_EDGE = 1600
         const val THUMB_EDGE = 360
         const val JPEG_QUALITY = 80
+        // Etwas höher, weil das Foto beim Teilen ein zweites Mal gespeichert wird.
+        const val SHARE_JPEG_QUALITY = 90
         const val UNUSED_GRACE_MILLIS = 24L * 60 * 60 * 1000
     }
 }

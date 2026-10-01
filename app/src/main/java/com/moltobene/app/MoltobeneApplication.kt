@@ -2,10 +2,12 @@ package com.moltobene.app
 
 import android.app.Application
 import android.content.Context
+import com.moltobene.app.data.AppPreferences
 import com.moltobene.app.data.RecipeRepository
 import com.moltobene.app.data.backup.BackupManager
 import com.moltobene.app.data.db.MoltobeneDatabase
 import com.moltobene.app.data.photos.PhotoStore
+import com.moltobene.app.data.share.RecipeSharer
 
 class MoltobeneApplication : Application() {
     val container: AppContainer by lazy { AppContainer(this) }
@@ -19,4 +21,6 @@ class AppContainer(context: Context) {
     val photoStore: PhotoStore by lazy { PhotoStore(appContext) }
     val repository: RecipeRepository by lazy { RecipeRepository(database.recipeDao(), photoStore) }
     val backupManager: BackupManager by lazy { BackupManager(appContext, repository, photoStore) }
+    val recipeSharer: RecipeSharer by lazy { RecipeSharer(appContext, photoStore) }
+    val preferences: AppPreferences by lazy { AppPreferences(appContext) }
 }

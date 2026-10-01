@@ -3,6 +3,19 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.4.0] – 2026-10-01 (versionCode 11)
+
+Rezepte lassen sich jetzt teilen.
+
+### Neu
+- **Rezept teilen** (Symbol oben rechts in der Rezeptansicht): Titel, Portionen, Zutaten, Zubereitung, Quelle und Foto gehen als gut lesbarer Text z. B. per Messenger oder E-Mail an andere. Eigene Notizen bleiben dabei privat.
+- **Als Rezeptdatei teilen** (Menü ⋮): eine Datei im offenen Standard schema.org, die auch andere Rezept-Apps lesen können. Das Foto steckt mit in der Datei.
+- **Neu in Version …:** Nach einem Update zeigt die App einmal kurz, was neu ist. Die Übersicht steht auch in den Einstellungen unter „Info“.
+
+### Geändert
+- „Rezept löschen“ steht jetzt im Menü ⋮ oben rechts in der Rezeptansicht.
+- Geteilte Fotos werden neu gespeichert, damit garantiert kein Aufnahmeort mitgeht.
+
 ## [0.3.1] – 2026-10-01 (versionCode 10)
 
 ### Geändert

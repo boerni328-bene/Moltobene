@@ -43,6 +43,21 @@
     <string name="recipe_not_found">Dieses Rezept gibt es nicht mehr.</string>
     <string name="recipe_load_error">Das Rezept konnte nicht geladen werden.</string>
     <string name="source_link_error">Der Link konnte nicht geöffnet werden.</string>
+    <string name="more_options">Weitere Optionen</string>
+
+    <!-- Teilen -->
+    <string name="share_recipe">Rezept teilen</string>
+    <string name="share_as_file">Als Rezeptdatei teilen</string>
+    <string name="share_source">Quelle: %1$s</string>
+    <string name="share_error">Das Rezept konnte nicht geteilt werden.</string>
+
+    <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
+    <string name="whats_new_title">Neu in Version %1$s</string>
+    <string-array name="whats_new_items">
+        <item>Rezepte teilen: als Text mit Foto, z. B. per Messenger oder E-Mail. Notizen bleiben dabei privat.</item>
+        <item>Rezepte als Rezeptdatei teilen, im Standardformat schema.org, das auch andere Rezept-Apps lesen.</item>
+        <item>„Rezept löschen“ steht jetzt im Menü ⋮ oben rechts in einem Rezept.</item>
+    </string-array>
 
     <!-- Bearbeiten -->
     <string name="field_title">Titel</string>
