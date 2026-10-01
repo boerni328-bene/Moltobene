@@ -209,7 +209,9 @@ private fun openShareMenu(context: Context, share: PreparedShare, chooserTitle: 
         share.text?.let { putExtra(Intent.EXTRA_TEXT, it) }
         share.fileUri?.let { uri ->
             putExtra(Intent.EXTRA_STREAM, uri)
-            clipData = ClipData.newRawUri(share.subject, uri)
+            // Text und Datei gemeinsam, wie Android es selbst macht: Manche Apps (z. B. WhatsApp)
+            // lesen nur diesen Teil und übernehmen den Text sonst nicht.
+            clipData = ClipData(share.subject, arrayOf(share.mimeType), ClipData.Item(share.text, null, null, uri))
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
     }

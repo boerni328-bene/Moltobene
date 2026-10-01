@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.4.1] – 2026-10-01 (versionCode 12)
+
+### Behoben
+- Beim Teilen eines Rezepts mit Foto kam in manchen Apps, z. B. WhatsApp, nur das Foto an. Der Rezepttext wird jetzt zusammen mit dem Foto übergeben.
+
 ## [0.4.0] – 2026-10-01 (versionCode 11)
 
 Rezepte lassen sich jetzt teilen.
