@@ -5,6 +5,8 @@ import android.net.Uri
 import com.moltobene.app.data.photos.PhotoStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -122,21 +124,28 @@ class PendingRecognition(private val context: Context, private val photoStore: P
 }
 
 /**
- * Aufbau der Ergebnisdatei: in der ersten Zeile die Sprache – mit angehängtem „?“, wenn sie nur vermutet
- * ist –, danach der erkannte Text.
+ * Aufbau der Ergebnisdatei (JSON): Sprache, ob sie erkannt oder nur vermutet ist, und der Text Bereich
+ * für Bereich. Dateien von 0.6.1 bis 0.8.0 („Sprache[?]“ in der ersten Zeile, danach der Text) bleiben lesbar.
  */
 internal object SavedResult {
+
+    @Serializable
+    private class Content(val language: String, val detected: Boolean = true, val parts: List<String> = emptyList())
 
     private const val GUESSED = "?"
 
     fun encode(result: TextRecognizer.Result): String =
-        result.language + (if (result.detected) "" else GUESSED) + "\n" + result.text
+        Json.encodeToString(Content.serializer(), Content(result.language, result.detected, result.parts))
 
     fun decode(content: String): TextRecognizer.Result? {
-        val head = content.substringBefore('\n', missingDelimiterValue = "").trim()
-        val language = head.removeSuffix(GUESSED)
-        val text = content.substringAfter('\n', missingDelimiterValue = "")
-        if (language.isEmpty() || text.isBlank()) return null
-        return TextRecognizer.Result(text, language, detected = !head.endsWith(GUESSED))
+        val result = if (content.trimStart().startsWith("{")) {
+            runCatching { Json.decodeFromString(Content.serializer(), content) }.getOrNull()
+                ?.let { TextRecognizer.Result(it.parts, it.language, it.detected) }
+        } else {
+            val head = content.substringBefore('\n', missingDelimiterValue = "").trim()
+            val text = content.substringAfter('\n', missingDelimiterValue = "")
+            TextRecognizer.Result(listOf(text), head.removeSuffix(GUESSED), detected = !head.endsWith(GUESSED))
+        }
+        return result?.takeIf { it.language.isNotEmpty() && it.text.isNotBlank() }
     }
 }

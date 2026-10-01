@@ -17,13 +17,14 @@ import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeIds
 import com.moltobene.app.data.RecipeRepository
 import com.moltobene.app.data.RecipeText
+import com.moltobene.app.data.ocr.AreaFrame
+import com.moltobene.app.data.ocr.AreaKind
 import com.moltobene.app.data.ocr.CropArea
-import com.moltobene.app.data.ocr.GrayImage
 import com.moltobene.app.data.ocr.PendingRecognition
 import com.moltobene.app.data.ocr.RecipeTextParser
 import com.moltobene.app.data.ocr.TextLanguage
 import com.moltobene.app.data.ocr.TextRecognizer
-import com.moltobene.app.data.ocr.crop
+import com.moltobene.app.data.ocr.boundsOf
 import com.moltobene.app.data.photos.PhotoStore
 import com.moltobene.app.ui.components.PageViewerModel
 import com.moltobene.app.ui.navigation.EditRoute
@@ -41,7 +42,10 @@ sealed interface RecognitionState {
 }
 
 /** „Bereich auswählen“ vor der Texterkennung; [page] zählt ab 1. */
-data class AreaSelection(val page: Int, val pageCount: Int, val area: CropArea)
+data class AreaSelection(val page: Int, val pageCount: Int, val frames: List<AreaFrame>, val active: Int) {
+    /** Nur ein Rahmen „Alles“ über die ganze Seite – so beginnt jede Seite. */
+    val isWholePage: Boolean get() = frames.size == 1 && frames[0] == AreaFrame.WHOLE_PAGE
+}
 
 /** Eine gelesene Seite mit dem Bereich, der gelesen wurde. [ref] ist „photo:<Kennung>“ oder „page:<Name>“. */
 private data class ReadPage(val ref: String, val area: CropArea) {
@@ -94,9 +98,11 @@ class EditViewModel(
     private val checkHintField = SavedField(handle, "checkHint", false)
     /** Seiten für „Bereich auswählen“ und die laufende Erkennung, eine je Zeile: „photo:<Kennung>“ oder „page:<Name>“. */
     private val areaPagesField = SavedField(handle, "areaPages", "")
-    /** Gewählter Bereich je Seite, getrennt mit „;“. */
+    /** Rahmen je Seite (#39), Seiten getrennt mit „;“ – siehe [AreaFrame.encodeAll]. */
     private val areaListField = SavedField(handle, "areaList", "")
     private val areaIndexField = SavedField(handle, "areaIndex", 0)
+    /** Rahmen der aktuellen Seite, der gerade bearbeitet wird. */
+    private val areaFrameField = SavedField(handle, "areaFrame", 0)
     /** Kennung, unter der die kopierten Seiten und ein Ergebnis der Erkennung als Dateien liegen (#37). */
     private val sessionField = SavedField<String?>(handle, "recognitionSession", null)
     /** Die Erkennung läuft; Seiten und Bereiche bleiben, bis ihr Ergebnis im Rezept steht. */
@@ -185,7 +191,8 @@ class EditViewModel(
             val pages = areaPages()
             if (pages.isEmpty() || recognitionStartedField.value) return null
             val index = areaIndexField.value.coerceIn(0, pages.lastIndex)
-            return AreaSelection(index + 1, pages.size, areas(pages.size)[index])
+            val frames = pageFrames(pages.size)[index]
+            return AreaSelection(index + 1, pages.size, frames, areaFrameField.value.coerceIn(0, frames.lastIndex))
         }
 
     /** Meldung für die Meldungsleiste (Text-Ressource), wird nach dem Anzeigen zurückgesetzt. */
@@ -300,15 +307,49 @@ class EditViewModel(
     /** Alle Seiten dieses Formulars liegen unter einer Kennung; gelöscht wird beim Speichern oder Verwerfen. */
     private fun ensureSession(): String = sessionField.value ?: pending.newSession().also { sessionField.value = it }
 
-    fun changeArea(area: CropArea) {
+    /** Ändert die Rahmen der aktuellen Seite. */
+    private fun changeFrames(transform: (List<AreaFrame>) -> List<AreaFrame>) {
         val pages = areaPages()
         if (pages.isEmpty()) return
-        val areas = areas(pages.size).toMutableList()
-        areas[areaIndexField.value.coerceIn(0, pages.lastIndex)] = area
-        areaListField.value = areas.joinToString(";") { it.encode() }
+        val all = pageFrames(pages.size).toMutableList()
+        val page = areaIndexField.value.coerceIn(0, pages.lastIndex)
+        all[page] = transform(all[page]).ifEmpty { listOf(AreaFrame.WHOLE_PAGE) }
+        areaListField.value = all.joinToString(";") { AreaFrame.encodeAll(it) }
     }
 
-    fun resetArea() = changeArea(CropArea.WHOLE_PAGE)
+    fun changeFrameArea(index: Int, area: CropArea) = changeFrames { frames ->
+        frames.mapIndexed { i, frame -> if (i == index) frame.copy(area = area) else frame }
+    }
+
+    fun selectFrame(index: Int) {
+        areaFrameField.value = index
+    }
+
+    /** Was im gerade bearbeiteten Rahmen steht. */
+    fun changeFrameKind(kind: AreaKind) {
+        val active = areaSelection?.active ?: return
+        changeFrames { frames -> frames.mapIndexed { i, frame -> if (i == active) frame.copy(kind = kind) else frame } }
+    }
+
+    /** „Bereich hinzufügen“: ein weiterer Rahmen, z. B. für die zweite Spalte. */
+    fun addFrame() {
+        val frames = areaSelection?.frames ?: return
+        changeFrames { it + AreaFrame.next(it) }
+        areaFrameField.value = frames.size
+    }
+
+    fun removeFrame() {
+        val selection = areaSelection ?: return
+        if (selection.frames.size <= 1) return
+        changeFrames { frames -> frames.filterIndexed { i, _ -> i != selection.active } }
+        areaFrameField.value = (selection.active - 1).coerceAtLeast(0)
+    }
+
+    /** „Ganze Seite“: wieder ein Rahmen „Alles“ über die ganze Seite. */
+    fun resetArea() {
+        changeFrames { listOf(AreaFrame.WHOLE_PAGE) }
+        areaFrameField.value = 0
+    }
 
     /** Gewählte Sprache des Textes; null = automatisch erkennen. */
     val languageChoice: String? get() = languageChoiceField.value
@@ -324,6 +365,7 @@ class EditViewModel(
         val index = areaIndexField.value
         if (index + 1 < pages.size) {
             areaIndexField.value = index + 1
+            areaFrameField.value = 0
             loadAreaPreview()
             return
         }
@@ -347,8 +389,9 @@ class EditViewModel(
 
     private fun startAreaSelection(pages: List<String>) {
         areaPagesField.value = pages.joinToString("\n")
-        areaListField.value = pages.joinToString(";") { CropArea.WHOLE_PAGE.encode() }
+        areaListField.value = pages.joinToString(";") { AreaFrame.WHOLE_PAGE.encode() }
         areaIndexField.value = 0
+        areaFrameField.value = 0
         recognitionStartedField.value = false
         loadAreaPreview()
     }
@@ -361,15 +404,17 @@ class EditViewModel(
     private fun finishRun(read: Boolean) {
         previewJob?.cancel()
         val pages = areaPages()
-        val areas = areas(pages.size)
+        val frames = pageFrames(pages.size)
         if (read) {
-            val newPages = pages.mapIndexed { index, ref -> ReadPage(ref, areas[index]) }
+            // Als Seite (und Originalseite) gilt, was alle Rahmen zusammen umfassen.
+            val newPages = pages.mapIndexed { index, ref -> ReadPage(ref, boundsOf(frames[index].map { it.area })) }
             val kept = readPages().filter { old -> newPages.none { it.ref == old.ref } }
             readPagesField.value = (kept + newPages).joinToString("\n") { it.encode() }
         }
         areaPagesField.value = ""
         areaListField.value = ""
         areaIndexField.value = 0
+        areaFrameField.value = 0
         recognitionStartedField.value = false
         recognitionInterrupted = false
         areaPreview = null
@@ -385,9 +430,10 @@ class EditViewModel(
 
     private fun areaPages(): List<String> = areaPagesField.value.lines().filter { it.isNotEmpty() }
 
-    private fun areas(count: Int): List<CropArea> {
-        val saved = areaListField.value.split(';').map { CropArea.decode(it) }
-        return List(count) { saved.getOrElse(it) { CropArea.WHOLE_PAGE } }
+    /** Rahmen je Seite; fehlt etwas, die ganze Seite. */
+    private fun pageFrames(count: Int): List<List<AreaFrame>> {
+        val saved = areaListField.value.split(';').map { AreaFrame.decodeAll(it) }
+        return List(count) { saved.getOrElse(it) { listOf(AreaFrame.WHOLE_PAGE) } }
     }
 
     private fun readPages(): List<ReadPage> = readPagesField.value.lines().filter { it.isNotEmpty() }.map { ReadPage.decode(it) }
@@ -437,20 +483,29 @@ class EditViewModel(
         }
     }
 
-    /** Liest die Seiten der Erkennung, jeweils nur den gewählten Bereich. */
+    /**
+     * Liest die Seiten der Erkennung, jeweils nur die Rahmen. Ein Rahmen „Alles“ liest nicht noch einmal,
+     * was schon in einem bezeichneten Rahmen derselben Seite liegt – so entsteht nichts doppelt.
+     */
     private fun startRecognition() {
-        val pages = areaPages()
-        if (pages.isEmpty() || isRecognizing) return
-        val areas = areas(pages.size)
-        val loaders = pages.mapIndexed { index, page ->
-            suspend { photoStore.loadForRecognition(pageUri(page)).crop(areas[index]) }
+        val refs = areaPages()
+        if (refs.isEmpty() || isRecognizing) return
+        val frames = pageFrames(refs.size)
+        val pages = refs.mapIndexed { index, ref ->
+            val labeled = frames[index].filter { it.kind != AreaKind.ALL }.map { it.area }
+            TextRecognizer.Page(
+                load = { photoStore.loadForRecognition(pageUri(ref)) },
+                areas = frames[index].map { frame ->
+                    TextRecognizer.Area(frame.area, blank = if (frame.kind == AreaKind.ALL) labeled else emptyList())
+                },
+            )
         }
-        runRecognition(loaders)
+        runRecognition(pages)
     }
 
     fun cancelRecognition() = recognizer.cancel()
 
-    private fun runRecognition(pages: List<suspend () -> GrayImage>) {
+    private fun runRecognition(pages: List<TextRecognizer.Page>) {
         if (isRecognizing) return
         recognitionInterrupted = false
         recognition = RecognitionState.Running(1, pages.size)
@@ -495,9 +550,14 @@ class EditViewModel(
         if (inBackground) saveDraft()
     }
 
-    /** Übernimmt den erkannten Text in das Formular, nach den Regeln von [DraftMerge]. */
+    /**
+     * Übernimmt den erkannten Text in das Formular, nach den Regeln von [DraftMerge]. Jeder Teil des Ergebnisses
+     * gehört zu einem Rahmen; stimmt die Anzahl nicht (Ergebnis einer älteren Version), gilt alles als „Alles“.
+     */
     private fun applyRecognized(result: TextRecognizer.Result) {
         val text = result.text.trim()
+        val kinds = pageFrames(areaPages().size).flatten().map { it.kind }
+        val parts = if (kinds.size == result.parts.size) kinds.zip(result.parts) else listOf(AreaKind.ALL to text)
         val merged = DraftMerge.merge(
             draft = DraftText(
                 title = title,
@@ -509,7 +569,7 @@ class EditViewModel(
                 language = languageField.value,
             ),
             text = text,
-            parsed = RecipeTextParser.parse(text, result.language),
+            parsed = RecipeTextParser.parseParts(parts, result.language),
             language = result.language.takeIf { result.detected },
         )
         if (merged.title != title) title = merged.title

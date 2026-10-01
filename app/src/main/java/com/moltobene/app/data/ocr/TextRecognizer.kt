@@ -19,8 +19,22 @@ import java.io.IOException
  */
 class TextRecognizer(private val context: Context) {
 
-    /** @param detected die Sprache wurde am Text eindeutig erkannt oder gewählt – sonst ist sie nur vermutet */
-    class Result(val text: String, val language: String, val detected: Boolean = true)
+    /**
+     * Eine Seite: [load] lädt das Foto, gelesen werden nur die [areas] – jeweils ohne das, was in
+     * ihren [Area.blank]-Bereichen liegt (das steht schon in einem anderen Bereich).
+     */
+    class Page(val load: suspend () -> GrayImage, val areas: List<Area>)
+
+    class Area(val area: CropArea, val blank: List<CropArea> = emptyList())
+
+    /**
+     * @param parts der Text Bereich für Bereich, in der Reihenfolge der Seiten und Bereiche
+     * @param detected die Sprache wurde am Text eindeutig erkannt oder gewählt – sonst ist sie nur vermutet
+     */
+    class Result(val parts: List<String>, val language: String, val detected: Boolean = true) {
+        /** Der ganze erkannte Text. */
+        val text: String get() = parts.map { it.trim() }.filter { it.isNotEmpty() }.joinToString("\n\n")
+    }
 
     /** Die Erkennung wurde über [cancel] abgebrochen. */
     class CancelledException : Exception()
@@ -40,7 +54,7 @@ class TextRecognizer(private val context: Context) {
      * @param onPage wird vor jeder Seite mit ihrer Nummer (ab 0) aufgerufen
      */
     suspend fun recognize(
-        pages: List<suspend () -> GrayImage>,
+        pages: List<Page>,
         preferredLanguage: String,
         chosenLanguage: String?,
         onPage: (Int) -> Unit,
@@ -49,24 +63,25 @@ class TextRecognizer(private val context: Context) {
         withContext(Dispatchers.Default) {
             var language = TextLanguage.supportedOrDefault(chosenLanguage ?: preferredLanguage)
             var detected = chosenLanguage != null
-            val texts = mutableListOf<String>()
-            pages.forEachIndexed { index, load ->
+            val parts = mutableListOf<String>()
+            pages.forEachIndexed { index, page ->
                 onPage(index)
-                val image = load()
-                var text = read(image, language)
+                val image = page.load()
+                val crops = page.areas.map { image.whiten(it.blank).crop(it.area) }
+                var texts = crops.map { read(it, language) }
                 // Ist die erste Seite unklar (z. B. nur ein kurzer Ausschnitt), entscheidet der Text bis hierher.
                 if (!detected) {
-                    TextLanguage.detect((texts + text).joinToString("\n"))?.let { found ->
+                    TextLanguage.detect((parts + texts).joinToString("\n"))?.let { found ->
                         detected = true
                         if (found != language) {
                             language = found
-                            text = read(image, language)
+                            texts = crops.map { read(it, language) }
                         }
                     }
                 }
-                text.trim().takeIf { it.isNotEmpty() }?.let { texts += it }
+                parts += texts.map { it.trim() }
             }
-            Result(texts.joinToString("\n\n"), language, detected)
+            Result(parts, language, detected)
         }
     }
 

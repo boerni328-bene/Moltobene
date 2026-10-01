@@ -90,11 +90,15 @@
     <string name="keep_pages">Behalten</string>
     <string name="area_title">Bereich auswählen</string>
     <string name="area_page">Seite %1$d von %2$d</string>
-    <string name="area_hint">Gelesen wird nur der Bereich im Rahmen. Ecken und Ränder des Rahmens lassen sich verschieben.</string>
+    <string name="area_hint">Gelesen wird nur, was in den Rahmen liegt. Ecken und Ränder lassen sich verschieben. Bei zwei Spalten einen Bereich hinzufügen und Zutaten und Zubereitung getrennt markieren.</string>
+    <string name="area_kind_label">Im Rahmen steht:</string>
+    <string name="area_kind_all">Alles</string>
+    <string name="area_add">Bereich hinzufügen</string>
+    <string name="area_remove">Bereich entfernen</string>
     <string name="area_whole_page">Ganze Seite</string>
     <string name="area_next_page">Nächste Seite</string>
     <string name="area_recognize">Text erkennen</string>
-    <string name="area_frame_description">Foto mit Rahmen um den Bereich, der gelesen wird</string>
+    <string name="area_frame_description">Foto mit Rahmen um die Bereiche, die gelesen werden</string>
     <string name="area_load_error">Das Foto konnte nicht geladen werden. Ein anderes Foto auswählen.</string>
 
     <!-- Lizenzen -->
@@ -107,8 +111,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>„Sprache des Textes“: Im Menü oben rechts in „Bereich auswählen“ lässt sich die Sprache festlegen – hilfreich bei kurzen Ausschnitten. Sonst erkennt die App sie wie bisher selbst.</item>
-        <item>Weitere Seiten ergänzen Zutaten und Zubereitung jetzt zuverlässiger, und dieselbe Seite zweimal gelesen ergibt keine doppelten Zeilen.</item>
+        <item>Bereiche zuordnen: In „Bereich auswählen“ lassen sich mehrere Rahmen ziehen und als Titel, Zutaten oder Zubereitung markieren. Ideal für Kochbuchseiten mit zwei Spalten – nichts landet mehr im falschen Feld.</item>
+        <item>Die Rahmen sind jetzt auf hellen und dunklen Fotos gleich gut zu sehen.</item>
     </string-array>
 
     <!-- Bearbeiten -->

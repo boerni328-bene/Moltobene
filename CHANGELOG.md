@@ -3,6 +3,17 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.9.0] – 2026-10-01 (versionCode 20)
+
+### Neu
+- **Bereiche zuordnen:** In „Bereich auswählen“ lassen sich mit „Bereich hinzufügen“ mehrere Rahmen auf eine Seite legen. Für jeden Rahmen wird unter „Im Rahmen steht:“ gewählt, was darin steht: „Alles“, „Titel“, „Zutaten“ oder „Zubereitung“. Bezeichnete Rahmen gehen ohne Raten direkt ins passende Feld – so werden z. B. Kochbuchseiten mit Zutaten links und Zubereitung rechts richtig gelesen. Die Bezeichnung steht als Text am Rahmen.
+- Ein Rahmen „Alles“ liest nicht noch einmal, was schon in einem bezeichneten Rahmen liegt; so entsteht nichts doppelt.
+- Ein Rahmen wird durch Antippen gewählt; „Bereich entfernen“ nimmt ihn wieder heraus, „Ganze Seite“ setzt alles zurück. Wer nichts ändert, liest wie bisher die ganze Seite.
+
+### Geändert
+- Die Rahmen haben jetzt eine helle Linie unter der farbigen und sind so auf weißen Buchseiten wie auf dunklen Bildschirmfotos gut zu sehen.
+- Als Originalseite wird bei mehreren Rahmen der Bereich behalten, der alle Rahmen umfasst.
+
 ## [0.8.0] – 2026-10-01 (versionCode 19)
 
 ### Neu

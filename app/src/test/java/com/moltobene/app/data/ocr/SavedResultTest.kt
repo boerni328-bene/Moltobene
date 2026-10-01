@@ -12,19 +12,28 @@ class SavedResultTest {
 
     @Test
     fun ergebnisBleibtVollstaendigErhalten() {
-        val text = "Crème brûlée\n\nZutaten:\n500 ml Sahne\n\n4 Eigelb\n"
-        val saved = SavedResult.decode(SavedResult.encode(TextRecognizer.Result(text, "fr")))
+        val parts = listOf("Crème brûlée", "Zutaten:\n500 ml Sahne\n\n4 Eigelb", "")
+        val saved = SavedResult.decode(SavedResult.encode(TextRecognizer.Result(parts, "fr")))
         assertNotNull(saved)
         assertEquals("fr", saved!!.language)
-        assertEquals(text, saved.text)
+        assertEquals(parts, saved.parts)
         assertTrue(saved.detected)
     }
 
     @Test
     fun vermuteteSpracheBleibtVermutet() {
-        val saved = SavedResult.decode(SavedResult.encode(TextRecognizer.Result("Salz", "de", detected = false)))
+        val saved = SavedResult.decode(SavedResult.encode(TextRecognizer.Result(listOf("Salz"), "de", detected = false)))
         assertEquals("de", saved!!.language)
         assertFalse(saved.detected)
+    }
+
+    @Test
+    fun dateienAelterVersionenBleibenLesbar() {
+        val old = SavedResult.decode("it?\nTorta di mele\n\n200 g di farina")
+        assertEquals("it", old!!.language)
+        assertFalse(old.detected)
+        assertEquals("Torta di mele\n\n200 g di farina", old.text)
+        assertTrue(SavedResult.decode("de\nApfelkuchen")!!.detected)
     }
 
     @Test
@@ -34,5 +43,7 @@ class SavedResultTest {
         assertNull(SavedResult.decode("de\n"))
         assertNull(SavedResult.decode("de\n  \n"))
         assertNull(SavedResult.decode("\nNur Text ohne Sprache"))
+        assertNull(SavedResult.decode("{kaputt"))
+        assertNull(SavedResult.decode("""{"language":"de","parts":["", " "]}"""))
     }
 }

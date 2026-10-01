@@ -91,11 +91,15 @@
     <string name="keep_pages">Keep</string>
     <string name="area_title">Select area</string>
     <string name="area_page">Page %1$d of %2$d</string>
-    <string name="area_hint">Only the area inside the frame is read. The corners and edges of the frame can be dragged.</string>
+    <string name="area_hint">Only what lies inside the frames is read. Corners and edges can be dragged. For two columns, add an area and mark the ingredients and instructions separately.</string>
+    <string name="area_kind_label">The frame contains:</string>
+    <string name="area_kind_all">Everything</string>
+    <string name="area_add">Add area</string>
+    <string name="area_remove">Remove area</string>
     <string name="area_whole_page">Whole page</string>
     <string name="area_next_page">Next page</string>
     <string name="area_recognize">Recognize text</string>
-    <string name="area_frame_description">Photo with a frame around the area to be read</string>
+    <string name="area_frame_description">Photo with frames around the areas to be read</string>
     <string name="area_load_error">The photo could not be loaded. Choose another photo.</string>
 
     <!-- Lizenzen -->
@@ -110,8 +114,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>“Language of the text”: the menu at the top right of “Select area” sets the language – helpful for short sections. Otherwise the app detects it by itself as before.</item>
-        <item>Further pages now add to the ingredients and instructions more reliably, and reading the same page twice no longer creates duplicate lines.</item>
+        <item>Assign areas: in “Select area”, several frames can be drawn and marked as title, ingredients or instructions. Ideal for cookbook pages with two columns – nothing ends up in the wrong field any more.</item>
+        <item>The frames are now equally easy to see on light and dark photos.</item>
     </string-array>
 
     <!-- Bearbeiten -->

@@ -68,26 +68,15 @@ object RecipeTextParser {
     fun parse(text: String, language: String? = null): ParsedRecipe {
         val lines = cleanLines(text)
         val content = lines.indices.filter { lines[it].isNotEmpty() }
-        if (content.isEmpty()) return ParsedRecipe(null, null, null, emptyList(), emptyList())
+        if (content.isEmpty()) return EMPTY
 
         val ingredientHeading = content.firstOrNull { INGREDIENT_HEADING.matches(lines[it].trimEnd(':')) }
         val stepsHeading = content.firstOrNull { isStepsHeading(lines[it]) }
 
-        // Portionen: aus einer eigenen Zeile oder aus der Überschrift „Zutaten für 4 Personen“.
-        var servings: Int? = null
-        var servingsUnit: String? = null
-        val servingsLines = mutableSetOf<Int>()
-        for (index in content) {
-            val line = lines[index]
-            val isHeading = index == ingredientHeading
-            if (!isHeading && (line.length > 40 || index == stepsHeading)) continue
-            val match = SERVINGS_PATTERNS.firstNotNullOfOrNull { it.find(line) } ?: continue
-            val count = match.groupValues[1].toIntOrNull()?.takeIf { it in 1..999 } ?: continue
-            servings = count
-            servingsUnit = match.groupValues.getOrNull(2)?.takeIf { PIECES.matches(it) }
-            if (!isHeading) servingsLines += index
-            break
-        }
+        val found = findServings(lines, content, ingredientHeading, stepsHeading)
+        val servings = found?.count
+        val servingsUnit = found?.unit
+        val servingsLines = setOfNotNull(found?.line)
 
         val firstHeading = listOfNotNull(ingredientHeading, stepsHeading).minOrNull()
         val titleIndex = content.firstOrNull { index ->
@@ -145,6 +134,69 @@ object RecipeTextParser {
             steps = formatSteps(stepLines),
         )
     }
+
+    /**
+     * Setzt ein Rezept aus den Bereichen von „Bereich auswählen“ zusammen (#39): Bezeichnete Bereiche gehen
+     * ohne Raten in ihr Feld, alle Bereiche „Alles“ werden gemeinsam wie bisher mit [parse] aufgeteilt.
+     * Ein Bereich „Titel“ geht vor einem gefundenen Titel.
+     */
+    fun parseParts(parts: List<Pair<AreaKind, String>>, language: String? = null): ParsedRecipe {
+        val allText = parts.filter { it.first == AreaKind.ALL }.map { it.second.trim() }.filter { it.isNotEmpty() }
+        val whole = if (allText.isEmpty()) EMPTY else parse(allText.joinToString("\n\n"), language)
+        val sections = parts.filter { it.first != AreaKind.ALL }.map { (kind, text) -> parseSection(kind, text, language) }
+        val servingsFrom = if (whole.servings != null) whole else sections.firstOrNull { it.servings != null }
+        return ParsedRecipe(
+            title = sections.firstNotNullOfOrNull { it.title } ?: whole.title,
+            servings = servingsFrom?.servings,
+            servingsUnit = servingsFrom?.servingsUnit,
+            ingredients = whole.ingredients + sections.flatMap { it.ingredients },
+            steps = whole.steps + sections.flatMap { it.steps },
+        )
+    }
+
+    /** Ein bezeichneter Bereich: Es wird nicht geraten, was darin steht, nur aufbereitet und Überschriften weggelassen. */
+    internal fun parseSection(kind: AreaKind, text: String, language: String?): ParsedRecipe {
+        val lines = cleanLines(text)
+        val content = lines.indices.filter { lines[it].isNotEmpty() }
+        if (content.isEmpty()) return EMPTY
+        fun without(skip: Set<Int>) = lines.mapIndexed { index, line -> if (index in skip) "" else line }
+        return when (kind) {
+            AreaKind.ALL -> parse(text, language)
+            AreaKind.TITLE -> EMPTY.copy(title = content.joinToString(" ") { lines[it] })
+            AreaKind.INGREDIENTS -> {
+                val heading = content.firstOrNull { INGREDIENT_HEADING.matches(lines[it].trimEnd(':')) }
+                val found = findServings(lines, content, heading, stepsHeading = null)
+                EMPTY.copy(
+                    servings = found?.count,
+                    servingsUnit = found?.unit,
+                    ingredients = formatIngredients(without(setOfNotNull(heading, found?.line)), language),
+                )
+            }
+            AreaKind.STEPS -> {
+                val heading = content.firstOrNull { isStepsHeading(lines[it]) }
+                EMPTY.copy(steps = formatSteps(without(setOfNotNull(heading))))
+            }
+        }
+    }
+
+    /** Portionen und – wenn sie in einer eigenen Zeile stehen – diese Zeile, damit sie keine Zutat wird. */
+    private class Servings(val count: Int, val unit: String?, val line: Int?)
+
+    /** Portionen: aus einer eigenen Zeile oder aus der Überschrift „Zutaten für 4 Personen“. */
+    private fun findServings(lines: List<String>, content: List<Int>, ingredientHeading: Int?, stepsHeading: Int?): Servings? {
+        for (index in content) {
+            val line = lines[index]
+            val isHeading = index == ingredientHeading
+            if (!isHeading && (line.length > 40 || index == stepsHeading)) continue
+            val match = SERVINGS_PATTERNS.firstNotNullOfOrNull { it.find(line) } ?: continue
+            val count = match.groupValues[1].toIntOrNull()?.takeIf { it in 1..999 } ?: continue
+            val unit = match.groupValues.getOrNull(2)?.takeIf { PIECES.matches(it) }
+            return Servings(count, unit, if (isHeading) null else index)
+        }
+        return null
+    }
+
+    private val EMPTY = ParsedRecipe(null, null, null, emptyList(), emptyList())
 
     /** Bereinigt die Zeilen: Ligaturen, Rauschen, Seitenzahlen und Trennstriche am Zeilenende. */
     internal fun cleanLines(text: String): List<String> {
