@@ -16,3 +16,6 @@ data class EditRoute(val id: String? = null, val fromPhoto: Boolean = false)
 
 @Serializable
 object SettingsRoute
+
+@Serializable
+object LicensesRoute

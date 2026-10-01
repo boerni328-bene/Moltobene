@@ -271,6 +271,20 @@ fun EditScreen(
         )
     }
 
+    if (viewModel.askKeepPhoto) {
+        AlertDialog(
+            onDismissRequest = viewModel::keepPhoto,
+            title = { Text(stringResource(R.string.keep_photo_title)) },
+            text = { Text(stringResource(R.string.keep_photo_text)) },
+            confirmButton = {
+                TextButton(onClick = viewModel::removePhotoAfterRecognition) { Text(stringResource(R.string.photo_remove)) }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::keepPhoto) { Text(stringResource(R.string.keep_photo)) }
+            },
+        )
+    }
+
     if (confirmDiscard) {
         AlertDialog(
             onDismissRequest = { confirmDiscard = false },

@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.5.1] – 2026-10-01 (versionCode 14)
+
+### Neu
+- Nach der Texterkennung fragt die App „Foto behalten?“. Zeigt das Foto nur die Buchseite, lässt es sich mit einem Tipp entfernen und spart Speicherplatz. Gelöscht wird es erst beim Speichern des Rezepts.
+- Einstellungen → Info → „Open-Source-Lizenzen“: die quelloffenen Bausteine, auf denen die App aufbaut, mit ihren Lizenzen.
+
 ## [0.5.0] – 2026-10-01 (versionCode 13)
 
 Rezepte aus Fotos übernehmen: Die App liest Titel, Zutaten und Zubereitung selbst.

@@ -116,6 +116,7 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 - `ui/` – je Bildschirm ein Ordner mit Screen und ViewModel; Navigation Compose mit typsicheren Zielen (`ui/navigation/Routes.kt`). Die gemeinsamen Bausteine hält `AppContainer` (in `MoltobeneApplication.kt`), alles wird erst bei Bedarf erzeugt.
 - Datei-, Datenbank- und Bildzugriffe laufen nie auf dem Hauptthread. Formulareingaben liegen im `SavedStateHandle`.
 - Freigegebene Bibliotheken: Room (mit KSP), Navigation Compose, Coil (ohne Internet-Modul), kotlinx.serialization, Tesseract4Android (Texterkennung; kommt über JitPack, dort nur für die Gruppe `cz.adaptech.tesseract4android` freigegeben). Weitere nur nach Rückfrage.
+- Jeder mitgelieferte quelloffene Baustein steht mit Lizenz in `ui/licenses/Licenses.kt` (Lizenztexte unter `assets/licenses/`), angezeigt unter Einstellungen → Info → „Open-Source-Lizenzen“. Neue Bausteine dort ergänzen.
 - Texterkennung: Sprachpakete `tessdata_fast` (Deutsch, Englisch, Italienisch, Französisch, Spanisch) liegen unter `assets/tessdata/` (Stand `tesseract-ocr/tessdata_fast@87416418`, Lizenz Apache 2.0). Eingestellt ist Sauvola-Schwellenwert (`thresholding_method=2`), Fotos werden auf etwa 2400 px gebracht; beides war in Tests mit nachgestellten Handyfotos am zuverlässigsten. Native Bibliotheken nur für `armeabi-v7a` und `arm64-v8a`.
 
 ### Daten dürfen nie verloren gehen

@@ -66,6 +66,16 @@
     <string name="recognized_text_show">Erkannten Text anzeigen</string>
     <string name="recognized_text_hide">Erkannten Text ausblenden</string>
     <string name="recognized_text_hint">Erkannter Text kann Fehler enthalten. Fehlende Teile lassen sich von hier kopieren.</string>
+    <string name="keep_photo_title">Foto behalten?</string>
+    <string name="keep_photo_text">Der Text ist ins Rezept übernommen. Zeigt das Foto nur die Buchseite, spart Entfernen Speicherplatz. Gelöscht wird es beim Speichern des Rezepts.</string>
+    <string name="keep_photo">Foto behalten</string>
+
+    <!-- Lizenzen -->
+    <string name="licenses_title">Open-Source-Lizenzen</string>
+    <string name="licenses_intro">Moltobene baut auf den folgenden quelloffenen Bausteinen auf. Vielen Dank an ihre Urheber.</string>
+    <string name="license_text_show">Lizenztext anzeigen</string>
+    <string name="license_text_hide">Lizenztext ausblenden</string>
+    <string name="licenses_error">Die Lizenztexte konnten nicht geladen werden.</string>
 
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>

@@ -15,6 +15,8 @@ import com.moltobene.app.ui.collection.CollectionScreen
 import com.moltobene.app.ui.collection.CollectionViewModel
 import com.moltobene.app.ui.edit.EditScreen
 import com.moltobene.app.ui.edit.EditViewModel
+import com.moltobene.app.ui.licenses.LicensesScreen
+import com.moltobene.app.ui.licenses.LicensesViewModel
 import com.moltobene.app.ui.recipe.RecipeScreen
 import com.moltobene.app.ui.recipe.RecipeViewModel
 import com.moltobene.app.ui.settings.SettingsScreen
@@ -91,6 +93,14 @@ fun MoltobeneNavHost() {
             SettingsScreen(
                 viewModel = viewModel { SettingsViewModel(container.backupManager) },
                 snackbarHostState = snackbarHostState,
+                onBack = { navController.popBackStack() },
+                onOpenLicenses = { navController.navigate(LicensesRoute) },
+            )
+        }
+        composable<LicensesRoute> {
+            val context = LocalContext.current
+            LicensesScreen(
+                viewModel = viewModel { LicensesViewModel(context) },
                 onBack = { navController.popBackStack() },
             )
         }

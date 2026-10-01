@@ -59,6 +59,7 @@ class EditViewModel(
     private val recognizedTextField = SavedField(handle, "recognizedText", "")
     private val languageField = SavedField<String?>(handle, "language", null)
     private val startPromptShownField = SavedField(handle, "startPromptShown", false)
+    private val askKeepPhotoField = SavedField(handle, "askKeepPhoto", false)
     private val photoIdField = SavedField<String?>(handle, "photoId", null)
     private val originalPhotoIdField = SavedField<String?>(handle, "originalPhotoId", null)
     private val draftIdField = SavedField<String?>(handle, "draftId", null)
@@ -94,6 +95,9 @@ class EditViewModel(
     val photoFile: File? get() = photoIdField.value?.let { photoStore.photoFile(it) }
     val hasPhoto: Boolean get() = photoIdField.value != null
     val recognizedText: String get() = recognizedTextField.value
+
+    /** Nach der Texterkennung fragen, ob das Rezeptfoto (meist die Buchseite) bleiben soll. */
+    val askKeepPhoto: Boolean get() = askKeepPhotoField.value
     val isDirty: Boolean get() = dirtyField.value
 
     var titleError by mutableStateOf(false)
@@ -161,7 +165,7 @@ class EditViewModel(
     /** Liest das Rezeptfoto. */
     fun recognizeRecipePhoto() {
         val photoId = photoIdField.value ?: return
-        runRecognition(listOf(suspend { photoStore.loadForRecognition(photoId) }))
+        runRecognition(listOf(suspend { photoStore.loadForRecognition(photoId) }), recipePhotoUsed = true)
     }
 
     /** Liest ausgewählte Fotos in der gewählten Reihenfolge; ohne Rezeptfoto wird das erste zum Rezeptfoto. */
@@ -169,7 +173,7 @@ class EditViewModel(
         if (uris.isEmpty()) return
         runRecognition(
             pages = uris.map { uri -> suspend { photoStore.loadForRecognition(uri) } },
-            prepare = { if (photoIdField.value == null) replacePhoto(photoStore.importFromUri(uris.first())) },
+            prepare = { takeAsRecipePhotoIfMissing(uris.first()) },
         )
     }
 
@@ -179,25 +183,48 @@ class EditViewModel(
         val capture = photoStore.cameraCaptureUri()
         runRecognition(
             pages = listOf(suspend { photoStore.loadForRecognition(capture) }),
-            prepare = { if (photoIdField.value == null) replacePhoto(photoStore.importFromUri(capture)) },
+            prepare = { takeAsRecipePhotoIfMissing(capture) },
             cleanUp = { photoStore.discardCameraPhoto() },
         )
     }
 
     fun cancelRecognition() = recognizer.cancel()
 
+    fun keepPhoto() {
+        askKeepPhotoField.value = false
+    }
+
+    /** Entfernt das Foto nach der Texterkennung; gelöscht wird es erst beim Speichern. */
+    fun removePhotoAfterRecognition() {
+        askKeepPhotoField.value = false
+        removePhoto()
+    }
+
+    /** Ohne Rezeptfoto wird das erste gelesene Foto zum Rezeptfoto. Liefert true, wenn das geschehen ist. */
+    private suspend fun takeAsRecipePhotoIfMissing(uri: Uri): Boolean {
+        if (photoIdField.value != null) return false
+        replacePhoto(photoStore.importFromUri(uri))
+        return true
+    }
+
+    /**
+     * @param recipePhotoUsed das Rezeptfoto selbst wird gelesen
+     * @param prepare läuft vor der Erkennung; liefert true, wenn dabei ein Rezeptfoto übernommen wurde
+     */
     private fun runRecognition(
         pages: List<suspend () -> GrayImage>,
-        prepare: suspend () -> Unit = {},
+        recipePhotoUsed: Boolean = false,
+        prepare: suspend () -> Boolean = { false },
         cleanUp: suspend () -> Unit = {},
     ) {
         if (isRecognizing) return
         recognition = RecognitionState.Running(1, pages.size)
         viewModelScope.launch {
             try {
+                var photoFromPages = recipePhotoUsed
                 // Zuerst das Foto übernehmen: Es bleibt erhalten, auch wenn die Erkennung nicht klappt.
                 try {
-                    prepare()
+                    if (prepare()) photoFromPages = true
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
@@ -214,6 +241,7 @@ class EditViewModel(
                 } else {
                     applyRecognized(result)
                     message = R.string.ocr_done
+                    if (photoFromPages && photoIdField.value != null) askKeepPhotoField.value = true
                 }
             } catch (e: TextRecognizer.CancelledException) {
                 // Abgebrochen: nichts ändern.

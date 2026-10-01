@@ -67,6 +67,18 @@
     <string name="recognized_text_show">Show recognized text</string>
     <string name="recognized_text_hide">Hide recognized text</string>
     <string name="recognized_text_hint">Recognized text may contain errors. Missing parts can be copied from here.</string>
+    <string name="keep_photo_title">Keep photo?</string>
+    <string name="keep_photo_text">The text has been added to the recipe. If the photo only shows the cookbook page, removing it saves storage space. It is deleted when the recipe is saved.</string>
+    <string name="keep_photo">Keep photo</string>
+
+    <!-- Lizenzen -->
+    <string name="licenses_title">Open-source licenses</string>
+    <string name="licenses_intro">Moltobene is built on the following open-source components. Many thanks to their authors.</string>
+    <string name="license_text_show">Show license text</string>
+    <string name="license_text_hide">Hide license text</string>
+    <string name="licenses_error">The license texts could not be loaded.</string>
+    <!-- Pflichthinweis der IJG-Lizenz, wörtlich vorgeschrieben -->
+    <string name="license_ijg_note" translatable="false">This software is based in part on the work of the Independent JPEG Group.</string>
 
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>

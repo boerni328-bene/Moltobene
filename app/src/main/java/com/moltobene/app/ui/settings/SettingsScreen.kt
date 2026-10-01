@@ -58,6 +58,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel,
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
+    onOpenLicenses: () -> Unit,
 ) {
     val context = LocalContext.current
     var showWhatsNew by rememberSaveable { mutableStateOf(false) }
@@ -116,6 +117,10 @@ fun SettingsScreen(
             ListItem(
                 headlineContent = { Text(stringResource(R.string.whats_new_title, WhatsNew.VERSION_NAME)) },
                 modifier = Modifier.clickable { showWhatsNew = true },
+            )
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.licenses_title)) },
+                modifier = Modifier.clickable(onClick = onOpenLicenses),
             )
         }
     }
