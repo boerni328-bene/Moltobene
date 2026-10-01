@@ -83,12 +83,10 @@ object RecipeTextParser {
             if (!isHeading && (line.length > 40 || index == stepsHeading)) continue
             val match = SERVINGS_PATTERNS.firstNotNullOfOrNull { it.find(line) } ?: continue
             val count = match.groupValues[1].toIntOrNull()?.takeIf { it in 1..999 } ?: continue
-            if (servings == null) {
-                servings = count
-                servingsUnit = match.groupValues.getOrNull(2)?.takeIf { PIECES.matches(it) }
-            }
+            servings = count
+            servingsUnit = match.groupValues.getOrNull(2)?.takeIf { PIECES.matches(it) }
             if (!isHeading) servingsLines += index
-            if (servings != null) break
+            break
         }
 
         val firstHeading = listOfNotNull(ingredientHeading, stepsHeading).minOrNull()

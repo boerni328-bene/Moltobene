@@ -4,31 +4,36 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import javax.imageio.ImageIO
+import java.util.zip.GZIPInputStream
 
 /**
- * test/resources/ocr/tabelle.png stellt das Bildschirmfoto einer Rezept-App nach (selbst erzeugt):
+ * test/resources/ocr/tabelle.pgm.gz stellt das Bildschirmfoto einer Rezept-App nach (selbst erzeugt):
  * Titel, „Für die Fülle:“, neun Zutaten mit Menge rechts und hellgrauen Trennlinien, darunter die Zubereitung.
  */
 class PageLayoutTest {
 
+    /** Liest ein Graustufenbild im einfachen Format PGM (P5), gzip-gepackt. */
     private fun loadGray(name: String): GrayImage {
-        val image = requireNotNull(javaClass.classLoader?.getResource("ocr/$name")) { "Prüfbild $name fehlt" }
-            .openStream().use { ImageIO.read(it) }
-        // Grauwerte direkt aus den Bilddaten (getRGB würde Graustufen-PNGs umrechnen).
-        val raster = image.raster
-        val pixels = ByteArray(image.width * image.height)
-        for (y in 0 until image.height) {
-            for (x in 0 until image.width) {
-                pixels[y * image.width + x] = raster.getSample(x, y, 0).toByte()
-            }
+        val bytes = requireNotNull(javaClass.classLoader?.getResource("ocr/$name")) { "Prüfbild $name fehlt" }
+            .openStream().use { GZIPInputStream(it).readBytes() }
+        // Kopf: „P5“, Breite, Höhe, Höchstwert – durch Leerraum getrennt, danach ein Byte je Bildpunkt.
+        var position = 0
+        val fields = mutableListOf<String>()
+        while (fields.size < 4) {
+            while (bytes[position].toInt().toChar().isWhitespace()) position++
+            val start = position
+            while (!bytes[position].toInt().toChar().isWhitespace()) position++
+            fields += String(bytes, start, position - start)
         }
-        return GrayImage(image.width, image.height, pixels)
+        position++
+        val width = fields[1].toInt()
+        val height = fields[2].toInt()
+        return GrayImage(width, height, bytes.copyOfRange(position, position + width * height))
     }
 
     @Test
     fun tabelleMitTrennlinienWirdInZeilenZerlegt() {
-        val image = loadGray("tabelle.png")
+        val image = loadGray("tabelle.pgm.gz")
         val bands = requireNotNull(PageLayout.analyze(image)) { "Tabelle nicht erkannt" }
         val rows = bands.filterIsInstance<LayoutBand.Row>()
         assertEquals(8, rows.size)
