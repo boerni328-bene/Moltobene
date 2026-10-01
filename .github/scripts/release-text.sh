@@ -27,8 +27,8 @@ echo "Ein Update wird einfach über die vorhandene App installiert, die Sammlung
 if [ -f "$APK" ]; then
   PRUEFSUMME=$(sha256sum "$APK" | cut -d' ' -f1)
   APKSIGNER="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -n 1)apksigner"
-  FINGERABDRUCK=$("$APKSIGNER" verify --print-certs "$APK" \
-    | sed -n 's/^Signer #1 certificate SHA-256 digest: //p' \
+  FINGERABDRUCK=$("$APKSIGNER" verify --print-certs "$APK" 2>&1 \
+    | grep -oiE 'certificate SHA-256 digest: *[0-9a-f]{64}' | grep -oiE '[0-9a-f]{64}' | head -n 1 \
     | tr 'a-f' 'A-F' | sed 's/../&:/g; s/:$//')
   echo
   echo "### Echtheit prüfen"

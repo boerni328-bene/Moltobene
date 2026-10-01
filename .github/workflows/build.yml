@@ -133,10 +133,12 @@ jobs:
           APK: dist/moltobene-${{ steps.version.outputs.name }}.apk
         run: |
           APKSIGNER="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -n 1)apksigner"
-          ZERTIFIKATE=$("$APKSIGNER" verify --print-certs "$APK")
-          ANZAHL=$(echo "$ZERTIFIKATE" | grep -c '^Signer #[0-9]* certificate SHA-256 digest:' || true)
-          FINGERABDRUCK=$(echo "$ZERTIFIKATE" | sed -n 's/^Signer #1 certificate SHA-256 digest: //p' \
-            | tr 'a-f' 'A-F' | sed 's/../&:/g; s/:$//')
+          echo "Prüfwerkzeug: $APKSIGNER"
+          ZERTIFIKATE=$("$APKSIGNER" verify --print-certs "$APK" 2>&1)
+          echo "$ZERTIFIKATE"
+          DIGESTS=$(echo "$ZERTIFIKATE" | grep -oiE 'certificate SHA-256 digest: *[0-9a-f]{64}' | grep -oiE '[0-9a-f]{64}' | sort -u || true)
+          ANZAHL=$(echo "$DIGESTS" | grep -c . || true)
+          FINGERABDRUCK=$(echo "$DIGESTS" | head -n 1 | tr 'a-f' 'A-F' | sed 's/../&:/g; s/:$//')
           if [ "$ANZAHL" -ne 1 ] || [ "$FINGERABDRUCK" != "$SIGNATUR_FINGERABDRUCK" ]; then
             echo "::error::Die APK ist nicht mit dem bekannten Schlüssel signiert (gefunden: $FINGERABDRUCK)."
             exit 1
