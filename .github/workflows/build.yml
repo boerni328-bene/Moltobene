@@ -13,6 +13,11 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: false
 
+env:
+  # Fingerabdruck des Signaturzertifikats. Ändert er sich, wurde der Schlüssel ersetzt –
+  # dann ließen sich Updates nicht mehr installieren, deshalb bricht der Build ab.
+  SIGNATUR_FINGERABDRUCK: "2A:8A:99:1C:E9:68:47:D2:0B:AC:DF:74:4F:1E:E8:95:E7:28:35:8B:06:83:EA:99:3E:42:58:65:F6:D5:2C:1A"
+
 # Alle Actions sind auf feste Commit-Kennungen angepinnt (Schutz vor veränderten Versionen).
 jobs:
   build:
@@ -37,9 +42,48 @@ jobs:
         id: version
         run: |
           VERSION=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
-          if [ -z "$VERSION" ]; then echo "versionName nicht gefunden"; exit 1; fi
+          CODE=$(grep -oP 'versionCode\s*=\s*\K\d+' app/build.gradle.kts)
+          if [ -z "$VERSION" ] || [ -z "$CODE" ]; then echo "::error::versionName oder versionCode nicht gefunden."; exit 1; fi
           echo "name=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Version: $VERSION"
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+          echo "Version: $VERSION (versionCode $CODE)"
+
+      # #5: Fehler hier fallen sonst erst beim Installieren auf.
+      - name: Versionsnummer und Änderungsprotokoll prüfen
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.name }}
+          CODE: ${{ steps.version.outputs.code }}
+        run: |
+          ZEILE=$(grep -m1 -F "## [$VERSION]" CHANGELOG.md || true)
+          if [ -z "$ZEILE" ]; then
+            echo "::error::In CHANGELOG.md fehlt der Abschnitt „## [$VERSION]“."
+            exit 1
+          fi
+          if ! echo "$ZEILE" | grep -qF "(versionCode $CODE)"; then
+            echo "::error::Der Abschnitt „## [$VERSION]“ in CHANGELOG.md nennt nicht versionCode $CODE."
+            exit 1
+          fi
+          if gh release view "v$VERSION" > /dev/null 2>&1; then
+            echo "Release v$VERSION gibt es schon – keine neue Version, nur bauen."
+            exit 0
+          fi
+          LETZTES=$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name 2> /dev/null || true)
+          if [ -z "$LETZTES" ]; then
+            echo "Noch kein Release vorhanden."
+            exit 0
+          fi
+          ALT=$(gh api "repos/$GITHUB_REPOSITORY/contents/app/build.gradle.kts?ref=$LETZTES" --jq .content \
+            | base64 --decode | grep -oP 'versionCode\s*=\s*\K\d+' || true)
+          if [ -z "$ALT" ]; then
+            echo "::error::versionCode des letzten Release $LETZTES nicht lesbar."
+            exit 1
+          fi
+          if [ "$CODE" -le "$ALT" ]; then
+            echo "::error::versionCode $CODE ist nicht größer als beim letzten Release $LETZTES ($ALT). Android würde das Update ablehnen."
+            exit 1
+          fi
+          echo "Neue Version $VERSION: versionCode $ALT → $CODE"
 
       - name: Signatur-Secrets prüfen und Schlüssel bereitstellen
         env:
@@ -83,6 +127,22 @@ jobs:
           mkdir -p dist
           cp app/build/outputs/apk/release/app-release.apk "dist/moltobene-${{ steps.version.outputs.name }}.apk"
 
+      # #13: Nur eine APK mit gültiger Signatur und dem bekannten Schlüssel wird weitergegeben.
+      - name: Signatur prüfen
+        env:
+          APK: dist/moltobene-${{ steps.version.outputs.name }}.apk
+        run: |
+          APKSIGNER="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -n 1)apksigner"
+          ZERTIFIKATE=$("$APKSIGNER" verify --print-certs "$APK")
+          ANZAHL=$(echo "$ZERTIFIKATE" | grep -c '^Signer #[0-9]* certificate SHA-256 digest:' || true)
+          FINGERABDRUCK=$(echo "$ZERTIFIKATE" | sed -n 's/^Signer #1 certificate SHA-256 digest: //p' \
+            | tr 'a-f' 'A-F' | sed 's/../&:/g; s/:$//')
+          if [ "$ANZAHL" -ne 1 ] || [ "$FINGERABDRUCK" != "$SIGNATUR_FINGERABDRUCK" ]; then
+            echo "::error::Die APK ist nicht mit dem bekannten Schlüssel signiert (gefunden: $FINGERABDRUCK)."
+            exit 1
+          fi
+          echo "Signatur in Ordnung: $FINGERABDRUCK"
+
       - name: APK als Build-Ergebnis speichern
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -104,34 +164,56 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      # Für den Herkunftsnachweis (#13)
+      id-token: write
+      attestations: write
 
     steps:
       - name: Code auschecken (für CHANGELOG.md)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      - name: Prüfen, ob die Version neu ist
+        id: neu
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          if gh release view "v$VERSION" > /dev/null 2>&1; then
+            echo "Release v$VERSION existiert bereits - kein neues Release."
+            echo "neu=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "neu=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: APK aus dem Build holen
+        if: steps.neu.outputs.neu == 'true'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: moltobene-${{ needs.build.outputs.version }}
           path: dist
 
-      - name: Release anlegen (nur wenn Version neu)
+      - name: Prüfsumme und Release-Text erzeugen
+        if: steps.neu.outputs.neu == 'true'
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          (cd dist && sha256sum "moltobene-$VERSION.apk" > "moltobene-$VERSION.apk.sha256")
+          bash .github/scripts/release-text.sh "$VERSION" "dist/moltobene-$VERSION.apk" > release-notes.md
+          cat release-notes.md
+
+      - name: Herkunftsnachweis anlegen
+        if: steps.neu.outputs.neu == 'true'
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: dist/moltobene-${{ needs.build.outputs.version }}.apk
+
+      - name: Release anlegen
+        if: steps.neu.outputs.neu == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ needs.build.outputs.version }}
         run: |
-          TAG="v$VERSION"
-          if gh release view "$TAG" > /dev/null 2>&1; then
-            echo "Release $TAG existiert bereits - kein neues Release."
-            exit 0
-          fi
-          # Abschnitt dieser Version aus CHANGELOG.md herausschneiden
-          awk -v v="$VERSION" '
-            /^## \[/ { if (found) exit; if (index($0, "## [" v "]") == 1) { found = 1; next } }
-            found { print }
-          ' CHANGELOG.md > release-notes.md
-          if [ ! -s release-notes.md ]; then echo "Version $VERSION" > release-notes.md; fi
-          gh release create "$TAG" "dist/moltobene-$VERSION.apk" \
+          gh release create "v$VERSION" "dist/moltobene-$VERSION.apk" "dist/moltobene-$VERSION.apk.sha256" \
             --title "Moltobene $VERSION" \
             --notes-file release-notes.md \
             --target "$GITHUB_SHA"

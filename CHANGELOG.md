@@ -3,6 +3,15 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.3.1] – 2026-10-01 (versionCode 10)
+
+### Geändert
+- Ab Android 13 passt sich das App-Symbol an, wenn in den Android-Einstellungen einfarbige Symbole („Designbasierte Symbole“) eingeschaltet sind.
+- Jede neue Version lässt sich auf Echtheit prüfen: Zu jeder APK gibt es eine Prüfsumme, den Fingerabdruck des Signaturzertifikats und einen fälschungssicheren Herkunftsnachweis von GitHub. Wie das geht, steht in der README.
+- Bevor eine Version erscheint, wird jetzt automatisch geprüft, ob sie korrekt signiert ist und sich als Update installieren lässt.
+- Sicherheitslücken lassen sich vertraulich melden (siehe SECURITY.md).
+- Die Projektseite auf GitHub erklärt jetzt, was die App kann und wie man sie installiert.
+
 ## [0.3.0] – 2026-09-29 (versionCode 9)
 
 Die erste Version der Rezeptsammlung.
@@ -38,7 +47,7 @@ Die erste Version der Rezeptsammlung.
 ## [0.2.3] – 2026-09-29 (versionCode 6)
 
 ### Geändert
-- Der automatische Bau ist sicherer und gründlicher geworden: Jede neue Version wird jetzt vor der Veröffentlichung automatisch auf Fehler geprüft und getestet. Außerdem wird sie nur noch veröffentlicht, wenn sie korrekt signiert ist. An der App selbst ändert sich nichts.
+- Keine sichtbaren Änderungen an der App. Jede neue Version wird jetzt vor der Veröffentlichung automatisch auf Fehler geprüft und getestet und nur veröffentlicht, wenn sie korrekt signiert ist.
 
 ## [0.2.2] – 2026-09-29 (versionCode 5)
 
@@ -48,7 +57,7 @@ Die erste Version der Rezeptsammlung.
 ## [0.2.1] – 2026-09-29 (versionCode 4)
 
 ### Geändert
-- Arbeitsregeln ergänzt: Prüfrunden mit dem Spezialisten-Team (Design, Funktionalität, Sicherheit, Kreativität, Konnektivität, Performance, Texte, Übersetzungen), deren Vorschläge als GitHub-Issues erfasst werden. An der App selbst ändert sich nichts.
+- Keine sichtbaren Änderungen an der App. Ein Team aus Fachleuten für Gestaltung, Sicherheit, Texte und weitere Bereiche prüft die App ab jetzt regelmäßig und schlägt Verbesserungen vor.
 
 ## [0.2.0] – 2026-09-29 (versionCode 3)
 
@@ -58,15 +67,11 @@ Die erste Version der Rezeptsammlung.
 ## [0.1.1] – 2026-09-29 (versionCode 2)
 
 ### Geändert
-- Build-Werkzeuge (GitHub Actions) auf aktuelle Versionen aktualisiert. Das behebt eine Warnung wegen veraltetem Node.js. An der App selbst ändert sich nichts.
+- Keine sichtbaren Änderungen an der App. Die Werkzeuge, mit denen die App gebaut wird, sind auf dem neuesten Stand.
 
 ## [0.1.0] – 2026-09-29 (versionCode 1)
 
 ### Neu
-- Grundgerüst der Android-App angelegt (Kotlin, Jetpack Compose).
-- Startseite, die den App-Namen „Moltobene“ anzeigt.
-- Unterstützt Android 8.0 (API 26) und neuer.
-- Gradle-Wrapper hinzugefügt, damit die App später über GitHub Actions gebaut werden kann.
-- Arbeitsregeln (CLAUDE.md), dieses Änderungsprotokoll und .gitignore angelegt.
-- Automatischer Build über GitHub Actions: Bei jeder Änderung wird eine signierte APK gebaut.
-- Für jede neue Version wird automatisch ein GitHub-Release mit der APK veröffentlicht.
+- Erste Version: eine Startseite mit dem Namen „Moltobene“, das Grundgerüst für alle weiteren Funktionen.
+- Läuft auf Android 8.0 und neuer.
+- Jede neue Version wird automatisch gebaut, signiert und hier veröffentlicht.

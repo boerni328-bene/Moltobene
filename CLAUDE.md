@@ -108,7 +108,7 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 - Mindestversion: Android 8.0 (API 26).
 - Auf dem Windows-PC gibt es **kein Android Studio und kein Java**. Es wird nicht lokal gebaut, sondern **ausschließlich über GitHub Actions**.
 - Abhängigkeiten und Versionen stehen zentral in `gradle/libs.versions.toml`.
-- Git-Commits verwenden die GitHub-noreply-Adresse (im Repository lokal eingestellt). Keine privaten E-Mail-Adressen, Passwörter, Schlüssel oder Keystores ins Repository, denn es ist **öffentlich**.
+- Git-Commits verwenden die GitHub-noreply-Adresse (im Repository lokal eingestellt). Keine privaten E-Mail-Adressen, Passwörter, Schlüssel oder Keystores ins Repository, denn es ist **öffentlich**. Die Versionsgeschichte wurde am 01.10.2026 bereinigt (#10); eine ältere Kopie des Repositorys auf dem PC vor der weiteren Arbeit mit `git fetch origin` und `git reset --hard origin/main` abgleichen.
 
 ### Aufbau des Codes
 
@@ -123,6 +123,15 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 - **Sicherungsdatei:** Alte Sicherungen müssen immer lesbar bleiben (Regeln in `data/backup/BackupFormat.kt`). Die Beispiel-Sicherung unter `app/src/test/resources/backup/` wird nie verändert, nur um neue Formatversionen ergänzt.
 - Die App braucht keine Berechtigungen. Neue Berechtigungen (auch Internet) nur nach Rückfrage.
 
+### Sicherheit und Datenschutz
+
+- So wenig Daten wie möglich: Inhalte verlassen das Handy nur, wenn Nutzer sie selbst teilen oder sichern.
+- Keine Bibliotheken für Werbung, Tracking, Analyse oder Absturzberichte.
+- Berechtigungen nur, wenn eine Funktion sie zwingend braucht, nach Rückfrage und mit Begründung als Kommentar im `AndroidManifest.xml`.
+- Internet (ab dem Übernehmen von Rezepten) nur über HTTPS und nur für die in der Vision genannten Zwecke. Spätestens mit der ersten Internet-Funktion gibt es eine kurze Datenschutzerklärung.
+- Fremde Inhalte gelten als unsicher (übernommene Rezepte, Sicherungs- und Rezeptdateien): Größe begrenzen, Format prüfen, Links nur mit http/https öffnen.
+- Sicherheitslücken werden vertraulich gemeldet (`SECURITY.md`, „Private vulnerability reporting“).
+
 ### Größere Arbeiten
 
 Umfangreiche Versionen werden auf einem Arbeitszweig entwickelt und dort über „Run workflow“ (`gh workflow run build.yml --ref <zweig>`) gebaut – ohne Release. Erst wenn der Build grün ist, kommt alles zusammengefasst auf `main`.
@@ -130,7 +139,9 @@ Umfangreiche Versionen werden auf einem Arbeitszweig entwickelt und dort über �
 ## Build, Signatur und Veröffentlichung
 
 - Workflow: `.github/workflows/build.yml` läuft bei jedem Push auf `main` und baut eine **signierte Release-APK**.
-- Gibt es für die aktuelle `versionName` noch kein Release, legt er automatisch das GitHub-Release `v<versionName>` an (APK `moltobene-<versionName>.apk`, Beschreibung = passender Abschnitt aus CHANGELOG.md). Sonst wird nur gebaut.
+- Vor dem Bauen prüft er, ob CHANGELOG.md einen Abschnitt für die aktuelle `versionName` mit passendem `versionCode` hat und ob der `versionCode` größer ist als beim letzten Release (#5). Nach dem Bauen prüft er die Signatur gegen den bekannten Fingerabdruck (`SIGNATUR_FINGERABDRUCK` in `build.yml`).
+- Gibt es für die aktuelle `versionName` noch kein Release, legt er automatisch das GitHub-Release `v<versionName>` an: APK `moltobene-<versionName>.apk`, Prüfsummen-Datei `.sha256` und ein Herkunftsnachweis von GitHub. Die Beschreibung erzeugt `.github/scripts/release-text.sh` aus Kernsatz, passendem Abschnitt aus CHANGELOG.md, Installationshinweis und Angaben zur Echtheit. Sonst wird nur gebaut.
+- Dependabot (`.github/dependabot.yml`) schlägt monatlich neue Versionen der Bausteine und GitHub-Actions als Pull-Requests vor. Das sind Vorschläge: Übernommen wird nur nach Freigabe, gebaut und geprüft auf einem Arbeitszweig.
 - Signatur-Secrets im Repository: `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`.
 - Der Keystore liegt **außerhalb** des Repositorys unter `D:\Claude\Schluessel\moltobene`. Er darf niemals ins Repository gelangen und nicht ersetzt werden, sonst lassen sich Updates nicht mehr installieren.
 - Portables JDK (nur für Werkzeuge wie `keytool`): `D:\Claude\Werkzeuge\jdk-21.0.12.1+1`. GitHub CLI: `C:\Program Files\GitHub CLI\gh.exe`.
@@ -148,7 +159,7 @@ Umfangreiche Versionen werden auf einem Arbeitszweig entwickelt und dort über �
 
 **Ausnahme für reine Dokumentation:** Ändern sich ausschließlich Dokumente (`docs/`, `CLAUDE.md`, `README.md`), entfallen Schritt 1 und 2 – keine neue Versionsnummer, kein CHANGELOG-Eintrag, kein neues Release. Commit, Push und Build-Prüfung (Schritt 3–5) gelten weiterhin. Sobald App-Code, Ressourcen oder Build-Dateien betroffen sind, gilt der volle Ablauf.
 
-1. **CHANGELOG.md** auf Deutsch ergänzen (neuer Eintrag oben, mit Version, Datum und versionCode).
+1. **CHANGELOG.md** auf Deutsch ergänzen (neuer Eintrag oben, Überschrift `## [<versionName>] – <Datum> (versionCode <n>)`). Der Abschnitt wird zur Beschreibung des Releases, deshalb aus Sicht der Nutzer schreiben, ohne Fachbegriffe (#21). Rein interne Änderungen beginnen mit „Keine sichtbaren Änderungen an der App.“
 2. **Versionsnummer erhöhen** in `app/build.gradle.kts`:
    - `versionCode` um **+1** erhöhen.
    - `versionName` nach **Major.Minor.Patch**:

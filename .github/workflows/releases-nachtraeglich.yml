@@ -1,0 +1,65 @@
+name: Releases nachträglich anpassen (einmalig)
+
+# Einmalige Wartung nach dem Umschreiben der Versionsgeschichte (#10) und den neuen Release-Texten (#13, #21).
+# Wird nur von Hand gestartet und danach wieder gelöscht.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  anpassen:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code mit ganzer Geschichte auschecken
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      # Die alten Markierungen zeigen noch auf die Commits vor dem Umschreiben.
+      # Jede wird auf den Commit mit gleichem Inhalt und gleicher Beschreibung im heutigen main gesetzt.
+      - name: Release-Markierungen auf die umgeschriebene Geschichte setzen
+        run: |
+          git fetch --force --tags origin
+          for TAG in $(git tag --list 'v*'); do
+            ALT=$(git rev-parse "$TAG^{commit}")
+            if git merge-base --is-ancestor "$ALT" origin/main; then
+              echo "$TAG ist bereits in Ordnung."
+              continue
+            fi
+            BAUM=$(git rev-parse "$ALT^{tree}")
+            BETREFF=$(git log -1 --format=%s "$ALT")
+            NEU=""
+            for C in $(git rev-list origin/main); do
+              if [ "$(git rev-parse "$C^{tree}")" = "$BAUM" ] && [ "$(git log -1 --format=%s "$C")" = "$BETREFF" ]; then
+                NEU="$C"
+                break
+              fi
+            done
+            if [ -z "$NEU" ]; then
+              echo "::error::Kein passender Commit für $TAG gefunden."
+              exit 1
+            fi
+            echo "$TAG: $ALT -> $NEU"
+            git tag -f "$TAG" "$NEU"
+            git push --force origin "refs/tags/$TAG"
+          done
+
+      - name: Release-Texte neu erzeugen und Prüfsummen anhängen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for TAG in $(gh release list --limit 100 --json tagName --jq '.[].tagName'); do
+            VERSION="${TAG#v}"
+            rm -rf apk
+            mkdir apk
+            gh release download "$TAG" --pattern "moltobene-$VERSION.apk" --dir apk || true
+            bash .github/scripts/release-text.sh "$VERSION" "apk/moltobene-$VERSION.apk" > notes.md
+            gh release edit "$TAG" --notes-file notes.md
+            if [ -f "apk/moltobene-$VERSION.apk" ]; then
+              (cd apk && sha256sum "moltobene-$VERSION.apk" > "moltobene-$VERSION.apk.sha256")
+              gh release upload "$TAG" "apk/moltobene-$VERSION.apk.sha256" --clobber
+            fi
+            echo "$TAG angepasst."
+          done
