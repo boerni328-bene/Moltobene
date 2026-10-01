@@ -52,13 +52,18 @@ class PhotoStore(private val context: Context) {
         }
     }
 
-    /** Das zuletzt mit der Kamera aufgenommene Foto (nur innerhalb der App lesbar). */
-    fun cameraCaptureUri(): Uri = Uri.fromFile(cameraFile)
-
-    suspend fun discardCameraPhoto() = withContext(Dispatchers.IO) { cameraFile.delete() }
-
-    /** Gespeichertes Rezeptfoto für die Texterkennung. */
-    suspend fun loadForRecognition(photoId: String): GrayImage = loadForRecognition(Uri.fromFile(photoFile(photoId)))
+    /** Gibt das zuletzt aufgenommene Kamerafoto unverändert an [target] weiter (als Seite für die Texterkennung). */
+    suspend fun moveCameraCapture(target: File) = withContext(Dispatchers.IO) {
+        if (!cameraFile.isFile) throw IOException("Kein Kamerafoto")
+        target.parentFile?.mkdirs()
+        if (!cameraFile.renameTo(target)) {
+            try {
+                cameraFile.copyTo(target, overwrite = true)
+            } finally {
+                cameraFile.delete()
+            }
+        }
+    }
 
     /**
      * Foto für die Texterkennung: richtig gedreht, in Graustufen (ein Byte je Bildpunkt) und so groß,
@@ -89,9 +94,6 @@ class PhotoStore(private val context: Context) {
             listOf(rotated, scaled).distinct().forEach { it.recycle() }
         }
     }
-
-    /** Rezeptfoto für „Bereich auswählen“. */
-    suspend fun loadPreview(photoId: String): Bitmap = loadPreview(Uri.fromFile(photoFile(photoId)))
 
     /**
      * Foto für „Bereich auswählen“: genauso gedreht wie für die Texterkennung, damit der Rahmen

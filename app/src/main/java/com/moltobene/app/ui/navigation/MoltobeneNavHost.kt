@@ -37,7 +37,9 @@ fun MoltobeneNavHost() {
     NavHost(navController = navController, startDestination = CollectionRoute) {
         composable<CollectionRoute> {
             CollectionScreen(
-                viewModel = viewModel { CollectionViewModel(container.repository, container.photoStore) },
+                viewModel = viewModel {
+                    CollectionViewModel(container.repository, container.photoStore, container.pendingRecognition)
+                },
                 snackbarHostState = snackbarHostState,
                 onOpenRecipe = { id -> navController.navigate(RecipeRoute(id)) },
                 onAddRecipe = { navController.navigate(EditRoute()) },
@@ -73,6 +75,7 @@ fun MoltobeneNavHost() {
                         container.photoStore,
                         container.textRecognizer,
                         container.preferences,
+                        container.pendingRecognition,
                     )
                 },
                 snackbarHostState = snackbarHostState,

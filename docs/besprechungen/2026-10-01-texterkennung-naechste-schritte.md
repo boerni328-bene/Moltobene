@@ -78,7 +78,7 @@
 - **Streitpunkt 1:** Die Originalseite kommt jetzt, zusammen mit Rang 2 (#38).
 - **Streitpunkt 2:** Das Entzerren kommt später, nach Rang 3 (#39).
 - **Streitpunkt 3:** Es gibt eine Sprachauswahl im Menü oben rechts (#42).
-- **Frage 3 (Reihenfolge)** ist noch offen und wird vor Beginn der Umsetzung geklärt.
+- **Frage 3 (Reihenfolge):** Die Verbesserungen der Texterkennung kommen vor der Etappe „Übernehmen von Internetseiten“; begonnen wird mit #37.
 
 ## Zurückgezogen / bereits als Issue vorhanden
 

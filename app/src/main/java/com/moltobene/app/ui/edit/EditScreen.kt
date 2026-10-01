@@ -9,6 +9,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -78,7 +80,7 @@ fun EditScreen(
     val scope = rememberCoroutineScope()
 
     val requestClose: () -> Unit = {
-        if (viewModel.isDirty) {
+        if (viewModel.isDirty || viewModel.recognitionInterrupted) {
             confirmDiscard = true
         } else {
             onClose()
@@ -88,6 +90,7 @@ fun EditScreen(
 
     // Geht die App in den Hintergrund (Anruf, anderer Bildschirm), wird ein neues Rezept als Entwurf gesichert.
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.onStop() }
+    LifecycleEventEffect(Lifecycle.Event.ON_START) { viewModel.onStart() }
 
     viewModel.message?.let { messageRes ->
         val text = stringResource(messageRes)
@@ -351,10 +354,18 @@ private fun RecognitionSection(
                     TextButton(onClick = viewModel::cancelRecognition) { Text(stringResource(R.string.cancel)) }
                 }
             }
-            RecognitionState.Idle -> OutlinedButton(onClick = onStart, enabled = enabled, modifier = Modifier.fillMaxWidth()) {
-                Icon(painterResource(R.drawable.ic_document_scanner), contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.size(Spacing.s))
-                Text(stringResource(R.string.ocr_action))
+            RecognitionState.Idle -> if (viewModel.recognitionInterrupted) {
+                InterruptedRecognition(
+                    enabled = enabled,
+                    onDiscard = viewModel::discardRecognition,
+                    onRetry = viewModel::retryRecognition,
+                )
+            } else {
+                OutlinedButton(onClick = onStart, enabled = enabled, modifier = Modifier.fillMaxWidth()) {
+                    Icon(painterResource(R.drawable.ic_document_scanner), contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.size(Spacing.s))
+                    Text(stringResource(R.string.ocr_action))
+                }
             }
         }
 
@@ -384,6 +395,36 @@ private fun RecognitionSection(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+/** Android hat die App während der Erkennung beendet: Die Seiten sind noch da und lassen sich erneut lesen. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun InterruptedRecognition(
+    enabled: Boolean,
+    onDiscard: () -> Unit,
+    onRetry: () -> Unit,
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        shape = MaterialTheme.shapes.large,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+            Text(
+                text = stringResource(R.string.ocr_interrupted),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.s, Alignment.End),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                TextButton(onClick = onDiscard, enabled = enabled) { Text(stringResource(R.string.discard)) }
+                TextButton(onClick = onRetry, enabled = enabled) { Text(stringResource(R.string.ocr_retry)) }
             }
         }
     }

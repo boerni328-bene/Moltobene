@@ -6,6 +6,7 @@ import com.moltobene.app.data.AppPreferences
 import com.moltobene.app.data.RecipeRepository
 import com.moltobene.app.data.backup.BackupManager
 import com.moltobene.app.data.db.MoltobeneDatabase
+import com.moltobene.app.data.ocr.PendingRecognition
 import com.moltobene.app.data.ocr.TextRecognizer
 import com.moltobene.app.data.photos.PhotoStore
 import com.moltobene.app.data.share.RecipeSharer
@@ -25,4 +26,5 @@ class AppContainer(context: Context) {
     val recipeSharer: RecipeSharer by lazy { RecipeSharer(appContext, photoStore) }
     val preferences: AppPreferences by lazy { AppPreferences(appContext) }
     val textRecognizer: TextRecognizer by lazy { TextRecognizer(appContext) }
+    val pendingRecognition: PendingRecognition by lazy { PendingRecognition(appContext, photoStore) }
 }

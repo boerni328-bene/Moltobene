@@ -63,6 +63,8 @@
     <string name="ocr_done">Text recognized. Recognized text may contain errors.</string>
     <string name="ocr_nothing">No text found on the photo.</string>
     <string name="ocr_error">The text could not be recognized.</string>
+    <string name="ocr_interrupted">Text recognition was interrupted.</string>
+    <string name="ocr_retry">Recognize again</string>
     <string name="recognized_text">Recognized text</string>
     <string name="recognized_text_show">Show recognized text</string>
     <string name="recognized_text_hide">Hide recognized text</string>

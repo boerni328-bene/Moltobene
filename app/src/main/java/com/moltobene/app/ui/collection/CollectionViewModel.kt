@@ -3,6 +3,7 @@ package com.moltobene.app.ui.collection
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moltobene.app.data.RecipeRepository
+import com.moltobene.app.data.ocr.PendingRecognition
 import com.moltobene.app.data.photos.PhotoStore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +34,7 @@ sealed interface CollectionUiState {
 class CollectionViewModel(
     private val repository: RecipeRepository,
     private val photoStore: PhotoStore,
+    private val pendingRecognition: PendingRecognition,
 ) : ViewModel() {
 
     private val _query = MutableStateFlow("")
@@ -58,7 +60,10 @@ class CollectionViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CollectionUiState.Loading)
 
     init {
-        viewModelScope.launch { runCatching { repository.cleanUpUnusedPhotos() } }
+        viewModelScope.launch {
+            runCatching { repository.cleanUpUnusedPhotos() }
+            runCatching { pendingRecognition.deleteLeftovers() }
+        }
     }
 
     fun onQueryChange(value: String) {

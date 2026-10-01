@@ -3,6 +3,15 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.6.1] – 2026-10-01 (versionCode 17)
+
+### Behoben
+- Die Texterkennung geht nicht mehr verloren, wenn während des Lesens eine andere App geöffnet wird und Android Moltobene im Hintergrund beendet:
+  - Ausgewählte Fotos und Kamerafotos werden sofort in die App übernommen und bleiben bis zum Ende der Erkennung erhalten.
+  - Wurde die Erkennung im Hintergrund noch fertig, steht ihr Ergebnis beim Zurückkehren im Rezept. Ein neues Rezept wird dann zusätzlich als Entwurf gespeichert.
+  - Wurde sie unterbrochen, erscheint „Texterkennung wurde unterbrochen.“ – mit „Erneut erkennen“ werden dieselben Seiten mit denselben Bereichen noch einmal gelesen.
+- Die übernommenen Fotos liegen nur in einem eigenen App-Ordner, der weder in Sicherungen noch beim Umzug auf ein neues Handy mitgeht. Sie werden nach dem Erkennen gelöscht, Reste beim nächsten Start.
+
 ## [0.6.0] – 2026-10-01 (versionCode 16)
 
 ### Neu
