@@ -14,11 +14,16 @@ android {
         applicationId = "com.moltobene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 12
-        versionName = "0.4.1"
+        versionCode = 13
+        versionName = "0.5.0"
 
         // Nur die unterstützten Sprachen mitliefern (Englisch als Rückfall, Deutsch).
         resourceConfigurations += listOf("en", "de")
+
+        // Texterkennung: nur die Prozessoren heutiger Handys, das hält die App klein.
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a")
+        }
     }
 
     androidResources {
@@ -98,6 +103,7 @@ dependencies {
     // Nur Anzeige lokaler Fotos – bewusst ohne das Internet-Modul von Coil.
     implementation(libs.coil.compose)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.tesseract4android)
     debugImplementation(libs.androidx.ui.tooling)
 
     testImplementation(libs.junit)

@@ -3,6 +3,20 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.5.0] – 2026-10-01 (versionCode 13)
+
+Rezepte aus Fotos übernehmen: Die App liest Titel, Zutaten und Zubereitung selbst.
+
+### Neu
+- **Text aus Foto erkennen** (beim Bearbeiten eines Rezepts): liest das Rezeptfoto, ausgewählte Fotos oder ein neu aufgenommenes Foto. Leere Felder werden ausgefüllt, Zutaten und Zubereitung ergänzt.
+- **Aus Foto übernehmen** (in der Sammlung): ein neues Rezept direkt aus Fotos von Kochbuch, Zettel oder Bildschirmfoto. Bei Rezepten über mehrere Seiten die Fotos einfach der Reihe nach auswählen.
+- Die Erkennung kennt Deutsch, Englisch, Italienisch, Französisch und Spanisch und wählt die passende Sprache selbst, damit auch Akzente wie in „Crème brûlée“ stimmen.
+- Der vollständige erkannte Text bleibt beim Rezept erhalten und lässt sich beim Bearbeiten anzeigen und kopieren.
+
+### Hinweis
+- Erkannter Text sollte geprüft werden: Bei Handschrift, Schatten oder gewölbten Buchseiten macht die Erkennung Fehler.
+- Die Texterkennung ist fest eingebaut und läuft nur auf dem Handy, ohne Internet und ohne Google-Dienste. Die App ist dadurch größer geworden.
+
 ## [0.4.1] – 2026-10-01 (versionCode 12)
 
 ### Behoben

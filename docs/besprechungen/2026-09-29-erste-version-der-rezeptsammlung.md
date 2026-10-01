@@ -165,3 +165,7 @@ Alle Fragen wurden im Anschluss an die Besprechung beantwortet.
   - Ü2: feste Kennungen für mitgelieferte Schlagwörter
   - Ü3: #24 bis #26 mit 0.3.0, Mehrzahlformen
 - Aussprache: Einheit nur als Originaltext; Sprachpakete für die Texterkennung beachten; Build-Stopp erst mit #6. Top 3: Datenmodell, T1, Ü2.
+
+## Nachtrag vom 01.10.2026
+
+Auf Wunsch des Projektinhabers kommt die Texterkennung aus Fotos vorgezogen als **0.5.0** (Tesseract, Sprachen Deutsch, Englisch, Italienisch, Französisch, Spanisch; Einstiege beim Bearbeiten, in der Sammlung und für mehrere Seiten). Das Übernehmen von Internetseiten, geteiltem Text und Zwischenablage samt Internet-Berechtigung und „Nach neuer Version suchen“ (#16) folgt danach; die weiteren Etappen verschieben sich entsprechend.

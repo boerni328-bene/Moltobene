@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -32,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -49,6 +51,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -100,6 +104,16 @@ fun EditScreen(
         viewModel.onCameraResult(success)
     }
 
+    // Texterkennung: mehrere Seiten auswählen oder eine Seite fotografieren.
+    var showRecognitionDialog by rememberSaveable { mutableStateOf(viewModel.takeStartPrompt()) }
+    val pickPages = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickMultipleVisualMedia(MAX_PAGES),
+    ) { uris -> viewModel.recognizePhotos(uris) }
+    val takePage = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        viewModel.onRecognitionCameraResult(success)
+    }
+    val busy = viewModel.isProcessingPhoto || viewModel.isRecognizing
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -114,7 +128,7 @@ fun EditScreen(
                 actions = {
                     TextButton(
                         onClick = { viewModel.save { id, wasNew -> onSaved(id, wasNew, savedMessage) } },
-                        enabled = !viewModel.isSaving && !viewModel.isLoading && !viewModel.isProcessingPhoto,
+                        enabled = !viewModel.isSaving && !viewModel.isLoading && !busy,
                     ) {
                         Text(stringResource(R.string.save))
                     }
@@ -147,6 +161,12 @@ fun EditScreen(
                             scope.launch { snackbarHostState.showSnackbar(cameraMissing) }
                         }
                     },
+                )
+
+                RecognitionSection(
+                    viewModel = viewModel,
+                    enabled = !busy,
+                    onStart = { showRecognitionDialog = true },
                 )
 
                 OutlinedTextField(
@@ -227,6 +247,30 @@ fun EditScreen(
         }
     }
 
+    if (showRecognitionDialog) {
+        RecognitionDialog(
+            title = stringResource(if (viewModel.isNew && !viewModel.hasPhoto) R.string.import_from_photo else R.string.ocr_action),
+            hasRecipePhoto = viewModel.hasPhoto,
+            onRecipePhoto = {
+                showRecognitionDialog = false
+                viewModel.recognizeRecipePhoto()
+            },
+            onChoose = {
+                showRecognitionDialog = false
+                pickPages.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            },
+            onTake = {
+                showRecognitionDialog = false
+                try {
+                    takePage.launch(viewModel.cameraUri())
+                } catch (e: ActivityNotFoundException) {
+                    scope.launch { snackbarHostState.showSnackbar(cameraMissing) }
+                }
+            },
+            onDismiss = { showRecognitionDialog = false },
+        )
+    }
+
     if (confirmDiscard) {
         AlertDialog(
             onDismissRequest = { confirmDiscard = false },
@@ -244,6 +288,123 @@ fun EditScreen(
     }
 }
 
+/** Texterkennung: Start, Fortschritt mit Abbrechen und der erkannte Text zum Nachsehen und Kopieren. */
+@Composable
+private fun RecognitionSection(
+    viewModel: EditViewModel,
+    enabled: Boolean,
+    onStart: () -> Unit,
+) {
+    var showText by rememberSaveable { mutableStateOf(false) }
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+        when (val state = viewModel.recognition) {
+            is RecognitionState.Running -> Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = MaterialTheme.shapes.large,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Row(
+                    modifier = Modifier.padding(Spacing.m),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.m),
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(32.dp))
+                    Text(
+                        text = if (state.pageCount > 1) {
+                            stringResource(R.string.ocr_running_pages, state.page, state.pageCount)
+                        } else {
+                            stringResource(R.string.ocr_running)
+                        },
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f),
+                    )
+                    TextButton(onClick = viewModel::cancelRecognition) { Text(stringResource(R.string.cancel)) }
+                }
+            }
+            RecognitionState.Idle -> OutlinedButton(onClick = onStart, enabled = enabled, modifier = Modifier.fillMaxWidth()) {
+                Icon(painterResource(R.drawable.ic_document_scanner), contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.size(Spacing.s))
+                Text(stringResource(R.string.ocr_action))
+            }
+        }
+
+        if (viewModel.recognizedText.isNotBlank()) {
+            TextButton(onClick = { showText = !showText }) {
+                Text(stringResource(if (showText) R.string.recognized_text_hide else R.string.recognized_text_show))
+            }
+            if (showText) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(modifier = Modifier.padding(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                        Text(
+                            text = stringResource(R.string.recognized_text),
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier.semantics { heading() },
+                        )
+                        Text(
+                            text = stringResource(R.string.recognized_text_hint),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        SelectionContainer {
+                            Text(viewModel.recognizedText, style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Auswahl, woher der Text kommt: Rezeptfoto, ausgewählte Fotos (mehrere Seiten) oder Kamera. */
+@Composable
+private fun RecognitionDialog(
+    title: String,
+    hasRecipePhoto: Boolean,
+    onRecipePhoto: () -> Unit,
+    onChoose: () -> Unit,
+    onTake: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title, modifier = Modifier.semantics { heading() }) },
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(Spacing.s),
+            ) {
+                Text(stringResource(R.string.ocr_dialog_text))
+                Spacer(Modifier.size(Spacing.xs))
+                if (hasRecipePhoto) {
+                    DialogOption(R.drawable.ic_document_scanner, R.string.ocr_from_recipe_photo, onRecipePhoto)
+                }
+                DialogOption(R.drawable.ic_image, R.string.ocr_choose_photos, onChoose)
+                DialogOption(R.drawable.ic_photo_camera, R.string.photo_take, onTake)
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+        },
+    )
+}
+
+@Composable
+private fun DialogOption(icon: Int, label: Int, onClick: () -> Unit) {
+    OutlinedButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+        Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.size(Spacing.s))
+        Text(stringResource(label), modifier = Modifier.weight(1f))
+    }
+}
+
+/** Höchstzahl der Seiten, die auf einmal gelesen werden. */
+private const val MAX_PAGES = 6
+
 @Composable
 private fun PhotoSection(
     viewModel: EditViewModel,
@@ -251,6 +412,7 @@ private fun PhotoSection(
     onTake: () -> Unit,
 ) {
     val photo = viewModel.photoFile
+    val idle = !viewModel.isProcessingPhoto && !viewModel.isRecognizing
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
         when {
             viewModel.isProcessingPhoto -> Box(
@@ -280,18 +442,18 @@ private fun PhotoSection(
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-            OutlinedButton(onClick = onChoose, enabled = !viewModel.isProcessingPhoto, modifier = Modifier.weight(1f)) {
+            OutlinedButton(onClick = onChoose, enabled = idle, modifier = Modifier.weight(1f)) {
                 Icon(painterResource(R.drawable.ic_image), contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.size(Spacing.s))
                 Text(stringResource(R.string.photo_choose))
             }
-            OutlinedButton(onClick = onTake, enabled = !viewModel.isProcessingPhoto, modifier = Modifier.weight(1f)) {
+            OutlinedButton(onClick = onTake, enabled = idle, modifier = Modifier.weight(1f)) {
                 Icon(painterResource(R.drawable.ic_photo_camera), contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.size(Spacing.s))
                 Text(stringResource(R.string.photo_take))
             }
         }
-        if (photo != null && !viewModel.isProcessingPhoto) {
+        if (photo != null && idle) {
             TextButton(onClick = viewModel::removePhoto) {
                 Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.size(Spacing.s))

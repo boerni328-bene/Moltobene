@@ -1,0 +1,291 @@
+package com.moltobene.app.data.ocr
+
+/** Ergebnis der Aufteilung: Zutaten im Format des Eingabefelds (Zwischenüberschriften enden mit „:“). */
+data class ParsedRecipe(
+    val title: String?,
+    val servings: Int?,
+    val servingsUnit: String?,
+    val ingredients: List<String>,
+    val steps: List<String>,
+)
+
+/**
+ * Teilt erkannten Text (Texterkennung, später auch geteilten Text) in Titel, Portionen, Zutaten und
+ * Zubereitung auf. Kennt Überschriften auf Deutsch, Englisch, Italienisch, Französisch und Spanisch;
+ * ohne Überschriften wird nach dem Aussehen der Zeilen entschieden. Das Ergebnis ist immer nur ein
+ * Vorschlag – der vollständige Text bleibt zusätzlich erhalten. Reines Kotlin, per Unit-Test prüfbar.
+ */
+object RecipeTextParser {
+
+    private val INGREDIENT_HEADING = Regex(
+        "^(zutaten|ingredients?|ingredienti|ingrédients|ingredientes|einkaufsliste)\\b.{0,40}$",
+        RegexOption.IGNORE_CASE,
+    )
+    private val STEPS_HEADING = Regex(
+        "^(zubereitung|anleitung|so geht'?s|so wird'?s gemacht|arbeitsschritte|instructions?|directions?|method|" +
+            "preparation|steps|preparazione|procedimento|préparation|réalisation|preparación|elaboración|" +
+            "instrucciones|modo de preparación)\\b[^0-9]{0,30}$",
+        RegexOption.IGNORE_CASE,
+    )
+    private val TIME_WORDS = Regex("(zeit|time|tempo|temps|tiempo)", RegexOption.IGNORE_CASE)
+
+    private const val QUANTITY = "(?:\\d+(?:[.,/]\\d+)?|[½¼¾⅓⅔⅛])"
+    private val STARTS_WITH_QUANTITY = Regex("^$QUANTITY\\s*(?:-\\s*\\d+)?\\s*\\S")
+    private val BULLET = Regex("^[•·▪◦●○■□\\-–*]\\s+")
+    private val NUMBERED_STEP = Regex("^(\\d{1,2})[.)]\\s+(\\S.*)$")
+    private val SECOND_QUANTITY = Regex("(?<=\\s)$QUANTITY(?:\\s*-\\s*\\d+)?\\s*(?=\\p{L})")
+    private val CONNECTORS = setOf(
+        "und", "oder", "mit", "von", "zu", "je", "à", "a", "ca.", "circa", "etwa", "x", "bzw.",
+        "and", "or", "with", "of", "about", "approx.", "e", "o", "con", "di", "da", "et", "ou", "avec", "de",
+        "y", "con", "del", "plus",
+    )
+    private val CONJUNCTIONS = setOf("und", "oder", "bzw.", "and", "or", "e", "o", "et", "ou", "y")
+    private val SUBHEADING = Regex(
+        "^(für|for|per|pour|para)\\s+(den|die|das|the|il|lo|la|i|gli|le|les|l'|el|los|las)\\b.{0,30}$",
+        RegexOption.IGNORE_CASE,
+    )
+
+    private const val PERSON_WORDS =
+        "personen|portionen|pers\\.?|people|persons|servings?|portions?|persone|porzioni|personnes|parts|personas|porciones|raciones"
+    private const val PIECE_WORDS = "stück|stücke|stk\\.?|pieces?|pezzi|pièces|piezas"
+    private val SERVINGS_PATTERNS = listOf(
+        Regex("\\b(?:für|fuer|for|per|pour|para)\\s+(\\d{1,3})(?:\\s*-\\s*\\d{1,3})?\\s*($PERSON_WORDS|$PIECE_WORDS)?\\b", RegexOption.IGNORE_CASE),
+        Regex("\\b(?:serves|makes|ergibt|reicht für|dosi per|rend|rinde)\\s*:?\\s*(\\d{1,3})\\s*($PIECE_WORDS)?", RegexOption.IGNORE_CASE),
+        Regex("^(\\d{1,3})\\s+($PERSON_WORDS|$PIECE_WORDS)\\b", RegexOption.IGNORE_CASE),
+        Regex("\\b(?:$PERSON_WORDS)\\s*:\\s*(\\d{1,3})", RegexOption.IGNORE_CASE),
+    )
+    private val PIECES = Regex("^($PIECE_WORDS)$", RegexOption.IGNORE_CASE)
+
+    fun parse(text: String): ParsedRecipe {
+        val lines = cleanLines(text)
+        val content = lines.indices.filter { lines[it].isNotEmpty() }
+        if (content.isEmpty()) return ParsedRecipe(null, null, null, emptyList(), emptyList())
+
+        val ingredientHeading = content.firstOrNull { INGREDIENT_HEADING.matches(lines[it].trimEnd(':')) }
+        val stepsHeading = content.firstOrNull { isStepsHeading(lines[it]) }
+
+        // Portionen: aus einer eigenen Zeile oder aus der Überschrift „Zutaten für 4 Personen“.
+        var servings: Int? = null
+        var servingsUnit: String? = null
+        val servingsLines = mutableSetOf<Int>()
+        for (index in content) {
+            val line = lines[index]
+            val isHeading = index == ingredientHeading
+            if (!isHeading && (line.length > 40 || index == stepsHeading)) continue
+            val match = SERVINGS_PATTERNS.firstNotNullOfOrNull { it.find(line) } ?: continue
+            val count = match.groupValues[1].toIntOrNull()?.takeIf { it in 1..999 } ?: continue
+            if (servings == null) {
+                servings = count
+                servingsUnit = match.groupValues.getOrNull(2)?.takeIf { PIECES.matches(it) }
+            }
+            if (!isHeading) servingsLines += index
+            if (servings != null) break
+        }
+
+        val firstHeading = listOfNotNull(ingredientHeading, stepsHeading).minOrNull()
+        val titleIndex = content.firstOrNull { index ->
+            (firstHeading == null || index < firstHeading) && index !in servingsLines
+        }?.takeIf { isTitleCandidate(lines[it]) }
+        val title = titleIndex?.let { lines[it] }
+
+        val skip = servingsLines + listOfNotNull(titleIndex, ingredientHeading, stepsHeading)
+        fun region(from: Int, to: Int): List<String> =
+            (from until to).map { if (it in skip) "" else lines[it] }
+
+        val ingredientLines: List<String>
+        val stepLines: List<String>
+        when {
+            ingredientHeading != null && stepsHeading != null && ingredientHeading < stepsHeading -> {
+                ingredientLines = region(ingredientHeading + 1, stepsHeading)
+                stepLines = region(stepsHeading + 1, lines.size)
+            }
+            ingredientHeading != null && stepsHeading != null -> {
+                stepLines = region(stepsHeading + 1, ingredientHeading)
+                ingredientLines = region(ingredientHeading + 1, lines.size)
+            }
+            ingredientHeading != null -> {
+                val rest = region(ingredientHeading + 1, lines.size)
+                val end = rest.indexOfFirst { it.isNotEmpty() && isStepLike(it) }.let { if (it < 0) rest.size else it }
+                ingredientLines = rest.subList(0, end)
+                stepLines = rest.subList(end, rest.size)
+            }
+            stepsHeading != null -> {
+                ingredientLines = region(0, stepsHeading).filter { it.isEmpty() || !isStepLike(it) }
+                stepLines = region(stepsHeading + 1, lines.size)
+            }
+            else -> {
+                val rest = region(0, lines.size)
+                val start = rest.indexOfFirst { it.isNotEmpty() && isIngredientLike(it) }
+                if (start < 0) {
+                    ingredientLines = emptyList()
+                    stepLines = rest
+                } else {
+                    val end = (start until rest.size).firstOrNull { rest[it].isNotEmpty() && isStepLike(rest[it]) } ?: rest.size
+                    ingredientLines = rest.subList(start, end)
+                    stepLines = rest.subList(0, start) + rest.subList(end, rest.size)
+                }
+            }
+        }
+
+        return ParsedRecipe(
+            title = title,
+            servings = servings,
+            servingsUnit = servingsUnit,
+            ingredients = formatIngredients(ingredientLines),
+            steps = formatSteps(stepLines),
+        )
+    }
+
+    /** Bereinigt die Zeilen: Ligaturen, Rauschen, Seitenzahlen und Trennstriche am Zeilenende. */
+    internal fun cleanLines(text: String): List<String> {
+        val raw = text
+            .replace("\r", "")
+            .replace("ﬁ", "fi").replace("ﬂ", "fl").replace("ﬀ", "ff")
+            .replace(' ', ' ').replace('\t', ' ')
+            .lines()
+            .map { it.replace(Regex(" {2,}"), " ").trim() }
+            .map { if (isNoise(it)) "" else it }
+            .toMutableList()
+
+        // Seitenzahlen am Anfang oder Ende
+        val pageNumber = Regex("^\\d{1,3}$")
+        raw.indexOfFirst { it.isNotEmpty() }.takeIf { it >= 0 && pageNumber.matches(raw[it]) }?.let { raw[it] = "" }
+        raw.indexOfLast { it.isNotEmpty() }.takeIf { it >= 0 && pageNumber.matches(raw[it]) }?.let { raw[it] = "" }
+
+        // Trennstriche: „Vanille-“ + „zucker“ → „Vanillezucker“, aber „Salz-“ + „und …“ bleibt getrennt.
+        val result = mutableListOf<String>()
+        var i = 0
+        while (i < raw.size) {
+            var line = raw[i]
+            while (line.length > 2 && line.endsWith("-") && line[line.length - 2].isLetter()) {
+                val next = (i + 1 until raw.size).firstOrNull { raw[it].isNotEmpty() } ?: break
+                val nextLine = raw[next]
+                if (!nextLine.first().isLowerCase()) break
+                val firstWord = nextLine.substringBefore(' ')
+                line = if (firstWord.lowercase() in CONJUNCTIONS) "$line $nextLine" else line.dropLast(1) + nextLine
+                for (j in i + 1..next) raw[j] = ""
+                i = next
+            }
+            result += line
+            i++
+        }
+        return result
+    }
+
+    private fun isNoise(line: String): Boolean {
+        if (line.isEmpty()) return true
+        val visible = line.filterNot { it.isWhitespace() }
+        if (visible.length < 2 && !visible.all { it.isDigit() }) return true
+        val alnum = visible.count { it.isLetterOrDigit() }
+        if (alnum < visible.length * 0.6) return true
+        if (Regex("(\\p{L})\\1{4,}").containsMatchIn(line)) return true
+        return false
+    }
+
+    private fun isStepsHeading(line: String): Boolean {
+        val text = line.trimEnd(':').trim()
+        return STEPS_HEADING.matches(text) && !TIME_WORDS.containsMatchIn(text)
+    }
+
+    private fun isTitleCandidate(line: String): Boolean =
+        line.length in 2..70 && !isIngredientLike(line) && !isStepLike(line) && !line.endsWith(":")
+
+    private fun isIngredientLike(line: String): Boolean =
+        STARTS_WITH_QUANTITY.containsMatchIn(line) || BULLET.containsMatchIn(line)
+
+    private fun isStepLike(line: String): Boolean {
+        if (NUMBERED_STEP.matches(line)) return true
+        if (isIngredientLike(line) && line.length <= 50) return false
+        val words = line.split(' ').size
+        return line.length > 50 || (words >= 5 && line.endsWith("."))
+    }
+
+    private fun formatIngredients(lines: List<String>): List<String> {
+        val result = mutableListOf<String>()
+        for (rawLine in lines) {
+            if (rawLine.isEmpty()) continue
+            val line = rawLine.replace(BULLET, "").trim()
+            if (line.isEmpty()) continue
+            val previous = result.lastOrNull()
+            // Fortsetzung einer umgebrochenen Zeile, z. B. „1 Dose Tomaten,“ + „gehackt“
+            if (previous != null && !previous.endsWith(":") &&
+                (previous.endsWith(",") || previous.endsWith("-") || previous.count { it == '(' } > previous.count { it == ')' })
+            ) {
+                result[result.lastIndex] = "$previous $line"
+                continue
+            }
+            if (line.endsWith(":") || (SUBHEADING.matches(line) && !isIngredientLike(line))) {
+                result += line.trimEnd(':').trim() + ":"
+                continue
+            }
+            result += splitColumns(line)
+        }
+        return result
+    }
+
+    /** Zwei Spalten, die in einer Zeile gelandet sind: „1 cipolla 60 g di parmigiano“ → zwei Zutaten. */
+    private fun splitColumns(line: String): List<String> {
+        if (!STARTS_WITH_QUANTITY.containsMatchIn(line)) return listOf(line)
+        val parts = mutableListOf<String>()
+        var rest = line
+        while (true) {
+            val match = SECOND_QUANTITY.findAll(rest).firstOrNull { candidate ->
+                val before = rest.substring(0, candidate.range.first).trim()
+                val wordsBefore = before.split(' ')
+                wordsBefore.size >= 2 &&
+                    wordsBefore.last().lowercase() !in CONNECTORS &&
+                    !wordsBefore.last().endsWith(",") &&
+                    !before.endsWith("(")
+            } ?: break
+            parts += rest.substring(0, match.range.first).trim()
+            rest = rest.substring(match.range.first).trim()
+        }
+        parts += rest
+        return parts
+    }
+
+    private fun formatSteps(lines: List<String>): List<String> {
+        val content = lines.filter { it.isNotEmpty() }
+        if (content.isEmpty()) return emptyList()
+        val steps = mutableListOf<String>()
+        val numbered = content.count { NUMBERED_STEP.matches(it) } >= 2
+        var current = StringBuilder()
+
+        fun close() {
+            val step = current.toString().trim()
+            if (step.isNotEmpty()) steps += step
+            current = StringBuilder()
+        }
+
+        if (numbered) {
+            for (line in content) {
+                val match = NUMBERED_STEP.matchEntire(line)
+                if (match != null) {
+                    close()
+                    current.append(match.groupValues[2])
+                } else {
+                    if (current.isNotEmpty()) current.append(' ')
+                    current.append(line)
+                }
+            }
+        } else {
+            // Leerzeilen der Texterkennung sind unzuverlässig: Ein Schritt endet erst nach einem Satzende.
+            for (line in lines) {
+                if (line.isEmpty()) {
+                    val text = current.trimEnd()
+                    if (text.isNotEmpty() && text.last() in ".!?:)…") close()
+                } else {
+                    if (line.endsWith(":") && line.length <= 40) {
+                        close()
+                        steps += line
+                        continue
+                    }
+                    if (current.isNotEmpty()) current.append(' ')
+                    current.append(line)
+                }
+            }
+        }
+        close()
+        return steps
+    }
+}

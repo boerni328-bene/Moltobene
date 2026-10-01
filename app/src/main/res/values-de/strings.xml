@@ -51,12 +51,28 @@
     <string name="share_source">Quelle: %1$s</string>
     <string name="share_error">Das Rezept konnte nicht geteilt werden.</string>
 
+    <!-- Texterkennung -->
+    <string name="import_from_photo">Aus Foto übernehmen</string>
+    <string name="ocr_action">Text aus Foto erkennen</string>
+    <string name="ocr_dialog_text">Titel, Zutaten und Zubereitung werden aus Fotos von Kochbuch, Zettel oder Bildschirmfoto gelesen. Leere Felder werden ausgefüllt, Zutaten und Zubereitung ergänzt. Bei Rezepten über mehrere Seiten die Fotos der Reihe nach auswählen.</string>
+    <string name="ocr_from_recipe_photo">Rezeptfoto lesen</string>
+    <string name="ocr_choose_photos">Fotos auswählen</string>
+    <string name="ocr_running">Text wird erkannt …</string>
+    <string name="ocr_running_pages">Text wird erkannt … Seite %1$d von %2$d</string>
+    <string name="ocr_done">Text erkannt. Erkannter Text kann Fehler enthalten.</string>
+    <string name="ocr_nothing">Auf dem Foto wurde kein Text gefunden.</string>
+    <string name="ocr_error">Der Text konnte nicht erkannt werden.</string>
+    <string name="recognized_text">Erkannter Text</string>
+    <string name="recognized_text_show">Erkannten Text anzeigen</string>
+    <string name="recognized_text_hide">Erkannten Text ausblenden</string>
+    <string name="recognized_text_hint">Erkannter Text kann Fehler enthalten. Fehlende Teile lassen sich von hier kopieren.</string>
+
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Rezepte teilen: als Text mit Foto, z. B. per Messenger oder E-Mail. Notizen bleiben dabei privat.</item>
-        <item>Rezepte als Rezeptdatei teilen, im Standardformat schema.org, das auch andere Rezept-Apps lesen.</item>
-        <item>„Rezept löschen“ steht jetzt im Menü ⋮ oben rechts in einem Rezept.</item>
+        <item>Texterkennung: Titel, Zutaten und Zubereitung aus Fotos von Kochbuch, Zettel oder Bildschirmfoto übernehmen – beim Bearbeiten eines Rezepts über „Text aus Foto erkennen“.</item>
+        <item>Neue Rezepte direkt aus Fotos: „Aus Foto übernehmen“ in der Sammlung, auch über mehrere Seiten.</item>
+        <item>Die Erkennung läuft nur auf dem Handy und liest Deutsch, Englisch, Italienisch, Französisch und Spanisch. Erkannter Text kann Fehler enthalten.</item>
     </string-array>
 
     <!-- Bearbeiten -->

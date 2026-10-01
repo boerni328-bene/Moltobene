@@ -7,6 +7,7 @@ import android.graphics.Matrix
 import android.media.ExifInterface
 import android.net.Uri
 import androidx.core.content.FileProvider
+import com.moltobene.app.data.ocr.GrayImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
@@ -22,6 +23,7 @@ import kotlin.math.roundToInt
  * ohne Zusatzdaten wie den Aufnahmeort (das Neu-Speichern übernimmt keine EXIF-Daten).
  * Fotos liegen im privaten App-Speicher; es sind keine Berechtigungen nötig.
  * Zum Teilen werden Fotos ebenfalls neu gespeichert ([encodeForSharing]).
+ * Für die Texterkennung liefert [loadForRecognition] ein passend großes Graustufenbild.
  */
 class PhotoStore(private val context: Context) {
 
@@ -48,6 +50,79 @@ class PhotoStore(private val context: Context) {
         } finally {
             withContext(Dispatchers.IO) { cameraFile.delete() }
         }
+    }
+
+    /** Das zuletzt mit der Kamera aufgenommene Foto (nur innerhalb der App lesbar). */
+    fun cameraCaptureUri(): Uri = Uri.fromFile(cameraFile)
+
+    suspend fun discardCameraPhoto() = withContext(Dispatchers.IO) { cameraFile.delete() }
+
+    /** Gespeichertes Rezeptfoto für die Texterkennung. */
+    suspend fun loadForRecognition(photoId: String): GrayImage = loadForRecognition(Uri.fromFile(photoFile(photoId)))
+
+    /**
+     * Foto für die Texterkennung: richtig gedreht, in Graustufen (ein Byte je Bildpunkt) und so groß,
+     * dass Tesseract die Schrift gut lesen kann – kleine Fotos werden vergrößert, große verkleinert.
+     */
+    suspend fun loadForRecognition(uri: Uri): GrayImage = withContext(Dispatchers.IO) {
+        val resolver = context.contentResolver
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        val boundsStream = resolver.openInputStream(uri) ?: throw IOException("Foto nicht lesbar")
+        boundsStream.use { BitmapFactory.decodeStream(it, null, bounds) }
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) throw IOException("Kein Foto")
+
+        val orientation = resolver.openInputStream(uri)?.use { stream ->
+            runCatching {
+                ExifInterface(stream).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+            }.getOrDefault(ExifInterface.ORIENTATION_NORMAL)
+        } ?: ExifInterface.ORIENTATION_NORMAL
+
+        val options = BitmapFactory.Options().apply {
+            inSampleSize = sampleSize(bounds.outWidth, bounds.outHeight, OCR_MIN_EDGE)
+            // Halber Speicherbedarf; Farben braucht die Texterkennung nicht.
+            inPreferredConfig = Bitmap.Config.RGB_565
+        }
+        val decoded = resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, options) }
+            ?: throw IOException("Foto nicht lesbar")
+        val rotated = applyOrientation(decoded, orientation)
+        val edge = max(rotated.width, rotated.height)
+        val target = when {
+            edge < OCR_TARGET_EDGE -> minOf(OCR_TARGET_EDGE, edge * 2)
+            edge > OCR_MAX_EDGE -> OCR_MAX_EDGE
+            else -> edge
+        }
+        val scaled = if (target == edge) {
+            rotated
+        } else {
+            Bitmap.createScaledBitmap(
+                rotated,
+                (rotated.width.toLong() * target / edge).toInt().coerceAtLeast(1),
+                (rotated.height.toLong() * target / edge).toInt().coerceAtLeast(1),
+                true,
+            )
+        }
+        try {
+            toGray(scaled)
+        } finally {
+            listOf(decoded, rotated, scaled).distinct().forEach { it.recycle() }
+        }
+    }
+
+    private fun toGray(bitmap: Bitmap): GrayImage {
+        val width = bitmap.width
+        val height = bitmap.height
+        val pixels = ByteArray(width * height)
+        val row = IntArray(width)
+        for (y in 0 until height) {
+            bitmap.getPixels(row, 0, width, 0, y, width, 1)
+            val offset = y * width
+            for (x in 0 until width) {
+                val color = row[x]
+                val gray = (((color shr 16) and 0xFF) * 299 + ((color shr 8) and 0xFF) * 587 + (color and 0xFF) * 114) / 1000
+                pixels[offset + x] = gray.toByte()
+            }
+        }
+        return GrayImage(width, height, pixels)
     }
 
     /** Liest ein Foto ein, verkleinert es und speichert Detail- und Vorschaubild. Liefert die neue Foto-Kennung. */
@@ -200,5 +275,10 @@ class PhotoStore(private val context: Context) {
         // Etwas höher, weil das Foto beim Teilen ein zweites Mal gespeichert wird.
         const val SHARE_JPEG_QUALITY = 90
         const val UNUSED_GRACE_MILLIS = 24L * 60 * 60 * 1000
+
+        // Texterkennung: Bei etwa 2400 px liest Tesseract Kochbuchseiten am zuverlässigsten.
+        const val OCR_MIN_EDGE = 1800
+        const val OCR_TARGET_EDGE = 2400
+        const val OCR_MAX_EDGE = 3000
     }
 }

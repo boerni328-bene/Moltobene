@@ -10,9 +10,9 @@ object CollectionRoute
 @Serializable
 data class RecipeRoute(val id: String)
 
-/** [id] leer = neues Rezept hinzufügen. */
+/** [id] leer = neues Rezept hinzufügen; [fromPhoto] = gleich mit der Texterkennung beginnen. */
 @Serializable
-data class EditRoute(val id: String? = null)
+data class EditRoute(val id: String? = null, val fromPhoto: Boolean = false)
 
 @Serializable
 object SettingsRoute

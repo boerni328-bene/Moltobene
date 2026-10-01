@@ -27,6 +27,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -38,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -60,6 +62,7 @@ fun CollectionScreen(
     snackbarHostState: SnackbarHostState,
     onOpenRecipe: (String) -> Unit,
     onAddRecipe: () -> Unit,
+    onAddFromPhoto: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -79,11 +82,20 @@ fun CollectionScreen(
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = onAddRecipe,
-                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.add_recipe)) },
-            )
+            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(Spacing.m)) {
+                ExtendedFloatingActionButton(
+                    onClick = onAddFromPhoto,
+                    icon = { Icon(painterResource(R.drawable.ic_document_scanner), contentDescription = null) },
+                    text = { Text(stringResource(R.string.import_from_photo)) },
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+                ExtendedFloatingActionButton(
+                    onClick = onAddRecipe,
+                    icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                    text = { Text(stringResource(R.string.add_recipe)) },
+                )
+            }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
@@ -94,7 +106,7 @@ fun CollectionScreen(
                 is CollectionUiState.Content -> {
                     val collectionIsEmpty = current.items.isEmpty() && query.isBlank()
                     if (collectionIsEmpty) {
-                        EmptyCollection(onAddRecipe = onAddRecipe)
+                        EmptyCollection(onAddRecipe = onAddRecipe, onAddFromPhoto = onAddFromPhoto)
                     } else {
                         SearchField(query = query, onQueryChange = viewModel::onQueryChange)
                         if (current.items.isEmpty()) {
@@ -135,8 +147,8 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
 private fun RecipeList(items: List<RecipeListItem>, onOpenRecipe: (String) -> Unit) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        // Platz unten, damit der Knopf „Rezept hinzufügen“ den letzten Eintrag nicht verdeckt.
-        contentPadding = PaddingValues(bottom = 96.dp),
+        // Platz unten, damit die Knöpfe „Aus Foto übernehmen“ und „Rezept hinzufügen“ den letzten Eintrag nicht verdecken.
+        contentPadding = PaddingValues(bottom = 176.dp),
     ) {
         items(items, key = { it.id }) { item ->
             RecipeRow(item = item, onClick = { onOpenRecipe(item.id) })
@@ -176,7 +188,7 @@ private fun RecipeRow(item: RecipeListItem, onClick: () -> Unit) {
 }
 
 @Composable
-private fun EmptyCollection(onAddRecipe: () -> Unit) {
+private fun EmptyCollection(onAddRecipe: () -> Unit, onAddFromPhoto: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -207,6 +219,10 @@ private fun EmptyCollection(onAddRecipe: () -> Unit) {
         Spacer(Modifier.size(Spacing.l))
         Button(onClick = onAddRecipe) {
             Text(stringResource(R.string.add_recipe))
+        }
+        Spacer(Modifier.size(Spacing.s))
+        OutlinedButton(onClick = onAddFromPhoto) {
+            Text(stringResource(R.string.import_from_photo))
         }
     }
 }

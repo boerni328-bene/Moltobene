@@ -52,12 +52,28 @@
     <string name="share_source">Source: %1$s</string>
     <string name="share_error">The recipe could not be shared.</string>
 
+    <!-- Texterkennung -->
+    <string name="import_from_photo">Import from photo</string>
+    <string name="ocr_action">Recognize text from photo</string>
+    <string name="ocr_dialog_text">Title, ingredients and instructions are read from photos of a cookbook, a note or a screenshot. Empty fields are filled in, ingredients and instructions are added. For recipes on several pages, choose the photos in order.</string>
+    <string name="ocr_from_recipe_photo">Read recipe photo</string>
+    <string name="ocr_choose_photos">Choose photos</string>
+    <string name="ocr_running">Recognizing text …</string>
+    <string name="ocr_running_pages">Recognizing text … page %1$d of %2$d</string>
+    <string name="ocr_done">Text recognized. Recognized text may contain errors.</string>
+    <string name="ocr_nothing">No text found on the photo.</string>
+    <string name="ocr_error">The text could not be recognized.</string>
+    <string name="recognized_text">Recognized text</string>
+    <string name="recognized_text_show">Show recognized text</string>
+    <string name="recognized_text_hide">Hide recognized text</string>
+    <string name="recognized_text_hint">Recognized text may contain errors. Missing parts can be copied from here.</string>
+
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Share recipes as text with photo, e.g. via a messenger or by email. Notes stay private.</item>
-        <item>Share recipes as a recipe file in the schema.org standard, which other recipe apps can read too.</item>
-        <item>“Delete recipe” has moved to the ⋮ menu at the top right of a recipe.</item>
+        <item>Text recognition: title, ingredients and instructions from photos of a cookbook, a note or a screenshot – when editing a recipe via “Recognize text from photo”.</item>
+        <item>New recipes straight from photos: “Import from photo” in the collection, also for recipes on several pages.</item>
+        <item>Recognition runs only on the device and reads German, English, Italian, French and Spanish. Recognized text may contain errors.</item>
     </string-array>
 
     <!-- Bearbeiten -->

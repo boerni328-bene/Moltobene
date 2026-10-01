@@ -21,6 +21,15 @@ class AppPreferences(context: Context) {
         prefs.edit { putInt(KEY_LAST_SEEN_VERSION, versionCode) }
     }
 
+    /** Zuletzt erkannte Sprache der Texterkennung (z. B. „de“); damit beginnt die nächste Erkennung. */
+    suspend fun recognitionLanguage(): String? = withContext(Dispatchers.IO) {
+        prefs.getString(KEY_RECOGNITION_LANGUAGE, null)
+    }
+
+    suspend fun setRecognitionLanguage(language: String) = withContext(Dispatchers.IO) {
+        prefs.edit { putString(KEY_RECOGNITION_LANGUAGE, language) }
+    }
+
     /** true, wenn die App frisch installiert und noch nie aktualisiert wurde. */
     suspend fun isFreshInstall(): Boolean = withContext(Dispatchers.IO) {
         val manager = appContext.packageManager
@@ -36,5 +45,6 @@ class AppPreferences(context: Context) {
     private companion object {
         const val FILE_NAME = "moltobene"
         const val KEY_LAST_SEEN_VERSION = "last_seen_version_code"
+        const val KEY_RECOGNITION_LANGUAGE = "recognition_language"
     }
 }

@@ -39,6 +39,7 @@ fun MoltobeneNavHost() {
                 snackbarHostState = snackbarHostState,
                 onOpenRecipe = { id -> navController.navigate(RecipeRoute(id)) },
                 onAddRecipe = { navController.navigate(EditRoute()) },
+                onAddFromPhoto = { navController.navigate(EditRoute(fromPhoto = true)) },
                 onOpenSettings = { navController.navigate(SettingsRoute) },
             )
         }
@@ -64,7 +65,13 @@ fun MoltobeneNavHost() {
         composable<EditRoute> {
             EditScreen(
                 viewModel = viewModel {
-                    EditViewModel(createSavedStateHandle(), container.repository, container.photoStore)
+                    EditViewModel(
+                        createSavedStateHandle(),
+                        container.repository,
+                        container.photoStore,
+                        container.textRecognizer,
+                        container.preferences,
+                    )
                 },
                 snackbarHostState = snackbarHostState,
                 onClose = { navController.popBackStack() },
