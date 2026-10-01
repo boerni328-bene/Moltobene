@@ -7,6 +7,7 @@ import android.graphics.Matrix
 import android.media.ExifInterface
 import android.net.Uri
 import androidx.core.content.FileProvider
+import com.moltobene.app.data.ocr.CropArea
 import com.moltobene.app.data.ocr.GrayImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -23,7 +24,8 @@ import kotlin.math.roundToInt
  * ohne Zusatzdaten wie den Aufnahmeort (das Neu-Speichern übernimmt keine EXIF-Daten).
  * Fotos liegen im privaten App-Speicher; es sind keine Berechtigungen nötig.
  * Zum Teilen werden Fotos ebenfalls neu gespeichert ([encodeForSharing]).
- * Für die Texterkennung liefert [loadForRecognition] ein passend großes Graustufenbild.
+ * Für die Texterkennung liefert [loadForRecognition] ein passend großes Graustufenbild;
+ * gelesene Seiten werden mit [importPage] zu Originalseiten.
  */
 class PhotoStore(private val context: Context) {
 
@@ -102,6 +104,44 @@ class PhotoStore(private val context: Context) {
     suspend fun loadPreview(uri: Uri): Bitmap = withContext(Dispatchers.IO) {
         val rotated = decodeOriented(uri, PREVIEW_EDGE, Bitmap.Config.ARGB_8888)
         scaleDown(rotated, PREVIEW_EDGE).also { if (it !== rotated) rotated.recycle() }
+    }
+
+    /**
+     * Seite zum Ansehen bzw. als Originalseite (#38): genauso gedreht wie für die Texterkennung,
+     * auf den gewählten Bereich zugeschnitten und höchstens [PAGE_EDGE] groß – genug, um auch
+     * kleine Schrift vergrößert zu lesen.
+     */
+    suspend fun loadPage(uri: Uri, area: CropArea): Bitmap = withContext(Dispatchers.IO) {
+        // RGB_565 braucht halb so viel Speicher; für Seiten reicht das.
+        val rotated = decodeOriented(uri, OCR_MIN_EDGE, Bitmap.Config.RGB_565)
+        val cropped = if (area.isWholePage) {
+            rotated
+        } else {
+            val box = area.toBox(rotated.width, rotated.height)
+            Bitmap.createBitmap(rotated, box.left, box.top, box.width, box.height)
+        }
+        val scaled = scaleDown(cropped, PAGE_EDGE)
+        listOf(rotated, cropped).distinct().filter { it !== scaled }.forEach { it.recycle() }
+        scaled
+    }
+
+    /** Behält eine gelesene Seite als Originalseite: neu gespeichert, also ohne Zusatzdaten wie den Aufnahmeort. */
+    suspend fun importPage(uri: Uri, area: CropArea): String {
+        val page = loadPage(uri, area)
+        return withContext(Dispatchers.IO) {
+            val thumb = scaleDown(page, THUMB_EDGE)
+            val photoId = UUID.randomUUID().toString()
+            try {
+                writeJpeg(page, photoFile(photoId))
+                writeJpeg(thumb, thumbFile(photoId))
+            } catch (e: IOException) {
+                delete(photoId)
+                throw e
+            } finally {
+                listOf(page, thumb).distinct().forEach { it.recycle() }
+            }
+            photoId
+        }
     }
 
     /** Liest ein Foto mindestens [minEdge] groß (sofern vorhanden) und dreht es laut Exif-Angabe richtig. */
@@ -304,5 +344,8 @@ class PhotoStore(private val context: Context) {
 
         /** Größe für „Bereich auswählen“. */
         const val PREVIEW_EDGE = 1600
+
+        /** Größe einer Originalseite. */
+        const val PAGE_EDGE = 2000
     }
 }

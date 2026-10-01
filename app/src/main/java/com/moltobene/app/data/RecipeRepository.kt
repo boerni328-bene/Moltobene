@@ -85,7 +85,8 @@ private fun RecipeWithDetails.toRecipe() = Recipe(
         .map { Ingredient(text = it.text, isHeading = it.isHeading, quantity = it.quantity, unit = it.unit) },
     steps = steps.sortedBy { it.position }.map { it.text },
     tags = tags.map { Tag(name = it.name, predefinedKey = it.predefinedKey) },
-    photoIds = photos.sortedBy { it.position }.map { it.photoId },
+    photoIds = photos.filter { it.kind != RecipePhotoEntity.KIND_PAGE }.sortedBy { it.position }.map { it.photoId },
+    pageIds = photos.filter { it.kind == RecipePhotoEntity.KIND_PAGE }.sortedBy { it.position }.map { it.photoId },
     createdAt = recipe.createdAt,
     updatedAt = recipe.updatedAt,
 )
@@ -122,7 +123,9 @@ private fun Recipe.toRows(): RecipeRows = RecipeRows(
     },
     steps = steps.mapIndexed { index, text -> StepEntity(recipeId = id, position = index, text = text) },
     photos = photoIds.distinct().mapIndexed { index, photoId ->
-        RecipePhotoEntity(photoId = photoId, recipeId = id, position = index)
+        RecipePhotoEntity(photoId = photoId, recipeId = id, position = index, kind = RecipePhotoEntity.KIND_PHOTO)
+    } + pageIds.distinct().filter { it !in photoIds }.mapIndexed { index, photoId ->
+        RecipePhotoEntity(photoId = photoId, recipeId = id, position = index, kind = RecipePhotoEntity.KIND_PAGE)
     },
     tags = tags.distinctBy { it.name }.map { RecipeTagEntity(recipeId = id, name = it.name, predefinedKey = it.predefinedKey) },
     search = RecipeSearchEntity(

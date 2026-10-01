@@ -14,8 +14,8 @@ android {
         applicationId = "com.moltobene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 17
-        versionName = "0.6.1"
+        versionCode = 18
+        versionName = "0.7.0"
 
         // Nur die unterstützten Sprachen mitliefern (Englisch als Rückfall, Deutsch).
         resourceConfigurations += listOf("en", "de")
@@ -107,4 +107,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
 
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
 }

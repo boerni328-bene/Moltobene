@@ -9,6 +9,7 @@
     <string name="cancel">Abbrechen</string>
     <string name="save">Speichern</string>
     <string name="delete">Löschen</string>
+    <string name="remove">Entfernen</string>
 
     <!-- Sammlung -->
     <string name="collection_title">Sammlung</string>
@@ -44,6 +45,10 @@
     <string name="recipe_load_error">Das Rezept konnte nicht geladen werden.</string>
     <string name="source_link_error">Der Link konnte nicht geöffnet werden.</string>
     <string name="more_options">Weitere Optionen</string>
+    <plurals name="original_pages_show">
+        <item quantity="one">Originalseite ansehen</item>
+        <item quantity="other">%d Originalseiten ansehen</item>
+    </plurals>
 
     <!-- Teilen -->
     <string name="share_recipe">Rezept teilen</string>
@@ -54,20 +59,33 @@
     <!-- Texterkennung -->
     <string name="import_from_photo">Aus Foto übernehmen</string>
     <string name="ocr_action">Text aus Foto erkennen</string>
-    <string name="ocr_dialog_text">Titel, Zutaten und Zubereitung werden aus Fotos von Kochbuch, Zettel oder Bildschirmfoto gelesen. Leere Felder werden ausgefüllt, Zutaten und Zubereitung ergänzt. Bei Rezepten über mehrere Seiten die Fotos der Reihe nach auswählen. Danach lässt sich je Foto der Bereich wählen, der gelesen wird.</string>
+    <string name="ocr_dialog_text">Liest Titel, Zutaten und Zubereitung aus Fotos von Kochbuch, Zettel oder Bildschirmfoto. Am besten gelingt es mit einem scharfen, gerade aufgenommenen Foto. Bei mehreren Seiten die Fotos der Reihe nach auswählen (bis zu %1$d).</string>
     <string name="ocr_from_recipe_photo">Rezeptfoto lesen</string>
     <string name="ocr_choose_photos">Fotos auswählen</string>
     <string name="ocr_running">Text wird erkannt …</string>
     <string name="ocr_running_pages">Text wird erkannt … Seite %1$d von %2$d</string>
-    <string name="ocr_done">Text erkannt. Erkannter Text kann Fehler enthalten.</string>
-    <string name="ocr_nothing">Auf dem Foto wurde kein Text gefunden.</string>
-    <string name="ocr_error">Der Text konnte nicht erkannt werden.</string>
+    <string name="ocr_done">Text ins Rezept übernommen. Mengen und Einheiten auf Lesefehler prüfen.</string>
+    <string name="ocr_nothing">Kein Text gefunden. Am besten klappt es mit einem scharfen, gerade aufgenommenen Foto bei gutem Licht.</string>
+    <string name="ocr_error">Der Text konnte nicht erkannt werden. Erneut versuchen oder ein anderes Foto wählen.</string>
     <string name="ocr_interrupted">Texterkennung wurde unterbrochen.</string>
     <string name="ocr_retry">Erneut erkennen</string>
     <string name="recognized_text">Erkannter Text</string>
     <string name="recognized_text_show">Erkannten Text anzeigen</string>
     <string name="recognized_text_hide">Erkannten Text ausblenden</string>
     <string name="recognized_text_hint">Erkannter Text kann Fehler enthalten. Fehlende Teile lassen sich von hier kopieren.</string>
+    <string name="recognized_text_remove">Erkannten Text entfernen</string>
+    <string name="recognized_text_remove_title">Erkannten Text wirklich entfernen?</string>
+    <string name="pages_show">Seiten ansehen</string>
+    <string name="page_previous">Vorherige Seite</string>
+    <string name="page_next">Nächste Seite</string>
+    <string name="zoom_in">Vergrößern</string>
+    <string name="zoom_out">Verkleinern</string>
+    <string name="page_load_error">Die Seite konnte nicht geladen werden.</string>
+    <string name="page_use_as_photo">Als Rezeptfoto verwenden</string>
+    <string name="page_remove">Seite entfernen</string>
+    <string name="keep_pages_title">Gelesene Seiten behalten?</string>
+    <string name="keep_pages_text">Die Seiten lassen sich als Originalseiten beim Rezept behalten – zum Nachlesen und Vergleichen. Sie werden mitgesichert, aber nie geteilt.</string>
+    <string name="keep_pages">Behalten</string>
     <string name="area_title">Bereich auswählen</string>
     <string name="area_page">Seite %1$d von %2$d</string>
     <string name="area_hint">Gelesen wird nur der Bereich im Rahmen. Ecken und Ränder des Rahmens lassen sich verschieben.</string>
@@ -75,10 +93,7 @@
     <string name="area_next_page">Nächste Seite</string>
     <string name="area_recognize">Text erkennen</string>
     <string name="area_frame_description">Foto mit Rahmen um den Bereich, der gelesen wird</string>
-    <string name="area_load_error">Das Foto konnte nicht geladen werden.</string>
-    <string name="keep_photo_title">Foto behalten?</string>
-    <string name="keep_photo_text">Der Text ist ins Rezept übernommen. Zeigt das Foto nur die Buchseite, spart Entfernen Speicherplatz. Gelöscht wird es beim Speichern des Rezepts.</string>
-    <string name="keep_photo">Foto behalten</string>
+    <string name="area_load_error">Das Foto konnte nicht geladen werden. Ein anderes Foto auswählen.</string>
 
     <!-- Lizenzen -->
     <string name="licenses_title">Open-Source-Lizenzen</string>
@@ -90,8 +105,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>„Bereich auswählen“: Vor der Texterkennung legt ein Rahmen fest, welcher Teil des Fotos gelesen wird – z. B. nur die Zutaten, ohne Knöpfe und Werbung.</item>
-        <item>Bildschirmfotos werden sauberer gelesen: Statusleiste, Symbole, Knöpfe und Fotos ergeben kaum noch falsche Zeilen.</item>
+        <item>„Seiten ansehen“: Nach der Texterkennung lassen sich die gelesenen Seiten groß ansehen und vergrößern – so fallen Lesefehler schneller auf.</item>
+        <item>Originalseiten: Beim Speichern lassen sich die gelesenen Seiten beim Rezept behalten, getrennt vom Foto des Gerichts. Sie werden mitgesichert, aber nie geteilt.</item>
+        <item>Der Hinweis zum Prüfen bleibt bis zum Speichern sichtbar, und der erkannte Text lässt sich entfernen.</item>
     </string-array>
 
     <!-- Bearbeiten -->

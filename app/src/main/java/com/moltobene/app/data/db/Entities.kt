@@ -1,5 +1,6 @@
 package com.moltobene.app.data.db
 
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -87,7 +88,14 @@ data class RecipePhotoEntity(
     @PrimaryKey val photoId: String,
     val recipeId: String,
     val position: Int,
-)
+    /** [KIND_PHOTO] für Fotos des Gerichts, [KIND_PAGE] für Originalseiten (seit Datenbank-Version 2). */
+    @ColumnInfo(defaultValue = KIND_PHOTO) val kind: String = KIND_PHOTO,
+) {
+    companion object {
+        const val KIND_PHOTO = "photo"
+        const val KIND_PAGE = "page"
+    }
+}
 
 @Entity(
     tableName = "recipe_tags",

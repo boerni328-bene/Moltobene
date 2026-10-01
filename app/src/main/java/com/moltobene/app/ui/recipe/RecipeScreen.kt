@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -31,6 +33,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -49,6 +52,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -66,6 +70,7 @@ import com.moltobene.app.data.share.PreparedShare
 import com.moltobene.app.data.share.ShareLabels
 import com.moltobene.app.ui.components.CenteredMessage
 import com.moltobene.app.ui.components.DraftLabel
+import com.moltobene.app.ui.components.PageViewer
 import com.moltobene.app.ui.components.RecipePhoto
 import com.moltobene.app.ui.theme.Spacing
 import kotlinx.coroutines.launch
@@ -97,6 +102,22 @@ fun RecipeScreen(
             val opened = event is ShareEvent.Ready && openShareMenu(context, event.share, chooserTitle)
             if (!opened) snackbarHostState.showSnackbar(errorText)
             viewModel.shareEvent = null
+        }
+    }
+
+    // „Originalseiten ansehen“ als Vollbild.
+    val pageCount = (state as? RecipeUiState.Content)?.recipe?.pageIds?.size ?: 0
+    viewModel.viewer.page?.let { page ->
+        if (pageCount > 0) {
+            PageViewer(
+                page = page.coerceAtMost(pageCount - 1),
+                pageCount = pageCount,
+                bitmap = viewModel.viewer.bitmap,
+                failed = viewModel.viewer.failed,
+                onPageChange = { if (it in 0 until pageCount) viewModel.viewer.open(it) },
+                onClose = viewModel.viewer::close,
+            )
+            return
         }
     }
 
@@ -155,6 +176,7 @@ fun RecipeScreen(
                 recipe = current.recipe,
                 photo = current.photo,
                 snackbarHostState = snackbarHostState,
+                onShowPages = { viewModel.viewer.open(0) },
                 modifier = Modifier.padding(padding),
             )
             current is RecipeUiState.Loading ->
@@ -238,6 +260,7 @@ private fun RecipeContent(
     recipe: Recipe,
     photo: File?,
     snackbarHostState: SnackbarHostState,
+    onShowPages: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -321,6 +344,15 @@ private fun RecipeContent(
                 } else {
                     val text = listOfNotNull(source.name, source.page).joinToString(", ")
                     if (text.isNotBlank()) Text(text, style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+
+            // Originalseiten (#38), z. B. die Kochbuchseite oder ein handgeschriebenes Rezept zum Nachlesen.
+            if (recipe.pageIds.isNotEmpty()) {
+                OutlinedButton(onClick = onShowPages, modifier = Modifier.padding(top = Spacing.m)) {
+                    Icon(painterResource(R.drawable.ic_document_scanner), contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.size(Spacing.s))
+                    Text(pluralStringResource(R.plurals.original_pages_show, recipe.pageIds.size, recipe.pageIds.size))
                 }
             }
         }

@@ -40,7 +40,7 @@ class BackupManager(
     /** Schreibt alle Rezepte mit Fotos in die gewählte Datei. Liefert die Anzahl der Rezepte. */
     suspend fun export(uri: Uri): Int = withContext(Dispatchers.IO) {
         val recipes = repository.getAll()
-        val photos = recipes.flatMap { it.photoIds }.distinct()
+        val photos = recipes.flatMap { it.photoIds + it.pageIds }.distinct()
             .associateWith { photoStore.photoFile(it) to photoStore.thumbFile(it) }
         val manifest = BackupManifest(
             appVersion = BuildConfig.VERSION_NAME,
@@ -95,29 +95,35 @@ class BackupManager(
                 current == null || backup.updatedAt > current
             }
             val replacedIds = toWrite.map { it.id }.filter { it in existing }.toSet()
-            val oldPhotoIds = replacedIds.flatMap { repository.getRecipe(it)?.photoIds.orEmpty() }
+            val oldPhotoIds = replacedIds.flatMap { id ->
+                repository.getRecipe(id)?.let { it.photoIds + it.pageIds }.orEmpty()
+            }
 
             val adopted = mutableListOf<String>()
+            /** Übernimmt die Fotos, die vorhanden sind; fehlende werden übergangen. */
+            suspend fun adoptAvailable(photoIds: List<String>): List<String> {
+                val available = photoIds.filter { photoId ->
+                    photoStore.exists(photoId) || File(preview.photoDir, "$photoId.jpg").isFile
+                }
+                available.forEach { photoId ->
+                    if (!photoStore.exists(photoId)) {
+                        photoStore.adoptFromBackup(
+                            photoId = photoId,
+                            full = File(preview.photoDir, "$photoId.jpg"),
+                            thumb = File(preview.photoDir, "${photoId}_thumb.jpg"),
+                        )
+                        adopted += photoId
+                    }
+                }
+                return available
+            }
             try {
                 val recipes = toWrite.map { backup ->
-                    val available = backup.photos.filter { photoId ->
-                        photoStore.exists(photoId) || File(preview.photoDir, "$photoId.jpg").isFile
-                    }
-                    available.forEach { photoId ->
-                        if (!photoStore.exists(photoId)) {
-                            photoStore.adoptFromBackup(
-                                photoId = photoId,
-                                full = File(preview.photoDir, "$photoId.jpg"),
-                                thumb = File(preview.photoDir, "${photoId}_thumb.jpg"),
-                            )
-                            adopted += photoId
-                        }
-                    }
-                    backup.copy(photos = available).toRecipe()
+                    backup.copy(photos = adoptAvailable(backup.photos), pages = adoptAvailable(backup.pages)).toRecipe()
                 }
                 repository.saveAll(recipes)
 
-                val newPhotoIds = recipes.flatMap { it.photoIds }.toSet()
+                val newPhotoIds = recipes.flatMap { it.photoIds + it.pageIds }.toSet()
                 oldPhotoIds.filter { it !in newPhotoIds }.forEach { photoStore.delete(it) }
             } catch (e: Exception) {
                 adopted.forEach { photoStore.delete(it) }

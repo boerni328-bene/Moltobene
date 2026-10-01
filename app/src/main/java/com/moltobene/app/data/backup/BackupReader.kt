@@ -111,7 +111,10 @@ class BackupReader(private val limits: Limits = Limits()) {
                 skipped++
                 null
             } else {
-                recipe.copy(photos = recipe.photos.filter { RecipeIds.isValid(it) })
+                recipe.copy(
+                    photos = recipe.photos.filter { RecipeIds.isValid(it) },
+                    pages = recipe.pages.filter { RecipeIds.isValid(it) },
+                )
             }
         }
         val unique = recipes.distinctBy { it.id }

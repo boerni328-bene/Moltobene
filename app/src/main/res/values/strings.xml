@@ -10,6 +10,7 @@
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="delete">Delete</string>
+    <string name="remove">Remove</string>
 
     <!-- Sammlung -->
     <string name="collection_title">Collection</string>
@@ -45,6 +46,10 @@
     <string name="recipe_load_error">The recipe could not be loaded.</string>
     <string name="source_link_error">The link could not be opened.</string>
     <string name="more_options">More options</string>
+    <plurals name="original_pages_show">
+        <item quantity="one">Show original page</item>
+        <item quantity="other">Show %d original pages</item>
+    </plurals>
 
     <!-- Teilen -->
     <string name="share_recipe">Share recipe</string>
@@ -55,20 +60,33 @@
     <!-- Texterkennung -->
     <string name="import_from_photo">Import from photo</string>
     <string name="ocr_action">Recognize text from photo</string>
-    <string name="ocr_dialog_text">Title, ingredients and instructions are read from photos of a cookbook, a note or a screenshot. Empty fields are filled in, ingredients and instructions are added. For recipes on several pages, choose the photos in order. Afterwards, the area to be read can be selected for each photo.</string>
+    <string name="ocr_dialog_text">Reads title, ingredients and instructions from photos of a cookbook, a note or a screenshot. Sharp photos taken straight on work best. For several pages, choose the photos in order (up to %1$d).</string>
     <string name="ocr_from_recipe_photo">Read recipe photo</string>
     <string name="ocr_choose_photos">Choose photos</string>
     <string name="ocr_running">Recognizing text …</string>
     <string name="ocr_running_pages">Recognizing text … page %1$d of %2$d</string>
-    <string name="ocr_done">Text recognized. Recognized text may contain errors.</string>
-    <string name="ocr_nothing">No text found on the photo.</string>
-    <string name="ocr_error">The text could not be recognized.</string>
+    <string name="ocr_done">Text added to the recipe. Check quantities and units for reading errors.</string>
+    <string name="ocr_nothing">No text found. Sharp photos taken straight on in good light work best.</string>
+    <string name="ocr_error">The text could not be recognized. Try again or choose another photo.</string>
     <string name="ocr_interrupted">Text recognition was interrupted.</string>
     <string name="ocr_retry">Recognize again</string>
     <string name="recognized_text">Recognized text</string>
     <string name="recognized_text_show">Show recognized text</string>
     <string name="recognized_text_hide">Hide recognized text</string>
     <string name="recognized_text_hint">Recognized text may contain errors. Missing parts can be copied from here.</string>
+    <string name="recognized_text_remove">Remove recognized text</string>
+    <string name="recognized_text_remove_title">Really remove the recognized text?</string>
+    <string name="pages_show">Show pages</string>
+    <string name="page_previous">Previous page</string>
+    <string name="page_next">Next page</string>
+    <string name="zoom_in">Zoom in</string>
+    <string name="zoom_out">Zoom out</string>
+    <string name="page_load_error">The page could not be loaded.</string>
+    <string name="page_use_as_photo">Use as recipe photo</string>
+    <string name="page_remove">Remove page</string>
+    <string name="keep_pages_title">Keep the pages that were read?</string>
+    <string name="keep_pages_text">The pages can be kept with the recipe as original pages – for reading up and comparing. They are included in backups but never shared.</string>
+    <string name="keep_pages">Keep</string>
     <string name="area_title">Select area</string>
     <string name="area_page">Page %1$d of %2$d</string>
     <string name="area_hint">Only the area inside the frame is read. The corners and edges of the frame can be dragged.</string>
@@ -76,10 +94,7 @@
     <string name="area_next_page">Next page</string>
     <string name="area_recognize">Recognize text</string>
     <string name="area_frame_description">Photo with a frame around the area to be read</string>
-    <string name="area_load_error">The photo could not be loaded.</string>
-    <string name="keep_photo_title">Keep photo?</string>
-    <string name="keep_photo_text">The text has been added to the recipe. If the photo only shows the cookbook page, removing it saves storage space. It is deleted when the recipe is saved.</string>
-    <string name="keep_photo">Keep photo</string>
+    <string name="area_load_error">The photo could not be loaded. Choose another photo.</string>
 
     <!-- Lizenzen -->
     <string name="licenses_title">Open-source licenses</string>
@@ -93,8 +108,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>“Select area”: before text recognition, a frame sets which part of the photo is read – e.g. only the ingredients, without buttons and ads.</item>
-        <item>Screenshots are read more cleanly: status bars, icons, buttons and photos hardly produce wrong lines any more.</item>
+        <item>“Show pages”: after text recognition, the pages that were read can be viewed full screen and zoomed in – reading errors are easier to spot.</item>
+        <item>Original pages: when saving, the pages that were read can be kept with the recipe, separate from the photo of the dish. They are included in backups but never shared.</item>
+        <item>The reminder to check stays visible until saving, and the recognized text can be removed.</item>
     </string-array>
 
     <!-- Bearbeiten -->

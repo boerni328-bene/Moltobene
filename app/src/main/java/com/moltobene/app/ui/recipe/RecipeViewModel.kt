@@ -1,5 +1,6 @@
 package com.moltobene.app.ui.recipe
 
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,10 +10,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeRepository
+import com.moltobene.app.data.ocr.CropArea
 import com.moltobene.app.data.photos.PhotoStore
 import com.moltobene.app.data.share.PreparedShare
 import com.moltobene.app.data.share.RecipeSharer
 import com.moltobene.app.data.share.ShareLabels
+import com.moltobene.app.ui.components.PageViewerModel
 import com.moltobene.app.ui.navigation.RecipeRoute
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,6 +25,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.File
+import java.io.IOException
 
 sealed interface RecipeUiState {
     data object Loading : RecipeUiState
@@ -54,6 +58,13 @@ class RecipeViewModel(
         }
         .catch { emit(RecipeUiState.Error) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RecipeUiState.Loading)
+
+    /** „Originalseiten ansehen“ (#38). */
+    val viewer = PageViewerModel(viewModelScope) { index ->
+        val pageId = (state.value as? RecipeUiState.Content)?.recipe?.pageIds?.getOrNull(index)
+            ?: throw IOException("Seite fehlt")
+        photoStore.loadPage(Uri.fromFile(photoStore.photoFile(pageId)), CropArea.WHOLE_PAGE)
+    }
 
     /** true, solange das Teilen vorbereitet wird. */
     var preparingShare by mutableStateOf(false)

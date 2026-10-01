@@ -26,6 +26,8 @@ data class Recipe(
     val tags: List<Tag> = emptyList(),
     /** Kennungen der Fotos; das erste ist das Hauptfoto. */
     val photoIds: List<String> = emptyList(),
+    /** Originalseiten (#38): Fotos der Vorlage, z. B. der Kochbuchseite – getrennt vom Foto des Gerichts, nie geteilt. */
+    val pageIds: List<String> = emptyList(),
     val createdAt: Long,
     val updatedAt: Long,
 )

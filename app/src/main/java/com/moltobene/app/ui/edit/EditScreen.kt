@@ -53,7 +53,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -62,6 +64,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.moltobene.app.R
 import com.moltobene.app.ui.components.CenteredMessage
+import com.moltobene.app.ui.components.PageViewer
 import com.moltobene.app.ui.components.RecipePhoto
 import com.moltobene.app.ui.theme.Spacing
 import kotlinx.coroutines.launch
@@ -76,6 +79,7 @@ fun EditScreen(
 ) {
     var confirmDiscard by rememberSaveable { mutableStateOf(false) }
     val savedMessage = stringResource(R.string.recipe_saved)
+    val onRecipeSaved: (String, Boolean) -> Unit = { id, wasNew -> onSaved(id, wasNew, savedMessage) }
     val cameraMissing = stringResource(R.string.camera_unavailable)
     val scope = rememberCoroutineScope()
 
@@ -132,6 +136,26 @@ fun EditScreen(
         return
     }
 
+    // „Seiten ansehen“: gelesene Seiten und Originalseiten als Vollbild.
+    viewModel.viewer.page?.let { page ->
+        PageViewer(
+            page = page,
+            pageCount = viewModel.pageCount,
+            bitmap = viewModel.viewer.bitmap,
+            failed = viewModel.viewer.failed,
+            onPageChange = viewModel::showPage,
+            onClose = viewModel.viewer::close,
+        ) {
+            if (viewModel.canChangeViewerPage) {
+                TextButton(onClick = viewModel::useViewerPageAsPhoto, enabled = !busy) {
+                    Text(stringResource(R.string.page_use_as_photo))
+                }
+                TextButton(onClick = viewModel::removeViewerPage) { Text(stringResource(R.string.page_remove)) }
+            }
+        }
+        return
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -144,11 +168,16 @@ fun EditScreen(
                     }
                 },
                 actions = {
-                    TextButton(
-                        onClick = { viewModel.save { id, wasNew -> onSaved(id, wasNew, savedMessage) } },
-                        enabled = !viewModel.isSaving && !viewModel.isLoading && !busy,
-                    ) {
-                        Text(stringResource(R.string.save))
+                    if (viewModel.isSaving) {
+                        // Das Speichern der Originalseiten kann auf günstigen Handys einige Sekunden dauern.
+                        CircularProgressIndicator(modifier = Modifier.padding(horizontal = Spacing.m).size(24.dp))
+                    } else {
+                        TextButton(
+                            onClick = { viewModel.requestSave(onRecipeSaved) },
+                            enabled = !viewModel.isLoading && !busy,
+                        ) {
+                            Text(stringResource(R.string.save))
+                        }
                     }
                 },
             )
@@ -289,16 +318,21 @@ fun EditScreen(
         )
     }
 
-    if (viewModel.askKeepPhoto) {
+    // Die einzige Frage nach der Texterkennung – beim Speichern (#38).
+    if (viewModel.askKeepPages) {
         AlertDialog(
-            onDismissRequest = viewModel::keepPhoto,
-            title = { Text(stringResource(R.string.keep_photo_title)) },
-            text = { Text(stringResource(R.string.keep_photo_text)) },
+            onDismissRequest = viewModel::cancelKeepPages,
+            title = { Text(stringResource(R.string.keep_pages_title)) },
+            text = { Text(stringResource(R.string.keep_pages_text)) },
             confirmButton = {
-                TextButton(onClick = viewModel::removePhotoAfterRecognition) { Text(stringResource(R.string.photo_remove)) }
+                TextButton(onClick = { viewModel.save(keepPages = true, onSaved = onRecipeSaved) }) {
+                    Text(stringResource(R.string.keep_pages))
+                }
             },
             dismissButton = {
-                TextButton(onClick = viewModel::keepPhoto) { Text(stringResource(R.string.keep_photo)) }
+                TextButton(onClick = { viewModel.save(keepPages = false, onSaved = onRecipeSaved) }) {
+                    Text(stringResource(R.string.discard))
+                }
             },
         )
     }
@@ -320,7 +354,11 @@ fun EditScreen(
     }
 }
 
-/** Texterkennung: Start, Fortschritt mit Abbrechen und der erkannte Text zum Nachsehen und Kopieren. */
+/**
+ * Texterkennung: Start, Fortschritt mit Abbrechen, Hinweis zum Prüfen, die gelesenen Seiten und
+ * der erkannte Text zum Nachsehen, Kopieren und Entfernen.
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun RecognitionSection(
     viewModel: EditViewModel,
@@ -328,6 +366,23 @@ private fun RecognitionSection(
     onStart: () -> Unit,
 ) {
     var showText by rememberSaveable { mutableStateOf(false) }
+    var confirmRemoveText by rememberSaveable { mutableStateOf(false) }
+    if (confirmRemoveText) {
+        AlertDialog(
+            onDismissRequest = { confirmRemoveText = false },
+            title = { Text(stringResource(R.string.recognized_text_remove_title)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmRemoveText = false
+                    showText = false
+                    viewModel.clearRecognizedText()
+                }) { Text(stringResource(R.string.remove)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmRemoveText = false }) { Text(stringResource(R.string.cancel)) }
+            },
+        )
+    }
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
         when (val state = viewModel.recognition) {
             is RecognitionState.Running -> Surface(
@@ -369,10 +424,39 @@ private fun RecognitionSection(
             }
         }
 
-        if (viewModel.recognizedText.isNotBlank()) {
-            TextButton(onClick = { showText = !showText }) {
-                Text(stringResource(if (showText) R.string.recognized_text_hide else R.string.recognized_text_show))
+        // Bleibt bis zum Speichern sichtbar; der Screenreader liest den Hinweis vor, sobald er erscheint.
+        if (viewModel.showCheckHint && !viewModel.isRecognizing) {
+            Surface(
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    text = stringResource(R.string.ocr_done),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .padding(Spacing.m)
+                        .semantics { liveRegion = LiveRegionMode.Polite },
+                )
             }
+        }
+
+        val hasText = viewModel.recognizedText.isNotBlank()
+        if (viewModel.pageCount > 0 || hasText) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                if (viewModel.pageCount > 0) {
+                    TextButton(onClick = viewModel::showPages, enabled = enabled) { Text(stringResource(R.string.pages_show)) }
+                }
+                if (hasText) {
+                    TextButton(onClick = { showText = !showText }) {
+                        Text(stringResource(if (showText) R.string.recognized_text_hide else R.string.recognized_text_show))
+                    }
+                }
+            }
+        }
+
+        if (hasText) {
             if (showText) {
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant,
@@ -392,6 +476,9 @@ private fun RecognitionSection(
                         )
                         SelectionContainer {
                             Text(viewModel.recognizedText, style = MaterialTheme.typography.bodyMedium)
+                        }
+                        TextButton(onClick = { confirmRemoveText = true }, modifier = Modifier.align(Alignment.End)) {
+                            Text(stringResource(R.string.recognized_text_remove))
                         }
                     }
                 }
@@ -448,7 +535,7 @@ private fun RecognitionDialog(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(Spacing.s),
             ) {
-                Text(stringResource(R.string.ocr_dialog_text))
+                Text(stringResource(R.string.ocr_dialog_text, MAX_PAGES))
                 Spacer(Modifier.size(Spacing.xs))
                 if (hasRecipePhoto) {
                     DialogOption(R.drawable.ic_document_scanner, R.string.ocr_from_recipe_photo, onRecipePhoto)

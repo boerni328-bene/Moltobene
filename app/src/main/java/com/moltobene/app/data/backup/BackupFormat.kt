@@ -12,7 +12,10 @@ import kotlinx.serialization.json.Json
  * Aufbau der Sicherungsdatei (ZIP):
  *  - manifest.json  – Kennung, Formatversion, App-Version, Datum, Anzahl
  *  - recipes.json   – alle Rezepte
- *  - photos/<id>.jpg und photos/<id>_thumb.jpg
+ *  - photos/<id>.jpg und photos/<id>_thumb.jpg – Fotos der Gerichte und Originalseiten
+ *
+ * Seit 0.7.0 nennt ein Rezept seine Originalseiten in „pages“. Ältere Sicherungen haben das Feld nicht
+ * und bleiben lesbar; ältere App-Versionen übergehen es und übernehmen die Rezepte ohne Originalseiten.
  *
  * Regel: Alte Sicherungen müssen immer lesbar bleiben. Neue Felder nur mit Standardwert ergänzen;
  * bei einer inkompatiblen Änderung [CURRENT_FORMAT_VERSION] erhöhen und das alte Format weiter lesen.
@@ -65,6 +68,7 @@ data class BackupRecipe(
     val steps: List<String> = emptyList(),
     val tags: List<BackupTag> = emptyList(),
     val photos: List<String> = emptyList(),
+    val pages: List<String> = emptyList(),
     val createdAt: Long = 0,
     val updatedAt: Long = 0,
 )
@@ -106,6 +110,7 @@ fun Recipe.toBackup() = BackupRecipe(
     steps = steps,
     tags = tags.map { BackupTag(name = it.name, key = it.predefinedKey) },
     photos = photoIds,
+    pages = pageIds,
     createdAt = createdAt,
     updatedAt = updatedAt,
 )
@@ -127,6 +132,7 @@ fun BackupRecipe.toRecipe() = Recipe(
     steps = steps,
     tags = tags.map { Tag(name = it.name, predefinedKey = it.key) },
     photoIds = photos,
+    pageIds = pages,
     createdAt = createdAt,
     updatedAt = updatedAt,
 )

@@ -57,6 +57,7 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 | Quelle | Source | Herkunft |
 | Notizen | Notes | Kommentar |
 | Foto | Photo | Bild |
+| Originalseite (Foto der Vorlage, z. B. der Kochbuchseite) | Original page | Scan, Vorlage |
 | Schlagwort | Tag | Kategorie, Tag |
 | Favorit | Favorite | |
 | Entwurf | Draft | |
@@ -115,7 +116,7 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 - `data/` – Rezept-Modell (`Recipe.kt`), Textumwandlung und Suche (reines Kotlin, per Unit-Test prüfbar), `db/` (Room-Datenbank mit Volltextsuche), `photos/` (einzige Stelle für Fotos), `backup/` (Sicherungsdatei), `share/` (Teilen als Text und als schema.org-Rezeptdatei; Notizen werden nie geteilt), `ocr/` (Texterkennung mit Tesseract; `PageLayout` erkennt Zutaten-Tabellen mit Trennlinien, damit Zutat und Menge je Zeile einzeln gelesen werden; `AmountText` ordnet Mengen und korrigiert Einheiten; `HocrText` setzt den Text aus dem Tesseract-Ergebnis (hOCR) zusammen und lässt unsicher gelesene Reste von Symbolen, Knöpfen und Fotos weg; `CropArea` ist der Bereich aus „Bereich auswählen“; `RecipeTextParser` teilt Text in Titel, Portionen, Zutaten und Zubereitung, `TextLanguage` erkennt die Sprache – alles reines Kotlin mit Unit-Tests auf echten Tesseract-Ergebnissen und einem selbst erzeugten Tabellenbild unter `test/resources/ocr/`; Fotos aus echten Kochbüchern kommen wegen des Urheberrechts nicht ins Repository), `AppPreferences` (kleine Merkwerte), `RecipeRepository` als zentrale Stelle für Speichern und Laden.
 - `ui/` – je Bildschirm ein Ordner mit Screen und ViewModel; Navigation Compose mit typsicheren Zielen (`ui/navigation/Routes.kt`). Die gemeinsamen Bausteine hält `AppContainer` (in `MoltobeneApplication.kt`), alles wird erst bei Bedarf erzeugt.
 - Datei-, Datenbank- und Bildzugriffe laufen nie auf dem Hauptthread. Formulareingaben liegen im `SavedStateHandle`.
-- Freigegebene Bibliotheken: Room (mit KSP), Navigation Compose, Coil (ohne Internet-Modul), kotlinx.serialization, Tesseract4Android (Texterkennung; kommt über JitPack, dort nur für die Gruppe `cz.adaptech.tesseract4android` freigegeben). Weitere nur nach Rückfrage.
+- Freigegebene Bibliotheken: Room (mit KSP), Navigation Compose, Coil (ohne Internet-Modul), kotlinx.serialization, Tesseract4Android (Texterkennung; kommt über JitPack, dort nur für die Gruppe `cz.adaptech.tesseract4android` freigegeben), Robolectric (nur für Tests, z. B. Datenbank-Umbauten mit einer echten Datenbank). Weitere nur nach Rückfrage.
 - Jeder mitgelieferte quelloffene Baustein steht mit Lizenz in `ui/licenses/Licenses.kt` (Lizenztexte unter `assets/licenses/`), angezeigt unter Einstellungen → Info → „Open-Source-Lizenzen“. Neue Bausteine dort ergänzen.
 - Texterkennung: Sprachpakete `tessdata_fast` (Deutsch, Englisch, Italienisch, Französisch, Spanisch) liegen unter `assets/tessdata/` (Stand `tesseract-ocr/tessdata_fast@87416418`, Lizenz Apache 2.0). Eingestellt ist Sauvola-Schwellenwert (`thresholding_method=2`), Fotos werden auf etwa 2400 px gebracht; beides war in Tests mit nachgestellten Handyfotos am zuverlässigsten. Native Bibliotheken nur für `armeabi-v7a` und `arm64-v8a`.
 

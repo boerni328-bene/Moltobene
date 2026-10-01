@@ -10,10 +10,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 abstract class RecipeDao {
 
+    // Die Liste zeigt nur Fotos des Gerichts, nie eine Originalseite.
     @Query(
         """
         SELECT id, title, isDraft,
-            (SELECT photoId FROM recipe_photos WHERE recipe_photos.recipeId = recipes.id
+            (SELECT photoId FROM recipe_photos WHERE recipe_photos.recipeId = recipes.id AND kind = 'photo'
              ORDER BY position LIMIT 1) AS photoId
         FROM recipes
         ORDER BY title COLLATE NOCASE, createdAt
@@ -24,7 +25,7 @@ abstract class RecipeDao {
     @Query(
         """
         SELECT id, title, isDraft,
-            (SELECT photoId FROM recipe_photos WHERE recipe_photos.recipeId = recipes.id
+            (SELECT photoId FROM recipe_photos WHERE recipe_photos.recipeId = recipes.id AND kind = 'photo'
              ORDER BY position LIMIT 1) AS photoId
         FROM recipes
         WHERE id IN (SELECT recipeId FROM recipe_search WHERE recipe_search MATCH :match)

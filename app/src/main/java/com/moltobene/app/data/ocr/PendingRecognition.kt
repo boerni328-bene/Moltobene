@@ -12,15 +12,17 @@ import java.io.OutputStream
 import java.util.UUID
 
 /**
- * Hält eine Texterkennung fest, bis ihr Ergebnis im Rezept steht (Issue #37). Beendet Android die App
- * im Hintergrund, gehen so weder die Seiten noch ein schon fertiges Ergebnis verloren:
+ * Hält die gelesenen Seiten eines Formulars fest, bis das Rezept gespeichert oder verworfen ist
+ * (Issues #37, #38). Beendet Android die App im Hintergrund, gehen so weder die Seiten noch ein
+ * schon fertiges Ergebnis verloren, und bis zum Speichern lassen sich die Seiten zum Prüfen ansehen:
  * - Ausgewählte Fotos werden sofort kopiert, denn die Leseerlaubnis der Fotoauswahl gilt nur vorübergehend.
  *   Das Kamerafoto wird übernommen, damit die nächste Aufnahme es nicht überschreibt.
  * - Ein Ergebnis, das im Hintergrund fertig wird, kommt in eine Datei und wird beim Zurückkehren übernommen.
  *
  * Alles liegt in noBackupFilesDir und geht weder in Sicherungen noch beim Umzug auf ein neues Handy mit.
- * Die Seiten sind unveränderte Kopien (samt Aufnahmeort). Sie werden nach dem Erkennen oder Verwerfen
- * gelöscht, übrig gebliebene beim nächsten Start ([deleteLeftovers]).
+ * Die Seiten sind unveränderte Kopien (samt Aufnahmeort). Beim Speichern werden sie auf Wunsch als
+ * Originalseiten neu gespeichert ([com.moltobene.app.data.photos.PhotoStore.importPage]); danach bzw. beim
+ * Verwerfen wird alles gelöscht, übrig gebliebene Reste beim nächsten Start ([deleteLeftovers]).
  */
 class PendingRecognition(private val context: Context, private val photoStore: PhotoStore) {
 
@@ -74,7 +76,17 @@ class PendingRecognition(private val context: Context, private val photoStore: P
         if (file.isFile) SavedResult.decode(file.readText()) else null
     }
 
-    /** Löscht die Seiten und das Ergebnis der Erkennung [session]. */
+    /** Löscht ein gesichertes Ergebnis, sobald es im Rezept steht. */
+    suspend fun deleteResult(session: String) = withContext(Dispatchers.IO) {
+        resultFile(session).delete()
+    }
+
+    /** Löscht einzelne Seiten, z. B. die einer abgebrochenen Erkennung. */
+    suspend fun deletePages(session: String, names: List<String>) = withContext(Dispatchers.IO) {
+        names.forEach { pageFile(session, it).delete() }
+    }
+
+    /** Löscht alle Seiten und das Ergebnis der Erkennung [session]. */
     suspend fun delete(session: String) = withContext(Dispatchers.IO) {
         sessionDir(session).deleteRecursively()
     }

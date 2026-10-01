@@ -23,6 +23,7 @@ import com.moltobene.app.data.ocr.TextLanguage
 import com.moltobene.app.data.ocr.TextRecognizer
 import com.moltobene.app.data.ocr.crop
 import com.moltobene.app.data.photos.PhotoStore
+import com.moltobene.app.ui.components.PageViewerModel
 import com.moltobene.app.ui.navigation.EditRoute
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -39,6 +40,21 @@ sealed interface RecognitionState {
 
 /** „Bereich auswählen“ vor der Texterkennung; [page] zählt ab 1. */
 data class AreaSelection(val page: Int, val pageCount: Int, val area: CropArea)
+
+/** Eine gelesene Seite mit dem Bereich, der gelesen wurde. [ref] ist „photo:<Kennung>“ oder „page:<Name>“. */
+private data class ReadPage(val ref: String, val area: CropArea) {
+    fun encode(): String = ref + "|" + area.encode()
+
+    companion object {
+        fun decode(line: String) = ReadPage(line.substringBefore('|'), CropArea.decode(line.substringAfter('|', "")))
+    }
+}
+
+/** Eine Seite in „Seiten ansehen“: eine schon gespeicherte Originalseite oder eine gerade gelesene Seite. */
+private sealed interface ViewerPage {
+    data class Stored(val photoId: String) : ViewerPage
+    data class Read(val page: ReadPage) : ViewerPage
+}
 
 /**
  * Formular zum Hinzufügen und Bearbeiten. Alle Eingaben liegen im SavedStateHandle und überstehen
@@ -69,18 +85,24 @@ class EditViewModel(
     private val recognizedTextField = SavedField(handle, "recognizedText", "")
     private val languageField = SavedField<String?>(handle, "language", null)
     private val startPromptShownField = SavedField(handle, "startPromptShown", false)
-    private val askKeepPhotoField = SavedField(handle, "askKeepPhoto", false)
-    /** Seiten für „Bereich auswählen“ und die Erkennung, eine je Zeile: „photo:<Kennung>“ oder „page:<Name>“. */
+    /** Nach einer Erkennung bleibt der Hinweis zum Prüfen bis zum Speichern sichtbar. */
+    private val checkHintField = SavedField(handle, "checkHint", false)
+    /** Seiten für „Bereich auswählen“ und die laufende Erkennung, eine je Zeile: „photo:<Kennung>“ oder „page:<Name>“. */
     private val areaPagesField = SavedField(handle, "areaPages", "")
     /** Gewählter Bereich je Seite, getrennt mit „;“. */
     private val areaListField = SavedField(handle, "areaList", "")
     private val areaIndexField = SavedField(handle, "areaIndex", 0)
-    /** Kennung, unter der die Seiten und ein Ergebnis der Erkennung als Dateien liegen (Issue #37). */
+    /** Kennung, unter der die kopierten Seiten und ein Ergebnis der Erkennung als Dateien liegen (#37). */
     private val sessionField = SavedField<String?>(handle, "recognitionSession", null)
     /** Die Erkennung läuft; Seiten und Bereiche bleiben, bis ihr Ergebnis im Rezept steht. */
     private val recognitionStartedField = SavedField(handle, "recognitionStarted", false)
-    /** Das Rezeptfoto stammt aus den gelesenen Seiten – danach wird gefragt, ob es bleiben soll. */
-    private val photoFromPagesField = SavedField(handle, "photoFromPages", false)
+    /** Gelesene Seiten dieses Formulars (#38), eine je Zeile – zum Prüfen und als mögliche Originalseiten. */
+    private val readPagesField = SavedField(handle, "readPages", "")
+    /** Schon gespeicherte Originalseiten des Rezepts, eine Kennung je Zeile, und ihr Stand beim Öffnen. */
+    private val pageIdsField = SavedField(handle, "pageIds", "")
+    private val originalPageIdsField = SavedField(handle, "originalPageIds", "")
+    /** Vor dem Speichern wird gefragt, ob die gelesenen Seiten als Originalseiten bleiben. */
+    private val askKeepPagesField = SavedField(handle, "askKeepPages", false)
     private val photoIdField = SavedField<String?>(handle, "photoId", null)
     private val originalPhotoIdField = SavedField<String?>(handle, "originalPhotoId", null)
     /** Steht von Anfang an fest, damit der Entwurf auch nach dem Beenden durch Android dieselbe Kennung behält. */
@@ -119,9 +141,8 @@ class EditViewModel(
     val photoFile: File? get() = photoIdField.value?.let { photoStore.photoFile(it) }
     val hasPhoto: Boolean get() = photoIdField.value != null
     val recognizedText: String get() = recognizedTextField.value
-
-    /** Nach der Texterkennung fragen, ob das Rezeptfoto (meist die Buchseite) bleiben soll. */
-    val askKeepPhoto: Boolean get() = askKeepPhotoField.value
+    val showCheckHint: Boolean get() = checkHintField.value
+    val askKeepPages: Boolean get() = askKeepPagesField.value
     val isDirty: Boolean get() = dirtyField.value
 
     var titleError by mutableStateOf(false)
@@ -147,6 +168,12 @@ class EditViewModel(
         private set
     private var previewJob: Job? = null
 
+    /** „Seiten ansehen“ (#38): gespeicherte Originalseiten und die gerade gelesenen Seiten. */
+    val viewer = PageViewerModel(viewModelScope) { index -> loadViewerPage(index) }
+
+    /** Anzahl der Seiten in „Seiten ansehen“. */
+    val pageCount: Int get() = viewerPages().size
+
     /** Läuft gerade „Bereich auswählen“? */
     val areaSelection: AreaSelection?
         get() {
@@ -165,8 +192,12 @@ class EditViewModel(
     /** Die App ist nicht sichtbar; Android kann sie jederzeit beenden. */
     private var inBackground = false
 
-    /** Dateien einer Erkennung, die im Hintergrund zu Ende ging; gelöscht, sobald die App wieder sichtbar ist. */
-    private var sessionToDelete: String? = null
+    /**
+     * Aufräumen nach einer Erkennung, die im Hintergrund zu Ende ging. Der zuletzt von Android
+     * gesicherte Stand kennt sie noch – beendet Android die App, wird sie damit fortgesetzt.
+     * Erst wenn die App wieder sichtbar ist, werden Ergebnisdatei und ungelesene Seiten gelöscht.
+     */
+    private var cleanUpWhenVisible: (suspend () -> Unit)? = null
 
     init {
         if (!loadedField.value && routeId != null) load(routeId)
@@ -196,6 +227,8 @@ class EditViewModel(
                 notesField.value = recipe.notes
                 photoIdField.value = recipe.photoIds.firstOrNull()
                 originalPhotoIdField.value = recipe.photoIds.firstOrNull()
+                pageIdsField.value = recipe.pageIds.joinToString("\n")
+                originalPageIdsField.value = pageIdsField.value
                 recognizedTextField.value = recipe.originalText.orEmpty()
             }
             loadedField.value = true
@@ -222,15 +255,16 @@ class EditViewModel(
     fun recognizeRecipePhoto() {
         val photoId = photoIdField.value ?: return
         if (isRecognizing) return
-        startAreaSelection(pending.newSession(), listOf(PAGE_PHOTO + photoId))
+        ensureSession()
+        startAreaSelection(listOf(PAGE_PHOTO + photoId))
     }
 
-    /** Liest ausgewählte Fotos in der gewählten Reihenfolge; ohne Rezeptfoto wird das erste zum Rezeptfoto. */
+    /** Liest ausgewählte Fotos in der gewählten Reihenfolge. */
     fun recognizePhotos(uris: List<Uri>) {
         if (uris.isNotEmpty()) keepPages { session -> uris.map { pending.keepPage(session, it) } }
     }
 
-    /** Liest ein gerade aufgenommenes Foto; ohne Rezeptfoto wird es zum Rezeptfoto. */
+    /** Liest ein gerade aufgenommenes Foto. */
     fun onRecognitionCameraResult(success: Boolean) {
         if (success) keepPages { session -> listOf(pending.keepCameraPage(session)) }
     }
@@ -241,22 +275,24 @@ class EditViewModel(
      */
     private fun keepPages(block: suspend (session: String) -> List<String>) {
         if (isRecognizing || isProcessingPhoto) return
-        val session = pending.newSession()
+        val session = ensureSession()
         viewModelScope.launch {
             isProcessingPhoto = true
             try {
                 val names = block(session)
-                startAreaSelection(session, names.map { PAGE_KEPT + it })
+                startAreaSelection(names.map { PAGE_KEPT + it })
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                runCatching { pending.delete(session) }
                 message = R.string.area_load_error
             } finally {
                 isProcessingPhoto = false
             }
         }
     }
+
+    /** Alle Seiten dieses Formulars liegen unter einer Kennung; gelöscht wird beim Speichern oder Verwerfen. */
+    private fun ensureSession(): String = sessionField.value ?: pending.newSession().also { sessionField.value = it }
 
     fun changeArea(area: CropArea) {
         val pages = areaPages()
@@ -286,47 +322,52 @@ class EditViewModel(
     }
 
     /** „Bereich auswählen“ abbrechen: Es wird nichts gelesen, die kopierten Seiten werden gelöscht. */
-    fun cancelAreaSelection() = endRecognition()
+    fun cancelAreaSelection() = finishRun(read = false)
 
     /** „Erneut erkennen“ nach einer Unterbrechung: dieselben Seiten mit denselben Bereichen lesen. */
     fun retryRecognition() {
         if (recognitionInterrupted) startRecognition()
     }
 
-    /** Eine unterbrochene Erkennung verwerfen; die kopierten Seiten werden gelöscht. */
-    fun discardRecognition() = endRecognition()
+    /** Eine unterbrochene Erkennung verwerfen; ihre Seiten werden gelöscht. */
+    fun discardRecognition() = finishRun(read = false)
 
-    private fun startAreaSelection(session: String, pages: List<String>) {
-        endRecognition()
-        sessionField.value = session
+    private fun startAreaSelection(pages: List<String>) {
         areaPagesField.value = pages.joinToString("\n")
         areaListField.value = pages.joinToString(";") { CropArea.WHOLE_PAGE.encode() }
+        areaIndexField.value = 0
+        recognitionStartedField.value = false
         loadAreaPreview()
     }
 
     /**
-     * Beendet „Bereich auswählen“ bzw. die Erkennung und löscht die kopierten Seiten. Im Hintergrund
-     * bleiben sie noch, bis die App wieder sichtbar ist: Der zuletzt von Android gesicherte Stand kennt
-     * die Erkennung noch, und beendet Android die App, wird sie damit fortgesetzt.
+     * Beendet „Bereich auswählen“ bzw. eine Erkennung. Wurden die Seiten gelesen ([read]), kommen sie zu den
+     * gelesenen Seiten, sonst werden die kopierten gelöscht. Im Hintergrund wird erst aufgeräumt, wenn die App
+     * wieder sichtbar ist (siehe [cleanUpWhenVisible]).
      */
-    private fun endRecognition() {
+    private fun finishRun(read: Boolean) {
         previewJob?.cancel()
-        val session = sessionField.value
-        sessionField.value = null
+        val pages = areaPages()
+        val areas = areas(pages.size)
+        if (read) {
+            val newPages = pages.mapIndexed { index, ref -> ReadPage(ref, areas[index]) }
+            val kept = readPages().filter { old -> newPages.none { it.ref == old.ref } }
+            readPagesField.value = (kept + newPages).joinToString("\n") { it.encode() }
+        }
         areaPagesField.value = ""
         areaListField.value = ""
         areaIndexField.value = 0
         recognitionStartedField.value = false
-        photoFromPagesField.value = false
         recognitionInterrupted = false
         areaPreview = null
         areaPreviewFailed = false
-        if (session == null) return
-        if (inBackground) {
-            sessionToDelete = session
-        } else {
-            viewModelScope.launch { runCatching { pending.delete(session) } }
+        val session = sessionField.value ?: return
+        val unread = if (read) emptyList() else pages.filter { it.startsWith(PAGE_KEPT) }.map { it.removePrefix(PAGE_KEPT) }
+        val cleanUp: suspend () -> Unit = {
+            runCatching { pending.deletePages(session, unread) }
+            runCatching { pending.deleteResult(session) }
         }
+        if (inBackground) cleanUpWhenVisible = cleanUp else viewModelScope.launch { cleanUp() }
     }
 
     private fun areaPages(): List<String> = areaPagesField.value.lines().filter { it.isNotEmpty() }
@@ -336,22 +377,28 @@ class EditViewModel(
         return List(count) { saved.getOrElse(it) { CropArea.WHOLE_PAGE } }
     }
 
-    /** Adresse einer Seite: das Rezeptfoto oder eine kopierte Seite der Erkennung [session]. */
-    private fun pageUri(page: String, session: String?): Uri = when {
-        page.startsWith(PAGE_PHOTO) -> Uri.fromFile(photoStore.photoFile(page.removePrefix(PAGE_PHOTO)))
-        page.startsWith(PAGE_KEPT) && session != null -> pending.pageUri(session, page.removePrefix(PAGE_KEPT))
-        else -> throw IOException("Seite nicht lesbar")
+    private fun readPages(): List<ReadPage> = readPagesField.value.lines().filter { it.isNotEmpty() }.map { ReadPage.decode(it) }
+
+    private fun storedPageIds(): List<String> = pageIdsField.value.lines().filter { it.isNotEmpty() }
+
+    /** Adresse einer Seite: das Rezeptfoto oder eine kopierte Seite. */
+    private fun pageUri(ref: String): Uri {
+        val session = sessionField.value
+        return when {
+            ref.startsWith(PAGE_PHOTO) -> Uri.fromFile(photoStore.photoFile(ref.removePrefix(PAGE_PHOTO)))
+            ref.startsWith(PAGE_KEPT) && session != null -> pending.pageUri(session, ref.removePrefix(PAGE_KEPT))
+            else -> throw IOException("Seite nicht lesbar")
+        }
     }
 
     private fun loadAreaPreview() {
         val page = areaPages().getOrNull(areaIndexField.value) ?: return
-        val session = sessionField.value
         previewJob?.cancel()
         areaPreview = null
         areaPreviewFailed = false
         previewJob = viewModelScope.launch {
             try {
-                areaPreview = photoStore.loadPreview(pageUri(page, session))
+                areaPreview = photoStore.loadPreview(pageUri(page))
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -369,8 +416,8 @@ class EditViewModel(
         viewModelScope.launch {
             val saved = session?.let { runCatching { pending.loadResult(it) }.getOrNull() }
             if (saved != null) {
-                showResult(saved)
-                endRecognition()
+                applyResult(saved)
+                finishRun(read = true)
             } else {
                 recognitionInterrupted = true
             }
@@ -382,51 +429,24 @@ class EditViewModel(
         val pages = areaPages()
         if (pages.isEmpty() || isRecognizing) return
         val areas = areas(pages.size)
-        val session = sessionField.value
         val loaders = pages.mapIndexed { index, page ->
-            suspend { photoStore.loadForRecognition(pageUri(page, session)).crop(areas[index]) }
+            suspend { photoStore.loadForRecognition(pageUri(page)).crop(areas[index]) }
         }
-        val first = pages.first()
-        if (first.startsWith(PAGE_PHOTO)) photoFromPagesField.value = true
-        runRecognition(loaders) {
-            first.startsWith(PAGE_KEPT) && takeAsRecipePhotoIfMissing(pageUri(first, session))
-        }
+        runRecognition(loaders)
     }
 
     fun cancelRecognition() = recognizer.cancel()
 
-    fun keepPhoto() {
-        askKeepPhotoField.value = false
-    }
-
-    /** Entfernt das Foto nach der Texterkennung; gelöscht wird es erst beim Speichern. */
-    fun removePhotoAfterRecognition() {
-        askKeepPhotoField.value = false
-        removePhoto()
-    }
-
-    /** Ohne Rezeptfoto wird das erste gelesene Foto zum Rezeptfoto. Liefert true, wenn das geschehen ist. */
-    private suspend fun takeAsRecipePhotoIfMissing(uri: Uri): Boolean {
-        if (photoIdField.value != null) return false
-        replacePhoto(photoStore.importFromUri(uri))
-        return true
-    }
-
-    /** @param prepare läuft vor der Erkennung; liefert true, wenn dabei ein Rezeptfoto übernommen wurde */
-    private fun runRecognition(pages: List<suspend () -> GrayImage>, prepare: suspend () -> Boolean) {
+    private fun runRecognition(pages: List<suspend () -> GrayImage>) {
         if (isRecognizing) return
         recognitionInterrupted = false
         recognition = RecognitionState.Running(1, pages.size)
+        val session = sessionField.value
         viewModelScope.launch {
+            var read = false
             try {
-                // Zuerst das Foto übernehmen: Es bleibt erhalten, auch wenn die Erkennung nicht klappt.
-                try {
-                    if (prepare()) photoFromPagesField.value = true
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    message = R.string.photo_error
-                }
+                // Ein Ergebnis einer früheren Erkennung darf nicht für diese gehalten werden.
+                session?.let { runCatching { pending.deleteResult(it) } }
                 val preferred = preferences.recognitionLanguage()
                     ?: TextLanguage.supportedOrDefault(Locale.getDefault().language)
                 val result = recognizer.recognize(pages, preferred) { index ->
@@ -437,8 +457,9 @@ class EditViewModel(
                     message = R.string.ocr_nothing
                 } else {
                     // Im Hintergrund kann Android die App jederzeit beenden: Ergebnis zuerst als Datei sichern.
-                    if (inBackground) sessionField.value?.let { runCatching { pending.saveResult(it, result) } }
-                    showResult(result)
+                    if (inBackground && session != null) runCatching { pending.saveResult(session, result) }
+                    applyResult(result)
+                    read = true
                 }
             } catch (e: TextRecognizer.CancelledException) {
                 // Abgebrochen: nichts ändern.
@@ -448,15 +469,14 @@ class EditViewModel(
                 message = R.string.ocr_error
             } finally {
                 recognition = RecognitionState.Idle
-                endRecognition()
+                finishRun(read)
             }
         }
     }
 
-    private fun showResult(result: TextRecognizer.Result) {
+    private fun applyResult(result: TextRecognizer.Result) {
         applyRecognized(result)
-        message = R.string.ocr_done
-        if (photoFromPagesField.value && photoIdField.value != null) askKeepPhotoField.value = true
+        checkHintField.value = true
         // Im Hintergrund wird ein neues Rezept gleich als Entwurf gesichert, wie beim Wechsel in den Hintergrund.
         if (inBackground) saveDraft()
     }
@@ -488,6 +508,63 @@ class EditViewModel(
             current.contains(block) -> current
             else -> current.trimEnd() + "\n" + block
         }
+    }
+
+    /** Entfernt den gespeicherten erkannten Text, z. B. weil ein Bildschirmfoto fremde Namen enthielt. */
+    fun clearRecognizedText() = change(recognizedTextField, "")
+
+    /** Gespeicherte Originalseiten zuerst, dann die gelesenen; das Rezeptfoto nur, solange es noch dasselbe ist. */
+    private fun viewerPages(): List<ViewerPage> =
+        storedPageIds().map { ViewerPage.Stored(it) } +
+            readPages().filter { !it.ref.startsWith(PAGE_PHOTO) || it.ref == PAGE_PHOTO + photoIdField.value }
+                .map { ViewerPage.Read(it) }
+
+    private suspend fun loadViewerPage(index: Int): Bitmap =
+        when (val page = viewerPages().getOrNull(index) ?: throw IOException("Seite fehlt")) {
+            is ViewerPage.Stored -> photoStore.loadPage(Uri.fromFile(photoStore.photoFile(page.photoId)), CropArea.WHOLE_PAGE)
+            is ViewerPage.Read -> photoStore.loadPage(pageUri(page.page.ref), page.page.area)
+        }
+
+    fun showPages() = viewer.open(0)
+
+    fun showPage(index: Int) {
+        if (index in 0 until pageCount) viewer.open(index)
+    }
+
+    private fun viewerPage(): ViewerPage? = viewer.page?.let { viewerPages().getOrNull(it) }
+
+    /** Die offene Seite ist eine Originalseite oder eine kopierte Seite – nicht das Rezeptfoto selbst. */
+    val canChangeViewerPage: Boolean
+        get() = when (val page = viewerPage()) {
+            is ViewerPage.Stored -> true
+            is ViewerPage.Read -> page.page.ref.startsWith(PAGE_KEPT)
+            null -> false
+        }
+
+    /** Macht die offene Seite zum Rezeptfoto – z. B. wenn die Buchseite das Gericht zeigt. */
+    fun useViewerPageAsPhoto() {
+        val uri = when (val page = viewerPage()) {
+            is ViewerPage.Stored -> Uri.fromFile(photoStore.photoFile(page.photoId))
+            is ViewerPage.Read -> if (page.page.ref.startsWith(PAGE_KEPT)) pageUri(page.page.ref) else return
+            null -> return
+        }
+        viewer.close()
+        importPhoto { photoStore.importFromUri(uri) }
+    }
+
+    /** Nimmt die offene Seite heraus; gelöscht wird erst beim Speichern. */
+    fun removeViewerPage() {
+        val index = viewer.page ?: return
+        when (val page = viewerPage()) {
+            is ViewerPage.Stored -> change(pageIdsField, storedPageIds().filter { it != page.photoId }.joinToString("\n"))
+            is ViewerPage.Read -> if (page.page.ref.startsWith(PAGE_KEPT)) {
+                change(readPagesField, readPages().filter { it.ref != page.page.ref }.joinToString("\n") { it.encode() })
+            } else {
+                return
+            }
+            null -> return
+        }
+        if (pageCount == 0) viewer.close() else viewer.open(index.coerceAtMost(pageCount - 1))
     }
 
     override fun onCleared() {
@@ -528,7 +605,26 @@ class EditViewModel(
         }
     }
 
-    fun save(onSaved: (id: String, wasNew: Boolean) -> Unit) {
+    /** „Speichern“: Gibt es gelesene Seiten, wird zuerst gefragt, ob sie als Originalseiten bleiben (#38). */
+    fun requestSave(onSaved: (id: String, wasNew: Boolean) -> Unit) {
+        if (title.isBlank()) {
+            titleError = true
+            return
+        }
+        if (readPages().any { it.ref.startsWith(PAGE_KEPT) }) {
+            askKeepPagesField.value = true
+        } else {
+            save(keepPages = false, onSaved = onSaved)
+        }
+    }
+
+    fun cancelKeepPages() {
+        askKeepPagesField.value = false
+    }
+
+    /** @param keepPages die gelesenen Seiten werden als Originalseiten beim Rezept gespeichert */
+    fun save(keepPages: Boolean, onSaved: (id: String, wasNew: Boolean) -> Unit) {
+        askKeepPagesField.value = false
         if (title.isBlank()) {
             titleError = true
             return
@@ -536,20 +632,29 @@ class EditViewModel(
         if (isSaving) return
         viewModelScope.launch {
             isSaving = true
+            val newPages = mutableListOf<String>()
             try {
+                if (keepPages) {
+                    readPages().filter { it.ref.startsWith(PAGE_KEPT) }.forEach { page ->
+                        newPages += photoStore.importPage(pageUri(page.ref), page.area)
+                    }
+                }
                 val id = routeId ?: draftIdField.value ?: RecipeIds.newId()
                 val base = repository.getRecipe(id)
-                repository.save(buildRecipe(id, base, isDraft = false))
+                repository.save(buildRecipe(id, base, isDraft = false, newPages = newPages))
                 val oldMainPhoto = originalPhotoIdField.value
                 if (oldMainPhoto != null && oldMainPhoto != photoIdField.value) photoStore.delete(oldMainPhoto)
                 originalPhotoIdField.value = photoIdField.value
-                deleteKeptPages()
+                val removedPages = originalPageIdsField.value.lines().filter { it.isNotEmpty() && it !in storedPageIds() }
+                removedPages.forEach { photoStore.delete(it) }
+                deleteSession()
                 dirtyField.value = false
                 finished = true
                 onSaved(id, isNew)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                newPages.forEach { runCatching { photoStore.delete(it) } }
                 message = R.string.save_error
             } finally {
                 isSaving = false
@@ -557,29 +662,29 @@ class EditViewModel(
         }
     }
 
-    /** Verwirft alle Änderungen: neue Fotos und ein automatisch gespeicherter Entwurf werden entfernt. */
+    /** Verwirft alle Änderungen: neue Fotos, gelesene Seiten und ein automatisch gespeicherter Entwurf werden entfernt. */
     fun discard(onDone: () -> Unit) {
         finished = true
         viewModelScope.launch {
             val current = photoIdField.value
             if (current != null && current != originalPhotoIdField.value) photoStore.delete(current)
             draftIdField.value?.let { runCatching { repository.delete(it) } }
-            deleteKeptPages()
+            deleteSession()
             onDone()
         }
     }
 
-    /** Seiten einer unterbrochenen Erkennung löschen, bevor das Formular geschlossen wird. */
-    private suspend fun deleteKeptPages() {
+    /** Kopierte Seiten löschen, bevor das Formular geschlossen wird. */
+    private suspend fun deleteSession() {
         sessionField.value?.let { runCatching { pending.delete(it) } }
     }
 
-    /** App wieder sichtbar: Die Dateien einer im Hintergrund beendeten Erkennung werden nicht mehr gebraucht. */
+    /** App wieder sichtbar: Aufräumen nach einer Erkennung, die im Hintergrund zu Ende ging. */
     fun onStart() {
         inBackground = false
-        val session = sessionToDelete ?: return
-        sessionToDelete = null
-        viewModelScope.launch { runCatching { pending.delete(session) } }
+        val cleanUp = cleanUpWhenVisible ?: return
+        cleanUpWhenVisible = null
+        viewModelScope.launch { cleanUp() }
     }
 
     /** App geht in den Hintergrund: ein neues Rezept still als Entwurf sichern. */
@@ -602,7 +707,7 @@ class EditViewModel(
     private fun hasContent(): Boolean =
         listOf(title, ingredients, steps, source, notes, recognizedText).any { it.isNotBlank() } || photoIdField.value != null
 
-    private fun buildRecipe(id: String, base: Recipe?, isDraft: Boolean): Recipe {
+    private fun buildRecipe(id: String, base: Recipe?, isDraft: Boolean, newPages: List<String> = emptyList()): Recipe {
         val now = System.currentTimeMillis()
         val start = base ?: Recipe(
             id = id,
@@ -629,6 +734,7 @@ class EditViewModel(
             ingredients = RecipeText.parseIngredients(ingredients),
             steps = RecipeText.parseSteps(steps),
             photoIds = listOfNotNull(mainPhoto) + furtherPhotos,
+            pageIds = storedPageIds() + newPages,
             originalText = recognizedText.trim().ifEmpty { null },
             language = languageField.value ?: start.language,
             updatedAt = now,

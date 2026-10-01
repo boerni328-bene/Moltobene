@@ -11,6 +11,7 @@ room = "2.7.2"
 coil = "3.0.4"
 kotlinxSerialization = "1.7.3"
 junit = "4.13.2"
+robolectric = "4.14.1"
 tesseract4android = "4.9.0"
 
 [libraries]
@@ -33,6 +34,8 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+# Nur für Tests (z. B. Datenbank-Umbauten mit einer echten Datenbank); kommt nicht in die App.
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 # Texterkennung (Tesseract, quelloffen, nur auf dem Handy). Kommt über JitPack, siehe settings.gradle.kts.
 tesseract4android = { group = "cz.adaptech.tesseract4android", name = "tesseract4android-openmp", version.ref = "tesseract4android" }
 

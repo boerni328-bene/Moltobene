@@ -23,6 +23,7 @@ class BackupTest {
     val temp = TemporaryFolder()
 
     private val photoId = "11111111-2222-3333-4444-555555555555"
+    private val pageId = "66666666-7777-8888-9999-000000000000"
 
     private val recipe = Recipe(
         id = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
@@ -37,6 +38,7 @@ class BackupTest {
         steps = listOf("Ofen vorheizen.", "Backen."),
         tags = listOf(Tag("Kuchen", predefinedKey = "cake"), Tag("sonntags")),
         photoIds = listOf(photoId),
+        pageIds = listOf(pageId),
         createdAt = 1_000,
         updatedAt = 2_000,
     )
@@ -45,17 +47,34 @@ class BackupTest {
     fun sicherungUebersteht_HinUndRueckweg() {
         val full = temp.newFile("full.jpg").apply { writeBytes(byteArrayOf(1, 2, 3)) }
         val thumb = temp.newFile("thumb.jpg").apply { writeBytes(byteArrayOf(4, 5)) }
+        val page = temp.newFile("page.jpg").apply { writeBytes(byteArrayOf(6, 7)) }
+        val pageThumb = temp.newFile("page_thumb.jpg").apply { writeBytes(byteArrayOf(8)) }
+        val photos = mapOf(photoId to (full to thumb), pageId to (page to pageThumb))
         val bytes = ByteArrayOutputStream().also { out ->
-            BackupWriter.write(out, BackupManifest(appVersion = "0.3.0", recipeCount = 1), listOf(recipe.toBackup()), mapOf(photoId to (full to thumb)))
+            BackupWriter.write(out, BackupManifest(appVersion = "0.7.0", recipeCount = 1), listOf(recipe.toBackup()), photos)
         }.toByteArray()
 
         val dir = temp.newFolder("restore")
         val result = BackupReader().read(ByteArrayInputStream(bytes), dir) as BackupReader.Result.Ok
 
+        // Foto des Gerichts und Originalseite bleiben getrennt erhalten.
         assertEquals(listOf(recipe), result.recipes.map { it.toRecipe() })
         assertEquals(0, result.skippedRecipes)
         assertTrue(File(dir, "$photoId.jpg").readBytes().contentEquals(byteArrayOf(1, 2, 3)))
         assertTrue(File(dir, "${photoId}_thumb.jpg").readBytes().contentEquals(byteArrayOf(4, 5)))
+        assertTrue(File(dir, "$pageId.jpg").readBytes().contentEquals(byteArrayOf(6, 7)))
+    }
+
+    @Test
+    fun ungueltigeKennungenVonOriginalseitenWerdenUebergangen() {
+        val bytes = zip(
+            BackupFormat.MANIFEST_ENTRY to BackupFormat.json.encodeToString(BackupManifest.serializer(), BackupManifest()).toByteArray(),
+            BackupFormat.RECIPES_ENTRY to """
+                {"recipes":[{"id":"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee","title":"Gut","pages":["$pageId","../boese"]}]}
+            """.trimIndent().toByteArray(),
+        )
+        val result = BackupReader().read(ByteArrayInputStream(bytes), temp.newFolder("seiten")) as BackupReader.Result.Ok
+        assertEquals(listOf(pageId), result.recipes.single().toRecipe().pageIds)
     }
 
     @Test
@@ -73,6 +92,8 @@ class BackupTest {
         assertTrue(kuchen.ingredients.first().isHeading)
         assertEquals("cake", kuchen.tags.first().predefinedKey)
         assertEquals(SourceType.BOOK, kuchen.source?.type)
+        // Format 1 kennt noch keine Originalseiten.
+        assertTrue(kuchen.pageIds.isEmpty())
         // Unbekannte Felder aus neueren Versionen werden ignoriert, fehlende bekommen Standardwerte.
         val suppe = result.recipes.first { it.title == "Suppe" }.toRecipe()
         assertEquals("", suppe.notes)

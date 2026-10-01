@@ -3,6 +3,22 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.7.0] – 2026-10-01 (versionCode 18)
+
+Erkannte Rezepte leichter prüfen – und die Vorlage beim Rezept behalten.
+
+### Neu
+- **Seiten ansehen:** Nach der Texterkennung lassen sich alle gelesenen Seiten als Vollbild ansehen und vergrößern – mit zwei Fingern, doppeltem Tippen oder den Schaltflächen „Vergrößern“ und „Verkleinern“. So lässt sich der erkannte Text Zeile für Zeile mit der Vorlage vergleichen.
+- **Originalseiten:** Beim Speichern fragt die App einmal „Gelesene Seiten behalten?“. Behaltene Seiten liegen getrennt vom Foto des Gerichts beim Rezept und lassen sich in der Rezeptansicht mit „Originalseite ansehen“ öffnen – praktisch z. B. für handgeschriebene Familienrezepte. Gespeichert wird nur der gewählte Bereich, ohne Aufnahmeort. Originalseiten werden mitgesichert, aber nie geteilt, und lassen sich beim Bearbeiten unter „Seiten ansehen“ einzeln entfernen.
+- Eine gelesene Seite lässt sich mit „Als Rezeptfoto verwenden“ zum Foto des Rezepts machen, z. B. wenn die Buchseite das Gericht zeigt.
+- Der erkannte Text lässt sich mit „Erkannten Text entfernen“ löschen, z. B. wenn ein Bildschirmfoto fremde Namen enthielt.
+
+### Geändert
+- Die erste gelesene Seite wird nicht mehr automatisch zum Rezeptfoto. Die Sammlung zeigt so Fotos der Gerichte statt Textseiten.
+- Statt der kurzen Meldung bleibt nach der Erkennung der Hinweis „Text ins Rezept übernommen. Mengen und Einheiten auf Lesefehler prüfen.“ bis zum Speichern sichtbar. Die Frage „Foto behalten?“ direkt nach der Erkennung entfällt.
+- Meldungen zur Texterkennung sagen jetzt, was sich tun lässt, z. B. „Kein Text gefunden. Am besten klappt es mit einem scharfen, gerade aufgenommenen Foto bei gutem Licht.“
+- Sicherungen enthalten jetzt auch die Originalseiten. Ältere Sicherungen bleiben lesbar.
+
 ## [0.6.1] – 2026-10-01 (versionCode 17)
 
 ### Behoben
