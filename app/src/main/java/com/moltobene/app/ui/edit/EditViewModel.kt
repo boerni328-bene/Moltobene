@@ -265,7 +265,7 @@ class EditViewModel(
         if (!recognizedTextField.value.contains(text)) {
             recognizedTextField.value = listOf(recognizedTextField.value.trim(), text).filter { it.isNotEmpty() }.joinToString("\n\n")
         }
-        val parsed = RecipeTextParser.parse(text)
+        val parsed = RecipeTextParser.parse(text, result.language)
         if (title.isBlank()) parsed.title?.let { title = it }
         if (servings.isBlank()) parsed.servings?.takeIf { it <= 999 }?.let { servingsField.value = it.toString() }
         if (servingsUnit.isBlank()) parsed.servingsUnit?.let { servingsUnitField.value = it }

@@ -10,9 +10,6 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 
-/** Graustufenbild für die Texterkennung: ein Byte je Bildpunkt, Zeile für Zeile. */
-class GrayImage(val width: Int, val height: Int, val pixels: ByteArray)
-
 /**
  * Texterkennung mit Tesseract, ausschließlich auf dem Handy und ohne Internet.
  * Die Sprachpakete liegen in assets/tessdata und werden beim ersten Gebrauch in den App-Speicher kopiert.
@@ -75,23 +72,66 @@ class TextRecognizer(private val context: Context) {
         val code = TextLanguage.tesseractCode(language)
         ensureLanguageData(code)
         if (cancelRequested) throw CancelledException()
+        val bands = PageLayout.analyze(image)
         val tess = TessBaseAPI()
         synchronized(lock) { active = tess }
         try {
             if (!tess.init(dataDir.absolutePath, code, TessBaseAPI.OEM_LSTM_ONLY)) throw IOException("Sprachpaket $code")
-            tess.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO)
             // Sauvola: kommt mit Schatten und ungleichem Licht auf Handyfotos am besten zurecht.
             tess.setVariable("thresholding_method", "2")
             tess.setVariable("user_defined_dpi", "300")
             tess.setImage(image.pixels, image.width, image.height, 1, image.width)
-            // getHOCRText erkennt mit Abbruchmöglichkeit; getUTF8Text liefert danach den fertigen Text.
-            tess.getHOCRText(0)
-            if (cancelRequested) throw CancelledException()
-            return tess.getUTF8Text().orEmpty()
+            if (bands == null) {
+                tess.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO)
+                return recognize(tess)
+            }
+            // Tabelle mit Trennlinien: Abschnitte einzeln lesen, in Tabellenzeilen Zutat und Menge getrennt.
+            val texts = bands.map { band ->
+                when (band) {
+                    is LayoutBand.Text -> readArea(tess, band.box, TessBaseAPI.PageSegMode.PSM_AUTO)
+                    is LayoutBand.Row -> readArea(tess, band.left, TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK)
+                }
+            }
+            // Mengen zuerst direkt auf der Seite lesen ...
+            val amounts = bands.map { band ->
+                val area = (band as? LayoutBand.Row)?.let { PageLayout.amountArea(image, it) } ?: return@map null
+                readArea(tess, area, TessBaseAPI.PageSegMode.PSM_SINGLE_LINE)
+            }.toMutableList()
+            // ... und nur, wo das keine gültige Menge ergibt, noch einmal vergrößert.
+            bands.forEachIndexed { index, band ->
+                val right = (band as? LayoutBand.Row)?.right ?: return@forEachIndexed
+                val direct = amounts[index].orEmpty()
+                if (AmountText.isAmount(direct)) return@forEachIndexed
+                val cell = PageLayout.cropScaled(image, right)
+                tess.setPageSegMode(TessBaseAPI.PageSegMode.PSM_SINGLE_LINE)
+                tess.setImage(cell.pixels, cell.width, cell.height, 1, cell.width)
+                val scaled = recognize(tess)
+                if (AmountText.isAmount(scaled) || direct.isBlank()) amounts[index] = scaled
+            }
+            return bands.indices.joinToString("\n") { index ->
+                when (bands[index]) {
+                    is LayoutBand.Text -> texts[index]
+                    is LayoutBand.Row -> RowText.compose(texts[index], amounts[index])
+                }
+            }
         } finally {
             synchronized(lock) { active = null }
             tess.recycle()
         }
+    }
+
+    /** Liest einen Ausschnitt der zuvor gesetzten Seite. */
+    private fun readArea(tess: TessBaseAPI, box: Box, @TessBaseAPI.PageSegMode.Mode pageSegMode: Int): String {
+        tess.setPageSegMode(pageSegMode)
+        tess.setRectangle(box.left, box.top, box.width, box.height)
+        return recognize(tess)
+    }
+
+    /** Erkennt das gesetzte Bild bzw. den Ausschnitt; getHOCRText lässt sich abbrechen, getUTF8Text liefert danach den Text. */
+    private fun recognize(tess: TessBaseAPI): String {
+        tess.getHOCRText(0)
+        if (cancelRequested) throw CancelledException()
+        return tess.getUTF8Text().orEmpty().trim()
     }
 
     /** Kopiert das Sprachpaket einmal je App-Version aus den mitgelieferten Dateien. */

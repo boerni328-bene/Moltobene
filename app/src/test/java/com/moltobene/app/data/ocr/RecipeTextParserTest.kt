@@ -131,6 +131,55 @@ class RecipeTextParserTest {
     }
 
     @Test
+    fun zutatenTabelleAusRezeptApp() {
+        // So setzt die Texterkennung eine Tabelle mit Trennlinien zusammen (Zeilen einzeln gelesen),
+        // dazu Werbung und Lesefehler, wie sie auf Bildschirmfotos vorkommen.
+        val text = """
+            Canneloni
+
+            Für die Fülle:
+            Öl 4EL
+            1 Stk. Zwiebel
+            2 Stk. Knoblauchzehen
+            500 g Hackfleisch gemischt
+            2 Do. Tomaten geschält, klein
+            etwas Salz, Pfeffer
+            1 Pr Oregano getrocknet
+            1 Pr Rosmarin getrocknet
+            3 EL Rotwein
+            x Anzeige —_
+            H=ROoh: mie
+            Zubereitung
+            Die Zwiebel fein hacken und in Öl andünsten.
+        """.trimIndent()
+        val recipe = RecipeTextParser.parse(text, "de")
+        assertEquals("Canneloni", recipe.title)
+        assertEquals(
+            listOf(
+                "Für die Fülle:", "4 EL Öl", "1 Stk. Zwiebel", "2 Stk. Knoblauchzehen", "500 g Hackfleisch gemischt",
+                "2 Do. Tomaten geschält, klein", "etwas Salz, Pfeffer", "1 Pr Oregano getrocknet",
+                "1 Pr Rosmarin getrocknet", "3 EL Rotwein",
+            ),
+            recipe.ingredients,
+        )
+        assertEquals(listOf("Die Zwiebel fein hacken und in Öl andünsten."), recipe.steps)
+    }
+
+    @Test
+    fun deutscheZutatUeberZweiZeilen() {
+        val text = "Zutaten\n500 g Hackfleisch\ngemischt\n1 Bund Petersilie\nfrische Kräuter\n1 Dose Tomaten,\nin Stücken"
+        assertEquals(
+            listOf("500 g Hackfleisch gemischt", "1 Bund Petersilie", "frische Kräuter", "1 Dose Tomaten, in Stücken"),
+            RecipeTextParser.parse(text, "de").ingredients,
+        )
+        // Im Italienischen beginnen auch eigene Zutaten klein („sale e pepe“).
+        assertEquals(
+            listOf("50 g di burro", "sale e pepe"),
+            RecipeTextParser.parse("Ingredienti\n50 g di burro\nsale e pepe", "it").ingredients,
+        )
+    }
+
+    @Test
     fun leererText() {
         val recipe = RecipeTextParser.parse("  \n\n ")
         assertNull(recipe.title)

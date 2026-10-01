@@ -3,6 +3,14 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.5.2] – 2026-10-01 (versionCode 15)
+
+### Geändert
+- Texterkennung: Zutaten-Tabellen, wie sie viele Rezept-Seiten und -Apps zeigen (Zutat links, Menge rechts, Trennlinien dazwischen), werden jetzt Zeile für Zeile gelesen. Jede Zeile wird eine Zutat mit der Menge vorne, z. B. „500 g Hackfleisch gemischt“ – auch wenn die Zutat über zwei Zeilen geht.
+- Mengen am Zeilenende („Oregano getrocknet 1 Pr“) kommen nach vorne, „etwas Salz, Pfeffer“ zählt als Zutat, und typische Lesefehler bei Einheiten werden korrigiert („500 q“ wird „500 g“).
+- Zutaten über zwei Zeilen („Hackfleisch“ / „gemischt“) werden zusammengefügt.
+- Werbung auf Bildschirmfotos („Anzeige“) und unlesbare Bildreste werden nicht mehr übernommen.
+
 ## [0.5.1] – 2026-10-01 (versionCode 14)
 
 ### Neu

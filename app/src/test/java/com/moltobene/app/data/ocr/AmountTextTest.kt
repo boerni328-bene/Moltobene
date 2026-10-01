@@ -1,0 +1,41 @@
+package com.moltobene.app.data.ocr
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class AmountTextTest {
+
+    @Test
+    fun einheitenWerdenGetrenntUndKorrigiert() {
+        assertEquals("1 Pr Oregano", AmountText.normalize("1Pr Oregano"))
+        assertEquals("3 EL Rotwein", AmountText.normalize("3EL Rotwein"))
+        assertEquals("500 g Hackfleisch", AmountText.normalize("500 q Hackfleisch"))
+        assertEquals("2 Stk. Knoblauchzehen", AmountText.normalize("2 Sik. Knoblauchzehen"))
+        assertEquals("1,5 kg Äpfel", AmountText.normalize("1,5 kg Äpfel"))
+        // Keine Einheit: unverändert
+        assertEquals("4 Eier", AmountText.normalize("4 Eier"))
+        assertEquals("1 Ei", AmountText.normalize("1 Ei"))
+    }
+
+    @Test
+    fun mengeAmEndeKommtNachVorne() {
+        assertEquals("4 EL Öl", AmountText.moveTrailingAmountToFront("Öl 4EL"))
+        assertEquals("1 Pr Oregano getrocknet", AmountText.moveTrailingAmountToFront("Oregano getrocknet 1Pr"))
+        assertEquals("500 g Hackfleisch", AmountText.moveTrailingAmountToFront("Hackfleisch ; 500 g"))
+        assertEquals("etwas Salz, Pfeffer", AmountText.moveTrailingAmountToFront("Salz, Pfeffer etwas"))
+        assertEquals("2 Eier", AmountText.moveTrailingAmountToFront("Eier 2"))
+        // Keine Mengen
+        assertEquals("Mehl Type 405", AmountText.moveTrailingAmountToFront("Mehl Type 405"))
+        assertEquals("200 g Mehl", AmountText.moveTrailingAmountToFront("200 g Mehl"))
+        assertEquals("Den Ofen auf 180 Grad", AmountText.moveTrailingAmountToFront("Den Ofen auf 180 Grad"))
+    }
+
+    @Test
+    fun mengeAmAnfang() {
+        assertTrue(AmountText.startsWithAmount("etwas Salz"))
+        assertTrue(AmountText.startsWithAmount("½ Bund Petersilie"))
+        assertFalse(AmountText.startsWithAmount("Salz"))
+    }
+}

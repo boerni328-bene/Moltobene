@@ -51,12 +51,21 @@ object RecipeTextParser {
     private val SERVINGS_PATTERNS = listOf(
         Regex("\\b(?:für|fuer|for|per|pour|para)\\s+(\\d{1,3})(?:\\s*-\\s*\\d{1,3})?\\s*($PERSON_WORDS|$PIECE_WORDS)?\\b", RegexOption.IGNORE_CASE),
         Regex("\\b(?:serves|makes|ergibt|reicht für|dosi per|rend|rinde)\\s*:?\\s*(\\d{1,3})\\s*($PIECE_WORDS)?", RegexOption.IGNORE_CASE),
-        Regex("^(\\d{1,3})\\s+($PERSON_WORDS|$PIECE_WORDS)\\b", RegexOption.IGNORE_CASE),
+        // Nur eine eigene Zeile wie „12 Stück“ – „1 Stk. Zwiebel“ ist eine Zutat.
+        Regex("^(\\d{1,3})\\s+($PERSON_WORDS|$PIECE_WORDS)\\s*$", RegexOption.IGNORE_CASE),
         Regex("\\b(?:$PERSON_WORDS)\\s*:\\s*(\\d{1,3})", RegexOption.IGNORE_CASE),
     )
     private val PIECES = Regex("^($PIECE_WORDS)$", RegexOption.IGNORE_CASE)
 
-    fun parse(text: String): ParsedRecipe {
+    /** Werbung auf Rezept-Seiten („Anzeige“) und Zeilen mit Zeichen, die in Rezepten kaum vorkommen. */
+    private val AD_MARKERS = Regex("\\b(anzeige|werbung|advertisement|sponsored|pubblicità|publicité|publicidad)\\b", RegexOption.IGNORE_CASE)
+    private val ODD_SYMBOLS = Regex("[=\\\\|<>{}\\[\\]~^_]")
+
+    /**
+     * @param language Sprache des Textes (z. B. „de“), falls bekannt. Im Deutschen beginnen Zutaten mit
+     * einem großen Buchstaben; eine klein beginnende Zeile gehört dann zur Zutat davor.
+     */
+    fun parse(text: String, language: String? = null): ParsedRecipe {
         val lines = cleanLines(text)
         val content = lines.indices.filter { lines[it].isNotEmpty() }
         if (content.isEmpty()) return ParsedRecipe(null, null, null, emptyList(), emptyList())
@@ -115,7 +124,10 @@ object RecipeTextParser {
             }
             else -> {
                 val rest = region(0, lines.size)
-                val start = rest.indexOfFirst { it.isNotEmpty() && isIngredientLike(it) }
+                var start = rest.indexOfFirst { it.isNotEmpty() && isIngredientLike(it) }
+                // Eine Zwischenüberschrift direkt davor („Für die Fülle:“) gehört zu den Zutaten.
+                val previous = (start - 1 downTo 0).firstOrNull { rest[it].isNotEmpty() }
+                if (start > 0 && previous != null && rest[previous].endsWith(":") && rest[previous].length <= 40) start = previous
                 if (start < 0) {
                     ingredientLines = emptyList()
                     stepLines = rest
@@ -131,7 +143,7 @@ object RecipeTextParser {
             title = title,
             servings = servings,
             servingsUnit = servingsUnit,
-            ingredients = formatIngredients(ingredientLines),
+            ingredients = formatIngredients(ingredientLines, language),
             steps = formatSteps(stepLines),
         )
     }
@@ -174,6 +186,13 @@ object RecipeTextParser {
 
     private fun isNoise(line: String): Boolean {
         if (line.isEmpty()) return true
+        if (AD_MARKERS.containsMatchIn(line)) return true
+        // Kurze Zeilen mit seltenen Zeichen sind meist Bildreste – außer sie enthalten ein richtiges Wort.
+        if (line.length < 30 && ODD_SYMBOLS.containsMatchIn(line) &&
+            line.split(Regex("[^\\p{L}]+")).none { it.length >= 5 }
+        ) {
+            return true
+        }
         val visible = line.filterNot { it.isWhitespace() }
         if (visible.length < 2 && !visible.all { it.isDigit() }) return true
         val alnum = visible.count { it.isLetterOrDigit() }
@@ -191,7 +210,9 @@ object RecipeTextParser {
         line.length in 2..70 && !isIngredientLike(line) && !isStepLike(line) && !line.endsWith(":")
 
     private fun isIngredientLike(line: String): Boolean =
-        STARTS_WITH_QUANTITY.containsMatchIn(line) || BULLET.containsMatchIn(line)
+        STARTS_WITH_QUANTITY.containsMatchIn(line) || BULLET.containsMatchIn(line) ||
+            AmountText.startsWithAmount(line) ||
+            (line.length <= 50 && AmountText.moveTrailingAmountToFront(line) != line)
 
     private fun isStepLike(line: String): Boolean {
         if (NUMBERED_STEP.matches(line)) return true
@@ -200,17 +221,21 @@ object RecipeTextParser {
         return line.length > 50 || (words >= 5 && line.endsWith("."))
     }
 
-    private fun formatIngredients(lines: List<String>): List<String> {
+    private fun formatIngredients(lines: List<String>, language: String?): List<String> {
         val result = mutableListOf<String>()
         for (rawLine in lines) {
             if (rawLine.isEmpty()) continue
-            val line = rawLine.replace(BULLET, "").trim()
+            val line = AmountText.normalize(AmountText.moveTrailingAmountToFront(rawLine.replace(BULLET, "").trim()))
             if (line.isEmpty()) continue
             val previous = result.lastOrNull()
-            // Fortsetzung einer umgebrochenen Zeile, z. B. „1 Dose Tomaten,“ + „gehackt“
-            if (previous != null && !previous.endsWith(":") &&
-                (previous.endsWith(",") || previous.endsWith("-") || previous.count { it == '(' } > previous.count { it == ')' })
-            ) {
+            // Fortsetzung einer umgebrochenen Zeile, z. B. „1 Dose Tomaten,“ + „gehackt“;
+            // im Deutschen auch „500 g Hackfleisch“ + „gemischt“ (Zutaten beginnen dort groß).
+            val continues = previous != null && !previous.endsWith(":") && (
+                previous.endsWith(",") || previous.endsWith("-") ||
+                    previous.count { it == '(' } > previous.count { it == ')' } ||
+                    (language == "de" && isGermanContinuation(line))
+                )
+            if (continues) {
                 result[result.lastIndex] = "$previous $line"
                 continue
             }
@@ -222,6 +247,14 @@ object RecipeTextParser {
         }
         return result
     }
+
+    /**
+     * Deutsch: Eine Zeile ohne Menge, die klein beginnt und kein Hauptwort enthält („gemischt“,
+     * „klein“, „getrocknet“), beschreibt die Zutat davor. „frische Kräuter“ bleibt eine eigene Zutat.
+     */
+    private fun isGermanContinuation(line: String): Boolean =
+        line.first().isLowerCase() && !AmountText.startsWithAmount(line) &&
+            line.split(' ').none { it.firstOrNull()?.isUpperCase() == true }
 
     /** Zwei Spalten, die in einer Zeile gelandet sind: „1 cipolla 60 g di parmigiano“ → zwei Zutaten. */
     private fun splitColumns(line: String): List<String> {
