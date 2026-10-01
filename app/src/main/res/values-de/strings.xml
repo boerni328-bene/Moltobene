@@ -54,7 +54,7 @@
     <!-- Texterkennung -->
     <string name="import_from_photo">Aus Foto übernehmen</string>
     <string name="ocr_action">Text aus Foto erkennen</string>
-    <string name="ocr_dialog_text">Titel, Zutaten und Zubereitung werden aus Fotos von Kochbuch, Zettel oder Bildschirmfoto gelesen. Leere Felder werden ausgefüllt, Zutaten und Zubereitung ergänzt. Bei Rezepten über mehrere Seiten die Fotos der Reihe nach auswählen.</string>
+    <string name="ocr_dialog_text">Titel, Zutaten und Zubereitung werden aus Fotos von Kochbuch, Zettel oder Bildschirmfoto gelesen. Leere Felder werden ausgefüllt, Zutaten und Zubereitung ergänzt. Bei Rezepten über mehrere Seiten die Fotos der Reihe nach auswählen. Danach lässt sich je Foto der Bereich wählen, der gelesen wird.</string>
     <string name="ocr_from_recipe_photo">Rezeptfoto lesen</string>
     <string name="ocr_choose_photos">Fotos auswählen</string>
     <string name="ocr_running">Text wird erkannt …</string>
@@ -66,6 +66,14 @@
     <string name="recognized_text_show">Erkannten Text anzeigen</string>
     <string name="recognized_text_hide">Erkannten Text ausblenden</string>
     <string name="recognized_text_hint">Erkannter Text kann Fehler enthalten. Fehlende Teile lassen sich von hier kopieren.</string>
+    <string name="area_title">Bereich auswählen</string>
+    <string name="area_page">Seite %1$d von %2$d</string>
+    <string name="area_hint">Gelesen wird nur der Bereich im Rahmen. Ecken und Ränder des Rahmens lassen sich verschieben.</string>
+    <string name="area_whole_page">Ganze Seite</string>
+    <string name="area_next_page">Nächste Seite</string>
+    <string name="area_recognize">Text erkennen</string>
+    <string name="area_frame_description">Foto mit Rahmen um den Bereich, der gelesen wird</string>
+    <string name="area_load_error">Das Foto konnte nicht geladen werden.</string>
     <string name="keep_photo_title">Foto behalten?</string>
     <string name="keep_photo_text">Der Text ist ins Rezept übernommen. Zeigt das Foto nur die Buchseite, spart Entfernen Speicherplatz. Gelöscht wird es beim Speichern des Rezepts.</string>
     <string name="keep_photo">Foto behalten</string>
@@ -80,9 +88,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Texterkennung: Titel, Zutaten und Zubereitung aus Fotos von Kochbuch, Zettel oder Bildschirmfoto übernehmen – beim Bearbeiten eines Rezepts über „Text aus Foto erkennen“.</item>
-        <item>Neue Rezepte direkt aus Fotos: „Aus Foto übernehmen“ in der Sammlung, auch über mehrere Seiten.</item>
-        <item>Die Erkennung läuft nur auf dem Handy und liest Deutsch, Englisch, Italienisch, Französisch und Spanisch. Erkannter Text kann Fehler enthalten.</item>
+        <item>„Bereich auswählen“: Vor der Texterkennung legt ein Rahmen fest, welcher Teil des Fotos gelesen wird – z. B. nur die Zutaten, ohne Knöpfe und Werbung.</item>
+        <item>Bildschirmfotos werden sauberer gelesen: Statusleiste, Symbole, Knöpfe und Fotos ergeben kaum noch falsche Zeilen.</item>
     </string-array>
 
     <!-- Bearbeiten -->

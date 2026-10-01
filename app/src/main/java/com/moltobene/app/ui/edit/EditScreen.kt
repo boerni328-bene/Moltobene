@@ -114,6 +114,21 @@ fun EditScreen(
     }
     val busy = viewModel.isProcessingPhoto || viewModel.isRecognizing
 
+    // Vor der Texterkennung: Bereich des Fotos wählen, der gelesen wird.
+    viewModel.areaSelection?.let { selection ->
+        AreaSelectionScreen(
+            selection = selection,
+            preview = viewModel.areaPreview,
+            failed = viewModel.areaPreviewFailed,
+            snackbarHostState = snackbarHostState,
+            onAreaChange = viewModel::changeArea,
+            onWholePage = viewModel::resetArea,
+            onConfirm = viewModel::confirmArea,
+            onCancel = viewModel::cancelAreaSelection,
+        )
+        return
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(

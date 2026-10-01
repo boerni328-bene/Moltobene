@@ -55,7 +55,7 @@
     <!-- Texterkennung -->
     <string name="import_from_photo">Import from photo</string>
     <string name="ocr_action">Recognize text from photo</string>
-    <string name="ocr_dialog_text">Title, ingredients and instructions are read from photos of a cookbook, a note or a screenshot. Empty fields are filled in, ingredients and instructions are added. For recipes on several pages, choose the photos in order.</string>
+    <string name="ocr_dialog_text">Title, ingredients and instructions are read from photos of a cookbook, a note or a screenshot. Empty fields are filled in, ingredients and instructions are added. For recipes on several pages, choose the photos in order. Afterwards, the area to be read can be selected for each photo.</string>
     <string name="ocr_from_recipe_photo">Read recipe photo</string>
     <string name="ocr_choose_photos">Choose photos</string>
     <string name="ocr_running">Recognizing text …</string>
@@ -67,6 +67,14 @@
     <string name="recognized_text_show">Show recognized text</string>
     <string name="recognized_text_hide">Hide recognized text</string>
     <string name="recognized_text_hint">Recognized text may contain errors. Missing parts can be copied from here.</string>
+    <string name="area_title">Select area</string>
+    <string name="area_page">Page %1$d of %2$d</string>
+    <string name="area_hint">Only the area inside the frame is read. The corners and edges of the frame can be dragged.</string>
+    <string name="area_whole_page">Whole page</string>
+    <string name="area_next_page">Next page</string>
+    <string name="area_recognize">Recognize text</string>
+    <string name="area_frame_description">Photo with a frame around the area to be read</string>
+    <string name="area_load_error">The photo could not be loaded.</string>
     <string name="keep_photo_title">Keep photo?</string>
     <string name="keep_photo_text">The text has been added to the recipe. If the photo only shows the cookbook page, removing it saves storage space. It is deleted when the recipe is saved.</string>
     <string name="keep_photo">Keep photo</string>
@@ -83,9 +91,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Text recognition: title, ingredients and instructions from photos of a cookbook, a note or a screenshot – when editing a recipe via “Recognize text from photo”.</item>
-        <item>New recipes straight from photos: “Import from photo” in the collection, also for recipes on several pages.</item>
-        <item>Recognition runs only on the device and reads German, English, Italian, French and Spanish. Recognized text may contain errors.</item>
+        <item>“Select area”: before text recognition, a frame sets which part of the photo is read – e.g. only the ingredients, without buttons and ads.</item>
+        <item>Screenshots are read more cleanly: status bars, icons, buttons and photos hardly produce wrong lines any more.</item>
     </string-array>
 
     <!-- Bearbeiten -->

@@ -65,26 +65,8 @@ class PhotoStore(private val context: Context) {
      * dass Tesseract die Schrift gut lesen kann – kleine Fotos werden vergrößert, große verkleinert.
      */
     suspend fun loadForRecognition(uri: Uri): GrayImage = withContext(Dispatchers.IO) {
-        val resolver = context.contentResolver
-        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        val boundsStream = resolver.openInputStream(uri) ?: throw IOException("Foto nicht lesbar")
-        boundsStream.use { BitmapFactory.decodeStream(it, null, bounds) }
-        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) throw IOException("Kein Foto")
-
-        val orientation = resolver.openInputStream(uri)?.use { stream ->
-            runCatching {
-                ExifInterface(stream).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
-            }.getOrDefault(ExifInterface.ORIENTATION_NORMAL)
-        } ?: ExifInterface.ORIENTATION_NORMAL
-
-        val options = BitmapFactory.Options().apply {
-            inSampleSize = sampleSize(bounds.outWidth, bounds.outHeight, OCR_MIN_EDGE)
-            // Halber Speicherbedarf; Farben braucht die Texterkennung nicht.
-            inPreferredConfig = Bitmap.Config.RGB_565
-        }
-        val decoded = resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, options) }
-            ?: throw IOException("Foto nicht lesbar")
-        val rotated = applyOrientation(decoded, orientation)
+        // Halber Speicherbedarf; Farben braucht die Texterkennung nicht.
+        val rotated = decodeOriented(uri, OCR_MIN_EDGE, Bitmap.Config.RGB_565)
         val edge = max(rotated.width, rotated.height)
         val target = when {
             edge < OCR_TARGET_EDGE -> minOf(OCR_TARGET_EDGE, edge * 2)
@@ -104,8 +86,45 @@ class PhotoStore(private val context: Context) {
         try {
             toGray(scaled)
         } finally {
-            listOf(decoded, rotated, scaled).distinct().forEach { it.recycle() }
+            listOf(rotated, scaled).distinct().forEach { it.recycle() }
         }
+    }
+
+    /** Rezeptfoto für „Bereich auswählen“. */
+    suspend fun loadPreview(photoId: String): Bitmap = loadPreview(Uri.fromFile(photoFile(photoId)))
+
+    /**
+     * Foto für „Bereich auswählen“: genauso gedreht wie für die Texterkennung, damit der Rahmen
+     * dieselbe Stelle trifft, aber nur so groß, wie der Bildschirm es braucht.
+     */
+    suspend fun loadPreview(uri: Uri): Bitmap = withContext(Dispatchers.IO) {
+        val rotated = decodeOriented(uri, PREVIEW_EDGE, Bitmap.Config.ARGB_8888)
+        scaleDown(rotated, PREVIEW_EDGE).also { if (it !== rotated) rotated.recycle() }
+    }
+
+    /** Liest ein Foto mindestens [minEdge] groß (sofern vorhanden) und dreht es laut Exif-Angabe richtig. */
+    private fun decodeOriented(uri: Uri, minEdge: Int, config: Bitmap.Config): Bitmap {
+        val resolver = context.contentResolver
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        val boundsStream = resolver.openInputStream(uri) ?: throw IOException("Foto nicht lesbar")
+        boundsStream.use { BitmapFactory.decodeStream(it, null, bounds) }
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) throw IOException("Kein Foto")
+
+        val orientation = resolver.openInputStream(uri)?.use { stream ->
+            runCatching {
+                ExifInterface(stream).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+            }.getOrDefault(ExifInterface.ORIENTATION_NORMAL)
+        } ?: ExifInterface.ORIENTATION_NORMAL
+
+        val options = BitmapFactory.Options().apply {
+            inSampleSize = sampleSize(bounds.outWidth, bounds.outHeight, minEdge)
+            inPreferredConfig = config
+        }
+        val decoded = resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, options) }
+            ?: throw IOException("Foto nicht lesbar")
+        val rotated = applyOrientation(decoded, orientation)
+        if (rotated !== decoded) decoded.recycle()
+        return rotated
     }
 
     private fun toGray(bitmap: Bitmap): GrayImage {
@@ -280,5 +299,8 @@ class PhotoStore(private val context: Context) {
         const val OCR_MIN_EDGE = 1800
         const val OCR_TARGET_EDGE = 2400
         const val OCR_MAX_EDGE = 3000
+
+        /** Größe für „Bereich auswählen“. */
+        const val PREVIEW_EDGE = 1600
     }
 }

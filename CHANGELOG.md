@@ -3,6 +3,14 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.6.0] – 2026-10-01 (versionCode 16)
+
+### Neu
+- **Bereich auswählen:** Vor der Texterkennung erscheint jedes Foto mit einem Rahmen. Gelesen wird nur, was im Rahmen liegt – bei einem Bildschirmfoto z. B. nur die Zutaten, ohne Kopfzeile, Knöpfe und Werbung. Ecken und Ränder lassen sich verschieben, „Ganze Seite“ setzt den Rahmen zurück. Bei mehreren Fotos geht es mit „Nächste Seite“ weiter.
+
+### Geändert
+- Bildschirmfotos werden sauberer gelesen: Status- und Browserleiste gelten nicht mehr als Zutaten-Tabelle. Was die Erkennung nur aus Symbolen, Knöpfen oder Fotos „liest“, und Wortfetzen wie „A Wa u“ werden weggelassen. Dadurch entstehen kaum noch falsche Zutaten.
+
 ## [0.5.2] – 2026-10-01 (versionCode 15)
 
 ### Geändert
