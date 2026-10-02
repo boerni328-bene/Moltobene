@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.10.1] – 2026-10-02 (versionCode 24)
+
+### Geändert
+- Keine sichtbaren Änderungen. Die Bausteine der Texterkennung werden jetzt bei jedem Bauen gegen feste Prüfsummen geprüft: das Texterkennungs-Programm Tesseract, das nicht signiert ist, und die fünf Sprachpakete, die genau den Originalen entsprechen müssen. Ein unbemerkt ausgetauschter Baustein käme so nie in die App – wichtig, bevor die App für das Übernehmen von Internetseiten erstmals ins Internet darf.
+
 ## [0.10.0] – 2026-10-02 (versionCode 23)
 
 ### Neu

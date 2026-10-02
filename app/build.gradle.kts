@@ -14,8 +14,8 @@ android {
         applicationId = "com.moltobene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 23
-        versionName = "0.10.0"
+        versionCode = 24
+        versionName = "0.10.1"
 
         // Nur die unterstützten Sprachen mitliefern (Englisch als Rückfall, Deutsch).
         resourceConfigurations += listOf("en", "de")

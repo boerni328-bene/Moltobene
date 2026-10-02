@@ -119,6 +119,7 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 - Freigegebene Bibliotheken: Room (mit KSP), Navigation Compose, Coil (ohne Internet-Modul), kotlinx.serialization, Tesseract4Android (Texterkennung; kommt über JitPack, dort nur für die Gruppe `cz.adaptech.tesseract4android` freigegeben), Robolectric (nur für Tests, z. B. Datenbank-Umbauten mit einer echten Datenbank). Weitere nur nach Rückfrage.
 - Jeder mitgelieferte quelloffene Baustein steht mit Lizenz in `ui/licenses/Licenses.kt` (Lizenztexte unter `assets/licenses/`), angezeigt unter Einstellungen → Info → „Open-Source-Lizenzen“. Neue Bausteine dort ergänzen.
 - Texterkennung: Sprachpakete `tessdata_fast` (Deutsch, Englisch, Italienisch, Französisch, Spanisch) liegen unter `assets/tessdata/` (Stand `tesseract-ocr/tessdata_fast@87416418`, Lizenz Apache 2.0). Eingestellt ist Sauvola-Schwellenwert (`thresholding_method=2`), Fotos werden auf etwa 2400 px gebracht; beides war in Tests mit nachgestellten Handyfotos am zuverlässigsten. Native Bibliotheken nur für `armeabi-v7a` und `arm64-v8a`.
+- Prüfsummen (#41): Tesseract4Android wird beim Bauen gegen feste SHA-256-Werte in `gradle/verification-metadata.xml` geprüft, die Sprachpakete per Unit-Test (`LanguageDataTest`). Bei einem Update (auch durch Dependabot) bricht der Build ab, bis die neuen Werte bewusst eingetragen sind – vorher mit dem Original (JitPack bzw. tessdata_fast auf GitHub) vergleichen.
 
 ### Daten dürfen nie verloren gehen
 
