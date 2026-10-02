@@ -174,7 +174,7 @@ class AppTourTest(private val variant: DisplayVariant) {
 
         composeRule.onNodeWithText(text(R.string.import_text_action)).performClick()
         waitForText(text(R.string.text_done))
-        composeRule.onNode(hasSetTextAction() and hasText("Spaghetti aglio e olio")).assertIsDisplayed()
+        composeRule.onNode(hasSetTextAction() and hasText("Spaghetti aglio e olio")).performScrollTo().assertIsDisplayed()
         screenshot("19-aus-text-uebernommen")
 
         field(R.string.ingredients).performScrollTo()

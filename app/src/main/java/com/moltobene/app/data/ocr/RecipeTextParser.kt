@@ -73,8 +73,10 @@ object RecipeTextParser {
     /**
      * @param language Sprache des Textes (z. B. „de“), falls bekannt. Im Deutschen beginnen Zutaten mit
      * einem großen Buchstaben; eine klein beginnende Zeile gehört dann zur Zutat davor.
+     * @param typed Der Text wurde eingefügt oder getippt, nicht erkannt: Seine Zeilenumbrüche sind echt,
+     * deshalb ist eine Zeile mit Satzende ein eigener Schritt.
      */
-    fun parse(text: String, language: String? = null): ParsedRecipe {
+    fun parse(text: String, language: String? = null, typed: Boolean = false): ParsedRecipe {
         val lines = cleanLines(text)
         val content = lines.indices.filter { lines[it].isNotEmpty() }
         if (content.isEmpty()) return EMPTY
@@ -140,7 +142,7 @@ object RecipeTextParser {
             servings = servings,
             servingsUnit = servingsUnit,
             ingredients = formatIngredients(ingredientLines, language),
-            steps = formatSteps(stepLines),
+            steps = formatSteps(stepLines, typed),
         )
     }
 
@@ -362,7 +364,7 @@ object RecipeTextParser {
         return parts
     }
 
-    private fun formatSteps(lines: List<String>): List<String> {
+    private fun formatSteps(lines: List<String>, typed: Boolean = false): List<String> {
         val content = lines.filter { it.isNotEmpty() }
         if (content.isEmpty()) return emptyList()
         val steps = mutableListOf<String>()
@@ -400,6 +402,9 @@ object RecipeTextParser {
                     }
                     if (current.isNotEmpty()) current.append(' ')
                     current.append(line)
+                    // Eingefügter Text: Ein Satzende am Zeilenende beendet den Schritt; mitten im Satz
+                    // umbrochene Zeilen (z. B. aus E-Mails) werden weiter verbunden.
+                    if (typed && line.last() in ".!?…") close()
                 }
             }
         }

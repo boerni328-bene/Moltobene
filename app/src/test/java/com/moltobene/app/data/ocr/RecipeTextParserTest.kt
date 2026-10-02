@@ -254,10 +254,16 @@ class RecipeTextParserTest {
             Knoblauch in Scheiben schneiden und im Öl goldgelb braten.
             Nudeln abgießen und im Öl schwenken.
         """.trimIndent()
-        val recipe = RecipeTextParser.parse(text, TextLanguage.detect(text))
+        val recipe = RecipeTextParser.parse(text, TextLanguage.detect(text), typed = true)
         assertEquals("Spaghetti aglio e olio", recipe.title)
         assertEquals(2, recipe.servings)
         assertEquals(listOf("200 g Spaghetti", "3 Knoblauchzehen", "4 EL Olivenöl", "1 Peperoncino"), recipe.ingredients)
         assertEquals(3, recipe.steps.size)
+
+        // In E-Mails mitten im Satz umbrochene Zeilen bleiben ein Schritt.
+        val wrapped = RecipeTextParser.parse("Zubereitung\nDen Teig kneten und eine\nStunde ruhen lassen.\nIm Ofen backen.", typed = true)
+        assertEquals(listOf("Den Teig kneten und eine Stunde ruhen lassen.", "Im Ofen backen."), wrapped.steps)
+        // Erkannter Text aus der Texterkennung bleibt wie bisher: Zeilen ohne Leerzeile gehören zusammen.
+        assertEquals(1, RecipeTextParser.parse(text).steps.size)
     }
 }

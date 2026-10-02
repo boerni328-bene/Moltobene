@@ -696,7 +696,7 @@ class EditViewModel(
             return
         }
         val language = TextLanguage.detect(text)
-        mergeIntoForm(text, RecipeTextParser.parse(text, language), language)
+        mergeIntoForm(text, RecipeTextParser.parse(text, language, typed = true), language)
         if (title.isBlank()) subject?.let { title = it }
         if (source.isBlank()) TextLinks.first(text)?.let { source = it }
         checkHintField.value = CHECK_TEXT
