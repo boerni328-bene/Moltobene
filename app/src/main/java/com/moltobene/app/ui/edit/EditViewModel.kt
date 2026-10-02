@@ -35,6 +35,9 @@ import java.io.File
 import java.io.IOException
 import java.util.Locale
 
+/** Höchstzahl der Seiten, die auf einmal gelesen werden – aus der Fotoauswahl wie aus „Teilen mit…“. */
+internal const val MAX_PAGES = 6
+
 /** Stand der Texterkennung; [page] zählt ab 1. */
 sealed interface RecognitionState {
     data object Idle : RecognitionState
@@ -75,6 +78,7 @@ class EditViewModel(
     private val recognizer: TextRecognizer,
     private val preferences: AppPreferences,
     private val pending: PendingRecognition,
+    private val sharedPhotos: SharedPhotos,
 ) : ViewModel() {
 
     private val route = handle.toRoute<EditRoute>()
@@ -99,6 +103,8 @@ class EditViewModel(
     /** In „Bereich auswählen“ gewählte Sprache des Textes; null = automatisch erkennen. */
     private val languageChoiceField = SavedField<String?>(handle, "languageChoice", null)
     private val startPromptShownField = SavedField(handle, "startPromptShown", false)
+    /** Die Bilder aus „Teilen mit…“ wurden übernommen – nach dem Drehen nicht noch einmal. */
+    private val sharedTakenField = SavedField(handle, "sharedTaken", false)
     /** Nach einer Erkennung bleibt der Hinweis zum Prüfen bis zum Speichern sichtbar. */
     private val checkHintField = SavedField(handle, "checkHint", false)
     /** Seiten für „Bereich auswählen“ und die laufende Erkennung, eine je Zeile: „photo:<Kennung>“ oder „page:<Name>“. */
@@ -250,6 +256,7 @@ class EditViewModel(
     init {
         if (!loadedField.value && routeId != null) load(routeId)
         if (checkHintField.value) loadSourceSuggestions()
+        if (route.fromShare && !sharedTakenField.value) takeSharedPhotos()
         when {
             // Android hat die App während der Erkennung beendet.
             recognitionStartedField.value -> resumeRecognition()
@@ -308,6 +315,14 @@ class EditViewModel(
         if (isRecognizing) return
         ensureSession()
         startAreaSelection(listOf(PAGE_PHOTO + photoId))
+    }
+
+    /** Bilder aus „Teilen mit…“ (#46): gleich kopieren und mit „Bereich auswählen“ beginnen. */
+    private fun takeSharedPhotos() {
+        sharedTakenField.value = true
+        val uris = sharedPhotos.take()
+        if (uris.size > MAX_PAGES) message = R.string.share_too_many
+        recognizePhotos(uris.take(MAX_PAGES))
     }
 
     /** Liest ausgewählte Fotos in der gewählten Reihenfolge. */

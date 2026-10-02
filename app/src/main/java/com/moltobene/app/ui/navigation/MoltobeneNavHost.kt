@@ -1,7 +1,9 @@
 package com.moltobene.app.ui.navigation
 
+import android.net.Uri
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
@@ -25,14 +27,22 @@ import com.moltobene.app.ui.whatsnew.WhatsNewDialog
 import com.moltobene.app.ui.whatsnew.WhatsNewViewModel
 import kotlinx.coroutines.launch
 
+/** @param sharedPhotos Bilder aus „Teilen mit…“ (#46); dann öffnet sich gleich das Formular dafür. */
 @Composable
-fun MoltobeneNavHost() {
+fun MoltobeneNavHost(sharedPhotos: List<Uri> = emptyList()) {
     val navController = rememberNavController()
     val container = (LocalContext.current.applicationContext as MoltobeneApplication).container
     // Gemeinsame Meldungsleiste, damit z. B. „Rezept gespeichert“ auch nach dem Bildschirmwechsel erscheint.
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val showMessage: (String) -> Unit = { text -> scope.launch { snackbarHostState.showSnackbar(text) } }
+
+    if (sharedPhotos.isNotEmpty()) {
+        LaunchedEffect(sharedPhotos) {
+            container.sharedPhotos.offer(sharedPhotos)
+            navController.navigate(EditRoute(fromShare = true))
+        }
+    }
 
     NavHost(navController = navController, startDestination = CollectionRoute) {
         composable<CollectionRoute> {
@@ -76,6 +86,7 @@ fun MoltobeneNavHost() {
                         container.textRecognizer,
                         container.preferences,
                         container.pendingRecognition,
+                        container.sharedPhotos,
                     )
                 },
                 snackbarHostState = snackbarHostState,

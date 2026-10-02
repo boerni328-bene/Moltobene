@@ -59,9 +59,9 @@
 
     <!-- Texterkennung -->
     <string name="import_from_photo">Import from photo</string>
-    <string name="ocr_action">Recognize text from photo</string>
+    <string name="share_too_many">Only the first %1$d photos are read.</string>
     <string name="ocr_dialog_text">Reads title, ingredients and instructions from photos of a cookbook, a note or a screenshot. Sharp photos taken straight on work best. For several pages, choose the photos in order (up to %1$d).</string>
-    <string name="ocr_from_recipe_photo">Read recipe photo</string>
+    <string name="ocr_from_recipe_photo">Use recipe photo</string>
     <string name="ocr_choose_photos">Choose photos</string>
     <string name="ocr_running">Recognizing text …</string>
     <string name="ocr_running_pages">Reading page %1$d of %2$d …</string>
@@ -114,8 +114,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>“Page”: the source has its own field for the page; it is shown and shared as “p. 47”.</item>
-        <item>After text recognition, the app suggests the most recently used books and the detected page number below the source – one tap is enough.</item>
+        <item>“Share”: screenshots and pictures from other apps can be sent straight to Moltobene – the app starts right away with “Select area”.</item>
+        <item>When editing, the option is now called the same as in the collection: “Import from photo”.</item>
     </string-array>
 
     <!-- Bearbeiten -->

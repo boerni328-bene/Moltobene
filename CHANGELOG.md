@@ -3,6 +3,15 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.11.0] – 2026-10-02 (versionCode 25)
+
+### Neu
+- **„Teilen mit…“:** Moltobene erscheint jetzt im Teilen-Menü von Android, wenn Bilder geteilt werden. Ein Bildschirmfoto oder ein Foto aus WhatsApp oder E-Mail lässt sich so direkt übernehmen: Die App öffnet ein neues Rezept und beginnt gleich mit „Bereich auswählen“. Auf einmal werden höchstens 6 Bilder gelesen.
+- Angenommen werden nur Bilder, die eine andere App ausdrücklich freigibt. Sie werden sofort in die App kopiert; danach behält Moltobene keinen Zugriff. Eine Berechtigung ist dafür nicht nötig, und die App bleibt ohne Internet.
+
+### Geändert
+- Einheitliche Namen: Der Weg heißt beim Bearbeiten jetzt wie in der Sammlung „Aus Foto übernehmen“ (bisher „Text aus Foto erkennen“); „Rezeptfoto lesen“ heißt jetzt „Rezeptfoto verwenden“.
+
 ## [0.10.1] – 2026-10-02 (versionCode 24)
 
 ### Geändert

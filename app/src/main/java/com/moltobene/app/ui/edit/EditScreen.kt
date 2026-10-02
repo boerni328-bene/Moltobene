@@ -100,7 +100,7 @@ fun EditScreen(
     LifecycleEventEffect(Lifecycle.Event.ON_START) { viewModel.onStart() }
 
     viewModel.message?.let { messageRes ->
-        val text = stringResource(messageRes)
+        val text = if (messageRes == R.string.share_too_many) stringResource(messageRes, MAX_PAGES) else stringResource(messageRes)
         LaunchedEffect(messageRes, text) {
             snackbarHostState.showSnackbar(text)
             viewModel.message = null
@@ -299,7 +299,7 @@ fun EditScreen(
 
     if (showRecognitionDialog) {
         RecognitionDialog(
-            title = stringResource(if (viewModel.isNew && !viewModel.hasPhoto) R.string.import_from_photo else R.string.ocr_action),
+            title = stringResource(R.string.import_from_photo),
             hasRecipePhoto = viewModel.hasPhoto,
             onRecipePhoto = {
                 showRecognitionDialog = false
@@ -427,7 +427,7 @@ private fun RecognitionSection(
                 OutlinedButton(onClick = onStart, enabled = enabled, modifier = Modifier.fillMaxWidth()) {
                     Icon(painterResource(R.drawable.ic_document_scanner), contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.size(Spacing.s))
-                    Text(stringResource(R.string.ocr_action))
+                    Text(stringResource(R.string.import_from_photo))
                 }
             }
         }
@@ -619,9 +619,6 @@ private fun DialogOption(icon: Int, label: Int, onClick: () -> Unit) {
         Text(stringResource(label), modifier = Modifier.weight(1f))
     }
 }
-
-/** Höchstzahl der Seiten, die auf einmal gelesen werden. */
-private const val MAX_PAGES = 6
 
 @Composable
 private fun PhotoSection(

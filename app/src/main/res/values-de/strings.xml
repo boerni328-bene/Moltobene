@@ -58,9 +58,9 @@
 
     <!-- Texterkennung -->
     <string name="import_from_photo">Aus Foto übernehmen</string>
-    <string name="ocr_action">Text aus Foto erkennen</string>
+    <string name="share_too_many">Es werden nur die ersten %1$d Fotos gelesen.</string>
     <string name="ocr_dialog_text">Liest Titel, Zutaten und Zubereitung aus Fotos von Kochbuch, Zettel oder Bildschirmfoto. Am besten gelingt es mit einem scharfen, gerade aufgenommenen Foto. Bei mehreren Seiten die Fotos der Reihe nach auswählen (bis zu %1$d).</string>
-    <string name="ocr_from_recipe_photo">Rezeptfoto lesen</string>
+    <string name="ocr_from_recipe_photo">Rezeptfoto verwenden</string>
     <string name="ocr_choose_photos">Fotos auswählen</string>
     <string name="ocr_running">Text wird erkannt …</string>
     <string name="ocr_running_pages">Seite %1$d von %2$d wird gelesen …</string>
@@ -111,8 +111,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>„Seite“: Die Quelle hat ein eigenes Feld für die Seite; angezeigt und geteilt wird sie als „S. 47“.</item>
-        <item>Nach der Texterkennung schlägt die App unter der Quelle die zuletzt genutzten Bücher und die erkannte Seitenzahl vor – ein Tipp genügt.</item>
+        <item>„Teilen mit…“: Bildschirmfotos und Bilder aus anderen Apps lassen sich direkt an Moltobene schicken – die App beginnt gleich mit „Bereich auswählen“.</item>
+        <item>Im Bearbeiten heißt der Weg jetzt wie in der Sammlung: „Aus Foto übernehmen“.</item>
     </string-array>
 
     <!-- Bearbeiten -->

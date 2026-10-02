@@ -10,6 +10,7 @@ import com.moltobene.app.data.ocr.PendingRecognition
 import com.moltobene.app.data.ocr.TextRecognizer
 import com.moltobene.app.data.photos.PhotoStore
 import com.moltobene.app.data.share.RecipeSharer
+import com.moltobene.app.ui.edit.SharedPhotos
 
 class MoltobeneApplication : Application() {
     val container: AppContainer by lazy { AppContainer(this) }
@@ -27,4 +28,5 @@ class AppContainer(context: Context) {
     val preferences: AppPreferences by lazy { AppPreferences(appContext) }
     val textRecognizer: TextRecognizer by lazy { TextRecognizer(appContext) }
     val pendingRecognition: PendingRecognition by lazy { PendingRecognition(appContext, photoStore) }
+    val sharedPhotos = SharedPhotos()
 }

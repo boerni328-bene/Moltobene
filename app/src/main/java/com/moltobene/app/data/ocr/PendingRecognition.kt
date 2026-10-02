@@ -40,8 +40,14 @@ class PendingRecognition(private val context: Context, private val photoStore: P
 
     fun pageUri(session: String, name: String): Uri = Uri.fromFile(pageFile(session, name))
 
-    /** Kopiert ein ausgewähltes Foto als Seite in die Erkennung [session]. Liefert den Namen der Seite. */
+    /**
+     * Kopiert ein ausgewähltes oder geteiltes Foto als Seite in die Erkennung [session]. Liefert den Namen
+     * der Seite. Abgelehnt wird, was ausdrücklich kein Bild ist (#46), und was größer ist als [MAX_PAGE_BYTES].
+     * Manche Apps geben keinen Dateityp an; ist es dann doch kein Bild, scheitert das Laden mit einer Meldung.
+     */
     suspend fun keepPage(session: String, uri: Uri): String = withContext(Dispatchers.IO) {
+        val type = context.contentResolver.getType(uri)
+        if (type != null && !type.startsWith("image/")) throw IOException("Kein Bild: $type")
         val name = UUID.randomUUID().toString()
         val target = pageFile(session, name).apply { parentFile?.mkdirs() }
         val input = context.contentResolver.openInputStream(uri) ?: throw IOException("Foto nicht lesbar")

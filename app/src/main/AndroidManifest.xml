@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Die App braucht keine einzige Berechtigung: Fotos kommen über die Android-Fotoauswahl
-  bzw. die Kamera-App, Sicherungen über den Android-Dateidialog. Kein Internet.
+  Die App braucht keine einzige Berechtigung: Fotos kommen über die Android-Fotoauswahl,
+  die Kamera-App oder „Teilen mit…“, Sicherungen über den Android-Dateidialog. Kein Internet.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -28,6 +28,21 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!--
+              „Teilen mit…“ (#46): Bildschirmfotos und Bilder aus anderen Apps direkt übernehmen.
+              Angenommen werden nur content://-Adressen, die Bilder werden sofort kopiert (siehe IncomingImages).
+              Dafür ist keine Berechtigung nötig.
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
             </intent-filter>
         </activity>
 
