@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.11.1] – 2026-10-02 (versionCode 26)
+
+### Geändert
+- Keine sichtbaren Änderungen an der App. Jede neue Version wird vor der Veröffentlichung automatisch auf einem virtuellen Android-Handy durchgeklickt: Rezept hinzufügen, Titel vergessen, suchen, ansehen, löschen, aus Foto übernehmen und die Einstellungen – jeweils im hellen und dunklen Modus, mit 200 % Schrift und auf Englisch. Klappt dabei etwas nicht, wird die Version nicht veröffentlicht. Von jedem Bildschirm entsteht ein Foto, damit Aussehen und Texte vor der Veröffentlichung geprüft werden können.
+
 ## [0.11.0] – 2026-10-02 (versionCode 25)
 
 ### Neu

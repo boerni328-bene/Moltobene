@@ -12,6 +12,7 @@ coil = "3.0.4"
 kotlinxSerialization = "1.7.3"
 junit = "4.13.2"
 robolectric = "4.14.1"
+androidxTestRunner = "1.6.2"
 tesseract4android = "4.9.0"
 
 [libraries]
@@ -36,6 +37,9 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 # Nur für Tests (z. B. Datenbank-Umbauten mit einer echten Datenbank); kommt nicht in die App.
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+# Nur für den Rundgang auf dem Emulator (androidTest); kommt nicht in die App.
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 # Texterkennung (Tesseract, quelloffen, nur auf dem Handy). Kommt über JitPack, siehe settings.gradle.kts.
 tesseract4android = { group = "cz.adaptech.tesseract4android", name = "tesseract4android-openmp", version.ref = "tesseract4android" }
 

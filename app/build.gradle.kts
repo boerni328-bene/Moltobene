@@ -14,8 +14,11 @@ android {
         applicationId = "com.moltobene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 25
-        versionName = "0.11.0"
+        versionCode = 26
+        versionName = "0.11.1"
+
+        // Rundgang durch die App auf dem Emulator (app/src/androidTest).
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Nur die unterstützten Sprachen mitliefern (Englisch als Rückfall, Deutsch).
         resourceConfigurations += listOf("en", "de")
@@ -41,8 +44,10 @@ android {
 
     // Der Signaturschlüssel kommt aus Umgebungsvariablen (auf GitHub aus den Secrets).
     // Auf GitHub (CI=true) ist er Pflicht, damit nie eine unsignierte APK veröffentlicht wird.
+    // Ausnahme: Der Rundgang auf dem Emulator baut nur Debug-Versionen und bekommt keine Secrets.
     val keystoreFile = System.getenv("KEYSTORE_FILE")
-    if (System.getenv("CI") == "true" && keystoreFile == null) {
+    val onlyDebugTasks = gradle.startParameter.taskNames.let { tasks -> tasks.isNotEmpty() && tasks.all { "Debug" in it } }
+    if (System.getenv("CI") == "true" && keystoreFile == null && !onlyDebugTasks) {
         throw GradleException("Signaturschlüssel fehlt (KEYSTORE_FILE). Ohne Signatur wird auf GitHub nicht gebaut.")
     }
     signingConfigs {
@@ -85,6 +90,11 @@ android {
         compose = true
         buildConfig = true
     }
+
+    testOptions {
+        // Ohne Animationen laufen die Tests auf dem Emulator gleichmäßiger.
+        animationsDisabled = true
+    }
 }
 
 // Baupläne der Datenbank (für spätere Umbauten/Migrationen) werden in app/schemas abgelegt.
@@ -116,4 +126,8 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
+
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.androidx.test.runner)
 }

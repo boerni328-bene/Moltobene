@@ -35,3 +35,6 @@ keystore.properties
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Heruntergeladene Bildschirmfotos aus dem Testlauf (nur zum Ansehen)
+bildschirmfotos/
