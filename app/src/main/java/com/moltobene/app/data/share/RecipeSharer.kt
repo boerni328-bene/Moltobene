@@ -47,14 +47,14 @@ class RecipeSharer(private val context: Context, private val photoStore: PhotoSt
     }
 
     /** Rezeptdatei im Standard schema.org/Recipe, mit eingebettetem Foto. */
-    suspend fun prepareFile(recipe: Recipe, untitled: String): PreparedShare = withContext(Dispatchers.IO) {
+    suspend fun prepareFile(recipe: Recipe, labels: ShareLabels): PreparedShare = withContext(Dispatchers.IO) {
         val folder = newFolder()
         val jpeg = recipe.photoIds.firstOrNull()?.let { photoStore.encodeForSharing(it) }
-        val file = File(folder, "${ShareFiles.baseName(recipe.title, untitled)}.${RecipeJsonLd.FILE_EXTENSION}")
-        file.writeText(RecipeJsonLd.build(recipe, untitled, jpeg))
+        val file = File(folder, "${ShareFiles.baseName(recipe.title, labels.untitled)}.${RecipeJsonLd.FILE_EXTENSION}")
+        file.writeText(RecipeJsonLd.build(recipe, labels.untitled, jpeg, labels.page))
         PreparedShare(
             mimeType = RecipeJsonLd.MIME_TYPE,
-            subject = recipe.title.trim().ifEmpty { untitled },
+            subject = recipe.title.trim().ifEmpty { labels.untitled },
             text = null,
             fileUri = uriFor(file),
         )

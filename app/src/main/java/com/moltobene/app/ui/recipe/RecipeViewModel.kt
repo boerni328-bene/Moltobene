@@ -81,7 +81,7 @@ class RecipeViewModel(
         viewModelScope.launch {
             shareEvent = try {
                 val prepared = if (asFile) {
-                    sharer.prepareFile(recipe, labels.untitled)
+                    sharer.prepareFile(recipe, labels)
                 } else {
                     sharer.prepareText(recipe, labels)
                 }

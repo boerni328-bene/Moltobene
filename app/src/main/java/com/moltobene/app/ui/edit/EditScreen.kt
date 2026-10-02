@@ -39,6 +39,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -60,6 +61,7 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -279,13 +281,7 @@ fun EditScreen(
                     modifier = Modifier.fillMaxWidth(),
                 )
 
-                OutlinedTextField(
-                    value = viewModel.source,
-                    onValueChange = { viewModel.source = it },
-                    label = { Text(stringResource(R.string.source)) },
-                    supportingText = { Text(stringResource(R.string.field_source_hint)) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                SourceSection(viewModel)
 
                 OutlinedTextField(
                     value = viewModel.notes,
@@ -493,6 +489,59 @@ private fun RecognitionSection(
                             Text(stringResource(R.string.recognized_text_remove))
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Quelle mit Seite (#40). Nach einer Texterkennung stehen darunter antippbare Vorschläge: zuletzt
+ * genutzte Bücher und die erkannte Seitenzahl – ohne zusätzliches Fenster.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SourceSection(viewModel: EditViewModel) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+            OutlinedTextField(
+                value = viewModel.source,
+                onValueChange = { viewModel.source = it },
+                label = { Text(stringResource(R.string.source)) },
+                supportingText = { Text(stringResource(R.string.field_source_hint)) },
+                modifier = Modifier.weight(2f),
+            )
+            if (!viewModel.sourceIsLink) {
+                OutlinedTextField(
+                    value = viewModel.sourcePage,
+                    onValueChange = { value -> if (value.length <= 9) viewModel.sourcePage = value },
+                    label = { Text(stringResource(R.string.field_source_page)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+        val books = viewModel.sourceSuggestions
+        val page = viewModel.pageSuggestion
+        if (books.isNotEmpty() || page != null) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                Text(
+                    text = stringResource(R.string.source_suggestions),
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                )
+                books.forEach { book ->
+                    SuggestionChip(
+                        onClick = { viewModel.takeSourceSuggestion(book) },
+                        label = { Text(book, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                    )
+                }
+                page?.let {
+                    SuggestionChip(
+                        onClick = viewModel::takePageSuggestion,
+                        label = { Text(stringResource(R.string.source_page, it)) },
+                    )
                 }
             }
         }

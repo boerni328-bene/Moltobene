@@ -2,6 +2,7 @@ package com.moltobene.app.data.share
 
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeSource
+import com.moltobene.app.data.RecipeText
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.add
@@ -27,6 +28,8 @@ class ShareLabels(
     val servings: (count: Int, unit: String?) -> String,
     /** Zeile mit der Quelle, z. B. „Quelle: Omas Kochbuch“. */
     val source: (String) -> String,
+    /** Seitenangabe, z. B. „S. 47“. */
+    val page: (String) -> String = { it },
 )
 
 object RecipeShareText {
@@ -66,16 +69,16 @@ object RecipeShareText {
             }
         }
 
-        sourceText(recipe.source)?.let { blocks += labels.source(it) }
+        sourceText(recipe.source, labels.page)?.let { blocks += labels.source(it) }
 
         return blocks.joinToString("\n\n")
     }
 
-    /** Lesbare Quelle: der Link, sonst Name und Seite. */
-    fun sourceText(source: RecipeSource?): String? {
+    /** Lesbare Quelle: der Link, sonst Name und Seite (eine reine Zahl mit [page], z. B. „S. 47“). */
+    fun sourceText(source: RecipeSource?, page: (String) -> String = { it }): String? {
         if (source == null) return null
         source.url?.trim()?.takeIf { it.isNotEmpty() }?.let { return it }
-        return listOfNotNull(source.name, source.page)
+        return listOfNotNull(source.name, source.page?.let { RecipeText.formatPage(it, page) })
             .map { it.trim() }
             .filter { it.isNotEmpty() }
             .joinToString(", ")
@@ -91,8 +94,11 @@ object RecipeJsonLd {
 
     private val json = Json { prettyPrint = true }
 
-    /** [photoJpeg] wird als data-Link eingebettet, damit die Datei ohne Internet vollständig ist. */
-    fun build(recipe: Recipe, untitled: String, photoJpeg: ByteArray?): String {
+    /**
+     * [photoJpeg] wird als data-Link eingebettet, damit die Datei ohne Internet vollständig ist.
+     * [page] schreibt eine Seitenzahl der Quelle aus, z. B. „S. 47“.
+     */
+    fun build(recipe: Recipe, untitled: String, photoJpeg: ByteArray?, page: (String) -> String = { it }): String {
         val document: JsonObject = buildJsonObject {
             put("@context", "https://schema.org")
             put("@type", "Recipe")
@@ -124,7 +130,7 @@ object RecipeJsonLd {
             if (url != null) {
                 put("url", url)
             } else {
-                RecipeShareText.sourceText(recipe.source)?.let { name ->
+                RecipeShareText.sourceText(recipe.source, page)?.let { name ->
                     putJsonObject("isBasedOn") {
                         put("@type", "CreativeWork")
                         put("name", name)

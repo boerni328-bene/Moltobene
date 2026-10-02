@@ -114,8 +114,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Assign areas: in “Select area”, several frames can be drawn and marked as title, ingredients or instructions. Ideal for cookbook pages with two columns – nothing ends up in the wrong field any more.</item>
-        <item>The frames are now equally easy to see on light and dark photos.</item>
+        <item>“Page”: the source has its own field for the page; it is shown and shared as “p. 47”.</item>
+        <item>After text recognition, the app suggests the most recently used books and the detected page number below the source – one tap is enough.</item>
     </string-array>
 
     <!-- Bearbeiten -->
@@ -125,7 +125,10 @@
     <string name="field_servings_unit_hint">e.g. pieces, 26 cm tin</string>
     <string name="field_ingredients_hint">One ingredient per line, e.g. 200 g flour. Subheadings end with a colon, e.g. For the dough:</string>
     <string name="field_instructions_hint">One step per line</string>
-    <string name="field_source_hint">e.g. Grandma’s cookbook, p. 42, or a link</string>
+    <string name="field_source_hint">e.g. Grandma’s cookbook or a link</string>
+    <string name="field_source_page">Page</string>
+    <string name="source_page">p. %1$s</string>
+    <string name="source_suggestions">Suggestions:</string>
     <string name="photo_choose">Choose photo</string>
     <string name="photo_take">Take photo</string>
     <string name="photo_remove">Remove photo</string>

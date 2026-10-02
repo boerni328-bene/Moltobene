@@ -87,6 +87,10 @@ class EditViewModel(
     private val ingredientsField = SavedField(handle, "ingredients", "")
     private val stepsField = SavedField(handle, "steps", "")
     private val sourceField = SavedField(handle, "source", "")
+    /** Seite in der Quelle, z. B. „47“ (#40). */
+    private val sourcePageField = SavedField(handle, "sourcePage", "")
+    /** Bei der Texterkennung gefundene Seitenzahl – als Vorschlag für „Seite“. */
+    private val suggestedPageField = SavedField(handle, "suggestedPage", "")
     private val notesField = SavedField(handle, "notes", "")
     /** Vollständiger erkannter Text; wird als Originaltext gespeichert, damit nichts verloren geht. */
     private val recognizedTextField = SavedField(handle, "recognizedText", "")
@@ -146,6 +150,37 @@ class EditViewModel(
     var source: String
         get() = sourceField.value
         set(value) = change(sourceField, value)
+    var sourcePage: String
+        get() = sourcePageField.value
+        set(value) = change(sourcePageField, value)
+
+    /** Bei einem Link gibt es keine Seite. */
+    val sourceIsLink: Boolean get() = RecipeText.isWebLink(source.trim())
+
+    /** Zuletzt genutzte Bücher aus der Sammlung; nach einer Texterkennung als Vorschlag für die Quelle (#40). */
+    private var recentSources by mutableStateOf<List<String>>(emptyList())
+
+    /** Vorschläge für „Quelle“ – nur nach einer Texterkennung und solange noch keine Quelle eingetragen ist. */
+    val sourceSuggestions: List<String>
+        get() = if (showCheckHint && source.isBlank()) recentSources else emptyList()
+
+    /** Vorschlag für „Seite“: die erkannte Seitenzahl, solange noch keine Seite eingetragen ist. */
+    val pageSuggestion: String?
+        get() = suggestedPageField.value.takeIf { it.isNotEmpty() && sourcePage.isBlank() && !sourceIsLink }
+
+    fun takeSourceSuggestion(name: String) {
+        source = name
+    }
+
+    fun takePageSuggestion() {
+        pageSuggestion?.let { sourcePage = it }
+    }
+
+    private fun loadSourceSuggestions() {
+        viewModelScope.launch {
+            recentSources = runCatching { repository.recentSourceNames() }.getOrDefault(emptyList())
+        }
+    }
     var notes: String
         get() = notesField.value
         set(value) = change(notesField, value)
@@ -214,6 +249,7 @@ class EditViewModel(
 
     init {
         if (!loadedField.value && routeId != null) load(routeId)
+        if (checkHintField.value) loadSourceSuggestions()
         when {
             // Android hat die App während der Erkennung beendet.
             recognitionStartedField.value -> resumeRecognition()
@@ -237,6 +273,7 @@ class EditViewModel(
                 ingredientsField.value = RecipeText.formatIngredients(recipe.ingredients)
                 stepsField.value = RecipeText.formatSteps(recipe.steps)
                 sourceField.value = RecipeText.formatSource(recipe.source)
+                sourcePageField.value = recipe.source?.page.orEmpty()
                 notesField.value = recipe.notes
                 photoIdField.value = recipe.photoIds.firstOrNull()
                 originalPhotoIdField.value = recipe.photoIds.firstOrNull()
@@ -554,6 +591,7 @@ class EditViewModel(
     private fun applyResult(result: TextRecognizer.Result) {
         applyRecognized(result)
         checkHintField.value = true
+        loadSourceSuggestions()
         // Im Hintergrund wird ein neues Rezept gleich als Entwurf gesichert, wie beim Wechsel in den Hintergrund.
         if (inBackground) saveDraft()
     }
@@ -566,6 +604,9 @@ class EditViewModel(
         val text = result.text.trim()
         val kinds = pageFrames(areaPages().size).flatten().map { it.kind }
         val parts = if (kinds.size == result.parts.size) kinds.zip(result.parts) else listOf(AreaKind.ALL to text)
+        val parsed = RecipeTextParser.parseParts(parts, result.language)
+        // Die Seitenzahl der ersten gelesenen Seite wird zum Vorschlag für „Seite“ (#40).
+        if (suggestedPageField.value.isEmpty()) parsed.pageNumber?.let { suggestedPageField.value = it }
         val merged = DraftMerge.merge(
             draft = DraftText(
                 title = title,
@@ -577,7 +618,7 @@ class EditViewModel(
                 language = languageField.value,
             ),
             text = text,
-            parsed = RecipeTextParser.parseParts(parts, result.language),
+            parsed = parsed,
             language = result.language.takeIf { result.detected },
         )
         if (merged.title != title) title = merged.title
@@ -785,7 +826,8 @@ class EditViewModel(
     }
 
     private fun hasContent(): Boolean =
-        listOf(title, ingredients, steps, source, notes, recognizedText).any { it.isNotBlank() } || photoIdField.value != null
+        listOf(title, ingredients, steps, source, sourcePage, notes, recognizedText).any { it.isNotBlank() } ||
+            photoIdField.value != null
 
     private fun buildRecipe(id: String, base: Recipe?, isDraft: Boolean, newPages: List<String> = emptyList()): Recipe {
         val now = System.currentTimeMillis()
@@ -796,11 +838,16 @@ class EditViewModel(
             createdAt = now,
             updatedAt = now,
         )
-        // Unveränderte Quelle behält ihre Details (z. B. Seitenangabe aus einer Sicherung).
-        val parsedSource = if (base != null && RecipeText.formatSource(base.source) == source.trim()) {
+        // Unveränderte Quelle behält ihre Details (z. B. die Art „Person“ aus einer Sicherung).
+        val page = sourcePage.takeIf { !sourceIsLink }
+        val parsedSource = if (
+            base?.source != null &&
+            RecipeText.formatSource(base.source) == source.trim() &&
+            base.source.page.orEmpty() == page.orEmpty().trim()
+        ) {
             base.source
         } else {
-            RecipeText.parseSource(source)
+            RecipeText.parseSource(source, page)
         }
         val mainPhoto = photoIdField.value
         val furtherPhotos = base?.photoIds?.drop(1).orEmpty().filter { it != mainPhoto }

@@ -86,6 +86,13 @@ class RecipeShareTest {
     }
 
     @Test
+    fun seiteDerQuelleMitBezeichnung() {
+        val book = RecipeSource(type = SourceType.BOOK, name = "Omas Kochbuch", page = "47")
+        assertEquals("Omas Kochbuch, S. 47", RecipeShareText.sourceText(book) { "S. $it" })
+        assertTrue(RecipeJsonLd.build(Recipe(id = "x", title = "Kuchen", source = book, createdAt = 0, updatedAt = 0), "Ohne Titel", null) { "p. $it" }.contains("Omas Kochbuch, p. 47"))
+    }
+
+    @Test
     fun rezeptdateiFolgtSchemaOrg() {
         val photo = byteArrayOf(1, 2, 3)
         val json = Json.parseToJsonElement(RecipeJsonLd.build(recipe.copy(prepMinutes = 20, totalMinutes = 90), "Ohne Titel", photo)).jsonObject

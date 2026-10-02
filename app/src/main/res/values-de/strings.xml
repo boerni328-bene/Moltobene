@@ -111,8 +111,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Bereiche zuordnen: In „Bereich auswählen“ lassen sich mehrere Rahmen ziehen und als Titel, Zutaten oder Zubereitung markieren. Ideal für Kochbuchseiten mit zwei Spalten – nichts landet mehr im falschen Feld.</item>
-        <item>Die Rahmen sind jetzt auf hellen und dunklen Fotos gleich gut zu sehen.</item>
+        <item>„Seite“: Die Quelle hat ein eigenes Feld für die Seite; angezeigt und geteilt wird sie als „S. 47“.</item>
+        <item>Nach der Texterkennung schlägt die App unter der Quelle die zuletzt genutzten Bücher und die erkannte Seitenzahl vor – ein Tipp genügt.</item>
     </string-array>
 
     <!-- Bearbeiten -->
@@ -122,7 +122,10 @@
     <string name="field_servings_unit_hint">z. B. Stück, Springform 26 cm</string>
     <string name="field_ingredients_hint">Eine Zutat pro Zeile, z. B. 200 g Mehl. Zwischenüberschriften enden mit Doppelpunkt, z. B. Für den Teig:</string>
     <string name="field_instructions_hint">Ein Schritt pro Zeile</string>
-    <string name="field_source_hint">z. B. Omas Kochbuch, S. 42, oder ein Link</string>
+    <string name="field_source_hint">z. B. Omas Kochbuch oder ein Link</string>
+    <string name="field_source_page">Seite</string>
+    <string name="source_page">S. %1$s</string>
+    <string name="source_suggestions">Vorschläge:</string>
     <string name="photo_choose">Foto auswählen</string>
     <string name="photo_take">Foto aufnehmen</string>
     <string name="photo_remove">Foto entfernen</string>

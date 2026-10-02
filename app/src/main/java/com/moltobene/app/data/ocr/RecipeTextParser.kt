@@ -2,13 +2,17 @@ package com.moltobene.app.data.ocr
 
 import java.text.Normalizer
 
-/** Ergebnis der Aufteilung: Zutaten im Format des Eingabefelds (Zwischenüberschriften enden mit „:“). */
+/**
+ * Ergebnis der Aufteilung: Zutaten im Format des Eingabefelds (Zwischenüberschriften enden mit „:“).
+ * [pageNumber] ist die Seitenzahl oben oder unten auf der ersten Seite – ein Vorschlag für die Quelle (#40).
+ */
 data class ParsedRecipe(
     val title: String?,
     val servings: Int?,
     val servingsUnit: String?,
     val ingredients: List<String>,
     val steps: List<String>,
+    val pageNumber: String? = null,
 )
 
 /**
@@ -158,7 +162,14 @@ object RecipeTextParser {
             servingsUnit = servingsFrom?.servingsUnit,
             ingredients = whole.ingredients + sections.flatMap { it.ingredients },
             steps = whole.steps + sections.flatMap { it.steps },
+            pageNumber = parts.firstNotNullOfOrNull { pageNumberOf(it.second) },
         )
+    }
+
+    /** Seitenzahl in der ersten oder letzten Zeile, sonst null. */
+    internal fun pageNumberOf(text: String): String? {
+        val lines = text.lines().map { it.trim() }.filter { it.isNotEmpty() }
+        return listOfNotNull(lines.firstOrNull(), lines.lastOrNull()).firstOrNull { PAGE_NUMBER.matches(it) }
     }
 
     /** Ein bezeichneter Bereich: Es wird nicht geraten, was darin steht, nur aufbereitet und Überschriften weggelassen. */

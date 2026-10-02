@@ -23,16 +23,24 @@ object RecipeText {
 
     fun formatSteps(steps: List<String>): String = steps.joinToString("\n")
 
-    /** Quelle aus dem Eingabefeld: Links (nur http/https) werden als Link erkannt, alles andere als Name. */
-    fun parseSource(text: String): RecipeSource? {
+    /**
+     * Quelle aus den Eingabefeldern „Quelle“ und „Seite“: Links (nur http/https) werden als Link erkannt,
+     * alles andere als Name. Mit einer Seite gilt die Quelle als Buch (#40); bei einem Link zählt die Seite nicht.
+     */
+    fun parseSource(text: String, page: String? = null): RecipeSource? {
         val value = text.trim()
-        if (value.isEmpty()) return null
-        return if (isWebLink(value)) {
-            RecipeSource(type = SourceType.WEB, url = value)
-        } else {
-            RecipeSource(type = SourceType.OTHER, name = value)
+        val pageValue = page?.trim()?.takeIf { it.isNotEmpty() }
+        if (value.isEmpty()) return pageValue?.let { RecipeSource(type = SourceType.BOOK, page = it) }
+        return when {
+            isWebLink(value) -> RecipeSource(type = SourceType.WEB, url = value)
+            pageValue != null -> RecipeSource(type = SourceType.BOOK, name = value, page = pageValue)
+            else -> RecipeSource(type = SourceType.OTHER, name = value)
         }
     }
+
+    /** Eine Seite, die nur aus einer Zahl besteht (z. B. „47“), wird mit [label] angezeigt („S. 47“); ältere Angaben wie „S. 42“ bleiben, wie sie sind. */
+    fun formatPage(page: String, label: (String) -> String): String =
+        page.trim().let { if (it.isNotEmpty() && it.all { char -> char.isDigit() || char == '-' }) label(it) else it }
 
     fun formatSource(source: RecipeSource?): String =
         source?.url ?: source?.name ?: ""

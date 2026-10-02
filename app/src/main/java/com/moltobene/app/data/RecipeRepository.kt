@@ -51,6 +51,9 @@ class RecipeRepository(
         photoIds.forEach { photoStore.delete(it) }
     }
 
+    /** Zuletzt genutzte Bücher und andere Quellen ohne Link – als Vorschlag beim Übernehmen (#40). */
+    suspend fun recentSourceNames(limit: Int = 3): List<String> = dao.getRecentSourceNames(limit)
+
     /** Entfernt Fotodateien, die zu keinem Rezept mehr gehören (z. B. nach einem Abbruch). */
     suspend fun cleanUpUnusedPhotos() {
         photoStore.deleteUnused(referenced = dao.getAllPhotoIds().toSet())

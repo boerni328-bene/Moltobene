@@ -207,6 +207,9 @@ class RecipeTextParserTest {
         )
         assertEquals(listOf("250 g Linsen", "1 Zwiebel", "2 Karotten"), recipe.ingredients)
         assertEquals(listOf("Alles weich kochen."), recipe.steps)
+        // Die Seitenzahl der ersten Seite wird Vorschlag für die Quelle (#40).
+        assertEquals("46", recipe.pageNumber)
+        assertNull(RecipeTextParser.pageNumberOf("Linsensuppe\n250 g Linsen"))
         // Eine einzelne Zahl mitten im Text gilt nicht als Zutat (früher: „4“ als Menge, „7“ als Zutat).
         val withNumber = RecipeTextParser.parse(
             "Linsensuppe\nAlles in einen Topf geben und weich kochen.\n\n47\n\nDann mit Salz abschmecken und servieren.",

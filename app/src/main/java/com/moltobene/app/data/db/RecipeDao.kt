@@ -55,6 +55,18 @@ abstract class RecipeDao {
     @Query("SELECT photoId FROM recipe_photos")
     abstract suspend fun getAllPhotoIds(): List<String>
 
+    /** Zuletzt genutzte Quellen ohne Link, z. B. Kochbücher – die zuletzt geänderten zuerst. */
+    @Query(
+        """
+        SELECT sourceName FROM recipes
+        WHERE sourceName IS NOT NULL AND TRIM(sourceName) != '' AND sourceUrl IS NULL
+        GROUP BY sourceName
+        ORDER BY MAX(updatedAt) DESC
+        LIMIT :limit
+        """
+    )
+    abstract suspend fun getRecentSourceNames(limit: Int): List<String>
+
     @Upsert
     abstract suspend fun upsertRecipe(recipe: RecipeEntity)
 

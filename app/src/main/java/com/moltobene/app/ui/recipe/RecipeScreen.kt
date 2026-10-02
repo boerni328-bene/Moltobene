@@ -221,6 +221,7 @@ private fun shareLabels(resources: Resources) = ShareLabels(
         }
     },
     source = { resources.getString(R.string.share_source, it) },
+    page = { resources.getString(R.string.source_page, it) },
 )
 
 /** Öffnet das Android-Teilen-Menü. Andere Apps dürfen nur die übergebene Datei lesen. */
@@ -342,7 +343,11 @@ private fun RecipeContent(
                 if (url != null && RecipeText.isWebLink(url)) {
                     SourceLink(url = url, snackbarHostState = snackbarHostState)
                 } else {
-                    val text = listOfNotNull(source.name, source.page).joinToString(", ")
+                    val resources = LocalContext.current.resources
+                    val text = listOfNotNull(
+                        source.name,
+                        source.page?.let { page -> RecipeText.formatPage(page) { resources.getString(R.string.source_page, it) } },
+                    ).joinToString(", ")
                     if (text.isNotBlank()) Text(text, style = MaterialTheme.typography.bodyLarge)
                 }
             }

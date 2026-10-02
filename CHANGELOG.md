@@ -3,6 +3,15 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.10.0] – 2026-10-02 (versionCode 23)
+
+### Neu
+- **Seite der Quelle:** Neben „Quelle“ gibt es das Feld „Seite“. In der Rezeptansicht und beim Teilen erscheint sie als „S. 47“ (auf Englisch „p. 47“). Bei einem Link gibt es keine Seite.
+- **Vorschläge für die Quelle:** Nach der Texterkennung stehen unter der Quelle antippbare Vorschläge – die zuletzt genutzten Bücher aus der eigenen Sammlung und die Seitenzahl, die auf der Seite erkannt wurde. Wer mehrere Rezepte aus demselben Kochbuch übernimmt, muss den Buchtitel nicht jedes Mal neu tippen. Es gibt dafür kein zusätzliches Fenster.
+
+### Geändert
+- Eine Quelle mit Seite gilt als Buch. Ältere Angaben wie „Omas Kochbuch, S. 42“ in einem Feld bleiben unverändert erhalten.
+
 ## [0.9.2] – 2026-10-02 (versionCode 22)
 
 ### Geändert
