@@ -78,7 +78,7 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 
 ### Übersetzbarkeit
 
-- Englisch ist die Rückfallsprache (`res/values/strings.xml`, `tools:locale="en"`), Deutsch die Übersetzung (`res/values-de/strings.xml`). Jeder neue Text kommt **immer in beide Dateien**. Mitgeliefert werden nur diese Sprachen (`resourceConfigurations`).
+- Englisch ist die Rückfallsprache (`res/values/strings.xml`, `tools:locale="en"`), Deutsch die Übersetzung (`res/values-de/strings.xml`). Jeder neue Text kommt **immer in beide Dateien**. Mitgeliefert werden nur diese Sprachen (`localeFilters` in `app/build.gradle.kts`).
 - Alle sichtbaren Texte inkl. Beschreibungen für den Screenreader stehen in `strings.xml`, nie im Code.
 - Mengenangaben als Mehrzahlformen (`plurals`): „1 Rezept“ / „2 Rezepte“.
 - Platzhalter nummeriert (`%1$s`, `%2$d`); Sätze nie aus Einzelteilen zusammensetzen.

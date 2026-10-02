@@ -1,6 +1,6 @@
 plugins {
+    // Kotlin übersetzt das Android-Bauwerkzeug seit AGP 9 selbst; ein eigenes Kotlin-Plugin ist nicht mehr nötig.
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
@@ -8,20 +8,17 @@ plugins {
 
 android {
     namespace = "com.moltobene.app"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.moltobene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 26
-        versionName = "0.11.1"
+        versionCode = 27
+        versionName = "0.11.2"
 
         // Rundgang durch die App auf dem Emulator (app/src/androidTest).
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        // Nur die unterstützten Sprachen mitliefern (Englisch als Rückfall, Deutsch).
-        resourceConfigurations += listOf("en", "de")
 
         // Texterkennung: nur die Prozessoren heutiger Handys, das hält die App klein.
         ndk {
@@ -30,6 +27,8 @@ android {
     }
 
     androidResources {
+        // Nur die unterstützten Sprachen mitliefern (Englisch als Rückfall, Deutsch).
+        localeFilters += listOf("en", "de")
         // Sprachliste für die Android-Einstellung „App-Sprache“ (ab Android 13) automatisch erzeugen.
         generateLocaleConfig = true
     }
@@ -80,10 +79,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
     }
 
     buildFeatures {

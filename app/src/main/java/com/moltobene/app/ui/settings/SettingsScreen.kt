@@ -33,7 +33,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -60,7 +60,8 @@ fun SettingsScreen(
     onBack: () -> Unit,
     onOpenLicenses: () -> Unit,
 ) {
-    val context = LocalContext.current
+    // Texte über LocalResources lesen: passt sich an, wenn sich z. B. die App-Sprache ändert.
+    val resources = LocalResources.current
     var showWhatsNew by rememberSaveable { mutableStateOf(false) }
     val createBackup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
         if (uri != null) viewModel.backup(uri)
@@ -101,7 +102,7 @@ fun SettingsScreen(
                 headlineContent = { Text(stringResource(R.string.backup_title)) },
                 supportingContent = { Text(stringResource(R.string.backup_text)) },
                 modifier = Modifier.clickable {
-                    createBackup.launch(context.getString(R.string.backup_file_name, LocalDate.now().toString()))
+                    createBackup.launch(resources.getString(R.string.backup_file_name, LocalDate.now().toString()))
                 },
             )
             ListItem(

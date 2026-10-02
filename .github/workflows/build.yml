@@ -105,7 +105,8 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew lintRelease testReleaseUnitTest assembleRelease --no-daemon
+        # Unit-Tests gibt es seit AGP 9 nur noch für die Debug-Variante (gleicher Code, ohne Verkleinerung).
+        run: ./gradlew lintRelease testDebugUnitTest assembleRelease --no-daemon
 
       - name: Prüfbericht (Lint) speichern
         if: always()

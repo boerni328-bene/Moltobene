@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.11.2] – 2026-10-02 (versionCode 27)
+
+### Geändert
+- Keine sichtbaren Änderungen an der App. Die Bausteine, aus denen die App besteht, und die Werkzeuge, mit denen sie gebaut wird, sind auf dem neuesten Stand – darunter die Bausteine für Bildschirme, Datenbank und Fotos sowie die Programmiersprache Kotlin. Neuere Bausteine enthalten Fehlerbehebungen und Verbesserungen und halten die App für künftige Android-Versionen fit.
+
 ## [0.11.1] – 2026-10-02 (versionCode 26)
 
 ### Geändert

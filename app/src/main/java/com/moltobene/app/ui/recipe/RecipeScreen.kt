@@ -51,6 +51,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -91,7 +92,7 @@ fun RecipeScreen(
     var menuOpen by remember { mutableStateOf(false) }
     val deletedMessage = stringResource(R.string.recipe_deleted)
     val context = LocalContext.current
-    val resources = context.resources
+    val resources = LocalResources.current
 
     KeepScreenOn()
 
@@ -343,7 +344,7 @@ private fun RecipeContent(
                 if (url != null && RecipeText.isWebLink(url)) {
                     SourceLink(url = url, snackbarHostState = snackbarHostState)
                 } else {
-                    val resources = LocalContext.current.resources
+                    val resources = LocalResources.current
                     val text = listOfNotNull(
                         source.name,
                         source.page?.let { page -> RecipeText.formatPage(page) { resources.getString(R.string.source_page, it) } },
