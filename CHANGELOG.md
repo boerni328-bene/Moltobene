@@ -3,6 +3,15 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.9.2] – 2026-10-02 (versionCode 22)
+
+### Geändert
+- Die Texterkennung ist schneller, besonders bei mehreren Seiten und Bereichen: Das Sprachpaket wird nur noch einmal geladen statt für jede Seite und jeden Bereich neu.
+- Während der Erkennung zeigt ein Balken, wie weit sie ist. Bei mehreren Seiten steht dazu z. B. „Seite 2 von 3 wird gelesen …“; der Screenreader sagt das von selbst an.
+
+### Behoben
+- „Abbrechen“ wirkte in den ersten Sekunden einer Erkennung manchmal nicht. Jetzt hält es die Erkennung jederzeit an.
+
 ## [0.9.1] – 2026-10-01 (versionCode 21)
 
 ### Behoben

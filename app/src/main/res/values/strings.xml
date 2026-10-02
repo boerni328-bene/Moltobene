@@ -64,7 +64,7 @@
     <string name="ocr_from_recipe_photo">Read recipe photo</string>
     <string name="ocr_choose_photos">Choose photos</string>
     <string name="ocr_running">Recognizing text …</string>
-    <string name="ocr_running_pages">Recognizing text … page %1$d of %2$d</string>
+    <string name="ocr_running_pages">Reading page %1$d of %2$d …</string>
     <string name="ocr_done">Text added to the recipe. Check quantities and units for reading errors.</string>
     <string name="ocr_nothing">No text found. Sharp photos taken straight on in good light work best.</string>
     <string name="ocr_error">The text could not be recognized. Try again or choose another photo.</string>

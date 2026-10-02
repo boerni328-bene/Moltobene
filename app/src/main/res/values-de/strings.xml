@@ -63,7 +63,7 @@
     <string name="ocr_from_recipe_photo">Rezeptfoto lesen</string>
     <string name="ocr_choose_photos">Fotos auswählen</string>
     <string name="ocr_running">Text wird erkannt …</string>
-    <string name="ocr_running_pages">Text wird erkannt … Seite %1$d von %2$d</string>
+    <string name="ocr_running_pages">Seite %1$d von %2$d wird gelesen …</string>
     <string name="ocr_done">Text ins Rezept übernommen. Mengen und Einheiten auf Lesefehler prüfen.</string>
     <string name="ocr_nothing">Kein Text gefunden. Am besten klappt es mit einem scharfen, gerade aufgenommenen Foto bei gutem Licht.</string>
     <string name="ocr_error">Der Text konnte nicht erkannt werden. Erneut versuchen oder ein anderes Foto wählen.</string>

@@ -31,6 +31,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -396,23 +397,28 @@ private fun RecognitionSection(
                 shape = MaterialTheme.shapes.large,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Row(
-                    modifier = Modifier.padding(Spacing.m),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.m),
-                ) {
-                    CircularProgressIndicator(modifier = Modifier.size(32.dp))
-                    Text(
-                        text = if (state.pageCount > 1) {
-                            stringResource(R.string.ocr_running_pages, state.page, state.pageCount)
-                        } else {
-                            stringResource(R.string.ocr_running)
-                        },
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.weight(1f),
-                    )
-                    TextButton(onClick = viewModel::cancelRecognition) { Text(stringResource(R.string.cancel)) }
+                Column(modifier = Modifier.padding(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
+                        // Ganze Sätze, die der Screenreader von selbst vorliest, sobald eine neue Seite drankommt (#43).
+                        Text(
+                            text = if (state.pageCount > 1) {
+                                stringResource(R.string.ocr_running_pages, state.page, state.pageCount)
+                            } else {
+                                stringResource(R.string.ocr_running)
+                            },
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .weight(1f)
+                                .semantics { liveRegion = LiveRegionMode.Polite },
+                        )
+                        TextButton(onClick = viewModel::cancelRecognition) { Text(stringResource(R.string.cancel)) }
+                    }
+                    if (state.percent > 0) {
+                        LinearProgressIndicator(progress = { state.percent / 100f }, modifier = Modifier.fillMaxWidth())
+                    } else {
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    }
                 }
             }
             RecognitionState.Idle -> if (viewModel.recognitionInterrupted) {

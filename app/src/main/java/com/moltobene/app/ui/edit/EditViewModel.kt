@@ -38,7 +38,8 @@ import java.util.Locale
 /** Stand der Texterkennung; [page] zählt ab 1. */
 sealed interface RecognitionState {
     data object Idle : RecognitionState
-    data class Running(val page: Int, val pageCount: Int) : RecognitionState
+    /** @param percent Fortschritt der ganzen Erkennung (0–100) */
+    data class Running(val page: Int, val pageCount: Int, val percent: Int = 0) : RecognitionState
 }
 
 /** „Bereich auswählen“ vor der Texterkennung; [page] zählt ab 1. */
@@ -503,13 +504,19 @@ class EditViewModel(
         runRecognition(pages)
     }
 
-    fun cancelRecognition() = recognizer.cancel()
+    /** Die laufende Erkennung; „Abbrechen“ wirkt auf sie, auch bevor das Lesen richtig begonnen hat (#43). */
+    private var run: TextRecognizer.Run? = null
+
+    fun cancelRecognition() {
+        run?.cancel()
+    }
 
     private fun runRecognition(pages: List<TextRecognizer.Page>) {
         if (isRecognizing) return
         recognitionInterrupted = false
         recognition = RecognitionState.Running(1, pages.size)
         val session = sessionField.value
+        val current = TextRecognizer.Run().also { run = it }
         viewModelScope.launch {
             var read = false
             try {
@@ -517,8 +524,8 @@ class EditViewModel(
                 session?.let { runCatching { pending.deleteResult(it) } }
                 val preferred = preferences.recognitionLanguage()
                     ?: TextLanguage.supportedOrDefault(Locale.getDefault().language)
-                val result = recognizer.recognize(pages, preferred, languageChoiceField.value) { index ->
-                    recognition = RecognitionState.Running(index + 1, pages.size)
+                val result = recognizer.recognize(current, pages, preferred, languageChoiceField.value) { page, percent ->
+                    recognition = RecognitionState.Running(page + 1, pages.size, percent)
                 }
                 // Nur eine sicher erkannte oder gewählte Sprache gilt beim nächsten Mal als zuletzt genutzt.
                 if (result.detected) preferences.setRecognitionLanguage(result.language)
@@ -537,6 +544,7 @@ class EditViewModel(
             } catch (e: Exception) {
                 message = R.string.ocr_error
             } finally {
+                if (run === current) run = null
                 recognition = RecognitionState.Idle
                 finishRun(read)
             }
@@ -640,7 +648,7 @@ class EditViewModel(
     }
 
     override fun onCleared() {
-        recognizer.cancel()
+        run?.cancel()
     }
 
     private companion object {
