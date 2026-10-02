@@ -168,9 +168,10 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.import_from_text))
         composeRule.onNodeWithText(text(R.string.import_from_text)).performClick()
         waitForField(R.string.import_text_field)
+        // Vor der Eingabe: Die Tastatur im Fenster würde sonst „Aus der Zwischenablage einfügen“ verdecken.
+        screenshot("18-aus-text-uebernehmen")
         // Rezepte bleiben in ihrer Originalsprache – deshalb auch in der englischen Darstellung deutsch.
         field(R.string.import_text_field).performTextInput(SHARED_TEXT)
-        screenshot("18-aus-text-uebernehmen")
 
         composeRule.onNodeWithText(text(R.string.import_text_action)).performClick()
         waitForText(text(R.string.text_done))
