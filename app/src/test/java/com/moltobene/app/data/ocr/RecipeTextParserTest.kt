@@ -235,4 +235,29 @@ class RecipeTextParserTest {
         assertEquals("spa", TextLanguage.tesseractCode("es"))
         assertEquals("en", TextLanguage.supportedOrDefault("nl"))
     }
+
+    /** „Aus Text übernehmen“: Text aus einer Nachricht, mit Leerzeilen und Satzzeichen wie getippt. */
+    @Test
+    fun geteilterTextAusEinerNachricht() {
+        val text = """
+            Spaghetti aglio e olio
+            Für 2 Portionen
+
+            Zutaten
+            200 g Spaghetti
+            3 Knoblauchzehen
+            4 EL Olivenöl
+            1 Peperoncino
+
+            Zubereitung
+            Spaghetti in Salzwasser bissfest kochen.
+            Knoblauch in Scheiben schneiden und im Öl goldgelb braten.
+            Nudeln abgießen und im Öl schwenken.
+        """.trimIndent()
+        val recipe = RecipeTextParser.parse(text, TextLanguage.detect(text))
+        assertEquals("Spaghetti aglio e olio", recipe.title)
+        assertEquals(2, recipe.servings)
+        assertEquals(listOf("200 g Spaghetti", "3 Knoblauchzehen", "4 EL Olivenöl", "1 Peperoncino"), recipe.ingredients)
+        assertEquals(3, recipe.steps.size)
+    }
 }

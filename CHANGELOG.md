@@ -3,6 +3,18 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.12.0] – 2026-10-02 (versionCode 28)
+
+### Neu
+- **„Aus Text übernehmen“:** Ein Rezept aus einer Nachricht, einer E-Mail oder einer Notiz einfügen – von Hand oder mit „Aus der Zwischenablage einfügen“. Titel, Portionen, Zutaten und Zubereitung werden automatisch eingeordnet; der vollständige Text bleibt beim Rezept erhalten, damit nichts verloren geht. Ein Link im Text wird zur Quelle.
+- **„Teilen mit…“ für Text:** Moltobene erscheint jetzt auch im Teilen-Menü, wenn Text geteilt wird, z. B. aus WhatsApp oder einer E-Mail. Der Text kommt direkt in ein neues Rezept. Wird nur ein Link geteilt, etwa aus dem Browser, speichert die App ihn mit dem Titel der Seite als Quelle. Das Lesen von Internetseiten selbst folgt in einer späteren Version; bis dahin lässt sich der Rezepttext von der Seite kopieren und mit „Aus Text übernehmen“ einfügen.
+- Die Zwischenablage wird nur gelesen, wenn „Aus der Zwischenablage einfügen“ angetippt wird. Die App bleibt ohne Internet und braucht keine Berechtigung.
+
+### Geändert
+- In der Sammlung heißt der Knopf jetzt „Rezept übernehmen“ und führt zur Auswahl „Aus Foto übernehmen“ oder „Aus Text übernehmen“.
+- „Erkannter Text“ heißt jetzt „Übernommener Text“, weil er auch aus eingefügtem Text stammen kann.
+- Hinweise beim Bearbeiten bleiben länger sichtbar.
+
 ## [0.11.2] – 2026-10-02 (versionCode 27)
 
 ### Geändert

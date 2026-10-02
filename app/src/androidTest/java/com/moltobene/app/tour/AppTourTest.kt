@@ -24,6 +24,7 @@ import com.moltobene.app.MoltobeneApplication
 import com.moltobene.app.R
 import com.moltobene.app.ui.whatsnew.WhatsNew
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -147,30 +148,61 @@ class AppTourTest(private val variant: DisplayVariant) {
 
     @Test
     fun ausFotoUebernehmen() {
-        clickVisible(text(R.string.import_from_photo))
+        clickVisible(text(R.string.import_recipe))
+        waitForText(text(R.string.import_from_text))
+        screenshot("15-rezept-uebernehmen")
+
+        composeRule.onNodeWithText(text(R.string.import_from_photo)).performClick()
         waitForText(text(R.string.ocr_choose_photos))
-        screenshot("15-aus-foto-uebernehmen")
+        screenshot("16-aus-foto-uebernehmen")
 
         composeRule.onNodeWithText(text(R.string.cancel)).performClick()
         waitUntilGone(text(R.string.ocr_choose_photos))
         waitForField(R.string.field_title)
-        screenshot("16-aus-foto-abgebrochen")
+        screenshot("17-aus-foto-abgebrochen")
+    }
+
+    @Test
+    fun ausTextUebernehmen() {
+        clickVisible(text(R.string.import_recipe))
+        waitForText(text(R.string.import_from_text))
+        composeRule.onNodeWithText(text(R.string.import_from_text)).performClick()
+        waitForField(R.string.import_text_field)
+        // Rezepte bleiben in ihrer Originalsprache – deshalb auch in der englischen Darstellung deutsch.
+        field(R.string.import_text_field).performTextInput(SHARED_TEXT)
+        screenshot("18-aus-text-uebernehmen")
+
+        composeRule.onNodeWithText(text(R.string.import_text_action)).performClick()
+        waitForText(text(R.string.text_done))
+        composeRule.onNode(hasSetTextAction() and hasText("Spaghetti aglio e olio")).assertIsDisplayed()
+        screenshot("19-aus-text-uebernommen")
+
+        field(R.string.ingredients).performScrollTo()
+        screenshot("20-aus-text-zutaten")
+
+        composeRule.onNodeWithText(text(R.string.save)).performClick()
+        waitForText("200 g Spaghetti")
+        val recipe = runBlocking { container().repository.getAll().single() }
+        assertEquals("Spaghetti aglio e olio", recipe.title)
+        assertEquals(2, recipe.servings)
+        assertEquals(4, recipe.ingredients.size)
+        assertEquals(3, recipe.steps.size)
     }
 
     @Test
     fun einstellungen() {
         composeRule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
         waitForText(text(R.string.backup_title))
-        screenshot("17-einstellungen")
+        screenshot("21-einstellungen")
 
         composeRule.onNodeWithText(text(R.string.whats_new_title, WhatsNew.VERSION_NAME)).performScrollTo().performClick()
         waitForText(text(R.string.close))
-        screenshot("18-neu-in-version")
+        screenshot("22-neu-in-version")
 
         composeRule.onNodeWithText(text(R.string.close)).performClick()
         composeRule.onNodeWithText(text(R.string.licenses_title)).performScrollTo().performClick()
         waitForText(text(R.string.licenses_intro))
-        screenshot("19-lizenzen")
+        screenshot("23-lizenzen")
     }
 
     // --- Hilfsfunktionen ---
@@ -193,7 +225,7 @@ class AppTourTest(private val variant: DisplayVariant) {
     private fun openRecipe(title: String) {
         waitForText(SampleRecipes.POTATO_SALAD)
         composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(title))
-        // Direkt auslösen statt antippen: Ganz unten liegen die Knöpfe „Aus Foto übernehmen“ und
+        // Direkt auslösen statt antippen: Ganz unten liegen die Knöpfe „Rezept übernehmen“ und
         // „Rezept hinzufügen“ über der Liste, ein Tipp in die Mitte des Eintrags kann sie treffen.
         composeRule.onNodeWithText(title).performSemanticsAction(SemanticsActions.OnClick)
     }
@@ -238,6 +270,23 @@ class AppTourTest(private val variant: DisplayVariant) {
     companion object {
         private const val TIMEOUT_MILLIS = 10_000L
         private const val SETTLE_MILLIS = 700L
+
+        /** Selbst geschriebenes Rezept, wie es aus einer Nachricht eingefügt wird. */
+        private val SHARED_TEXT = """
+            Spaghetti aglio e olio
+            Für 2 Portionen
+
+            Zutaten
+            200 g Spaghetti
+            3 Knoblauchzehen
+            4 EL Olivenöl
+            1 Peperoncino
+
+            Zubereitung
+            Spaghetti in Salzwasser bissfest kochen.
+            Knoblauch in Scheiben schneiden und im Öl goldgelb braten.
+            Nudeln abgießen und im Öl schwenken.
+        """.trimIndent()
 
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")

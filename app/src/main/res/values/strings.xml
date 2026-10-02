@@ -60,6 +60,15 @@
     <!-- Texterkennung -->
     <string name="import_from_photo">Import from photo</string>
     <string name="share_too_many">Only the first %1$d photos are read.</string>
+    <string name="import_recipe">Import recipe</string>
+    <string name="import_from_text">Import from text</string>
+    <string name="import_text_hint">Paste or type a recipe, e.g. from a message, an email or a note. Title, ingredients and instructions are sorted automatically.</string>
+    <string name="import_text_field">Recipe text</string>
+    <string name="import_text_action">Import</string>
+    <string name="paste_from_clipboard">Paste from clipboard</string>
+    <string name="clipboard_empty">The clipboard contains no text.</string>
+    <string name="text_done">Text added to the recipe. Check that everything is in the right place.</string>
+    <string name="import_link_saved">Link saved as source. The recipe text can be copied from the page and added with “Import from text”.</string>
     <string name="ocr_dialog_text">Reads title, ingredients and instructions from photos of a cookbook, a note or a screenshot. Sharp photos taken straight on work best. For several pages, choose the photos in order (up to %1$d).</string>
     <string name="ocr_from_recipe_photo">Use recipe photo</string>
     <string name="ocr_choose_photos">Choose photos</string>
@@ -72,12 +81,12 @@
     <string name="ocr_retry">Recognize again</string>
     <string name="ocr_language">Language of the text</string>
     <string name="ocr_language_auto">Detect automatically</string>
-    <string name="recognized_text">Recognized text</string>
-    <string name="recognized_text_show">Show recognized text</string>
-    <string name="recognized_text_hide">Hide recognized text</string>
-    <string name="recognized_text_hint">Recognized text may contain errors. Missing parts can be copied from here.</string>
-    <string name="recognized_text_remove">Remove recognized text</string>
-    <string name="recognized_text_remove_title">Really remove the recognized text?</string>
+    <string name="recognized_text">Imported text</string>
+    <string name="recognized_text_show">Show imported text</string>
+    <string name="recognized_text_hide">Hide imported text</string>
+    <string name="recognized_text_hint">Imported text may contain errors. Missing parts can be copied from here.</string>
+    <string name="recognized_text_remove">Remove imported text</string>
+    <string name="recognized_text_remove_title">Really remove the imported text?</string>
     <string name="pages_show">Show pages</string>
     <string name="page_previous">Previous page</string>
     <string name="page_next">Next page</string>
@@ -114,8 +123,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>“Share”: screenshots and pictures from other apps can be sent straight to Moltobene – the app starts right away with “Select area”.</item>
-        <item>When editing, the option is now called the same as in the collection: “Import from photo”.</item>
+        <item>“Import from text”: paste recipes from messages, emails or notes – title, ingredients and instructions are sorted automatically.</item>
+        <item>“Share” now also works with text: shared recipe text goes straight into a new recipe, a shared link is saved as the source.</item>
+        <item>In the collection, “Import recipe” leads to all ways of importing a recipe.</item>
     </string-array>
 
     <!-- Bearbeiten -->

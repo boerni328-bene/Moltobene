@@ -16,7 +16,7 @@ data class ParsedRecipe(
 )
 
 /**
- * Teilt erkannten Text (Texterkennung, später auch geteilten Text) in Titel, Portionen, Zutaten und
+ * Teilt Text (Texterkennung oder „Aus Text übernehmen“) in Titel, Portionen, Zutaten und
  * Zubereitung auf. Kennt Überschriften auf Deutsch, Englisch, Italienisch, Französisch und Spanisch;
  * ohne Überschriften wird nach dem Aussehen der Zeilen entschieden. Das Ergebnis ist immer nur ein
  * Vorschlag – der vollständige Text bleibt zusätzlich erhalten. Reines Kotlin, per Unit-Test prüfbar.

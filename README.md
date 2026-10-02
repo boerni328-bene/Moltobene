@@ -8,12 +8,13 @@ Kostenlos, ohne Werbung, ohne Konto und ohne Tracking. Die App braucht keine ein
 
 - Rezepte hinzufügen und bearbeiten: Titel, Foto, Portionen, Zutaten, Zubereitung, Quelle und eigene Notizen
 - Rezepte aus Fotos übernehmen: Die Texterkennung liest Titel, Zutaten und Zubereitung aus Fotos von Kochbuch, Zettel oder Bildschirmfoto, auch über mehrere Seiten (Deutsch, Englisch, Italienisch, Französisch, Spanisch)
+- Rezepte aus Text übernehmen: eingefügt aus Nachrichten, E-Mails oder Notizen oder per „Teilen mit…“ aus anderen Apps; Titel, Zutaten und Zubereitung werden automatisch eingeordnet
 - Die Sammlung durchsuchen, mit Vorschaubildern
 - Beim Kochen bleibt der Bildschirm an
 - Einzelne Rezepte teilen: als gut lesbaren Text mit Foto oder als Rezeptdatei im offenen Standard schema.org. Eigene Notizen bleiben dabei privat.
 - Die ganze Sammlung inklusive Fotos als Datei sichern und wiederherstellen, z. B. für den Umzug auf ein neues Handy
 
-Geplant sind unter anderem: Rezepte aus Internetseiten und anderen Apps übernehmen sowie eine Kochansicht zum Abhaken und Umrechnen der Portionen.
+Geplant sind unter anderem: Rezepte aus Internetseiten übernehmen sowie eine Kochansicht zum Abhaken und Umrechnen der Portionen.
 
 ## Installation
 

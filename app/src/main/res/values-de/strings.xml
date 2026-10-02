@@ -59,6 +59,15 @@
     <!-- Texterkennung -->
     <string name="import_from_photo">Aus Foto übernehmen</string>
     <string name="share_too_many">Es werden nur die ersten %1$d Fotos gelesen.</string>
+    <string name="import_recipe">Rezept übernehmen</string>
+    <string name="import_from_text">Aus Text übernehmen</string>
+    <string name="import_text_hint">Ein Rezept einfügen oder eintippen, z. B. aus einer Nachricht, einer E-Mail oder einer Notiz. Titel, Zutaten und Zubereitung werden automatisch eingeordnet.</string>
+    <string name="import_text_field">Rezepttext</string>
+    <string name="import_text_action">Übernehmen</string>
+    <string name="paste_from_clipboard">Aus der Zwischenablage einfügen</string>
+    <string name="clipboard_empty">Die Zwischenablage enthält keinen Text.</string>
+    <string name="text_done">Text ins Rezept übernommen. Prüfen, ob alles an der richtigen Stelle steht.</string>
+    <string name="import_link_saved">Link als Quelle gespeichert. Den Rezepttext von der Seite kopieren und mit „Aus Text übernehmen“ einfügen.</string>
     <string name="ocr_dialog_text">Liest Titel, Zutaten und Zubereitung aus Fotos von Kochbuch, Zettel oder Bildschirmfoto. Am besten gelingt es mit einem scharfen, gerade aufgenommenen Foto. Bei mehreren Seiten die Fotos der Reihe nach auswählen (bis zu %1$d).</string>
     <string name="ocr_from_recipe_photo">Rezeptfoto verwenden</string>
     <string name="ocr_choose_photos">Fotos auswählen</string>
@@ -71,12 +80,12 @@
     <string name="ocr_retry">Erneut erkennen</string>
     <string name="ocr_language">Sprache des Textes</string>
     <string name="ocr_language_auto">Automatisch erkennen</string>
-    <string name="recognized_text">Erkannter Text</string>
-    <string name="recognized_text_show">Erkannten Text anzeigen</string>
-    <string name="recognized_text_hide">Erkannten Text ausblenden</string>
-    <string name="recognized_text_hint">Erkannter Text kann Fehler enthalten. Fehlende Teile lassen sich von hier kopieren.</string>
-    <string name="recognized_text_remove">Erkannten Text entfernen</string>
-    <string name="recognized_text_remove_title">Erkannten Text wirklich entfernen?</string>
+    <string name="recognized_text">Übernommener Text</string>
+    <string name="recognized_text_show">Übernommenen Text anzeigen</string>
+    <string name="recognized_text_hide">Übernommenen Text ausblenden</string>
+    <string name="recognized_text_hint">Übernommener Text kann Fehler enthalten. Fehlende Teile lassen sich von hier kopieren.</string>
+    <string name="recognized_text_remove">Übernommenen Text entfernen</string>
+    <string name="recognized_text_remove_title">Übernommenen Text wirklich entfernen?</string>
     <string name="pages_show">Seiten ansehen</string>
     <string name="page_previous">Vorherige Seite</string>
     <string name="page_next">Nächste Seite</string>
@@ -111,8 +120,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>„Teilen mit…“: Bildschirmfotos und Bilder aus anderen Apps lassen sich direkt an Moltobene schicken – die App beginnt gleich mit „Bereich auswählen“.</item>
-        <item>Im Bearbeiten heißt der Weg jetzt wie in der Sammlung: „Aus Foto übernehmen“.</item>
+        <item>„Aus Text übernehmen“: Rezepte aus Nachrichten, E-Mails oder Notizen einfügen – Titel, Zutaten und Zubereitung werden automatisch eingeordnet.</item>
+        <item>„Teilen mit…“ klappt jetzt auch mit Text: Ein geteilter Rezepttext kommt direkt in ein neues Rezept, ein geteilter Link wird als Quelle gespeichert.</item>
+        <item>In der Sammlung führt „Rezept übernehmen“ zu allen Wegen, ein Rezept zu übernehmen.</item>
     </string-array>
 
     <!-- Bearbeiten -->

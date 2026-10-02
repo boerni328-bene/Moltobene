@@ -17,15 +17,18 @@ import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeIds
 import com.moltobene.app.data.RecipeRepository
 import com.moltobene.app.data.RecipeText
+import com.moltobene.app.data.TextLinks
 import com.moltobene.app.data.ocr.AreaFrame
 import com.moltobene.app.data.ocr.AreaKind
 import com.moltobene.app.data.ocr.CropArea
+import com.moltobene.app.data.ocr.ParsedRecipe
 import com.moltobene.app.data.ocr.PendingRecognition
 import com.moltobene.app.data.ocr.RecipeTextParser
 import com.moltobene.app.data.ocr.TextLanguage
 import com.moltobene.app.data.ocr.TextRecognizer
 import com.moltobene.app.data.ocr.boundsOf
 import com.moltobene.app.data.photos.PhotoStore
+import com.moltobene.app.data.share.IncomingText
 import com.moltobene.app.ui.components.PageViewerModel
 import com.moltobene.app.ui.navigation.EditRoute
 import kotlinx.coroutines.CancellationException
@@ -78,7 +81,7 @@ class EditViewModel(
     private val recognizer: TextRecognizer,
     private val preferences: AppPreferences,
     private val pending: PendingRecognition,
-    private val sharedPhotos: SharedPhotos,
+    private val sharedInput: SharedInput,
 ) : ViewModel() {
 
     private val route = handle.toRoute<EditRoute>()
@@ -103,10 +106,13 @@ class EditViewModel(
     /** In „Bereich auswählen“ gewählte Sprache des Textes; null = automatisch erkennen. */
     private val languageChoiceField = SavedField<String?>(handle, "languageChoice", null)
     private val startPromptShownField = SavedField(handle, "startPromptShown", false)
-    /** Die Bilder aus „Teilen mit…“ wurden übernommen – nach dem Drehen nicht noch einmal. */
+    /** Der Inhalt aus „Teilen mit…“ wurde übernommen – nach dem Drehen nicht noch einmal. */
     private val sharedTakenField = SavedField(handle, "sharedTaken", false)
-    /** Nach einer Erkennung bleibt der Hinweis zum Prüfen bis zum Speichern sichtbar. */
-    private val checkHintField = SavedField(handle, "checkHint", false)
+    /**
+     * Nach einer Übernahme bleibt der Hinweis zum Prüfen bis zum Speichern sichtbar:
+     * [CHECK_RECOGNIZED] nach der Texterkennung, [CHECK_TEXT] nach „Aus Text übernehmen“, sonst leer.
+     */
+    private val checkHintField = SavedField(handle, "checkHintKind", "")
     /** Seiten für „Bereich auswählen“ und die laufende Erkennung, eine je Zeile: „photo:<Kennung>“ oder „page:<Name>“. */
     private val areaPagesField = SavedField(handle, "areaPages", "")
     /** Rahmen je Seite (#39), Seiten getrennt mit „;“ – siehe [AreaFrame.encodeAll]. */
@@ -194,7 +200,14 @@ class EditViewModel(
     val photoFile: File? get() = photoIdField.value?.let { photoStore.photoFile(it) }
     val hasPhoto: Boolean get() = photoIdField.value != null
     val recognizedText: String get() = recognizedTextField.value
-    val showCheckHint: Boolean get() = checkHintField.value
+    val showCheckHint: Boolean get() = checkHintField.value.isNotEmpty()
+
+    /** Text des Hinweises zum Prüfen – nach der Texterkennung geht es um Lesefehler, sonst um die Aufteilung. */
+    val checkHint: Int? get() = when (checkHintField.value) {
+        CHECK_RECOGNIZED -> R.string.ocr_done
+        CHECK_TEXT -> R.string.text_done
+        else -> null
+    }
     val askKeepPages: Boolean get() = askKeepPagesField.value
     val isDirty: Boolean get() = dirtyField.value
 
@@ -255,8 +268,8 @@ class EditViewModel(
 
     init {
         if (!loadedField.value && routeId != null) load(routeId)
-        if (checkHintField.value) loadSourceSuggestions()
-        if (route.fromShare && !sharedTakenField.value) takeSharedPhotos()
+        if (checkHintField.value.isNotEmpty()) loadSourceSuggestions()
+        if (route.fromShare && !sharedTakenField.value) takeShared()
         when {
             // Android hat die App während der Erkennung beendet.
             recognitionStartedField.value -> resumeRecognition()
@@ -317,12 +330,27 @@ class EditViewModel(
         startAreaSelection(listOf(PAGE_PHOTO + photoId))
     }
 
-    /** Bilder aus „Teilen mit…“ (#46): gleich kopieren und mit „Bereich auswählen“ beginnen. */
-    private fun takeSharedPhotos() {
+    /** „Aus Text übernehmen“ in der Sammlung: Das Feld für den Text erscheint beim ersten Öffnen von selbst. */
+    fun takeTextPrompt(): Boolean {
+        if (!route.fromText || startPromptShownField.value) return false
+        startPromptShownField.value = true
+        return true
+    }
+
+    /**
+     * Inhalt aus „Teilen mit…“: Bilder (#46) werden gleich kopiert und mit „Bereich auswählen“ gelesen,
+     * Text wird wie bei „Aus Text übernehmen“ aufgeteilt.
+     */
+    private fun takeShared() {
         sharedTakenField.value = true
-        val uris = sharedPhotos.take()
-        if (uris.size > MAX_PAGES) message = R.string.share_too_many
-        recognizePhotos(uris.take(MAX_PAGES))
+        when (val content = sharedInput.take()) {
+            is SharedContent.Photos -> {
+                if (content.uris.size > MAX_PAGES) message = R.string.share_too_many
+                recognizePhotos(content.uris.take(MAX_PAGES))
+            }
+            is SharedContent.Text -> importText(content.shared.text, content.shared.subject)
+            null -> Unit
+        }
     }
 
     /** Liest ausgewählte Fotos in der gewählten Reihenfolge. */
@@ -605,7 +633,7 @@ class EditViewModel(
 
     private fun applyResult(result: TextRecognizer.Result) {
         applyRecognized(result)
-        checkHintField.value = true
+        checkHintField.value = CHECK_RECOGNIZED
         loadSourceSuggestions()
         // Im Hintergrund wird ein neues Rezept gleich als Entwurf gesichert, wie beim Wechsel in den Hintergrund.
         if (inBackground) saveDraft()
@@ -622,6 +650,11 @@ class EditViewModel(
         val parsed = RecipeTextParser.parseParts(parts, result.language)
         // Die Seitenzahl der ersten gelesenen Seite wird zum Vorschlag für „Seite“ (#40).
         if (suggestedPageField.value.isEmpty()) parsed.pageNumber?.let { suggestedPageField.value = it }
+        mergeIntoForm(text, parsed, language = result.language.takeIf { result.detected })
+    }
+
+    /** Übernimmt Text und seine Aufteilung ins Formular, nach den Regeln von [DraftMerge]. */
+    private fun mergeIntoForm(text: String, parsed: ParsedRecipe, language: String?) {
         val merged = DraftMerge.merge(
             draft = DraftText(
                 title = title,
@@ -634,7 +667,7 @@ class EditViewModel(
             ),
             text = text,
             parsed = parsed,
-            language = result.language.takeIf { result.detected },
+            language = language,
         )
         if (merged.title != title) title = merged.title
         servingsField.value = merged.servings
@@ -644,6 +677,29 @@ class EditViewModel(
         recognizedTextField.value = merged.originalText
         languageField.value = merged.language
         dirtyField.value = true
+    }
+
+    /**
+     * „Aus Text übernehmen“: Text aus „Teilen mit…“, der Zwischenablage oder selbst eingefügt. Er wird wie
+     * erkannter Text in Titel, Zutaten und Zubereitung aufgeteilt und bleibt vollständig als übernommener Text
+     * erhalten. Ein Link im Text wird zur Quelle. Ist der Text nur ein geteilter Link, wird er als Quelle
+     * gespeichert, damit nichts verloren geht.
+     */
+    fun importText(raw: String, subject: String? = null) {
+        val text = raw.trim().take(IncomingText.MAX_CHARS)
+        if (text.isEmpty()) return
+        val sharedLink = TextLinks.sharedLink(text)
+        if (sharedLink != null) {
+            if (source.isBlank()) source = sharedLink.url
+            if (title.isBlank()) (sharedLink.title ?: subject)?.let { title = it }
+            message = R.string.import_link_saved
+            return
+        }
+        val language = TextLanguage.detect(text)
+        mergeIntoForm(text, RecipeTextParser.parse(text, language), language)
+        if (title.isBlank()) subject?.let { title = it }
+        if (source.isBlank()) TextLinks.first(text)?.let { source = it }
+        checkHintField.value = CHECK_TEXT
     }
 
     /** Entfernt den gespeicherten erkannten Text, z. B. weil ein Bildschirmfoto fremde Namen enthielt. */
@@ -710,6 +766,8 @@ class EditViewModel(
     private companion object {
         const val PAGE_PHOTO = "photo:"
         const val PAGE_KEPT = "page:"
+        const val CHECK_RECOGNIZED = "recognized"
+        const val CHECK_TEXT = "text"
     }
 
     fun removePhoto() {

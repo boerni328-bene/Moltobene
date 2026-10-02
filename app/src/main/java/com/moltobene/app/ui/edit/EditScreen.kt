@@ -37,6 +37,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SuggestionChip
@@ -53,6 +54,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -66,7 +69,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.moltobene.app.R
+import com.moltobene.app.data.share.IncomingText
 import com.moltobene.app.ui.components.CenteredMessage
+import com.moltobene.app.ui.components.OptionButton
 import com.moltobene.app.ui.components.PageViewer
 import com.moltobene.app.ui.components.RecipePhoto
 import com.moltobene.app.ui.theme.Spacing
@@ -102,7 +107,8 @@ fun EditScreen(
     viewModel.message?.let { messageRes ->
         val text = if (messageRes == R.string.share_too_many) stringResource(messageRes, MAX_PAGES) else stringResource(messageRes)
         LaunchedEffect(messageRes, text) {
-            snackbarHostState.showSnackbar(text)
+            // Die Meldungen hier sagen auch, was man tun kann – deshalb länger sichtbar.
+            snackbarHostState.showSnackbar(text, duration = SnackbarDuration.Long)
             viewModel.message = null
         }
     }
@@ -116,6 +122,8 @@ fun EditScreen(
 
     // Texterkennung: mehrere Seiten auswählen oder eine Seite fotografieren.
     var showRecognitionDialog by rememberSaveable { mutableStateOf(viewModel.takeStartPrompt()) }
+    // „Aus Text übernehmen“: Text aus der Zwischenablage einfügen oder selbst eintragen.
+    var showTextDialog by rememberSaveable { mutableStateOf(viewModel.takeTextPrompt()) }
     val pickPages = rememberLauncherForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia(MAX_PAGES),
     ) { uris -> viewModel.recognizePhotos(uris) }
@@ -223,6 +231,7 @@ fun EditScreen(
                     viewModel = viewModel,
                     enabled = !busy,
                     onStart = { showRecognitionDialog = true },
+                    onImportText = { showTextDialog = true },
                 )
 
                 OutlinedTextField(
@@ -321,6 +330,16 @@ fun EditScreen(
         )
     }
 
+    if (showTextDialog) {
+        TextImportDialog(
+            onImport = { text ->
+                showTextDialog = false
+                viewModel.importText(text)
+            },
+            onDismiss = { showTextDialog = false },
+        )
+    }
+
     // Die einzige Frage nach der Texterkennung – beim Speichern (#38).
     if (viewModel.askKeepPages) {
         AlertDialog(
@@ -358,8 +377,8 @@ fun EditScreen(
 }
 
 /**
- * Texterkennung: Start, Fortschritt mit Abbrechen, Hinweis zum Prüfen, die gelesenen Seiten und
- * der erkannte Text zum Nachsehen, Kopieren und Entfernen.
+ * Übernehmen: „Aus Foto übernehmen“ (Texterkennung mit Fortschritt und Abbrechen) und „Aus Text übernehmen“,
+ * der Hinweis zum Prüfen, die gelesenen Seiten und der übernommene Text zum Nachsehen, Kopieren und Entfernen.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -367,6 +386,7 @@ private fun RecognitionSection(
     viewModel: EditViewModel,
     enabled: Boolean,
     onStart: () -> Unit,
+    onImportText: () -> Unit,
 ) {
     var showText by rememberSaveable { mutableStateOf(false) }
     var confirmRemoveText by rememberSaveable { mutableStateOf(false) }
@@ -424,16 +444,14 @@ private fun RecognitionSection(
                     onRetry = viewModel::retryRecognition,
                 )
             } else {
-                OutlinedButton(onClick = onStart, enabled = enabled, modifier = Modifier.fillMaxWidth()) {
-                    Icon(painterResource(R.drawable.ic_document_scanner), contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.size(Spacing.s))
-                    Text(stringResource(R.string.import_from_photo))
-                }
+                OptionButton(R.drawable.ic_document_scanner, R.string.import_from_photo, onStart, enabled = enabled)
+                OptionButton(R.drawable.ic_content_paste, R.string.import_from_text, onImportText, enabled = enabled)
             }
         }
 
         // Bleibt bis zum Speichern sichtbar; der Screenreader liest den Hinweis vor, sobald er erscheint.
-        if (viewModel.showCheckHint && !viewModel.isRecognizing) {
+        val checkHint = viewModel.checkHint
+        if (checkHint != null && !viewModel.isRecognizing) {
             Surface(
                 color = MaterialTheme.colorScheme.secondaryContainer,
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -441,7 +459,7 @@ private fun RecognitionSection(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
-                    text = stringResource(R.string.ocr_done),
+                    text = stringResource(checkHint),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier
                         .padding(Spacing.m)
@@ -599,10 +617,10 @@ private fun RecognitionDialog(
                 Text(stringResource(R.string.ocr_dialog_text, MAX_PAGES))
                 Spacer(Modifier.size(Spacing.xs))
                 if (hasRecipePhoto) {
-                    DialogOption(R.drawable.ic_document_scanner, R.string.ocr_from_recipe_photo, onRecipePhoto)
+                    OptionButton(R.drawable.ic_document_scanner, R.string.ocr_from_recipe_photo, onRecipePhoto)
                 }
-                DialogOption(R.drawable.ic_image, R.string.ocr_choose_photos, onChoose)
-                DialogOption(R.drawable.ic_photo_camera, R.string.photo_take, onTake)
+                OptionButton(R.drawable.ic_image, R.string.ocr_choose_photos, onChoose)
+                OptionButton(R.drawable.ic_photo_camera, R.string.photo_take, onTake)
             }
         },
         confirmButton = {
@@ -611,13 +629,66 @@ private fun RecognitionDialog(
     )
 }
 
+/**
+ * „Aus Text übernehmen“: Rezepttext z. B. aus WhatsApp, einer E-Mail oder einer Notiz einfügen. Die Zwischenablage
+ * wird nur gelesen, wenn „Aus der Zwischenablage einfügen“ angetippt wird.
+ */
 @Composable
-private fun DialogOption(icon: Int, label: Int, onClick: () -> Unit) {
-    OutlinedButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-        Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(18.dp))
-        Spacer(Modifier.size(Spacing.s))
-        Text(stringResource(label), modifier = Modifier.weight(1f))
-    }
+private fun TextImportDialog(onImport: (String) -> Unit, onDismiss: () -> Unit) {
+    var text by rememberSaveable { mutableStateOf("") }
+    var clipboardEmpty by rememberSaveable { mutableStateOf(false) }
+    val clipboard = LocalClipboard.current
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.import_from_text), modifier = Modifier.semantics { heading() }) },
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(Spacing.s),
+            ) {
+                Text(stringResource(R.string.import_text_hint))
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it.take(IncomingText.MAX_CHARS) },
+                    label = { Text(stringResource(R.string.import_text_field)) },
+                    minLines = 5,
+                    maxLines = 12,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OptionButton(R.drawable.ic_content_paste, R.string.paste_from_clipboard, onClick = {
+                    scope.launch {
+                        val pasted = clipboard.getClipEntry()?.clipData
+                            ?.takeIf { it.itemCount > 0 }
+                            ?.getItemAt(0)?.coerceToText(context)?.toString()?.trim().orEmpty()
+                        clipboardEmpty = pasted.isEmpty()
+                        if (pasted.isNotEmpty()) {
+                            text = listOf(text.trim(), pasted).filter { it.isNotEmpty() }.joinToString("\n\n")
+                                .take(IncomingText.MAX_CHARS)
+                        }
+                    }
+                })
+                if (clipboardEmpty) {
+                    Text(
+                        text = stringResource(R.string.clipboard_empty),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onImport(text) }, enabled = text.isNotBlank()) {
+                Text(stringResource(R.string.import_text_action))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+        },
+    )
 }
 
 @Composable

@@ -12,10 +12,15 @@ data class RecipeRoute(val id: String)
 
 /**
  * [id] leer = neues Rezept hinzufügen; [fromPhoto] = gleich mit der Texterkennung beginnen;
- * [fromShare] = Bilder aus „Teilen mit…“ übernehmen (#46).
+ * [fromText] = gleich mit „Aus Text übernehmen“ beginnen; [fromShare] = Bilder oder Text aus „Teilen mit…“ übernehmen.
  */
 @Serializable
-data class EditRoute(val id: String? = null, val fromPhoto: Boolean = false, val fromShare: Boolean = false)
+data class EditRoute(
+    val id: String? = null,
+    val fromPhoto: Boolean = false,
+    val fromText: Boolean = false,
+    val fromShare: Boolean = false,
+)
 
 @Serializable
 object SettingsRoute

@@ -1,6 +1,5 @@
 package com.moltobene.app.ui.navigation
 
-import android.net.Uri
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,6 +16,7 @@ import com.moltobene.app.ui.collection.CollectionScreen
 import com.moltobene.app.ui.collection.CollectionViewModel
 import com.moltobene.app.ui.edit.EditScreen
 import com.moltobene.app.ui.edit.EditViewModel
+import com.moltobene.app.ui.edit.SharedContent
 import com.moltobene.app.ui.licenses.LicensesScreen
 import com.moltobene.app.ui.licenses.LicensesViewModel
 import com.moltobene.app.ui.recipe.RecipeScreen
@@ -27,9 +27,9 @@ import com.moltobene.app.ui.whatsnew.WhatsNewDialog
 import com.moltobene.app.ui.whatsnew.WhatsNewViewModel
 import kotlinx.coroutines.launch
 
-/** @param sharedPhotos Bilder aus „Teilen mit…“ (#46); dann öffnet sich gleich das Formular dafür. */
+/** @param shared Bilder oder Text aus „Teilen mit…“; dann öffnet sich gleich das Formular dafür. */
 @Composable
-fun MoltobeneNavHost(sharedPhotos: List<Uri> = emptyList()) {
+fun MoltobeneNavHost(shared: SharedContent? = null) {
     val navController = rememberNavController()
     val container = (LocalContext.current.applicationContext as MoltobeneApplication).container
     // Gemeinsame Meldungsleiste, damit z. B. „Rezept gespeichert“ auch nach dem Bildschirmwechsel erscheint.
@@ -37,9 +37,9 @@ fun MoltobeneNavHost(sharedPhotos: List<Uri> = emptyList()) {
     val scope = rememberCoroutineScope()
     val showMessage: (String) -> Unit = { text -> scope.launch { snackbarHostState.showSnackbar(text) } }
 
-    if (sharedPhotos.isNotEmpty()) {
-        LaunchedEffect(sharedPhotos) {
-            container.sharedPhotos.offer(sharedPhotos)
+    if (shared != null) {
+        LaunchedEffect(shared) {
+            container.sharedInput.offer(shared)
             navController.navigate(EditRoute(fromShare = true))
         }
     }
@@ -54,6 +54,7 @@ fun MoltobeneNavHost(sharedPhotos: List<Uri> = emptyList()) {
                 onOpenRecipe = { id -> navController.navigate(RecipeRoute(id)) },
                 onAddRecipe = { navController.navigate(EditRoute()) },
                 onAddFromPhoto = { navController.navigate(EditRoute(fromPhoto = true)) },
+                onAddFromText = { navController.navigate(EditRoute(fromText = true)) },
                 onOpenSettings = { navController.navigate(SettingsRoute) },
             )
         }
@@ -86,7 +87,7 @@ fun MoltobeneNavHost(sharedPhotos: List<Uri> = emptyList()) {
                         container.textRecognizer,
                         container.preferences,
                         container.pendingRecognition,
-                        container.sharedPhotos,
+                        container.sharedInput,
                     )
                 },
                 snackbarHostState = snackbarHostState,

@@ -44,6 +44,15 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="image/*" />
             </intent-filter>
+            <!--
+              „Teilen mit…“ für Text: Rezepttext aus WhatsApp, E-Mail oder Notizen, Links aus dem Browser.
+              Der Text wird gekürzt und nur als Text verwendet (siehe IncomingText); geöffnet wird nichts.
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
         </activity>
 
         <!-- Übergabe von Dateien an andere Apps: Kamera-App und Teilen (nur die Ordner in file_paths.xml). -->
