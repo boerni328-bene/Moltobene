@@ -3,3 +3,6 @@
 *.jar binary
 *.png binary
 *.traineddata binary
+*.onnx binary
+# Zeichenliste der Texterkennung: unverändert wie das Original (Windows-Zeilenenden), sonst stimmt die Prüfsumme nicht.
+app/src/main/assets/ocr/keys.txt -text

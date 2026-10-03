@@ -16,6 +16,5 @@
 -keep class com.moltobene.app.data.backup.Backup* { *; }
 -keep class com.moltobene.app.data.backup.Backup*$* { *; }
 
-# Texterkennung (Tesseract4Android): der native Teil greift über feste Namen auf diese Klassen zu.
--keep class com.googlecode.tesseract.android.** { *; }
--keep class com.googlecode.leptonica.android.** { *; }
+# Texterkennung (ONNX Runtime): der native Teil greift über feste Namen auf diese Klassen zu.
+-keep class ai.onnxruntime.** { *; }

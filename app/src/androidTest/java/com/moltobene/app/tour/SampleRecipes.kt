@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Shader
+import android.graphics.Typeface
 import android.net.Uri
 import com.moltobene.app.AppContainer
 import com.moltobene.app.data.Ingredient
@@ -46,6 +47,45 @@ object SampleRecipes {
             sample.recipe.copy(photoIds = photoIds, createdAt = time, updatedAt = time)
         }
         container.repository.saveAll(recipes)
+    }
+
+    /** Titel des Rezepts, dessen Foto eine gezeichnete Kochbuchseite ist (für die Texterkennung). */
+    const val PAGE_RECIPE = "Hefezopf"
+
+    /** Zeilen der gezeichneten Kochbuchseite: Text und Schriftgröße; fett sind Titel und Überschriften. */
+    private val PAGE_LINES = listOf(
+        "Hefezopf" to 76f,
+        "Für 1 Zopf" to 40f,
+        "" to 30f,
+        "Zutaten" to 48f,
+        "500 g Mehl" to 44f,
+        "1 Würfel Hefe" to 44f,
+        "250 ml Milch" to 44f,
+        "80 g Zucker" to 44f,
+        "1 Ei" to 44f,
+        "" to 30f,
+        "Zubereitung" to 48f,
+        "Die Hefe in der lauwarmen Milch auflösen." to 44f,
+        "" to 18f,
+        "Mit Mehl, Zucker und Ei zu einem Teig kneten." to 44f,
+        "" to 18f,
+        "Zugedeckt eine Stunde gehen lassen." to 44f,
+    )
+
+    /**
+     * Speichert ein Rezept, das nur einen Titel hat und als Foto eine gezeichnete Kochbuchseite – so lässt sich
+     * die Texterkennung auf dem Handy mit „Rezeptfoto verwenden“ ausprobieren, ohne Kamera und ohne fremde Inhalte.
+     */
+    suspend fun addRecipePage(container: AppContainer, context: Context) {
+        val file = drawPage(context)
+        val photoId = try {
+            container.photoStore.importFromUri(Uri.fromFile(file))
+        } finally {
+            file.delete()
+        }
+        val now = System.currentTimeMillis()
+        val recipe = recipe(title = PAGE_RECIPE, language = "de", servings = 0, ingredients = emptyList(), steps = emptyList())
+        container.repository.saveAll(listOf(recipe.copy(servings = null, photoIds = listOf(photoId), createdAt = now, updatedAt = now)))
     }
 
     private class Sample(val recipe: Recipe, val photo: PhotoColors? = null)
@@ -222,6 +262,28 @@ object SampleRecipes {
             ),
         ),
     )
+
+    /** Zeichnet eine Kochbuchseite: schwarze Schrift auf leicht gelblichem Papier, etwas schräg wie fotografiert. */
+    private fun drawPage(context: Context): File {
+        val width = 1200
+        val height = 1600
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        canvas.drawColor(0xFFF6EFE1.toInt())
+        canvas.rotate(-2f, width / 2f, height / 2f)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF1E1E1E.toInt() }
+        var y = 180f
+        PAGE_LINES.forEach { (text, size) ->
+            paint.textSize = size
+            paint.typeface = if (size >= 48f) Typeface.create(Typeface.SERIF, Typeface.BOLD) else Typeface.SERIF
+            y += size * 1.45f
+            if (text.isNotEmpty()) canvas.drawText(text, 120f, y, paint)
+        }
+        val file = File(context.cacheDir, "kochbuchseite-${System.nanoTime()}.jpg")
+        file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 90, it) }
+        bitmap.recycle()
+        return file
+    }
 
     /** Zeichnet ein einfaches „Foto“: Teller mit Gericht auf einem Tisch. */
     private fun drawPhoto(context: Context, colors: PhotoColors): File {

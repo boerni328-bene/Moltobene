@@ -34,7 +34,7 @@ object AmountText {
     /** Steht davor eines dieser Wörter, ist die Zahl keine Menge („Mehl Type 405“). */
     private val NOT_AN_AMOUNT_BEFORE = setOf("type", "typ", "größe", "gr.", "nr.", "no.", "size", "n.")
 
-    /** Zeichen, die Tesseract in kurzen Angaben häufig verwechselt (gelesen → gemeint). */
+    /** Zeichen, die die Texterkennung in kurzen Angaben häufig verwechselt (gelesen → gemeint). */
     private val CONFUSIONS = mapOf('q' to 'g', 'i' to 't', 'l' to 't', '1' to 'l', '0' to 'o', 'I' to 'l')
 
     private val LEADING = Regex("^($NUMBER(?:\\s*-\\s*\\d+)?)\\s*([\\p{L}.]+)?", RegexOption.IGNORE_CASE)
@@ -86,9 +86,12 @@ object AmountText {
         return "${normalize(amount)} $name"
     }
 
+    /** „1 1 di brodo“: Ein einzelnes „1“, „I“ oder „|“ nach der Menge ist das Liter-Zeichen „l“. */
+    private val LITRE_AS_ONE = Regex("^(\\d+(?:[.,]\\d+)?)\\s+[1I|]\\s+(?=\\p{L})")
+
     /** Leerzeichen zwischen Zahl und Einheit, offensichtliche Lesefehler in der Einheit korrigieren. */
     fun normalize(text: String): String {
-        val compacted = compact(text)
+        val compacted = compact(LITRE_AS_ONE.replace(text) { "${it.groupValues[1]} l " })
         val match = LEADING.find(compacted) ?: return text
         val number = match.groupValues[1]
         val unit = match.groupValues[2]

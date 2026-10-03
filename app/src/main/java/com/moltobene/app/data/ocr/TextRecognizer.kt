@@ -1,8 +1,8 @@
 package com.moltobene.app.data.ocr
 
+import ai.onnxruntime.OrtException
+import ai.onnxruntime.OrtSession
 import android.content.Context
-import com.googlecode.tesseract.android.TessBaseAPI
-import com.moltobene.app.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -11,11 +11,9 @@ import java.io.File
 import java.io.IOException
 
 /**
- * Texterkennung mit Tesseract, ausschließlich auf dem Handy und ohne Internet.
- * Die Sprachpakete liegen in assets/tessdata und werden beim ersten Gebrauch in den App-Speicher kopiert.
- * Ohne gewählte Sprache wird mit der zuletzt erkannten begonnen. Bis die Sprache am Text eindeutig erkannt
- * ist, wird jede Seite geprüft; passt sie nicht, wird die Seite mit dem richtigen Sprachpaket noch einmal
- * gelesen (sonst gehen z. B. Akzente verloren).
+ * Texterkennung mit PP-OCRv6 ([PaddleOcr]), ausschließlich auf dem Handy und ohne Internet.
+ * Die Modelle liegen in assets/ocr und werden je Erkennung einmal geladen. Das Lesemodell kennt alle
+ * Sprachen der App zugleich; die Sprache des Rezepts wird erst am gelesenen Text erkannt (oder ist gewählt).
  */
 class TextRecognizer(private val context: Context) {
 
@@ -41,35 +39,34 @@ class TextRecognizer(private val context: Context) {
 
     /**
      * Eine Erkennung (#43). Sie lässt sich jederzeit abbrechen – auch in den ersten Sekunden, bevor
-     * das Lesen richtig begonnen hat. Darf von jedem Thread aus abgebrochen werden.
+     * das Lesen richtig begonnen hat, und mitten in einer Rechnung der Modelle. Darf von jedem Thread aus
+     * abgebrochen werden.
      */
     class Run {
         @Volatile
         private var cancelled = false
-        private var active: TessBaseAPI? = null
+        private var active: OrtSession.RunOptions? = null
 
         fun cancel() {
             cancelled = true
-            synchronized(this) { active?.stop() }
+            synchronized(this) { active?.setTerminate(true) }
         }
 
         internal fun check() {
             if (cancelled) throw CancelledException()
         }
 
-        internal fun attach(tess: TessBaseAPI?) = synchronized(this) {
-            active = tess
-            if (cancelled) tess?.stop()
+        internal fun attach(options: OrtSession.RunOptions?) = synchronized(this) {
+            active = options
+            if (cancelled) options?.setTerminate(true)
         }
     }
 
     private val mutex = Mutex()
 
-    /** In noBackupFilesDir: Die Sprachpakete lassen sich jederzeit neu kopieren und gehören weder in Sicherungen noch zum Umzug. */
-    private val dataDir: File get() = File(context.noBackupFilesDir, DATA_DIR)
-
     /**
      * @param pages lädt die Seiten nacheinander, damit nie mehrere Fotos zugleich im Speicher liegen
+     * @param preferredLanguage Sprache, falls sie sich am Text nicht erkennen lässt
      * @param chosenLanguage vom Nutzer gewählte Sprache – dann wird sie nicht am Text erkannt
      * @param onProgress Seite (ab 0) und Fortschritt der ganzen Erkennung in Prozent; nur bei Änderung gemeldet
      */
@@ -82,42 +79,62 @@ class TextRecognizer(private val context: Context) {
     ): Result = mutex.withLock {
         withContext(Dispatchers.Default) {
             run.check()
-            var language = TextLanguage.supportedOrDefault(chosenLanguage ?: preferredLanguage)
-            var detected = chosenLanguage != null
-            val parts = mutableListOf<String>()
             val progress = Progress(pages.size, onProgress)
-            Reader(run, progress).use { reader ->
-                pages.forEachIndexed { index, page ->
-                    progress.startPage(index, page.areas.size)
-                    val image = page.load()
-                    run.check()
-                    val crops = page.areas.map { image.whiten(it.blank).crop(it.area) }
-                    suspend fun readAll() = crops.mapIndexed { area, crop ->
-                        progress.startArea(area)
-                        reader.read(crop, language)
-                    }
-                    var texts = readAll()
-                    // Ist die erste Seite unklar (z. B. nur ein kurzer Ausschnitt), entscheidet der Text bis hierher.
-                    if (!detected) {
-                        TextLanguage.detect((parts + texts).joinToString("\n"))?.let { found ->
-                            detected = true
-                            if (found != language) {
-                                language = found
-                                texts = readAll()
+            val parts = mutableListOf<String>()
+            val ocr = openModels()
+            try {
+                OrtSession.RunOptions().use { options ->
+                    run.attach(options)
+                    try {
+                        pages.forEachIndexed { index, page ->
+                            progress.startPage(index, page.areas.size)
+                            val image = page.load()
+                            run.check()
+                            page.areas.forEachIndexed { area, frame ->
+                                progress.startArea(area)
+                                val crop = image.whiten(frame.blank).crop(frame.area)
+                                val lines = ocr.recognize(crop, options) { done, total ->
+                                    run.check()
+                                    progress.report(DETECTION_SHARE + (100 - DETECTION_SHARE) * done / total)
+                                }
+                                parts += ReadingOrder.text(lines).trim()
                             }
                         }
+                    } catch (e: OrtException) {
+                        // Ein Abbruch beendet die laufende Rechnung des Modells mit einem Fehler.
+                        run.check()
+                        throw IOException("Texterkennung fehlgeschlagen", e)
+                    } finally {
+                        run.attach(null)
                     }
-                    parts += texts.map { it.trim() }
                 }
+            } finally {
+                ocr.close()
             }
-            Result(parts, language, detected)
+            val text = parts.joinToString("\n")
+            val found = chosenLanguage?.let { TextLanguage.supportedOrDefault(it) } ?: TextLanguage.detect(text)
+            Result(parts, found ?: TextLanguage.supportedOrDefault(preferredLanguage), detected = found != null)
         }
     }
 
+    /** Lädt die beiden Modelle und die Zeichenliste aus den mitgelieferten Dateien. */
+    private suspend fun openModels(): PaddleOcr = withContext(Dispatchers.IO) {
+        // Bis Version 0.13 lagen hier die Sprachpakete von Tesseract (rund 12 MB); sie werden nicht mehr gebraucht.
+        listOf(File(context.noBackupFilesDir, OLD_TESSERACT_DIR), File(context.filesDir, OLD_TESSERACT_DIR))
+            .filter { it.exists() }
+            .forEach { it.deleteRecursively() }
+        val assets = context.assets
+        val dir = PaddleOcr.MODEL_DIR
+        val detection = assets.open("$dir/${PaddleOcr.DETECTION_MODEL}").use { it.readBytes() }
+        val recognition = assets.open("$dir/${PaddleOcr.RECOGNITION_MODEL}").use { it.readBytes() }
+        val dictionary = assets.open("$dir/${PaddleOcr.DICTIONARY}").bufferedReader(Charsets.UTF_8).use { it.readLines() }
+        PaddleOcr(detection, recognition, dictionary)
+    }
+
     /**
-     * Fortschritt der ganzen Erkennung aus Seite, Bereich und dem Fortschritt, den Tesseract meldet.
-     * Er geht nie zurück und wird nur in ganzen Prozentschritten gemeldet, damit die Anzeige nicht
-     * ständig neu gezeichnet wird, während der Prozessor ausgelastet ist.
+     * Fortschritt der ganzen Erkennung aus Seite, Bereich und gelesenen Zeilen. Er geht nie zurück und wird nur
+     * in ganzen Prozentschritten gemeldet, damit die Anzeige nicht ständig neu gezeichnet wird, während der
+     * Prozessor ausgelastet ist.
      */
     private class Progress(private val pageCount: Int, private val onProgress: (page: Int, percent: Int) -> Unit) {
         private var page = 0
@@ -137,7 +154,7 @@ class TextRecognizer(private val context: Context) {
             report(0)
         }
 
-        /** [percent] des gerade gelesenen Ausschnitts, wie Tesseract ihn meldet. */
+        /** [percent] des gerade gelesenen Bereichs. */
         fun report(percent: Int) {
             val withinPage = (area + percent.coerceIn(0, 100) / 100f) / areaCount
             val total = ((page + withinPage) / pageCount * 100).toInt().coerceIn(0, 100)
@@ -147,118 +164,10 @@ class TextRecognizer(private val context: Context) {
         }
     }
 
-    /**
-     * Liest Ausschnitte mit einer einzigen Tesseract-Instanz je Erkennung; das Sprachpaket wird nur bei
-     * einem Sprachwechsel neu geladen (#43).
-     */
-    private inner class Reader(private val run: Run, private val progress: Progress) : AutoCloseable {
-        private var tess: TessBaseAPI? = null
-        private var tessLanguage: String? = null
-
-        suspend fun read(image: GrayImage, language: String): String {
-            val tess = engine(language)
-            val bands = PageLayout.analyze(image)
-            tess.setImage(image.pixels, image.width, image.height, 1, image.width)
-            if (bands == null) {
-                tess.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO)
-                return recognize(tess)
-            }
-            // Tabelle mit Trennlinien: Abschnitte einzeln lesen, in Tabellenzeilen Zutat und Menge getrennt.
-            val texts = bands.map { band ->
-                when (band) {
-                    is LayoutBand.Text -> readArea(tess, band.box, TessBaseAPI.PageSegMode.PSM_AUTO)
-                    is LayoutBand.Row -> readArea(tess, band.left, TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK)
-                }
-            }
-            // Mengen zuerst direkt auf der Seite lesen ...
-            val amounts = bands.map { band ->
-                val area = (band as? LayoutBand.Row)?.let { PageLayout.amountArea(image, it) } ?: return@map null
-                readArea(tess, area, TessBaseAPI.PageSegMode.PSM_SINGLE_LINE)
-            }.toMutableList()
-            // ... und nur, wo das keine gültige Menge ergibt, noch einmal vergrößert.
-            bands.forEachIndexed { index, band ->
-                val right = (band as? LayoutBand.Row)?.right ?: return@forEachIndexed
-                val direct = amounts[index].orEmpty()
-                if (AmountText.isAmount(direct)) return@forEachIndexed
-                val cell = PageLayout.cropScaled(image, right)
-                tess.setPageSegMode(TessBaseAPI.PageSegMode.PSM_SINGLE_LINE)
-                tess.setImage(cell.pixels, cell.width, cell.height, 1, cell.width)
-                val scaled = recognize(tess)
-                if (AmountText.isAmount(scaled) || direct.isBlank()) amounts[index] = scaled
-            }
-            return bands.indices.joinToString("\n") { index ->
-                when (bands[index]) {
-                    is LayoutBand.Text -> texts[index]
-                    is LayoutBand.Row -> RowText.compose(texts[index], amounts[index])
-                }
-            }
-        }
-
-        /** Die Instanz für [language]; bei einem Sprachwechsel wird sie mit dem anderen Sprachpaket neu gestartet. */
-        private suspend fun engine(language: String): TessBaseAPI {
-            tess?.takeIf { tessLanguage == language }?.let { return it }
-            close()
-            val code = TextLanguage.tesseractCode(language)
-            ensureLanguageData(code)
-            run.check()
-            val api = TessBaseAPI(TessBaseAPI.ProgressNotifier { values -> progress.report(values.percent) })
-            run.attach(api)
-            tess = api
-            tessLanguage = language
-            if (!api.init(dataDir.absolutePath, code, TessBaseAPI.OEM_LSTM_ONLY)) throw IOException("Sprachpaket $code")
-            // Sauvola: kommt mit Schatten und ungleichem Licht auf Handyfotos am besten zurecht.
-            api.setVariable("thresholding_method", "2")
-            api.setVariable("user_defined_dpi", "300")
-            return api
-        }
-
-        /** Liest einen Ausschnitt der zuvor gesetzten Seite. */
-        private fun readArea(tess: TessBaseAPI, box: Box, @TessBaseAPI.PageSegMode.Mode pageSegMode: Int): String {
-            tess.setPageSegMode(pageSegMode)
-            tess.setRectangle(box.left, box.top, box.width, box.height)
-            return recognize(tess)
-        }
-
-        /**
-         * Erkennt das gesetzte Bild bzw. den Ausschnitt. getHOCRText lässt sich abbrechen, meldet den Fortschritt
-         * und liefert zu jedem Wort, wie sicher es gelesen wurde – damit fallen Reste von Symbolen, Knöpfen und Fotos weg.
-         */
-        private fun recognize(tess: TessBaseAPI): String {
-            run.check()
-            val hocr = tess.getHOCRText(0).orEmpty()
-            run.check()
-            return HocrText.compose(hocr).trim()
-        }
-
-        override fun close() {
-            run.attach(null)
-            tess?.recycle()
-            tess = null
-            tessLanguage = null
-        }
-    }
-
-    /** Kopiert das Sprachpaket einmal je App-Version aus den mitgelieferten Dateien. */
-    private suspend fun ensureLanguageData(code: String) = withContext(Dispatchers.IO) {
-        // Bis 0.9.0 lagen die Sprachpakete in filesDir und gingen beim Umzug auf ein neues Handy mit (#45).
-        File(context.filesDir, DATA_DIR).takeIf { it.exists() }?.deleteRecursively()
-        val dir = File(dataDir, "tessdata").apply { mkdirs() }
-        val target = File(dir, "$code.traineddata")
-        val marker = File(dir, "$code.version")
-        val version = BuildConfig.VERSION_CODE.toString()
-        if (target.isFile && marker.isFile && marker.readText() == version) return@withContext
-        val temp = File(dir, "$code.traineddata.tmp")
-        context.assets.open("tessdata/$code.traineddata").use { input ->
-            temp.outputStream().use { input.copyTo(it) }
-        }
-        if (!temp.renameTo(target)) {
-            temp.delete()
-            throw IOException("Sprachpaket $code nicht speicherbar")
-        }
-        marker.writeText(version)
-    }
-
     private companion object {
-        const val DATA_DIR = "tesseract"
+        /** Anteil der Zeilensuche am Fortschritt eines Bereichs; der Rest ist das Lesen der Zeilen. */
+        private const val DETECTION_SHARE = 15
+
+        private const val OLD_TESSERACT_DIR = "tesseract"
     }
 }

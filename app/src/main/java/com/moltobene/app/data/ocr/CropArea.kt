@@ -3,6 +3,12 @@ package com.moltobene.app.data.ocr
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
+/** Rechteck im Bild in Bildpunkten (rechts und unten ausschließlich). */
+data class Box(val left: Int, val top: Int, val right: Int, val bottom: Int) {
+    val width: Int get() = right - left
+    val height: Int get() = bottom - top
+}
+
 /** Teil des Rahmens, der gerade gezogen wird. */
 enum class CropHandle { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, LEFT, TOP, RIGHT, BOTTOM, MOVE }
 

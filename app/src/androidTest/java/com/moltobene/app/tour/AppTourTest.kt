@@ -8,6 +8,7 @@ import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -27,6 +28,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -197,6 +199,37 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForField(R.string.field_title)
     }
 
+    /**
+     * Texterkennung auf dem Handy: Das Rezeptfoto ist eine gezeichnete Kochbuchseite; nach „Text erkennen“
+     * stehen Zutaten und Zubereitung in ihren Feldern. Prüft auch, dass die Modelle unter Android laufen.
+     */
+    @Test
+    fun texterkennung() {
+        // Die Erkennung hängt nicht von der Darstellung ab; einmal genügt, denn sie dauert auf dem Emulator etwas.
+        assumeTrue(variant == DisplayVariant.LIGHT)
+        runBlocking { SampleRecipes.addRecipePage(container(), activity) }
+        waitForText(SampleRecipes.PAGE_RECIPE)
+        composeRule.onNodeWithText(SampleRecipes.PAGE_RECIPE).performSemanticsAction(SemanticsActions.OnClick)
+        waitForDescription(text(R.string.edit_recipe))
+        composeRule.onNodeWithContentDescription(text(R.string.edit_recipe)).performClick()
+        waitForField(R.string.field_title)
+
+        composeRule.onNodeWithText(text(R.string.import_from_photo)).performScrollTo().performClick()
+        waitForText(text(R.string.ocr_from_recipe_photo))
+        composeRule.onNodeWithText(text(R.string.ocr_from_recipe_photo)).performScrollTo().performClick()
+        waitForText(text(R.string.area_recognize))
+        composeRule.onNodeWithText(text(R.string.area_recognize)).performClick()
+
+        composeRule.waitUntil(OCR_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText(text(R.string.ocr_done)).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNode(hasSetTextAction() and hasText("500 g Mehl", substring = true)).assertExists()
+        composeRule.onNode(hasSetTextAction() and hasText("1 Würfel Hefe", substring = true)).assertExists()
+        composeRule.onNode(hasSetTextAction() and hasText("lauwarmen Milch auflösen", substring = true)).assertExists()
+        field(R.string.ingredients).performScrollTo()
+        screenshot("21-text-erkannt")
+    }
+
     @Test
     fun ausTextUebernehmen() {
         clickVisible(text(R.string.import_recipe))
@@ -204,17 +237,17 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithText(text(R.string.import_from_text)).performClick()
         waitForField(R.string.import_text_field)
         // Vor der Eingabe: Die Tastatur im Fenster würde sonst „Aus der Zwischenablage einfügen“ verdecken.
-        screenshot("21-aus-text-uebernehmen")
+        screenshot("22-aus-text-uebernehmen")
         // Rezepte bleiben in ihrer Originalsprache – deshalb auch in der englischen Darstellung deutsch.
         field(R.string.import_text_field).performTextInput(SHARED_TEXT)
 
         composeRule.onNodeWithText(text(R.string.import_text_action)).performClick()
         waitForText(text(R.string.text_done))
         composeRule.onNode(hasSetTextAction() and hasText("Spaghetti aglio e olio")).performScrollTo().assertIsDisplayed()
-        screenshot("22-aus-text-uebernommen")
+        screenshot("23-aus-text-uebernommen")
 
         field(R.string.ingredients).performScrollTo()
-        screenshot("23-aus-text-zutaten")
+        screenshot("24-aus-text-zutaten")
 
         composeRule.onNodeWithText(text(R.string.save)).performClick()
         waitForText("200 g Spaghetti")
@@ -229,16 +262,16 @@ class AppTourTest(private val variant: DisplayVariant) {
     fun einstellungen() {
         composeRule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
         waitForText(text(R.string.backup_title))
-        screenshot("24-einstellungen")
+        screenshot("25-einstellungen")
 
         composeRule.onNodeWithText(text(R.string.whats_new_title, WhatsNew.VERSION_NAME)).performScrollTo().performClick()
         waitForText(text(R.string.close))
-        screenshot("25-neu-in-version")
+        screenshot("26-neu-in-version")
 
         composeRule.onNodeWithText(text(R.string.close)).performClick()
         composeRule.onNodeWithText(text(R.string.licenses_title)).performScrollTo().performClick()
         waitForText(text(R.string.licenses_intro))
-        screenshot("26-lizenzen")
+        screenshot("27-lizenzen")
     }
 
     // --- Hilfsfunktionen ---
@@ -282,6 +315,10 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onAllNodesWithText(value).fetchSemanticsNodes().isNotEmpty()
     }
 
+    private fun waitForDescription(value: String) = composeRule.waitUntil(TIMEOUT_MILLIS) {
+        composeRule.onAllNodesWithContentDescription(value).fetchSemanticsNodes().isNotEmpty()
+    }
+
     private fun waitForField(@StringRes label: Int) = composeRule.waitUntil(TIMEOUT_MILLIS) {
         composeRule.onAllNodes(hasSetTextAction() and hasText(text(label))).fetchSemanticsNodes().isNotEmpty()
     }
@@ -305,6 +342,9 @@ class AppTourTest(private val variant: DisplayVariant) {
 
     companion object {
         private const val TIMEOUT_MILLIS = 10_000L
+
+        /** Die Texterkennung einer Seite dauert auf dem Emulator deutlich länger als auf einem Handy. */
+        private const val OCR_TIMEOUT_MILLIS = 180_000L
         private const val SETTLE_MILLIS = 700L
 
         /** Selbst geschriebenes Rezept, wie es aus einer Nachricht eingefügt wird. */

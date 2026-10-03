@@ -14,13 +14,13 @@ android {
         applicationId = "com.moltobene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 29
-        versionName = "0.13.0"
+        versionCode = 30
+        versionName = "0.14.0"
 
         // Rundgang durch die App auf dem Emulator (app/src/androidTest).
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Texterkennung: nur die Prozessoren heutiger Handys, das hält die App klein.
+        // Texterkennung (ONNX Runtime): nur die Prozessoren heutiger Handys, das hält die App kleiner.
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")
         }
@@ -61,6 +61,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Nur für die Debug-Version (Rundgang auf dem Emulator): Die Texterkennung läuft dort ohne
+            // Übersetzung der Handy-Prozessorbefehle. Die veröffentlichte App bleibt bei den Handy-Prozessoren.
+            ndk {
+                abiFilters += "x86_64"
+            }
+        }
         release {
             if (keystoreFile != null) {
                 signingConfig = signingConfigs.getByName("release")
@@ -92,6 +99,13 @@ android {
     }
 }
 
+// Unit-Tests laufen auf dem PC: Dort braucht ONNX Runtime die PC-Fassung, die Android-Fassung würde sie verdecken.
+configurations.configureEach {
+    if (name.endsWith("UnitTestRuntimeClasspath")) {
+        exclude(group = "com.microsoft.onnxruntime", module = "onnxruntime-android")
+    }
+}
+
 // Baupläne der Datenbank (für spätere Umbauten/Migrationen) werden in app/schemas abgelegt.
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
@@ -116,11 +130,12 @@ dependencies {
     // Nur Anzeige lokaler Fotos – bewusst ohne das Internet-Modul von Coil.
     implementation(libs.coil.compose)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.tesseract4android)
+    implementation(libs.onnxruntime.android)
     debugImplementation(libs.androidx.ui.tooling)
 
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
+    testImplementation(libs.onnxruntime.jvm)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)

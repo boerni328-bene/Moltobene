@@ -69,7 +69,7 @@ class PhotoStore(private val context: Context) {
 
     /**
      * Foto für die Texterkennung: richtig gedreht, in Graustufen (ein Byte je Bildpunkt) und so groß,
-     * dass Tesseract die Schrift gut lesen kann – kleine Fotos werden vergrößert, große verkleinert.
+     * dass auch kleine Schrift scharf genug bleibt – kleine Fotos werden vergrößert, große verkleinert.
      */
     suspend fun loadForRecognition(uri: Uri): GrayImage = withContext(Dispatchers.IO) {
         // Halber Speicherbedarf; Farben braucht die Texterkennung nicht.
@@ -338,7 +338,8 @@ class PhotoStore(private val context: Context) {
         const val SHARE_JPEG_QUALITY = 90
         const val UNUSED_GRACE_MILLIS = 24L * 60 * 60 * 1000
 
-        // Texterkennung: Bei etwa 2400 px liest Tesseract Kochbuchseiten am zuverlässigsten.
+        // Texterkennung: Die Zeilen werden auf einer Seite von etwa 2400 px gesucht und gelesen (bei der Suche
+        // verkleinert), so bleibt auch kleine Schrift in Kochbüchern scharf genug.
         const val OCR_MIN_EDGE = 1800
         const val OCR_TARGET_EDGE = 2400
         const val OCR_MAX_EDGE = 3000

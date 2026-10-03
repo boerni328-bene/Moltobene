@@ -1,9 +1,9 @@
 package com.moltobene.app.data.ocr
 
 /**
- * Sprachen der Texterkennung. Die Sprache wird am Text erkannt (typische kurze Wörter wie „und“,
- * „the“, „di“, „les“, „los“), damit die Erkennung mit dem passenden Sprachpaket wiederholt werden kann –
- * nur so bleiben Akzente wie in „Crème brûlée“ erhalten. Reines Kotlin, per Unit-Test prüfbar.
+ * Sprachen der Rezepte. Die Sprache wird am Text erkannt (typische kurze Wörter wie „und“, „the“, „di“,
+ * „les“, „los“) und als Sprache des Rezepts gespeichert; die Texterkennung selbst liest alle diese Sprachen
+ * zugleich. Reines Kotlin, per Unit-Test prüfbar.
  */
 object TextLanguage {
 
@@ -34,15 +34,6 @@ object TextLanguage {
             "aceite", "añade", "unos", "minutos",
         ),
     )
-
-    /** Kürzel des Sprachpakets der Texterkennung. */
-    fun tesseractCode(language: String): String = when (language) {
-        "de" -> "deu"
-        "it" -> "ita"
-        "fr" -> "fra"
-        "es" -> "spa"
-        else -> "eng"
-    }
 
     fun supportedOrDefault(language: String?): String = language?.takeIf { it in SUPPORTED } ?: FALLBACK
 

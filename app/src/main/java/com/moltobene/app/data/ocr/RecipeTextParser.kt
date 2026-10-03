@@ -355,7 +355,8 @@ object RecipeTextParser {
                 wordsBefore.size >= 2 &&
                     wordsBefore.last().lowercase() !in CONNECTORS &&
                     !wordsBefore.last().endsWith(",") &&
-                    !before.endsWith("(")
+                    // In einer offenen Klammer geht die Zutat weiter: „1 Stück Ingwer (ca. 3 cm)“.
+                    before.count { it == '(' } <= before.count { it == ')' }
             } ?: break
             parts += rest.substring(0, match.range.first).trim()
             rest = rest.substring(match.range.first).trim()

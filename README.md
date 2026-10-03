@@ -42,7 +42,7 @@ Moltobene wird nicht über den Play Store verteilt. Ob eine APK wirklich aus die
 - Rezepte und Fotos liegen nur auf dem Handy. Keine Cloud, kein Konto, keine Weitergabe an Dritte.
 - Die automatische Android-Cloud-Sicherung ist abgeschaltet. Gesichert wird über die eigene Sicherungsdatei.
 - Fotos werden verkleinert und ohne Aufnahmeort gespeichert und geteilt.
-- Die Texterkennung ([Tesseract](https://github.com/tesseract-ocr/tesseract), quelloffen) ist fest eingebaut und läuft nur auf dem Handy, ohne Internet und ohne Google-Dienste.
+- Die Texterkennung ([PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR) mit [ONNX Runtime](https://onnxruntime.ai), beides quelloffen) ist fest eingebaut und läuft nur auf dem Handy, ohne Internet und ohne Google-Dienste.
 
 ## Weiteres
 

@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
@@ -54,19 +54,44 @@ fun LicensesScreen(viewModel: LicensesViewModel, onBack: () -> Unit) {
                 CenteredMessage(text = "", modifier = Modifier.padding(padding)) { CircularProgressIndicator() }
             LicensesUiState.Error ->
                 CenteredMessage(text = stringResource(R.string.licenses_error), modifier = Modifier.padding(padding))
-            is LicensesUiState.Content -> LazyColumn(
-                modifier = Modifier.padding(padding).fillMaxSize(),
-            ) {
-                item {
-                    Text(
-                        text = stringResource(R.string.licenses_intro),
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(Spacing.m),
-                    )
-                }
-                items(LICENSE_GROUPS, key = { it.file }) { group ->
-                    HorizontalDivider()
-                    LicenseSection(group = group, text = state.texts[group.file].orEmpty())
+            is LicensesUiState.Content -> LicenseList(state, Modifier.padding(padding).fillMaxSize())
+        }
+    }
+}
+
+/** Liste der Bausteine; der Lizenztext einer Gruppe erscheint abschnittweise darunter, wenn er geöffnet ist. */
+@Composable
+private fun LicenseList(state: LicensesUiState.Content, modifier: Modifier) {
+    // Geöffnet ist höchstens ein Lizenztext.
+    var openFile by rememberSaveable { mutableStateOf<String?>(null) }
+    LazyColumn(modifier = modifier) {
+        item {
+            Text(
+                text = stringResource(R.string.licenses_intro),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(Spacing.m),
+            )
+        }
+        LICENSE_GROUPS.forEach { group ->
+            val open = openFile == group.file
+            item(key = group.file) {
+                HorizontalDivider()
+                LicenseSection(group = group, showText = open, onToggle = { openFile = if (open) null else group.file })
+            }
+            if (open) {
+                val parts = state.texts[group.file].orEmpty()
+                itemsIndexed(parts, key = { index, _ -> "${group.file}#$index" }) { _, part ->
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m),
+                    ) {
+                        Text(
+                            text = part,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.s),
+                        )
+                    }
                 }
             }
         }
@@ -74,8 +99,7 @@ fun LicensesScreen(viewModel: LicensesViewModel, onBack: () -> Unit) {
 }
 
 @Composable
-private fun LicenseSection(group: LicenseGroup, text: String) {
-    var showText by rememberSaveable(group.file) { mutableStateOf(false) }
+private fun LicenseSection(group: LicenseGroup, showText: Boolean, onToggle: () -> Unit) {
     Column(
         modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.m),
         verticalArrangement = Arrangement.spacedBy(Spacing.s),
@@ -99,22 +123,8 @@ private fun LicenseSection(group: LicenseGroup, text: String) {
         group.note?.let { note ->
             Text(stringResource(note), style = MaterialTheme.typography.bodyMedium)
         }
-        TextButton(onClick = { showText = !showText }) {
+        TextButton(onClick = onToggle) {
             Text(stringResource(if (showText) R.string.license_text_hide else R.string.license_text_show))
-        }
-        if (showText) {
-            Surface(
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(Spacing.m),
-                )
-            }
         }
     }
 }

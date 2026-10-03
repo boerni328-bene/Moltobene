@@ -3,6 +3,18 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.14.0] – 2026-10-03 (versionCode 30)
+
+### Neu
+- **Neue Texterkennung:** Fotos von Kochbüchern, Zetteln und Bildschirmen werden jetzt deutlich zuverlässiger gelesen – auch schräg aufgenommene, gewölbte oder teilweise im Schatten liegende Seiten. In Tests mit nachgestellten Handyfotos stieg der Anteil richtig gelesener Wörter bei schwierigen Fotos von etwa 40 % auf über 95 %. Umlaute und Akzente (z. B. „È più buono“) bleiben erhalten.
+- **Zutaten und Zubereitung automatisch erkannt:** Die App erkennt jetzt selbst, was auf einer Seite nebeneinander steht. Bei Kochbuchseiten mit zwei Spalten kommen erst alle Zutaten, dann die Zubereitung – ohne dass Bereiche markiert werden müssen. Tabellen wie in Rezept-Apps (Zutat links, Menge rechts) werden Zeile für Zeile zur Zutat mit Menge. Getrennte Absätze der Zubereitung bleiben getrennte Schritte.
+- Die Texterkennung läuft weiterhin nur auf dem Handy, ohne Internet und ohne Google-Dienste. Sie kennt alle Sprachen der App zugleich; die Sprache des Rezepts wird am Text erkannt.
+
+### Geändert
+- Die App ist größer (etwa 45 MB statt 14 MB), weil das neue Erkennungsprogramm und seine Modelle mitgeliefert werden. Die alten Sprachpakete (rund 12 MB) werden beim ersten Lesen vom Handy entfernt.
+- „Bereich auswählen“ ist nur noch selten nötig, z. B. um Werbung oder Knöpfe auf Bildschirmfotos auszulassen.
+- Unter „Open-Source-Lizenzen“ stehen jetzt PaddleOCR, OnnxOCR und ONNX Runtime; lange Lizenztexte werden abschnittweise angezeigt.
+
 ## [0.13.0] – 2026-10-03 (versionCode 29)
 
 ### Neu

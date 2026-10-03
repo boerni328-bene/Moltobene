@@ -1,7 +1,6 @@
 package com.moltobene.app.ui.licenses
 
 import androidx.annotation.StringRes
-import com.moltobene.app.R
 
 /**
  * Quelloffene Bausteine der App und ihre Lizenzen (Lizenztexte unter assets/licenses/).
@@ -23,9 +22,8 @@ internal val LICENSE_GROUPS = listOf(
         licenseName = "Apache License 2.0",
         file = "apache-2.0.txt",
         components = listOf(
-            Component("Tesseract OCR", "Google, Tesseract contributors"),
-            Component("tessdata_fast", "Google, Tesseract contributors"),
-            Component("Tesseract4Android", "Robert Pösel, Robert Theis (tess-two)"),
+            Component("PaddleOCR (PP-OCRv6)", "PaddlePaddle Authors"),
+            Component("OnnxOCR", "jingsongliujing"),
             Component("Android Jetpack (AndroidX, Compose, Room, Navigation)", "The Android Open Source Project"),
             Component("Material Icons", "Google"),
             Component("Kotlin, kotlinx.coroutines, kotlinx.serialization", "JetBrains s.r.o. and Kotlin contributors"),
@@ -35,19 +33,13 @@ internal val LICENSE_GROUPS = listOf(
         ),
     ),
     LicenseGroup(
-        licenseName = "BSD 2-Clause License",
-        file = "leptonica.txt",
-        components = listOf(Component("Leptonica", "Leptonica")),
+        licenseName = "MIT License",
+        file = "mit-onnxruntime.txt",
+        components = listOf(Component("ONNX Runtime", "Microsoft Corporation")),
     ),
     LicenseGroup(
-        licenseName = "Independent JPEG Group License",
-        file = "libjpeg.txt",
-        components = listOf(Component("libjpeg", "Thomas G. Lane, Guido Vollbeding")),
-        note = R.string.license_ijg_note,
-    ),
-    LicenseGroup(
-        licenseName = "PNG Reference Library License version 2",
-        file = "libpng.txt",
-        components = listOf(Component("libpng", "The PNG Reference Library Authors")),
+        licenseName = "Third Party Notices",
+        file = "onnxruntime-third-party.txt",
+        components = listOf(Component("ONNX Runtime", "Microsoft Corporation")),
     ),
 )

@@ -6,8 +6,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Prüftexte unter test/resources/ocr/ sind echte Ergebnisse von Tesseract (tessdata_fast) für
- * nachgestellte Handyfotos von Kochbuchseiten (schief, ungleich hell, 1600 px).
+ * Die Prüftexte de.txt, en.txt usw. unter test/resources/ocr/ sind echte Ergebnisse der früheren Texterkennung
+ * (Tesseract) für nachgestellte Handyfotos von Kochbuchseiten (schief, ungleich hell, 1600 px) – mit typischen
+ * Lesefehlern; sie prüfen, dass das Aufteilen auch dann klappt.
  */
 class RecipeTextParserTest {
 
@@ -232,7 +233,6 @@ class RecipeTextParserTest {
         assertEquals("it", TextLanguage.detect(resource("it_mit_deu_gelesen.txt")))
         assertEquals("en", TextLanguage.detect(resource("en_mit_deu_gelesen.txt")))
         assertNull(TextLanguage.detect("Pfannkuchen"))
-        assertEquals("spa", TextLanguage.tesseractCode("es"))
         assertEquals("en", TextLanguage.supportedOrDefault("nl"))
     }
 

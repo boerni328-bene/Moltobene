@@ -138,14 +138,13 @@
     <string name="license_text_hide">Hide license text</string>
     <string name="licenses_error">The license texts could not be loaded.</string>
     <!-- Pflichthinweis der IJG-Lizenz, wörtlich vorgeschrieben -->
-    <string name="license_ijg_note" translatable="false">This software is based in part on the work of the Independent JPEG Group.</string>
 
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Several photos in a row: take or choose a longer recipe page by page – it is read only at the end, all together.</item>
-        <item>The pages appear in an overview with previews; single pages can be removed again.</item>
-        <item>“Choose area” only when needed, via the icon on the page.</item>
+        <item>New text recognition: photos of cookbooks are read much more reliably, even tilted, curved or shaded pages.</item>
+        <item>Ingredients and instructions are recognized automatically, also in two columns and in tables with the amount on the right.</item>
+        <item>Several photos in a row: take a recipe page by page, everything is read together.</item>
     </string-array>
 
     <!-- Bearbeiten -->

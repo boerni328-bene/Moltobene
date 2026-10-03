@@ -140,9 +140,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Mehrere Fotos hintereinander: Längere Rezepte Seite für Seite fotografieren oder auswählen – gelesen wird erst am Ende, alles zusammen.</item>
-        <item>Die Seiten erscheinen in einer Übersicht mit Vorschaubildern; einzelne Seiten lassen sich wieder entfernen.</item>
-        <item>„Bereich auswählen“ nur noch bei Bedarf, über das Symbol an der Seite.</item>
+        <item>Neue Texterkennung: Fotos von Kochbüchern werden viel zuverlässiger gelesen, auch schräge, gewölbte oder schattige Seiten.</item>
+        <item>Zutaten und Zubereitung werden automatisch erkannt, auch bei zwei Spalten und bei Tabellen mit der Menge rechts.</item>
+        <item>Mehrere Fotos hintereinander: Seite für Seite fotografieren, gelesen wird alles zusammen.</item>
     </string-array>
 
     <!-- Bearbeiten -->
