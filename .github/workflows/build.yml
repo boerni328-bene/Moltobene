@@ -232,6 +232,21 @@ jobs:
       - name: Rundgang durch die App
         run: ./gradlew connectedDebugAndroidTest --no-daemon
 
+      - name: Fehlgeschlagene Schritte des Rundgangs anzeigen
+        if: failure()
+        # Gradle nennt im Protokoll nur „There were failing tests“; die Einzelheiten stehen in den XML-Ergebnissen.
+        run: |
+          find app/build/outputs/androidTest-results -name '*.xml' 2>/dev/null | head -5
+          python3 - <<'PY'
+          import glob, xml.etree.ElementTree as ET
+          for path in glob.glob("app/build/outputs/androidTest-results/connected/**/*.xml", recursive=True):
+              for case in ET.parse(path).getroot().iter("testcase"):
+                  for problem in list(case.findall("failure")) + list(case.findall("error")):
+                      text = (problem.text or problem.get("message") or "").strip().splitlines()
+                      print(f"::error::{case.get('classname')}.{case.get('name')}: {text[0] if text else ''}")
+                      print("\n".join(text[:25]))
+          PY
+
       - name: Bildschirmfotos vom Emulator holen
         if: always()
         run: adb pull /data/local/tmp/moltobene-bildschirmfotos bildschirmfotos || echo "Keine Bildschirmfotos vorhanden."

@@ -6,7 +6,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -16,13 +15,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -37,10 +32,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -56,7 +49,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -69,19 +61,17 @@ import com.moltobene.app.data.ocr.AreaFrame
 import com.moltobene.app.data.ocr.AreaKind
 import com.moltobene.app.data.ocr.CropArea
 import com.moltobene.app.data.ocr.CropHandle
-import com.moltobene.app.data.ocr.TextLanguage
 import com.moltobene.app.ui.components.CenteredMessage
 import com.moltobene.app.ui.theme.Spacing
-import java.util.Locale
 import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
- * „Bereich auswählen“ vor der Texterkennung: Das Foto erscheint mit einem Rahmen, gelesen wird nur,
- * was darin liegt. So bleiben Knöpfe, Werbung oder Fotos auf Bildschirmfotos außen vor.
+ * „Bereich auswählen“ für eine Seite der Seitenübersicht: Das Foto erscheint mit einem Rahmen, gelesen wird
+ * nur, was darin liegt. So bleiben Knöpfe, Werbung oder Fotos auf Bildschirmfotos außen vor.
  * Weitere Rahmen lassen sich hinzufügen und als „Titel“, „Zutaten“ oder „Zubereitung“ bezeichnen (#39) –
- * z. B. für Kochbuchseiten mit zwei Spalten. Am Anfang umfasst ein Rahmen „Alles“ die ganze Seite;
- * wer nichts ändern will, tippt nur „Text erkennen“. Alles Wichtige geht auch ohne Ziehen.
+ * z. B. für Kochbuchseiten mit zwei Spalten. Am Anfang umfasst ein Rahmen „Alles“ die ganze Seite.
+ * Änderungen gelten sofort; „Bereich festlegen“ und „Zurück“ führen zur Übersicht. Alles Wichtige geht auch ohne Ziehen.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -90,19 +80,15 @@ fun AreaSelectionScreen(
     preview: Bitmap?,
     failed: Boolean,
     snackbarHostState: SnackbarHostState,
-    language: String?,
-    onLanguageChange: (String?) -> Unit,
     onFrameChange: (index: Int, area: CropArea) -> Unit,
     onSelectFrame: (Int) -> Unit,
     onKindChange: (AreaKind) -> Unit,
     onAddFrame: () -> Unit,
     onRemoveFrame: () -> Unit,
     onWholePage: () -> Unit,
-    onConfirm: () -> Unit,
-    onCancel: () -> Unit,
+    onDone: () -> Unit,
 ) {
-    BackHandler(onBack = onCancel)
-    var languageMenuOpen by remember { mutableStateOf(false) }
+    BackHandler(onBack = onDone)
     Scaffold(
         topBar = {
             TopAppBar(
@@ -118,39 +104,9 @@ fun AreaSelectionScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = onCancel) {
-                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.cancel))
-                    }
-                },
-                actions = {
-                    // Sprache des Textes (#42): meist erkennt die App sie selbst; bei kurzen Ausschnitten hilft die Wahl.
-                    Box {
-                        IconButton(onClick = { languageMenuOpen = true }) {
-                            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.ocr_language))
-                        }
-                        DropdownMenu(expanded = languageMenuOpen, onDismissRequest = { languageMenuOpen = false }) {
-                            Text(
-                                text = stringResource(R.string.ocr_language),
-                                style = MaterialTheme.typography.titleSmall,
-                                modifier = Modifier
-                                    .padding(horizontal = Spacing.m, vertical = Spacing.s)
-                                    .semantics { heading() },
-                            )
-                            (listOf<String?>(null) + TextLanguage.SUPPORTED).forEach { code ->
-                                val selected = code == language
-                                DropdownMenuItem(
-                                    text = { Text(code?.let { languageName(it) } ?: stringResource(R.string.ocr_language_auto)) },
-                                    leadingIcon = {
-                                        if (selected) Icon(Icons.Filled.Check, contentDescription = null)
-                                    },
-                                    onClick = {
-                                        languageMenuOpen = false
-                                        onLanguageChange(code)
-                                    },
-                                    modifier = Modifier.semantics { this.selected = selected },
-                                )
-                            }
-                        }
+                    // Zurück zur Seitenübersicht; die Rahmen bleiben, wie sie sind.
+                    IconButton(onClick = onDone) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
             )
@@ -226,13 +182,8 @@ fun AreaSelectionScreen(
                 ) {
                     Text(stringResource(R.string.area_whole_page), textAlign = TextAlign.Center)
                 }
-                Button(onClick = onConfirm, enabled = preview != null && !failed, modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(
-                            if (selection.page < selection.pageCount) R.string.area_next_page else R.string.area_recognize,
-                        ),
-                        textAlign = TextAlign.Center,
-                    )
+                Button(onClick = onDone, modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.area_done), textAlign = TextAlign.Center)
                 }
             }
         }
@@ -394,9 +345,3 @@ private const val OUTLINE_FACTOR = 2.5f
 
 /** Mehr Rahmen braucht eine Seite kaum; so bleibt die Erkennung auch auf günstigen Handys schnell genug. */
 private const val MAX_FRAMES = 6
-
-/** Name einer Sprache in ihr selbst („Italiano“, „Français“), damit jeder seine Sprache findet. */
-private fun languageName(code: String): String {
-    val locale = Locale.forLanguageTag(code)
-    return locale.getDisplayLanguage(locale).replaceFirstChar { it.titlecase(locale) }
-}

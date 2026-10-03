@@ -59,7 +59,7 @@
 
     <!-- Texterkennung -->
     <string name="import_from_photo">Import from photo</string>
-    <string name="share_too_many">Only the first %1$d photos are read.</string>
+    <string name="share_too_many">At most %1$d pages at a time – the other photos were left out.</string>
     <string name="import_recipe">Import recipe</string>
     <string name="import_from_text">Import from text</string>
     <string name="import_text_hint">Paste or type a recipe, e.g. from a message, an email or a note. Title, ingredients and instructions are sorted automatically.</string>
@@ -69,7 +69,7 @@
     <string name="clipboard_empty">The clipboard contains no text.</string>
     <string name="text_done">Text added to the recipe. Check that everything is in the right place.</string>
     <string name="import_link_saved">Link saved as source. The recipe text can be copied from the page and added with “Import from text”.</string>
-    <string name="ocr_dialog_text">Reads title, ingredients and instructions from photos of a cookbook, a note or a screenshot. Sharp photos taken straight on work best. For several pages, choose the photos in order (up to %1$d).</string>
+    <string name="ocr_dialog_text">Reads title, ingredients and instructions from photos of a cookbook, a note or a screenshot. Sharp photos taken straight on work best. For longer recipes, take or choose one photo per page (up to %1$d pages) – everything is read together at the end.</string>
     <string name="ocr_from_recipe_photo">Use recipe photo</string>
     <string name="ocr_choose_photos">Choose photos</string>
     <string name="ocr_running">Recognizing text …</string>
@@ -106,10 +106,30 @@
     <string name="area_add">Add area</string>
     <string name="area_remove">Remove area</string>
     <string name="area_whole_page">Whole page</string>
-    <string name="area_next_page">Next page</string>
     <string name="area_recognize">Recognize text</string>
     <string name="area_frame_description">Photo with frames around the areas to be read</string>
     <string name="area_load_error">The photo could not be loaded. Choose another photo.</string>
+    <string name="area_done">Set area</string>
+    <!-- Seitenübersicht vor der Texterkennung (Fotoserie) -->
+    <plurals name="pages_count">
+        <item quantity="one">%1$d page</item>
+        <item quantity="other">%1$d pages</item>
+    </plurals>
+    <string name="pages_hint">All pages are read together. Choose an area only if needed, e.g. for two columns.</string>
+    <string name="page_label">Page %1$d</string>
+    <string name="page_area_chosen">Area chosen</string>
+    <string name="page_choose_area">Choose area of page %1$d</string>
+    <string name="page_remove_number">Remove page %1$d</string>
+    <string name="pages_adding">Adding page …</string>
+    <string name="pages_take_more">Take another page</string>
+    <string name="pages_choose_more">Choose more photos</string>
+    <plurals name="pages_max">
+        <item quantity="one">At most %1$d page at a time</item>
+        <item quantity="other">At most %1$d pages at a time</item>
+    </plurals>
+    <string name="pages_discard_title">Discard pages?</string>
+    <string name="pages_discard_text">The pages will not be read.</string>
+    <string name="pages_keep">Keep pages</string>
 
     <!-- Lizenzen -->
     <string name="licenses_title">Open-source licenses</string>
@@ -123,9 +143,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>“Import from text”: paste recipes from messages, emails or notes – title, ingredients and instructions are sorted automatically.</item>
-        <item>“Share” now also works with text: shared recipe text goes straight into a new recipe, a shared link is saved as the source.</item>
-        <item>In the collection, “Import recipe” leads to all ways of importing a recipe.</item>
+        <item>Several photos in a row: take or choose a longer recipe page by page – it is read only at the end, all together.</item>
+        <item>The pages appear in an overview with previews; single pages can be removed again.</item>
+        <item>“Choose area” only when needed, via the icon on the page.</item>
     </string-array>
 
     <!-- Bearbeiten -->

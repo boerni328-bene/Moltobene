@@ -99,11 +99,12 @@ class PhotoStore(private val context: Context) {
 
     /**
      * Foto für „Bereich auswählen“: genauso gedreht wie für die Texterkennung, damit der Rahmen
-     * dieselbe Stelle trifft, aber nur so groß, wie der Bildschirm es braucht.
+     * dieselbe Stelle trifft, aber nur so groß, wie der Bildschirm es braucht ([edge], kleiner z. B. für die
+     * Vorschaubilder der Seitenübersicht).
      */
-    suspend fun loadPreview(uri: Uri): Bitmap = withContext(Dispatchers.IO) {
-        val rotated = decodeOriented(uri, PREVIEW_EDGE, Bitmap.Config.ARGB_8888)
-        scaleDown(rotated, PREVIEW_EDGE).also { if (it !== rotated) rotated.recycle() }
+    suspend fun loadPreview(uri: Uri, edge: Int = PREVIEW_EDGE): Bitmap = withContext(Dispatchers.IO) {
+        val rotated = decodeOriented(uri, edge, Bitmap.Config.ARGB_8888)
+        scaleDown(rotated, edge).also { if (it !== rotated) rotated.recycle() }
     }
 
     /**

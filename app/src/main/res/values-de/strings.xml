@@ -58,7 +58,7 @@
 
     <!-- Texterkennung -->
     <string name="import_from_photo">Aus Foto übernehmen</string>
-    <string name="share_too_many">Es werden nur die ersten %1$d Fotos gelesen.</string>
+    <string name="share_too_many">Höchstens %1$d Seiten auf einmal – die übrigen Fotos wurden weggelassen.</string>
     <string name="import_recipe">Rezept übernehmen</string>
     <string name="import_from_text">Aus Text übernehmen</string>
     <string name="import_text_hint">Ein Rezept einfügen oder eintippen, z. B. aus einer Nachricht, einer E-Mail oder einer Notiz. Titel, Zutaten und Zubereitung werden automatisch eingeordnet.</string>
@@ -68,7 +68,7 @@
     <string name="clipboard_empty">Die Zwischenablage enthält keinen Text.</string>
     <string name="text_done">Text ins Rezept übernommen. Prüfen, ob alles an der richtigen Stelle steht.</string>
     <string name="import_link_saved">Link als Quelle gespeichert. Den Rezepttext von der Seite kopieren und mit „Aus Text übernehmen“ einfügen.</string>
-    <string name="ocr_dialog_text">Liest Titel, Zutaten und Zubereitung aus Fotos von Kochbuch, Zettel oder Bildschirmfoto. Am besten gelingt es mit einem scharfen, gerade aufgenommenen Foto. Bei mehreren Seiten die Fotos der Reihe nach auswählen (bis zu %1$d).</string>
+    <string name="ocr_dialog_text">Liest Titel, Zutaten und Zubereitung aus Fotos von Kochbuch, Zettel oder Bildschirmfoto. Am besten gelingt es mit einem scharfen, gerade aufgenommenen Foto. Längere Rezepte Seite für Seite fotografieren oder auswählen (bis zu %1$d Seiten) – am Ende wird alles zusammen gelesen.</string>
     <string name="ocr_from_recipe_photo">Rezeptfoto verwenden</string>
     <string name="ocr_choose_photos">Fotos auswählen</string>
     <string name="ocr_running">Text wird erkannt …</string>
@@ -105,10 +105,30 @@
     <string name="area_add">Bereich hinzufügen</string>
     <string name="area_remove">Bereich entfernen</string>
     <string name="area_whole_page">Ganze Seite</string>
-    <string name="area_next_page">Nächste Seite</string>
     <string name="area_recognize">Text erkennen</string>
     <string name="area_frame_description">Foto mit Rahmen um die Bereiche, die gelesen werden</string>
     <string name="area_load_error">Das Foto konnte nicht geladen werden. Ein anderes Foto auswählen.</string>
+    <string name="area_done">Bereich festlegen</string>
+    <!-- Seitenübersicht vor der Texterkennung (Fotoserie) -->
+    <plurals name="pages_count">
+        <item quantity="one">%1$d Seite</item>
+        <item quantity="other">%1$d Seiten</item>
+    </plurals>
+    <string name="pages_hint">Alle Seiten werden zusammen gelesen. Einen Bereich nur bei Bedarf wählen, z. B. bei zwei Spalten.</string>
+    <string name="page_label">Seite %1$d</string>
+    <string name="page_area_chosen">Bereich gewählt</string>
+    <string name="page_choose_area">Bereich von Seite %1$d wählen</string>
+    <string name="page_remove_number">Seite %1$d entfernen</string>
+    <string name="pages_adding">Seite wird hinzugefügt …</string>
+    <string name="pages_take_more">Weitere Seite fotografieren</string>
+    <string name="pages_choose_more">Weitere Fotos auswählen</string>
+    <plurals name="pages_max">
+        <item quantity="one">Höchstens %1$d Seite auf einmal</item>
+        <item quantity="other">Höchstens %1$d Seiten auf einmal</item>
+    </plurals>
+    <string name="pages_discard_title">Seiten verwerfen?</string>
+    <string name="pages_discard_text">Die Seiten werden nicht gelesen.</string>
+    <string name="pages_keep">Seiten behalten</string>
 
     <!-- Lizenzen -->
     <string name="licenses_title">Open-Source-Lizenzen</string>
@@ -120,9 +140,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>„Aus Text übernehmen“: Rezepte aus Nachrichten, E-Mails oder Notizen einfügen – Titel, Zutaten und Zubereitung werden automatisch eingeordnet.</item>
-        <item>„Teilen mit…“ klappt jetzt auch mit Text: Ein geteilter Rezepttext kommt direkt in ein neues Rezept, ein geteilter Link wird als Quelle gespeichert.</item>
-        <item>In der Sammlung führt „Rezept übernehmen“ zu allen Wegen, ein Rezept zu übernehmen.</item>
+        <item>Mehrere Fotos hintereinander: Längere Rezepte Seite für Seite fotografieren oder auswählen – gelesen wird erst am Ende, alles zusammen.</item>
+        <item>Die Seiten erscheinen in einer Übersicht mit Vorschaubildern; einzelne Seiten lassen sich wieder entfernen.</item>
+        <item>„Bereich auswählen“ nur noch bei Bedarf, über das Symbol an der Seite.</item>
     </string-array>
 
     <!-- Bearbeiten -->

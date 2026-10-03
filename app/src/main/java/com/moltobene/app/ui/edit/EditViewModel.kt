@@ -3,6 +3,7 @@ package com.moltobene.app.ui.edit
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
@@ -48,7 +49,15 @@ sealed interface RecognitionState {
     data class Running(val page: Int, val pageCount: Int, val percent: Int = 0) : RecognitionState
 }
 
-/** „Bereich auswählen“ vor der Texterkennung; [page] zählt ab 1. */
+/**
+ * Seitenübersicht vor der Texterkennung: alle gesammelten Seiten, z. B. aus einer Fotoserie.
+ * [areaChosen] je Seite: Für sie wurde ein eigener Bereich gewählt.
+ */
+data class PageOverview(val pages: List<String>, val areaChosen: List<Boolean>) {
+    val canAddMore: Boolean get() = pages.size < MAX_PAGES
+}
+
+/** „Bereich auswählen“ für eine Seite der Übersicht; [page] zählt ab 1. */
 data class AreaSelection(val page: Int, val pageCount: Int, val frames: List<AreaFrame>, val active: Int) {
     /** Nur ein Rahmen „Alles“ über die ganze Seite – so beginnt jede Seite. */
     val isWholePage: Boolean get() = frames.size == 1 && frames[0] == AreaFrame.WHOLE_PAGE
@@ -118,6 +127,8 @@ class EditViewModel(
     /** Rahmen je Seite (#39), Seiten getrennt mit „;“ – siehe [AreaFrame.encodeAll]. */
     private val areaListField = SavedField(handle, "areaList", "")
     private val areaIndexField = SavedField(handle, "areaIndex", 0)
+    /** Für eine Seite der Übersicht wird gerade der Bereich gewählt. */
+    private val areaEditingField = SavedField(handle, "areaEditing", false)
     /** Rahmen der aktuellen Seite, der gerade bearbeitet wird. */
     private val areaFrameField = SavedField(handle, "areaFrame", 0)
     /** Kennung, unter der die kopierten Seiten und ein Ergebnis der Erkennung als Dateien liegen (#37). */
@@ -240,11 +251,26 @@ class EditViewModel(
     /** Anzahl der Seiten in „Seiten ansehen“. */
     val pageCount: Int get() = viewerPages().size
 
-    /** Läuft gerade „Bereich auswählen“? */
+    /** Gesammelte Seiten vor der Texterkennung; null, wenn keine da sind oder gerade ein Bereich gewählt wird. */
+    val pageOverview: PageOverview?
+        get() {
+            val pages = areaPages()
+            if (pages.isEmpty() || recognitionStartedField.value || areaEditingField.value) return null
+            return PageOverview(pages, pageFrames(pages.size).map { it != listOf(AreaFrame.WHOLE_PAGE) })
+        }
+
+    /** Vorschaubilder der Seitenübersicht, je Seite; fehlt eines, lädt es noch oder ließ sich nicht laden. */
+    val pageThumbnails = mutableStateMapOf<String, Bitmap>()
+    /** Seiten, deren Vorschaubild sich nicht laden ließ. */
+    val failedThumbnails = mutableStateMapOf<String, Boolean>()
+    /** Seiten, deren Vorschaubild gerade geladen wird – damit keines doppelt lädt. */
+    private val loadingThumbnails = mutableSetOf<String>()
+
+    /** Läuft gerade „Bereich auswählen“ für eine Seite? */
     val areaSelection: AreaSelection?
         get() {
             val pages = areaPages()
-            if (pages.isEmpty() || recognitionStartedField.value) return null
+            if (pages.isEmpty() || recognitionStartedField.value || !areaEditingField.value) return null
             val index = areaIndexField.value.coerceIn(0, pages.lastIndex)
             val frames = pageFrames(pages.size)[index]
             return AreaSelection(index + 1, pages.size, frames, areaFrameField.value.coerceIn(0, frames.lastIndex))
@@ -273,8 +299,8 @@ class EditViewModel(
         when {
             // Android hat die App während der Erkennung beendet.
             recognitionStartedField.value -> resumeRecognition()
-            // Nach dem Beenden der App durch Android geht „Bereich auswählen“ an derselben Stelle weiter.
-            areaPages().isNotEmpty() -> loadAreaPreview()
+            // Nach dem Beenden der App durch Android geht es an derselben Stelle weiter.
+            areaPages().isNotEmpty() -> if (areaEditingField.value) loadAreaPreview() else loadThumbnails()
         }
     }
 
@@ -322,12 +348,12 @@ class EditViewModel(
         return true
     }
 
-    /** Liest das Rezeptfoto – zuerst wird der Bereich gewählt. */
+    /** Nimmt das Rezeptfoto in die Seitenübersicht auf. */
     fun recognizeRecipePhoto() {
         val photoId = photoIdField.value ?: return
         if (isRecognizing) return
         ensureSession()
-        startAreaSelection(listOf(PAGE_PHOTO + photoId))
+        addPages(listOf(PAGE_PHOTO + photoId))
     }
 
     /** „Aus Text übernehmen“ in der Sammlung: Das Feld für den Text erscheint beim ersten Öffnen von selbst. */
@@ -338,34 +364,35 @@ class EditViewModel(
     }
 
     /**
-     * Inhalt aus „Teilen mit…“: Bilder (#46) werden gleich kopiert und mit „Bereich auswählen“ gelesen,
+     * Inhalt aus „Teilen mit…“: Bilder (#46) werden gleich kopiert und kommen in die Seitenübersicht,
      * Text wird wie bei „Aus Text übernehmen“ aufgeteilt.
      */
     private fun takeShared() {
         sharedTakenField.value = true
         when (val content = sharedInput.take()) {
-            is SharedContent.Photos -> {
-                if (content.uris.size > MAX_PAGES) message = R.string.share_too_many
-                recognizePhotos(content.uris.take(MAX_PAGES))
-            }
+            is SharedContent.Photos -> recognizePhotos(content.uris)
             is SharedContent.Text -> importText(content.shared.text, content.shared.subject)
             null -> Unit
         }
     }
 
-    /** Liest ausgewählte Fotos in der gewählten Reihenfolge. */
+    /** Nimmt ausgewählte Fotos in der gewählten Reihenfolge in die Seitenübersicht auf (höchstens [MAX_PAGES] Seiten). */
     fun recognizePhotos(uris: List<Uri>) {
-        if (uris.isNotEmpty()) keepPages { session -> uris.map { pending.keepPage(session, it) } }
+        if (uris.isEmpty()) return
+        val room = MAX_PAGES - areaPages().size
+        if (uris.size > room) message = R.string.share_too_many
+        val taken = uris.take(room.coerceAtLeast(0))
+        if (taken.isNotEmpty()) keepPages { session -> taken.map { pending.keepPage(session, it) } }
     }
 
-    /** Liest ein gerade aufgenommenes Foto. */
+    /** Nimmt ein gerade aufgenommenes Foto in die Seitenübersicht auf; danach lässt sich die nächste Seite fotografieren. */
     fun onRecognitionCameraResult(success: Boolean) {
-        if (success) keepPages { session -> listOf(pending.keepCameraPage(session)) }
+        if (success && areaPages().size < MAX_PAGES) keepPages { session -> listOf(pending.keepCameraPage(session)) }
     }
 
     /**
      * Legt die Seiten sofort als eigene Dateien ab – die Leseerlaubnis der Fotoauswahl gilt nur vorübergehend –
-     * und startet dann „Bereich auswählen“.
+     * und nimmt sie in die Seitenübersicht auf.
      */
     private fun keepPages(block: suspend (session: String) -> List<String>) {
         if (isRecognizing || isProcessingPhoto) return
@@ -374,7 +401,7 @@ class EditViewModel(
             isProcessingPhoto = true
             try {
                 val names = block(session)
-                startAreaSelection(names.map { PAGE_KEPT + it })
+                addPages(names.map { PAGE_KEPT + it })
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -439,26 +466,58 @@ class EditViewModel(
         languageChoiceField.value = language?.takeIf { it in TextLanguage.SUPPORTED }
     }
 
-    /** Weiter zur nächsten Seite; nach der letzten startet die Texterkennung. */
-    fun confirmArea() {
+    /** „Bereich wählen“ für eine Seite der Übersicht. */
+    fun editArea(index: Int) {
         val pages = areaPages()
-        if (pages.isEmpty() || isRecognizing) return
-        val index = areaIndexField.value
-        if (index + 1 < pages.size) {
-            areaIndexField.value = index + 1
-            areaFrameField.value = 0
-            loadAreaPreview()
+        if (index !in pages.indices || isRecognizing) return
+        areaIndexField.value = index
+        areaFrameField.value = 0
+        areaEditingField.value = true
+        loadAreaPreview()
+    }
+
+    /** Zurück zur Seitenübersicht; die gewählten Rahmen bleiben. */
+    fun closeAreaSelection() {
+        areaEditingField.value = false
+        previewJob?.cancel()
+        areaPreview = null
+        areaPreviewFailed = false
+        loadThumbnails()
+    }
+
+    /** Entfernt eine Seite aus der Übersicht; ohne Seiten geht es zurück zum Formular. */
+    fun removePage(index: Int) {
+        val pages = areaPages()
+        if (index !in pages.indices || isRecognizing) return
+        if (pages.size == 1) {
+            finishRun(read = false)
             return
         }
+        val ref = pages[index]
+        val frames = pageFrames(pages.size).filterIndexed { i, _ -> i != index }
+        areaPagesField.value = pages.filterIndexed { i, _ -> i != index }.joinToString("\n")
+        areaListField.value = frames.joinToString(";") { AreaFrame.encodeAll(it) }
+        pageThumbnails.remove(ref)
+        failedThumbnails.remove(ref)
+        val session = sessionField.value
+        if (session != null && ref.startsWith(PAGE_KEPT)) {
+            viewModelScope.launch { runCatching { pending.deletePages(session, listOf(ref.removePrefix(PAGE_KEPT))) } }
+        }
+    }
+
+    /** „Text erkennen“: liest alle Seiten der Übersicht in einem Durchgang. */
+    fun recognizePages() {
+        if (areaPages().isEmpty() || isRecognizing) return
         // Seiten und Bereiche bleiben gespeichert, bis das Ergebnis im Rezept steht.
         recognitionStartedField.value = true
+        areaEditingField.value = false
         previewJob?.cancel()
         areaPreview = null
         startRecognition()
     }
 
-    /** „Bereich auswählen“ abbrechen: Es wird nichts gelesen, die kopierten Seiten werden gelöscht. */
-    fun cancelAreaSelection() = finishRun(read = false)
+    /** Seitenübersicht abbrechen: Es wird nichts gelesen, die kopierten Seiten werden gelöscht. */
+    fun cancelPages() = finishRun(read = false)
 
     /** „Erneut erkennen“ nach einer Unterbrechung: dieselben Seiten mit denselben Bereichen lesen. */
     fun retryRecognition() {
@@ -468,13 +527,42 @@ class EditViewModel(
     /** Eine unterbrochene Erkennung verwerfen; ihre Seiten werden gelöscht. */
     fun discardRecognition() = finishRun(read = false)
 
-    private fun startAreaSelection(pages: List<String>) {
-        areaPagesField.value = pages.joinToString("\n")
-        areaListField.value = pages.joinToString(";") { AreaFrame.WHOLE_PAGE.encode() }
-        areaIndexField.value = 0
-        areaFrameField.value = 0
+    /** Hängt Seiten an die Übersicht an; jede beginnt mit der ganzen Seite. Doppelte und überzählige fallen weg. */
+    private fun addPages(refs: List<String>) {
+        val existing = areaPages()
+        val added = refs.filter { it !in existing }.distinct().take(MAX_PAGES - existing.size)
+        val dropped = refs.filter { it !in added && it !in existing && it.startsWith(PAGE_KEPT) }
+        val session = sessionField.value
+        if (session != null && dropped.isNotEmpty()) {
+            viewModelScope.launch { runCatching { pending.deletePages(session, dropped.map { it.removePrefix(PAGE_KEPT) }) } }
+        }
+        if (added.isEmpty()) return
+        val frames = pageFrames(existing.size) + added.map { listOf(AreaFrame.WHOLE_PAGE) }
+        areaPagesField.value = (existing + added).joinToString("\n")
+        areaListField.value = frames.joinToString(";") { AreaFrame.encodeAll(it) }
+        areaEditingField.value = false
         recognitionStartedField.value = false
-        loadAreaPreview()
+        loadThumbnails()
+    }
+
+    /** Lädt die fehlenden Vorschaubilder der Seitenübersicht, klein, damit auch sechs Seiten wenig Speicher brauchen. */
+    private fun loadThumbnails() {
+        areaPages().filter { it !in pageThumbnails && it !in failedThumbnails && it !in loadingThumbnails }.forEach { ref ->
+            loadingThumbnails += ref
+            viewModelScope.launch {
+                try {
+                    val thumbnail = photoStore.loadPreview(pageUri(ref), THUMBNAIL_EDGE)
+                    // Wurde die Seite inzwischen entfernt, wird das Bild nicht mehr gebraucht.
+                    if (ref in areaPages()) pageThumbnails[ref] = thumbnail
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    if (ref in areaPages()) failedThumbnails[ref] = true
+                } finally {
+                    loadingThumbnails -= ref
+                }
+            }
+        }
     }
 
     /**
@@ -496,6 +584,9 @@ class EditViewModel(
         areaListField.value = ""
         areaIndexField.value = 0
         areaFrameField.value = 0
+        areaEditingField.value = false
+        pageThumbnails.clear()
+        failedThumbnails.clear()
         recognitionStartedField.value = false
         recognitionInterrupted = false
         areaPreview = null
@@ -768,6 +859,8 @@ class EditViewModel(
         const val PAGE_KEPT = "page:"
         const val CHECK_RECOGNIZED = "recognized"
         const val CHECK_TEXT = "text"
+        /** Kantenlänge der Vorschaubilder in der Seitenübersicht. */
+        const val THUMBNAIL_EDGE = 480
     }
 
     fun removePhoto() {

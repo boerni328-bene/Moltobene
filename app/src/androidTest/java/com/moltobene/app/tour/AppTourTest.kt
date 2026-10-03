@@ -162,6 +162,41 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("17-aus-foto-abgebrochen")
     }
 
+    /**
+     * Seitenübersicht der Fotoserie, hier mit dem Rezeptfoto als Seite (Kamera und Fotoauswahl sind fremde Apps):
+     * Bereich einer Seite wählen, zurück zur Übersicht, Abbrechen mit Rückfrage.
+     */
+    @Test
+    fun seitenuebersicht() {
+        addSampleRecipes()
+        openRecipe(SampleRecipes.TOMATO_SAUCE)
+        waitForText("800 g reife Tomaten")
+        composeRule.onNodeWithContentDescription(text(R.string.edit_recipe)).performClick()
+        waitForField(R.string.field_title)
+
+        composeRule.onNodeWithText(text(R.string.import_from_photo)).performScrollTo().performClick()
+        waitForText(text(R.string.ocr_from_recipe_photo))
+        // Mit 200 % Schrift liegt die Auswahl unter dem Erklärtext; im Fenster wird dafür geblättert.
+        composeRule.onNodeWithText(text(R.string.ocr_from_recipe_photo)).performScrollTo().performClick()
+        waitForText(text(R.string.area_recognize))
+        composeRule.onNodeWithText(text(R.string.page_label, 1)).performScrollTo().assertIsDisplayed()
+        screenshot("18-seitenuebersicht")
+
+        composeRule.onNodeWithContentDescription(text(R.string.page_choose_area, 1)).performScrollTo().performClick()
+        waitForText(text(R.string.area_title))
+        screenshot("19-bereich-waehlen")
+
+        composeRule.onNodeWithText(text(R.string.area_done)).performClick()
+        waitForText(text(R.string.area_recognize))
+        composeRule.onNodeWithContentDescription(text(R.string.cancel)).performClick()
+        waitForText(text(R.string.pages_discard_title))
+        screenshot("20-seiten-verwerfen")
+
+        composeRule.onNodeWithText(text(R.string.discard)).performClick()
+        waitUntilGone(text(R.string.area_recognize))
+        waitForField(R.string.field_title)
+    }
+
     @Test
     fun ausTextUebernehmen() {
         clickVisible(text(R.string.import_recipe))
@@ -169,17 +204,17 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithText(text(R.string.import_from_text)).performClick()
         waitForField(R.string.import_text_field)
         // Vor der Eingabe: Die Tastatur im Fenster würde sonst „Aus der Zwischenablage einfügen“ verdecken.
-        screenshot("18-aus-text-uebernehmen")
+        screenshot("21-aus-text-uebernehmen")
         // Rezepte bleiben in ihrer Originalsprache – deshalb auch in der englischen Darstellung deutsch.
         field(R.string.import_text_field).performTextInput(SHARED_TEXT)
 
         composeRule.onNodeWithText(text(R.string.import_text_action)).performClick()
         waitForText(text(R.string.text_done))
         composeRule.onNode(hasSetTextAction() and hasText("Spaghetti aglio e olio")).performScrollTo().assertIsDisplayed()
-        screenshot("19-aus-text-uebernommen")
+        screenshot("22-aus-text-uebernommen")
 
         field(R.string.ingredients).performScrollTo()
-        screenshot("20-aus-text-zutaten")
+        screenshot("23-aus-text-zutaten")
 
         composeRule.onNodeWithText(text(R.string.save)).performClick()
         waitForText("200 g Spaghetti")
@@ -194,16 +229,16 @@ class AppTourTest(private val variant: DisplayVariant) {
     fun einstellungen() {
         composeRule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
         waitForText(text(R.string.backup_title))
-        screenshot("21-einstellungen")
+        screenshot("24-einstellungen")
 
         composeRule.onNodeWithText(text(R.string.whats_new_title, WhatsNew.VERSION_NAME)).performScrollTo().performClick()
         waitForText(text(R.string.close))
-        screenshot("22-neu-in-version")
+        screenshot("25-neu-in-version")
 
         composeRule.onNodeWithText(text(R.string.close)).performClick()
         composeRule.onNodeWithText(text(R.string.licenses_title)).performScrollTo().performClick()
         waitForText(text(R.string.licenses_intro))
-        screenshot("23-lizenzen")
+        screenshot("26-lizenzen")
     }
 
     // --- Hilfsfunktionen ---

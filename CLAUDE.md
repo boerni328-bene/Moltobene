@@ -72,7 +72,7 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 
 - Keine direkte Anrede, neutral und knapp: „Rezept hinzufügen“, „Rezept wirklich löschen?“, „Noch keine Rezepte vorhanden“.
 - Schaltflächen nennen die Aktion („Löschen“, „Speichern“, „Verwerfen“), nie „OK“ oder „Ja“.
-- Erfassungswege heißen einheitlich „Aus Foto übernehmen“, „Aus Link übernehmen“, „Aus Text übernehmen“ (englisch “Import from photo / link / text”). „Text erkennen“ ist nur die Schaltfläche am Ende von „Bereich auswählen“.
+- Erfassungswege heißen einheitlich „Aus Foto übernehmen“, „Aus Link übernehmen“, „Aus Text übernehmen“ (englisch “Import from photo / link / text”). „Text erkennen“ ist nur die Schaltfläche in der Seitenübersicht vor der Texterkennung.
 - Meldungen sagen, was passiert ist und was man tun kann; keine Fachbegriffe, kein Amtsdeutsch.
 - Deutsche Anführungszeichen „…“, im Englischen “…”.
 

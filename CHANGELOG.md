@@ -3,6 +3,17 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.13.0] – 2026-10-03 (versionCode 29)
+
+### Neu
+- **Mehrere Fotos hintereinander:** Längere Rezepte lassen sich jetzt Seite für Seite fotografieren, ohne dass nach jedem Foto gelesen wird. Die Seiten sammeln sich in einer Übersicht mit Vorschaubildern; dort gibt es „Weitere Seite fotografieren“ und „Weitere Fotos auswählen“. Erst „Text erkennen“ liest alle Seiten zusammen und macht daraus ein Rezept. Bis zu 6 Seiten auf einmal.
+- In der Übersicht lässt sich jede Seite wieder entfernen. Wer abbricht, wird vorher gefragt, damit keine Fotos aus Versehen verloren gehen.
+
+### Geändert
+- „Bereich auswählen“ kommt nicht mehr bei jedem Foto, sondern nur noch bei Bedarf über das Symbol an der Seite in der Übersicht, z. B. bei Kochbuchseiten mit zwei Spalten. Ohne Bereich wird die ganze Seite gelesen.
+- Die Sprache des Textes wird jetzt im Menü oben rechts in der Übersicht gewählt.
+- Auch Fotos aus „Teilen mit…“ und das Rezeptfoto kommen zuerst in die Übersicht.
+
 ## [0.12.0] – 2026-10-02 (versionCode 28)
 
 ### Neu

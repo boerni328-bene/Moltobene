@@ -120,7 +120,7 @@ fun EditScreen(
         viewModel.onCameraResult(success)
     }
 
-    // Texterkennung: mehrere Seiten auswählen oder eine Seite fotografieren.
+    // Texterkennung: Seiten auswählen oder fotografieren; sie sammeln sich in der Seitenübersicht.
     var showRecognitionDialog by rememberSaveable { mutableStateOf(viewModel.takeStartPrompt()) }
     // „Aus Text übernehmen“: Text aus der Zwischenablage einfügen oder selbst eintragen.
     var showTextDialog by rememberSaveable { mutableStateOf(viewModel.takeTextPrompt()) }
@@ -132,23 +132,48 @@ fun EditScreen(
     }
     val busy = viewModel.isProcessingPhoto || viewModel.isRecognizing
 
-    // Vor der Texterkennung: Bereich des Fotos wählen, der gelesen wird.
+    // Vor der Texterkennung: Seiten sammeln (Fotoserie) und am Ende alle zusammen lesen.
+    viewModel.pageOverview?.let { overview ->
+        PagesScreen(
+            overview = overview,
+            thumbnails = viewModel.pageThumbnails,
+            failed = viewModel.failedThumbnails,
+            adding = viewModel.isProcessingPhoto,
+            snackbarHostState = snackbarHostState,
+            language = viewModel.languageChoice,
+            onLanguageChange = viewModel::chooseLanguage,
+            onTakePage = {
+                try {
+                    takePage.launch(viewModel.cameraUri())
+                } catch (e: ActivityNotFoundException) {
+                    scope.launch { snackbarHostState.showSnackbar(cameraMissing) }
+                }
+            },
+            onChoosePages = {
+                pickPages.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            },
+            onChooseArea = viewModel::editArea,
+            onRemovePage = viewModel::removePage,
+            onRecognize = viewModel::recognizePages,
+            onDiscard = viewModel::cancelPages,
+        )
+        return
+    }
+
+    // Bei Bedarf: Bereich einer Seite wählen, der gelesen wird; danach zurück zur Seitenübersicht.
     viewModel.areaSelection?.let { selection ->
         AreaSelectionScreen(
             selection = selection,
             preview = viewModel.areaPreview,
             failed = viewModel.areaPreviewFailed,
             snackbarHostState = snackbarHostState,
-            language = viewModel.languageChoice,
-            onLanguageChange = viewModel::chooseLanguage,
             onFrameChange = viewModel::changeFrameArea,
             onSelectFrame = viewModel::selectFrame,
             onKindChange = viewModel::changeFrameKind,
             onAddFrame = viewModel::addFrame,
             onRemoveFrame = viewModel::removeFrame,
             onWholePage = viewModel::resetArea,
-            onConfirm = viewModel::confirmArea,
-            onCancel = viewModel::cancelAreaSelection,
+            onDone = viewModel::closeAreaSelection,
         )
         return
     }
