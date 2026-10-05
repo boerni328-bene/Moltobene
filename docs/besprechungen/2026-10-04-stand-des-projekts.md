@@ -228,6 +228,17 @@ Sicherheit hat ihn eingebracht, der Moderator hat ihn an der Release-APK nachgep
   - Frage 4: Dependabot-Warnungen einschalten
   - Streitpunkt 3: wo „Zuletzt gesichert“ erscheint (#51)
 
+### Nachtrag vom 05.10.2026
+
+- **Rang 1 (#49) ist umgesetzt** in Version 0.14.1 (Commit `d729ad3`, aus einer parallelen Sitzung). An der veröffentlichten APK 0.15.0 nachgeprüft: keine Internet-Berechtigung, kein `ACCESS_NETWORK_STATE`, kein Telemetrie-Baustein.
+- **Das Release v0.14.0** trägt oben in der Beschreibung einen Hinweis auf die Panne und auf die neueste Version.
+- **Was im Quelltext von ONNX Runtime nachgelesen wurde:**
+  - Ohne den entfernten Startbaustein ist die Telemetrie auf Android nicht lauffähig.
+  - `ORT_DISABLE_TELEMETRY` schaltet sie zusätzlich ab.
+  - Gesammelt wurden u. a. eine (gehashte) Geräte-Kennung und Angaben zum Handy.
+  - Zwischengespeichert wurde im Cache-Ordner der App. Diesen nimmt ein Umzug auf ein neues Handy nie mit.
+- **Dependabot-Warnungen einschalten (S3):** weiter offen, die Entscheidung des Projektinhabers steht aus.
+
 ## Zurückgezogen / bereits als Issue vorhanden
 
 - **Zurückgezogen oder abgeschwächt:**
