@@ -3,6 +3,13 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.14.1] – 2026-10-05 (versionCode 31)
+
+### Behoben
+- **Keine Berechtigung und keine Telemetrie mehr:** Version 0.14.0 enthielt unbemerkt einen Baustein von Microsoft, der Nutzungsdaten der Texterkennung ins Internet senden konnte, und dafür die Internet-Berechtigung. Beides ist entfernt; die App hat wieder keine Berechtigung. Ob tatsächlich etwas gesendet wurde, ist nicht belegt.
+- Damit das nicht wieder passiert, wird jede neue Version vor der Veröffentlichung auf Berechtigungen geprüft.
+- Beim Start räumt die App Reste auf: Dateien, die dieser Baustein angelegt haben kann, und die alten Sprachpakete der früheren Texterkennung (rund 12 MB).
+
 ## [0.14.0] – 2026-10-03 (versionCode 30)
 
 ### Neu

@@ -146,6 +146,44 @@ jobs:
           fi
           echo "Signatur in Ordnung: $FINGERABDRUCK"
 
+      # #49: Die App braucht keine Berechtigung. Was ein Baustein unbemerkt mitbringt (so die Microsoft-Telemetrie
+      # aus ONNX Runtime in 0.14.0), bricht hier den Build ab – auch nach Updates durch Dependabot.
+      # Neue Einträge in ERLAUBT nur nach Freigabe durch den Projektinhaber.
+      - name: Berechtigungen prüfen
+        env:
+          APK: dist/moltobene-${{ steps.version.outputs.name }}.apk
+          # Nur innerhalb der App: AndroidX schützt damit eigene Empfänger (nur für die App selbst, für Nutzer unsichtbar).
+          ERLAUBT: com.moltobene.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+          # Dauerhaft verboten, auch wenn die Internet-Berechtigung später gewollt zurückkommt.
+          VERBOTEN: ai.onnxruntime.TelemetryInitializer android.permission.ACCESS_NETWORK_STATE
+        run: |
+          AAPT2="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -n 1)aapt2"
+          LISTE=$("$AAPT2" dump permissions "$APK")
+          MANIFEST=$("$AAPT2" dump xmltree --file AndroidManifest.xml "$APK")
+          # Gegenprobe: Ohne den eigenen FileProvider wurde das Manifest nicht richtig gelesen.
+          if ! echo "$MANIFEST" | grep -qF "androidx.core.content.FileProvider"; then
+            echo "::error::Das Manifest der APK konnte nicht gelesen werden."
+            exit 1
+          fi
+          GEFUNDEN=$(echo "$LISTE" | grep -E '^uses-permission' | sed -E "s/^uses-permission(-sdk-23)?: (name=')?([^' ]+).*/\3/" | sort -u || true)
+          echo "Berechtigungen der APK:"
+          echo "${GEFUNDEN:-(keine)}"
+          FEHLER=0
+          for P in $GEFUNDEN; do
+            case " $ERLAUBT " in
+              *" $P "*) ;;
+              *) echo "::error::Nicht erlaubte Berechtigung in der APK: $P"; FEHLER=1 ;;
+            esac
+          done
+          for V in $VERBOTEN; do
+            if echo "$MANIFEST" | grep -qF "$V"; then
+              echo "::error::Verboten, aber in der APK: $V"
+              FEHLER=1
+            fi
+          done
+          [ "$FEHLER" -eq 0 ] || exit 1
+          echo "Berechtigungen in Ordnung."
+
       - name: APK als Build-Ergebnis speichern
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

@@ -7,7 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.io.File
 import java.io.IOException
 
 /**
@@ -119,10 +118,6 @@ class TextRecognizer(private val context: Context) {
 
     /** Lädt die beiden Modelle und die Zeichenliste aus den mitgelieferten Dateien. */
     private suspend fun openModels(): PaddleOcr = withContext(Dispatchers.IO) {
-        // Bis Version 0.13 lagen hier die Sprachpakete von Tesseract (rund 12 MB); sie werden nicht mehr gebraucht.
-        listOf(File(context.noBackupFilesDir, OLD_TESSERACT_DIR), File(context.filesDir, OLD_TESSERACT_DIR))
-            .filter { it.exists() }
-            .forEach { it.deleteRecursively() }
         val assets = context.assets
         val dir = PaddleOcr.MODEL_DIR
         val detection = assets.open("$dir/${PaddleOcr.DETECTION_MODEL}").use { it.readBytes() }
@@ -167,7 +162,5 @@ class TextRecognizer(private val context: Context) {
     private companion object {
         /** Anteil der Zeilensuche am Fortschritt eines Bereichs; der Rest ist das Lesen der Zeilen. */
         private const val DETECTION_SHARE = 15
-
-        private const val OLD_TESSERACT_DIR = "tesseract"
     }
 }

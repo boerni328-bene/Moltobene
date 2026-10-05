@@ -2,8 +2,18 @@
 <!--
   Die App braucht keine einzige Berechtigung: Fotos kommen über die Android-Fotoauswahl,
   die Kamera-App oder „Teilen mit…“, Sicherungen über den Android-Dateidialog. Kein Internet.
+  Der Build prüft die fertige APK gegen eine Erlaubt-Liste (build.yml, „Berechtigungen prüfen“).
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+      #49: ONNX Runtime (Texterkennung) bringt eine Telemetrie von Microsoft mit, die Nutzungsdaten ins Internet
+      senden kann, und dafür diese beiden Berechtigungen. Beides wird hier entfernt; zusätzlich schaltet
+      MoltobeneApplication die Telemetrie über ORT_DISABLE_TELEMETRY ab.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove" />
 
     <!--
       Datensicherung (#12): keine Cloud-Sicherung ins Google-Konto (Vision: „keine Cloud“).
@@ -54,6 +64,15 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
+
+        <!--
+          #49: Startbaustein der Microsoft-Telemetrie aus ONNX Runtime entfernen. Er liefe sonst bei jedem App-Start.
+          Nur dieser eine; der gemeinsame androidx.startup.InitializationProvider bleibt.
+        -->
+        <provider
+            android:name="ai.onnxruntime.TelemetryInitializer"
+            android:authorities="${applicationId}.onnxruntime_telemetry_initializer"
+            tools:node="remove" />
 
         <!-- Übergabe von Dateien an andere Apps: Kamera-App und Teilen (nur die Ordner in file_paths.xml). -->
         <provider

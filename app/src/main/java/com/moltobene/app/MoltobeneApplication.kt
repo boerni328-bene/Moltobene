@@ -2,7 +2,10 @@ package com.moltobene.app
 
 import android.app.Application
 import android.content.Context
+import android.system.ErrnoException
+import android.system.Os
 import com.moltobene.app.data.AppPreferences
+import com.moltobene.app.data.LegacyCleanup
 import com.moltobene.app.data.RecipeRepository
 import com.moltobene.app.data.backup.BackupManager
 import com.moltobene.app.data.db.MoltobeneDatabase
@@ -14,6 +17,30 @@ import com.moltobene.app.ui.edit.SharedInput
 
 class MoltobeneApplication : Application() {
     val container: AppContainer by lazy { AppContainer(this) }
+
+    override fun attachBaseContext(base: Context) {
+        // #49: Telemetrie von ONNX Runtime dauerhaft aus – zusätzlich zum im Manifest entfernten Startbaustein,
+        // auch falls die Internet-Berechtigung später gewollt zurückkommt. So früh wie möglich, vor dem Laden
+        // der Bibliothek; die Bibliothek liest den Wert beim Start und bleibt dann aus.
+        try {
+            Os.setenv(DISABLE_TELEMETRY, "1", true)
+        } catch (e: ErrnoException) {
+            // Ohne Startbaustein sendet die Bibliothek ohnehin nichts.
+        }
+        super.attachBaseContext(base)
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        // Reste älterer Versionen entfernen, im Hintergrund, damit der Start nicht wartet.
+        Thread({ LegacyCleanup.run(filesDir, noBackupFilesDir, cacheDir) }, "aufraeumen").apply {
+            priority = Thread.MIN_PRIORITY
+        }.start()
+    }
+
+    private companion object {
+        const val DISABLE_TELEMETRY = "ORT_DISABLE_TELEMETRY"
+    }
 }
 
 /** Hält die gemeinsam genutzten Bausteine. Alles wird erst bei Bedarf erzeugt (schneller App-Start). */
