@@ -3,6 +3,18 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.15.0] – 2026-10-05 (versionCode 32)
+
+### Neu
+- **Fotos ganz ansehen:** Das Foto eines Rezepts wird jetzt in seinem eigenen Format gezeigt, Hoch- wie Querformat, statt auf einen festen Ausschnitt zugeschnitten. Antippen öffnet es als Vollbild; vergrößern geht mit zwei Fingern, doppeltem Tippen oder den Schaltflächen. Das gilt in der Rezeptansicht und beim Bearbeiten.
+- **Fotoserie ohne Unterbrechung:** Beim Fotografieren von Rezeptseiten öffnet sich die Kamera nach jedem Foto gleich wieder für die nächste Seite. „Zurück“ in der Kamera beendet die Serie und zeigt die Seitenübersicht; nach 6 Seiten endet sie von selbst.
+
+### Behoben
+- **Kochbuchseiten mit mehreren schmalen Spalten** werden jetzt Spalte für Spalte gelesen. Bisher lief die Zubereitung quer über alle Spalten und konnte mitten in der zweiten Spalte beginnen.
+- **Titel neben der Zutatenliste:** Ein großer Titel oben auf der Seite wird jetzt auch übernommen, wenn links daneben z. B. eine Zutaten-Karte steht. Ein Titel über zwei Zeilen wird zu einem Titel zusammengefügt.
+- „Sie brauchen:“ und ähnliche Überschriften (auch auf Englisch, Italienisch, Französisch und Spanisch) werden als Überschrift der Zutaten erkannt.
+- Nährwerte wie „Enthält pro Portion … kcal“ hängen nicht mehr am letzten Schritt, sondern stehen als eigener Eintrag am Ende der Zubereitung.
+
 ## [0.14.1] – 2026-10-05 (versionCode 31)
 
 ### Behoben

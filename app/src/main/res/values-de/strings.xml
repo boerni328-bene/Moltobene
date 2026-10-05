@@ -25,6 +25,8 @@
 
     <!-- Rezept -->
     <string name="photo">Foto</string>
+    <string name="photo_open">Foto ganz ansehen</string>
+    <string name="photo_load_error">Das Foto konnte nicht geladen werden.</string>
     <string name="ingredients">Zutaten</string>
     <string name="instructions">Zubereitung</string>
     <string name="notes">Notizen</string>
@@ -68,7 +70,7 @@
     <string name="clipboard_empty">Die Zwischenablage enthält keinen Text.</string>
     <string name="text_done">Text ins Rezept übernommen. Prüfen, ob alles an der richtigen Stelle steht.</string>
     <string name="import_link_saved">Link als Quelle gespeichert. Den Rezepttext von der Seite kopieren und mit „Aus Text übernehmen“ einfügen.</string>
-    <string name="ocr_dialog_text">Liest Titel, Zutaten und Zubereitung aus Fotos von Kochbuch, Zettel oder Bildschirmfoto. Am besten gelingt es mit einem scharfen, gerade aufgenommenen Foto. Längere Rezepte Seite für Seite fotografieren oder auswählen (bis zu %1$d Seiten) – am Ende wird alles zusammen gelesen.</string>
+    <string name="ocr_dialog_text">Liest Titel, Zutaten und Zubereitung aus Fotos von Kochbuch, Zettel oder Bildschirmfoto. Am besten gelingt es mit einem scharfen, gerade aufgenommenen Foto. Längere Rezepte Seite für Seite fotografieren oder auswählen (bis zu %1$d Seiten) – am Ende wird alles zusammen gelesen. Beim Fotografieren öffnet sich die Kamera nach jedem Foto wieder; „Zurück“ beendet die Fotoserie.</string>
     <string name="ocr_from_recipe_photo">Rezeptfoto verwenden</string>
     <string name="ocr_choose_photos">Fotos auswählen</string>
     <string name="ocr_running">Text wird erkannt …</string>
@@ -114,7 +116,7 @@
         <item quantity="one">%1$d Seite</item>
         <item quantity="other">%1$d Seiten</item>
     </plurals>
-    <string name="pages_hint">Alle Seiten werden zusammen gelesen. Einen Bereich nur bei Bedarf wählen, z. B. bei zwei Spalten.</string>
+    <string name="pages_hint">Alle Seiten werden zusammen gelesen. Nach jedem Foto öffnet sich die Kamera wieder; „Zurück“ beendet die Fotoserie. Einen Bereich nur bei Bedarf wählen, z. B. bei zwei Spalten.</string>
     <string name="page_label">Seite %1$d</string>
     <string name="page_area_chosen">Bereich gewählt</string>
     <string name="page_choose_area">Bereich von Seite %1$d wählen</string>
@@ -140,9 +142,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Neue Texterkennung: Fotos von Kochbüchern werden viel zuverlässiger gelesen, auch schräge, gewölbte oder schattige Seiten.</item>
-        <item>Zutaten und Zubereitung werden automatisch erkannt, auch bei zwei Spalten und bei Tabellen mit der Menge rechts.</item>
-        <item>Mehrere Fotos hintereinander: Seite für Seite fotografieren, gelesen wird alles zusammen.</item>
+        <item>Fotos ganz ansehen: Antippen zeigt das Foto eines Rezepts als Vollbild, vergrößern mit zwei Fingern oder doppeltem Tippen.</item>
+        <item>Fotoserie ohne Unterbrechung: Nach jedem Foto öffnet sich die Kamera gleich wieder für die nächste Seite.</item>
+        <item>Kochbuchseiten mit mehreren schmalen Spalten oder einem Titel neben den Zutaten werden in der richtigen Reihenfolge gelesen.</item>
     </string-array>
 
     <!-- Bearbeiten -->

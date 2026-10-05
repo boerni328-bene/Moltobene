@@ -73,7 +73,7 @@ import com.moltobene.app.data.share.IncomingText
 import com.moltobene.app.ui.components.CenteredMessage
 import com.moltobene.app.ui.components.OptionButton
 import com.moltobene.app.ui.components.PageViewer
-import com.moltobene.app.ui.components.RecipePhoto
+import com.moltobene.app.ui.components.RecipePhotoLarge
 import com.moltobene.app.ui.theme.Spacing
 import kotlinx.coroutines.launch
 
@@ -129,6 +129,17 @@ fun EditScreen(
     ) { uris -> viewModel.recognizePhotos(uris) }
     val takePage = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         viewModel.onRecognitionCameraResult(success)
+    }
+    // Fotoserie ohne Unterbrechung: Nach jedem Foto öffnet sich die Kamera gleich wieder für die nächste Seite.
+    if (viewModel.openCameraAgain) {
+        LaunchedEffect(Unit) {
+            viewModel.cameraReopened()
+            try {
+                takePage.launch(viewModel.cameraUri())
+            } catch (e: ActivityNotFoundException) {
+                scope.launch { snackbarHostState.showSnackbar(cameraMissing) }
+            }
+        }
     }
     val busy = viewModel.isProcessingPhoto || viewModel.isRecognizing
 
@@ -195,6 +206,21 @@ fun EditScreen(
                 TextButton(onClick = viewModel::removeViewerPage) { Text(stringResource(R.string.page_remove)) }
             }
         }
+        return
+    }
+
+    // Das Rezeptfoto ganz und zum Vergrößern.
+    viewModel.photoViewer.page?.let {
+        PageViewer(
+            page = 0,
+            pageCount = 1,
+            bitmap = viewModel.photoViewer.bitmap,
+            failed = viewModel.photoViewer.failed,
+            onPageChange = {},
+            onClose = viewModel.photoViewer::close,
+            title = stringResource(R.string.photo),
+            errorText = stringResource(R.string.photo_load_error),
+        )
         return
     }
 
@@ -743,11 +769,11 @@ private fun PhotoSection(
                     )
                 }
             }
-            photo != null -> RecipePhoto(
+            photo != null -> RecipePhotoLarge(
                 file = photo,
+                onOpen = { viewModel.photoViewer.open(0) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(4f / 3f)
                     .clip(MaterialTheme.shapes.large),
             )
         }

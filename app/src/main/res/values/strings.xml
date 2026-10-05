@@ -26,6 +26,8 @@
 
     <!-- Rezept -->
     <string name="photo">Photo</string>
+    <string name="photo_open">View whole photo</string>
+    <string name="photo_load_error">The photo could not be loaded.</string>
     <string name="ingredients">Ingredients</string>
     <string name="instructions">Instructions</string>
     <string name="notes">Notes</string>
@@ -69,7 +71,7 @@
     <string name="clipboard_empty">The clipboard contains no text.</string>
     <string name="text_done">Text added to the recipe. Check that everything is in the right place.</string>
     <string name="import_link_saved">Link saved as source. The recipe text can be copied from the page and added with “Import from text”.</string>
-    <string name="ocr_dialog_text">Reads title, ingredients and instructions from photos of a cookbook, a note or a screenshot. Sharp photos taken straight on work best. For longer recipes, take or choose one photo per page (up to %1$d pages) – everything is read together at the end.</string>
+    <string name="ocr_dialog_text">Reads title, ingredients and instructions from photos of a cookbook, a note or a screenshot. Sharp photos taken straight on work best. For longer recipes, take or choose one photo per page (up to %1$d pages) – everything is read together at the end. When taking photos, the camera opens again after each one; “Back” ends the series.</string>
     <string name="ocr_from_recipe_photo">Use recipe photo</string>
     <string name="ocr_choose_photos">Choose photos</string>
     <string name="ocr_running">Recognizing text …</string>
@@ -115,7 +117,7 @@
         <item quantity="one">%1$d page</item>
         <item quantity="other">%1$d pages</item>
     </plurals>
-    <string name="pages_hint">All pages are read together. Choose an area only if needed, e.g. for two columns.</string>
+    <string name="pages_hint">All pages are read together. After each photo the camera opens again; “Back” ends the series. Choose an area only if needed, e.g. for two columns.</string>
     <string name="page_label">Page %1$d</string>
     <string name="page_area_chosen">Area chosen</string>
     <string name="page_choose_area">Choose area of page %1$d</string>
@@ -142,9 +144,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>New text recognition: photos of cookbooks are read much more reliably, even tilted, curved or shaded pages.</item>
-        <item>Ingredients and instructions are recognized automatically, also in two columns and in tables with the amount on the right.</item>
-        <item>Several photos in a row: take a recipe page by page, everything is read together.</item>
+        <item>View whole photos: tap a recipe photo to see it full screen and zoom in with two fingers or a double tap.</item>
+        <item>Photo series without interruption: after each photo the camera opens again for the next page.</item>
+        <item>Cookbook pages with several narrow columns or a title next to the ingredients are read in the right order.</item>
     </string-array>
 
     <!-- Bearbeiten -->

@@ -100,6 +100,26 @@ class PaddleOcrTest {
     }
 
     @Test
+    fun dreiSpaltenNebenZutatenKarte() {
+        // Zutaten-Karte schräg links, großer Titel über zwei Zeilen, drei schmale Spalten im Blocksatz, die mitten
+        // im Satz umbrechen, und ein Nährwert-Kasten (nachgestellt wie auf einer Kochbuchseite).
+        val text = read("foto_dreispaltig.pgm.gz")
+        assertTrue(wordsRight(original("foto_dreispaltig.txt"), text) >= MIN_WORDS_RIGHT)
+        val recipe = RecipeTextParser.parse(text, TextLanguage.detect(text))
+        assertEquals("Hähnchenbrust mit Kräuterkruste auf buntem Ofengemüse", recipe.title)
+        assertEquals(2, recipe.servings)
+        assertEquals(12, recipe.ingredients.size)
+        assertEquals("2 Hähnchenbrustfilets", recipe.ingredients.first())
+        assertEquals("Pfeffer", recipe.ingredients.last())
+        assertEquals(5, recipe.steps.size)
+        assertTrue(recipe.steps[0].startsWith("Das Gemüse waschen"))
+        // Die zweite Spalte setzt den zweiten Schritt fort, die dritte den vierten.
+        assertTrue(recipe.steps[1].endsWith("im restlichen Öl von beiden Seiten kurz anbraten. Dann salzen, pfeffern und auf das Gemüse legen."))
+        assertTrue(recipe.steps[3].startsWith("Alles im heißen Ofen etwa 25 Minuten garen"))
+        assertTrue(recipe.steps[4].startsWith("Enthält pro Portion"))
+    }
+
+    @Test
     fun tabelleMitMengenRechts() {
         // Bildschirmfoto einer Rezept-App (selbst erzeugt): Zutat links, Menge rechts, Trennlinien dazwischen.
         val recipe = RecipeTextParser.parse(read("tabelle.pgm.gz"), "de")

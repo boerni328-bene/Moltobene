@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -73,6 +72,7 @@ import com.moltobene.app.ui.components.CenteredMessage
 import com.moltobene.app.ui.components.DraftLabel
 import com.moltobene.app.ui.components.PageViewer
 import com.moltobene.app.ui.components.RecipePhoto
+import com.moltobene.app.ui.components.RecipePhotoLarge
 import com.moltobene.app.ui.theme.Spacing
 import kotlinx.coroutines.launch
 import java.io.File
@@ -120,6 +120,19 @@ fun RecipeScreen(
             )
             return
         }
+    }
+    viewModel.photoViewer.page?.let {
+        PageViewer(
+            page = 0,
+            pageCount = 1,
+            bitmap = viewModel.photoViewer.bitmap,
+            failed = viewModel.photoViewer.failed,
+            onPageChange = {},
+            onClose = viewModel.photoViewer::close,
+            title = stringResource(R.string.photo),
+            errorText = stringResource(R.string.photo_load_error),
+        )
+        return
     }
 
     Scaffold(
@@ -178,6 +191,7 @@ fun RecipeScreen(
                 photo = current.photo,
                 snackbarHostState = snackbarHostState,
                 onShowPages = { viewModel.viewer.open(0) },
+                onShowPhoto = { viewModel.photoViewer.open(0) },
                 modifier = Modifier.padding(padding),
             )
             current is RecipeUiState.Loading ->
@@ -263,6 +277,7 @@ private fun RecipeContent(
     photo: File?,
     snackbarHostState: SnackbarHostState,
     onShowPages: () -> Unit,
+    onShowPhoto: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -271,7 +286,7 @@ private fun RecipeContent(
             .verticalScroll(rememberScrollState()),
     ) {
         if (photo != null) {
-            RecipePhoto(file = photo, modifier = Modifier.fillMaxWidth().aspectRatio(4f / 3f))
+            RecipePhotoLarge(file = photo, onOpen = onShowPhoto, modifier = Modifier.fillMaxWidth())
         } else {
             RecipePhoto(file = null, placeholderIconSize = 40.dp, modifier = Modifier.fillMaxWidth().height(120.dp))
         }

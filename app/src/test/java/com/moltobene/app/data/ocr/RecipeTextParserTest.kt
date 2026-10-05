@@ -266,4 +266,62 @@ class RecipeTextParserTest {
         // Erkannter Text aus der Texterkennung bleibt wie bisher: Zeilen ohne Leerzeile gehören zusammen.
         assertEquals(1, RecipeTextParser.parse(text).steps.size)
     }
+
+    @Test
+    fun kochbuchMitZutatenKarteUndNaehrwerten() {
+        // So liest die Texterkennung eine Kochbuchseite mit Zutaten-Karte, zweizeiligem Titel und drei Spalten.
+        val text = """
+            Hähnchenbrust mit Kräuterkruste auf buntem Ofengemüse
+
+            Sie brauchen:
+
+            Für 2 Portionen:
+            2 Hähnchenbrustfilets
+            3 EL Rapsöl
+            Salz
+
+            So wird’s gemacht:
+            1. Das Gemüse waschen und
+            putzen.
+            2. Den Backofen vorheizen. Das Fleisch kalt abspülen und im
+
+            restlichen Öl anbraten.
+            3. Alles 25 Minuten garen.
+
+            Enthält pro Portion
+            38 g Eiweiß, 31 g Fett,
+            540 kcal = 2260 kJ
+        """.trimIndent()
+        val recipe = RecipeTextParser.parse(text, "de")
+        // Der Titel ist länger als eine Zeile der Zubereitung, steht aber für sich und ohne Satzende.
+        assertEquals("Hähnchenbrust mit Kräuterkruste auf buntem Ofengemüse", recipe.title)
+        assertEquals(2, recipe.servings)
+        assertEquals(listOf("2 Hähnchenbrustfilets", "3 EL Rapsöl", "Salz"), recipe.ingredients)
+        assertEquals(
+            listOf(
+                "Das Gemüse waschen und putzen.",
+                // Ein Schritt, der in der nächsten Spalte weitergeht, bleibt ganz.
+                "Den Backofen vorheizen. Das Fleisch kalt abspülen und im restlichen Öl anbraten.",
+                "Alles 25 Minuten garen.",
+                // Die Nährwerte hängen nicht am letzten Schritt, und „540 kcal“ gilt nicht als Bildrest.
+                "Enthält pro Portion 38 g Eiweiß, 31 g Fett, 540 kcal = 2260 kJ",
+            ),
+            recipe.steps,
+        )
+    }
+
+    @Test
+    fun sieBrauchenNurAlsGanzeZeileUeberschrift() {
+        val recipe = RecipeTextParser.parse("Sie brauchen für 4 Personen:\n500 g Kartoffeln\nZubereitung\nSie brauchen dazu einen großen Topf.")
+        assertEquals(4, recipe.servings)
+        assertEquals(listOf("500 g Kartoffeln"), recipe.ingredients)
+        assertEquals(listOf("Sie brauchen dazu einen großen Topf."), recipe.steps)
+        assertEquals(listOf("1 egg"), RecipeTextParser.parse("You will need:\n1 egg\nMethod\nBeat the egg.").ingredients)
+    }
+
+    @Test
+    fun langeZeileOhneLeerzeileIstKeinTitel() {
+        val recipe = RecipeTextParser.parse("Den Backofen auf 200 Grad vorheizen und die Form gut einfetten, dann\nden Teig einfüllen.")
+        assertNull(recipe.title)
+    }
 }

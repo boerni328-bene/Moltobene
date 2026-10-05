@@ -2,6 +2,7 @@ package com.moltobene.app.data.ocr
 
 import kotlin.math.abs
 import kotlin.math.cos
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
 
@@ -14,12 +15,22 @@ data class TextLine(val box: TextBox, val text: String)
  * zwischen Spalten –, und das so lange, bis kein Abschnitt mehr eine Fuge hat. So kommt bei zweispaltigen
  * Kochbuchseiten erst die ganze Zutaten-Spalte, dann die Zubereitung. Eine Tabelle (links die Zutat, rechts
  * kurz die Menge) wird nicht in Spalten zerlegt, sondern Zeile für Zeile gelesen; die Menge kommt nach vorn.
+ * Der Titel (größte Schrift oben) kommt zuerst, auch wenn links daneben z. B. eine Zutaten-Karte steht.
  * Reines Kotlin, per Unit-Test prüfbar.
  */
 object ReadingOrder {
 
     /** Spalten brauchen eine Fuge von mindestens so vielen Zeilenhöhen. */
     private const val COLUMN_GAP = 1.2f
+
+    /**
+     * Schmalere Fuge (in Zeilenhöhen) zwischen Spalten im Blocksatz, wie in Kochbüchern mit drei Spalten. Sie zählt
+     * nur zwischen Textspalten: viele breite Zeilen auf beiden Seiten nebeneinander.
+     */
+    private const val NARROW_COLUMN_GAP = 0.25f
+
+    /** Zeilen einer Textspalte sind im Mittel mindestens so viele Zeilenhöhen breit. */
+    private const val TEXT_COLUMN_WIDTH = 6f
 
     /** Abschnitte brauchen eine Lücke von mindestens so vielen Zeilenhöhen. */
     private const val SECTION_GAP = 0.8f
@@ -39,9 +50,27 @@ object ReadingOrder {
     /** Echte Spalten haben auf jeder Seite mindestens so viele Zeilen. */
     private const val MIN_COLUMN_LINES = 3
 
+    /** Ein Titel ist mindestens so viel größer geschrieben als der übrige Text … */
+    private const val TITLE_SIZE = 1.4f
+
+    /** … hat höchstens so viele Zeilen … */
+    private const val TITLE_ROWS = 3
+
+    /** … und beginnt im oberen Teil der Seite (Anteil der Höhe des Textes). */
+    private const val TITLE_AREA = 0.3f
+
     private class Item(val x0: Float, val x1: Float, val y0: Float, val y1: Float, val height: Float, val text: String) {
         val centerX get() = (x0 + x1) / 2
         val centerY get() = (y0 + y1) / 2
+    }
+
+    /** Ein fertiger Abschnitt mit seiner Lage, damit der Titel nach vorn kommen kann. */
+    private class Block(val items: List<Item>, val text: String, val rows: Int) {
+        val x0 = items.minOf { it.x0 }
+        val x1 = items.maxOf { it.x1 }
+        val y0 = items.minOf { it.y0 }
+        val y1 = items.maxOf { it.y1 }
+        val height = items.map { it.height }.sorted()[items.size / 2]
     }
 
     /** Abschnitte in Lesereihenfolge, jeder als Text mit einer Zeile je Textzeile. */
@@ -58,15 +87,31 @@ object ReadingOrder {
             Item(x - box.width / 2, x + box.width / 2, y - box.height / 2, y + box.height / 2, box.height, line.text)
         }
         val unit = items.map { it.height }.sorted()[items.size / 2].coerceAtLeast(1f)
-        val blocks = mutableListOf<String>()
+        val blocks = mutableListOf<Block>()
         cut(items, unit, blocks)
-        return blocks.filter { it.isNotBlank() }
+        return titleFirst(blocks, unit).map { it.text }.filter { it.isNotBlank() }
     }
 
     /** Ganzer Text der Seite: Abschnitte durch eine Leerzeile getrennt. */
     fun text(lines: List<TextLine>): String = blocks(lines).joinToString("\n\n")
 
-    private fun cut(items: List<Item>, unit: Float, blocks: MutableList<String>) {
+    /**
+     * Der Titel zuerst: Der größte Text im oberen Teil der Seite ist meist der Titel. Steht links daneben etwas
+     * (z. B. eine Zutaten-Karte), käme er sonst erst danach. Was über dem Titel steht, bleibt davor.
+     */
+    private fun titleFirst(blocks: List<Block>, unit: Float): List<Block> {
+        if (blocks.size < 2) return blocks
+        val title = blocks.maxBy { it.height }
+        val index = blocks.indexOf(title)
+        if (index == 0 || title.height < TITLE_SIZE * unit || title.rows > TITLE_ROWS) return blocks
+        val top = blocks.minOf { it.y0 }
+        val bottom = blocks.maxOf { it.y1 }
+        if (title.y0 - top > TITLE_AREA * (bottom - top)) return blocks
+        if (blocks.subList(0, index).any { it.x0 < title.x1 && it.x1 > title.x0 }) return blocks
+        return listOf(title) + blocks.filter { it !== title }
+    }
+
+    private fun cut(items: List<Item>, unit: Float, blocks: MutableList<Block>) {
         if (items.size <= 1) {
             if (items.isNotEmpty()) blocks += rows(items, unit)
             return
@@ -75,15 +120,18 @@ object ReadingOrder {
         val vertical = widestGap(items.map { it.x0 to it.x1 })
         val horizontalSize = horizontal?.let { (it.second - it.first) / unit } ?: 0f
         val verticalSize = vertical?.let { (it.second - it.first) / unit } ?: 0f
-        val columns = vertical != null && verticalSize >= COLUMN_GAP && (
-            verticalSize >= horizontalSize || isLongGutter(items, (vertical.first + vertical.second) / 2)
-            )
+        val columns = vertical != null && when {
+            verticalSize >= COLUMN_GAP ->
+                verticalSize >= horizontalSize || isLongGutter(items, (vertical.first + vertical.second) / 2)
+            verticalSize >= NARROW_COLUMN_GAP -> isTextColumns(items, (vertical.first + vertical.second) / 2, unit)
+            else -> false
+        }
         when {
             vertical != null && columns -> {
                 val middle = (vertical.first + vertical.second) / 2
                 if (isTable(items, middle, unit)) {
                     // Eine Tabelle wird nicht weiter zerlegt, sonst stünden Zutat und Menge getrennt.
-                    blocks += table(items, middle, unit)
+                    blocks += Block(items, table(items, middle, unit), rows = items.size)
                 } else {
                     cut(items.filter { it.centerX < middle }, unit, blocks)
                     cut(items.filter { it.centerX >= middle }, unit, blocks)
@@ -110,22 +158,52 @@ object ReadingOrder {
     private fun isLongGutter(items: List<Item>, middle: Float): Boolean =
         items.count { it.centerX < middle } >= MIN_COLUMN_LINES && items.count { it.centerX >= middle } >= MIN_COLUMN_LINES
 
+    /** Spalten im Blocksatz mit schmaler Fuge: auf beiden Seiten mehrere breite Zeilen nebeneinander. */
+    private fun isTextColumns(items: List<Item>, middle: Float, unit: Float): Boolean {
+        val left = items.filter { it.centerX < middle }
+        val right = items.filter { it.centerX >= middle }
+        if (left.size < MIN_COLUMN_LINES || right.size < MIN_COLUMN_LINES) return false
+        fun wide(side: List<Item>) = side.map { it.x1 - it.x0 }.sorted()[side.size / 2] >= TEXT_COLUMN_WIDTH * unit
+        if (!wide(left) || !wide(right)) return false
+        // Nebeneinander, nicht versetzt untereinander: Im gemeinsamen Höhenbereich stehen auf jeder Seite mehrere Zeilen.
+        val top = max(left.minOf { it.y0 }, right.minOf { it.y0 })
+        val bottom = min(left.maxOf { it.y1 }, right.maxOf { it.y1 })
+        return left.count { it.centerY in top..bottom } >= MIN_COLUMN_LINES &&
+            right.count { it.centerY in top..bottom } >= MIN_COLUMN_LINES
+    }
+
+    /** Fuge zwischen echten Spalten (keine Tabelle) – breit oder schmal im Blocksatz. */
+    private fun isColumnGutter(items: List<Item>, gap: Pair<Float, Float>, unit: Float): Boolean {
+        val size = (gap.second - gap.first) / unit
+        val middle = (gap.first + gap.second) / 2
+        return when {
+            size >= COLUMN_GAP -> isLongGutter(items, middle) && !isTable(items, middle, unit)
+            size >= NARROW_COLUMN_GAP -> isTextColumns(items, middle, unit)
+            else -> false
+        }
+    }
+
     /**
-     * Überschrift über zwei Spalten: Reicht der Titel über die Fuge, gibt es oben keine Spaltenfuge, und der
-     * Abstand zum Rest ist oft klein. Gesucht wird deshalb die oberste kleine Lücke, unter der eine Spaltenfuge liegt.
+     * Überschrift über Spalten: Reicht der Titel über die Fuge, gibt es oben keine Spaltenfuge, und der
+     * Abstand zum Rest ist oft klein. Gesucht wird deshalb eine kleine Lücke, unter der Spalten liegen – die mit
+     * den meisten Spalten darunter, bei Gleichstand die oberste. So bleibt ein zweizeiliger Titel zusammen, auch
+     * wenn seine zweite Zeile schon neben einer Spaltenfuge endet.
      */
     private fun headerCut(items: List<Item>, unit: Float): Float? {
+        var best: Float? = null
+        var bestColumns = 0
         for ((start, end) in gaps(items.map { it.y0 to it.y1 })) {
             if ((end - start) / unit < HEADER_GAP) continue
             val middle = (start + end) / 2
             val below = items.filter { it.centerY >= middle }
-            if (below.size < 2 * MIN_COLUMN_LINES) return null
-            val gutter = widestGap(below.map { it.x0 to it.x1 }) ?: continue
-            if ((gutter.second - gutter.first) / unit < COLUMN_GAP) continue
-            val gutterMiddle = (gutter.first + gutter.second) / 2
-            if (isLongGutter(below, gutterMiddle) && !isTable(below, gutterMiddle, unit)) return middle
+            if (below.size < 2 * MIN_COLUMN_LINES) break
+            val columns = gaps(below.map { it.x0 to it.x1 }).count { isColumnGutter(below, it, unit) }
+            if (columns > bestColumns) {
+                best = middle
+                bestColumns = columns
+            }
         }
-        return null
+        return best
     }
 
     /** Breiteste Lücke zwischen den Strecken [spans] (Anfang, Ende); null, wenn sie sich alle überlappen. */
@@ -183,8 +261,9 @@ object ReadingOrder {
     /**
      * Zeilen eines Abschnitts von oben nach unten; was nebeneinander steht, wird eine Zeile. Ein deutlich
      * größerer Abstand (Absatz) wird zur Leerzeile – so bleiben getrennte Schritte der Zubereitung getrennt.
+     * Groß geschriebene Zeilen direkt untereinander (ein Titel über zwei Zeilen) werden eine Zeile.
      */
-    private fun rows(items: List<Item>, unit: Float): String {
+    private fun rows(items: List<Item>, unit: Float): Block {
         val rows = mutableListOf<MutableList<Item>>()
         for (item in items.sortedBy { it.centerY }) {
             val last = rows.lastOrNull()?.last()
@@ -194,15 +273,26 @@ object ReadingOrder {
                 rows += mutableListOf(item)
             }
         }
+        fun height(row: List<Item>) = row.map { it.height }.sorted()[row.size / 2]
         val text = StringBuilder()
         rows.forEachIndexed { index, row ->
+            val line = row.sortedBy { it.x0 }.joinToString(" ") { it.text }
             if (index > 0) {
-                val gap = row.minOf { it.y0 } - rows[index - 1].maxOf { it.y1 }
-                text.append(if (gap >= PARAGRAPH_GAP * unit) "\n\n" else "\n")
+                val previous = rows[index - 1]
+                val gap = row.minOf { it.y0 } - previous.maxOf { it.y1 }
+                val size = min(height(row), height(previous))
+                val large = size >= TITLE_SIZE * unit
+                when {
+                    // Große Schrift hat größere Abstände: gemessen an ihrer eigenen Höhe.
+                    gap >= PARAGRAPH_GAP * (if (large) size else unit) -> text.append("\n\n")
+                    large && text.endsWith("-") && line.firstOrNull()?.isLowerCase() == true -> text.setLength(text.length - 1)
+                    large -> text.append(' ')
+                    else -> text.append("\n")
+                }
             }
-            text.append(row.sortedBy { it.x0 }.joinToString(" ") { it.text })
+            text.append(line)
         }
-        return text.toString()
+        return Block(items, text.toString(), rows.size)
     }
 }
 

@@ -29,6 +29,14 @@ object RecipeTextParser {
         "^(zutaten|ingredients?|ingredienti|ingredientes|einkaufsliste)\\b.{0,40}$",
         RegexOption.IGNORE_CASE,
     )
+    // „Sie brauchen:“, „You will need:“ – nur als ganze Zeile (höchstens mit „für 4 Personen“), denn ein Satz der
+    // Zubereitung kann genauso beginnen.
+    private val NEEDS_HEADING = Regex(
+        "^(sie brauchen|das brauchen sie|sie benotigen|man braucht|was man braucht|du brauchst|" +
+            "you need|you will need|you'll need|what you need|occorrente|il vous faut|necesitas|necesitaras|se necesita)" +
+            "(\\s+(fur|for|per|pour|para)\\s+\\d{1,3}(\\s*-\\s*\\d{1,3})?\\s*\\p{L}*)?$",
+        RegexOption.IGNORE_CASE,
+    )
     private val STEPS_HEADING = Regex(
         "^(zubereitung|anleitung|so geht'?s|so wird'?s gemacht|arbeitsschritte|instructions?|directions?|method|" +
             "preparation|steps|preparazione|procedimento|realisation|preparacion|elaboracion|" +
@@ -70,6 +78,14 @@ object RecipeTextParser {
     private val AD_MARKERS = Regex("\\b(anzeige|werbung|advertisement|sponsored|pubblicità|publicité|publicidad)\\b", RegexOption.IGNORE_CASE)
     private val ODD_SYMBOLS = Regex("[=\\\\|<>{}\\[\\]~^_]")
 
+    /** Nährwerte wie „Enthält pro Portion 44 g Eiweiß, 73 g Fett … = 1033 kcal“. */
+    private val NUTRITION = Regex(
+        "\\b(kcal|kj|kalorien|brennwert|nährwerte?|eiweiß|eiweiss|fett|kohlenhydrate|ballaststoffe|calories|protein|fat|" +
+            "carbohydrates?|fibre|fiber|calorie|proteine|grassi|carboidrati|glucides|lipides|protéines|proteínas|grasas|hidratos)\\b",
+        RegexOption.IGNORE_CASE,
+    )
+    private val ENERGY = Regex("\\d\\s*(kcal|kj)\\b", RegexOption.IGNORE_CASE)
+
     /**
      * @param language Sprache des Textes (z. B. „de“), falls bekannt. Im Deutschen beginnen Zutaten mit
      * einem großen Buchstaben; eine klein beginnende Zeile gehört dann zur Zutat davor.
@@ -92,7 +108,7 @@ object RecipeTextParser {
         val firstHeading = listOfNotNull(ingredientHeading, stepsHeading).minOrNull()
         val titleIndex = content.firstOrNull { index ->
             (firstHeading == null || index < firstHeading) && index !in servingsLines
-        }?.takeIf { isTitleCandidate(lines[it]) }
+        }?.takeIf { isTitleCandidate(lines, it) }
         val title = titleIndex?.let { lines[it] }
 
         val skip = servingsLines + listOfNotNull(titleIndex, ingredientHeading, stepsHeading)
@@ -267,7 +283,7 @@ object RecipeTextParser {
         if (line.isEmpty()) return true
         if (AD_MARKERS.containsMatchIn(line)) return true
         // Kurze Zeilen mit seltenen Zeichen sind meist Bildreste – außer sie enthalten ein richtiges Wort.
-        if (line.length < 30 && ODD_SYMBOLS.containsMatchIn(line) &&
+        if (line.length < 30 && ODD_SYMBOLS.containsMatchIn(line) && !ENERGY.containsMatchIn(line) &&
             line.split(Regex("[^\\p{L}]+")).none { it.length >= 5 }
         ) {
             return true
@@ -280,21 +296,32 @@ object RecipeTextParser {
         return false
     }
 
-    private fun isIngredientHeading(line: String): Boolean = INGREDIENT_HEADING.matches(withoutAccents(line.trimEnd(':')))
+    private fun isIngredientHeading(line: String): Boolean {
+        val text = withoutAccents(line.trimEnd(':').trim())
+        return INGREDIENT_HEADING.matches(text) || NEEDS_HEADING.matches(text)
+    }
 
     private fun isStepsHeading(line: String): Boolean {
         val text = line.trimEnd(':').trim()
         return STEPS_HEADING.matches(withoutAccents(text)) && !TIME_WORDS.containsMatchIn(text)
     }
 
-    /** „Préparation“ → „Preparation“, „Elaboraciön“ → „Elaboracion“. */
+    /** „Préparation“ → „Preparation“, „Elaboraciön“ → „Elaboracion“; typografische Apostrophe wie „wird’s“ → „wird's“. */
     private fun withoutAccents(text: String): String =
-        Normalizer.normalize(text, Normalizer.Form.NFD).replace(COMBINING_MARKS, "")
+        Normalizer.normalize(text, Normalizer.Form.NFD).replace(COMBINING_MARKS, "").replace(APOSTROPHES, "'")
+
+    private val APOSTROPHES = Regex("[’‘´`]")
 
     private val COMBINING_MARKS = Regex("\\p{Mn}+")
 
-    private fun isTitleCandidate(line: String): Boolean =
-        line.length in 2..70 && !isIngredientLike(line) && !isStepLike(line) && !line.endsWith(":")
+    private fun isTitleCandidate(lines: List<String>, index: Int): Boolean {
+        val line = lines[index]
+        if (line.length < 2 || isIngredientLike(line) || line.endsWith(":")) return false
+        if (!isStepLike(line)) return line.length <= 70
+        // Ein langer Titel (z. B. zwei Zeilen großer Schrift, zu einer zusammengefügt) steht für sich und ohne Satzende.
+        val alone = lines.getOrNull(index + 1).isNullOrEmpty()
+        return alone && line.length <= 90 && !NUMBERED_STEP.matches(line) && line.last() !in ".!?…" && ". " !in line
+    }
 
     private fun isIngredientLike(line: String): Boolean =
         STARTS_WITH_QUANTITY.containsMatchIn(line) || BULLET.containsMatchIn(line) ||
@@ -379,14 +406,22 @@ object RecipeTextParser {
         }
 
         if (numbered) {
-            for (line in content) {
-                val match = NUMBERED_STEP.matchEntire(line)
-                if (match != null) {
+            for (paragraph in paragraphs(lines)) {
+                // Nährwerte unter dem letzten Schritt (oft in einem Kasten) sind ein eigener Eintrag.
+                if (!NUMBERED_STEP.matches(paragraph.first()) && isNutrition(paragraph)) {
                     close()
-                    current.append(match.groupValues[2])
-                } else {
-                    if (current.isNotEmpty()) current.append(' ')
-                    current.append(line)
+                    steps += paragraph.joinToString(" ")
+                    continue
+                }
+                for (line in paragraph) {
+                    val match = NUMBERED_STEP.matchEntire(line)
+                    if (match != null) {
+                        close()
+                        current.append(match.groupValues[2])
+                    } else {
+                        if (current.isNotEmpty()) current.append(' ')
+                        current.append(line)
+                    }
                 }
             }
         } else {
@@ -412,4 +447,24 @@ object RecipeTextParser {
         close()
         return steps
     }
+
+    /** Absätze: Zeilen zwischen Leerzeilen. */
+    private fun paragraphs(lines: List<String>): List<List<String>> {
+        val result = mutableListOf<MutableList<String>>()
+        var open = false
+        for (line in lines) {
+            if (line.isEmpty()) {
+                open = false
+            } else {
+                if (!open) result += mutableListOf<String>()
+                result.last() += line
+                open = true
+            }
+        }
+        return result
+    }
+
+    /** Ein Absatz mit mehreren Nährwert-Angaben (Eiweiß, Fett, kcal …). */
+    private fun isNutrition(paragraph: List<String>): Boolean =
+        NUTRITION.findAll(paragraph.joinToString(" ")).map { it.value.lowercase() }.distinct().count() >= 2
 }

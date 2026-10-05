@@ -1,15 +1,22 @@
 package com.moltobene.app.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -40,6 +47,57 @@ fun RecipePhoto(
         PhotoPlaceholder(modifier = modifier, iconSize = placeholderIconSize)
     }
 }
+
+/**
+ * Großes Foto eines Rezepts in seinem eigenen Seitenverhältnis – Hoch- wie Querformat werden ganz gezeigt,
+ * nur sehr lange oder breite Fotos zugeschnitten. Antippen öffnet es als Vollbild zum Vergrößern ([onOpen]).
+ */
+@Composable
+fun RecipePhotoLarge(file: File, onOpen: () -> Unit, modifier: Modifier = Modifier) {
+    var ratio by rememberSaveable(file) { mutableFloatStateOf(DEFAULT_RATIO) }
+    val openLabel = stringResource(R.string.photo_open)
+    Box(
+        modifier = modifier
+            .aspectRatio(ratio)
+            .clickable(onClickLabel = openLabel, onClick = onOpen),
+    ) {
+        AsyncImage(
+            model = file,
+            contentDescription = stringResource(R.string.photo),
+            contentScale = ContentScale.Crop,
+            onSuccess = { state ->
+                val size = state.painter.intrinsicSize
+                if (size.width > 0f && size.height > 0f) ratio = (size.width / size.height).coerceIn(MIN_RATIO, MAX_RATIO)
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+        )
+        // Zeigt, dass sich das Foto vergrößern lässt; die Beschreibung trägt das Antippen selbst.
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surface.copy(alpha = ICON_BACKGROUND_ALPHA),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(Spacing.s),
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_zoom_in),
+                contentDescription = null,
+                modifier = Modifier.padding(Spacing.s).size(20.dp),
+            )
+        }
+    }
+}
+
+/** Seitenverhältnis bis das Foto geladen ist (übliche Handyfotos), und die Grenzen für sehr hohe oder breite Fotos. */
+private const val DEFAULT_RATIO = 4f / 3f
+private const val MIN_RATIO = 3f / 4f
+private const val MAX_RATIO = 2f
+
+/** Das Symbol bleibt auf hellen wie dunklen Fotos erkennbar. */
+private const val ICON_BACKGROUND_ALPHA = 0.85f
 
 @Composable
 fun PhotoPlaceholder(modifier: Modifier = Modifier, iconSize: Dp = 32.dp) {

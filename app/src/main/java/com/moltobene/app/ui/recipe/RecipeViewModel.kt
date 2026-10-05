@@ -66,6 +66,12 @@ class RecipeViewModel(
         photoStore.loadPage(Uri.fromFile(photoStore.photoFile(pageId)), CropArea.WHOLE_PAGE)
     }
 
+    /** Das Foto des Rezepts als Vollbild, ganz und zum Vergrößern. */
+    val photoViewer = PageViewerModel(viewModelScope) {
+        val photo = (state.value as? RecipeUiState.Content)?.photo ?: throw IOException("Foto fehlt")
+        photoStore.loadPage(Uri.fromFile(photo), CropArea.WHOLE_PAGE)
+    }
+
     /** true, solange das Teilen vorbereitet wird. */
     var preparingShare by mutableStateOf(false)
         private set

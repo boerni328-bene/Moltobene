@@ -123,6 +123,14 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText("800 g reife Tomaten")
         screenshot("11-rezept-mit-foto")
 
+        // Antippen zeigt das Foto ganz, als Vollbild zum Vergrößern.
+        composeRule.onNodeWithContentDescription(text(R.string.photo)).performClick()
+        waitForDescription(text(R.string.zoom_in))
+        waitForDescription(text(R.string.photo))
+        screenshot("11a-foto-vollbild")
+        composeRule.onNodeWithContentDescription(text(R.string.close)).performClick()
+        waitForText("800 g reife Tomaten")
+
         composeRule.onNodeWithText("Omas Kochbuch", substring = true).performScrollTo()
         screenshot("12-rezept-ende")
 

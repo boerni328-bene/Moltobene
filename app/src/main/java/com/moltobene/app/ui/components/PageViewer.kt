@@ -97,8 +97,9 @@ class PageViewerModel(
 }
 
 /**
- * Seiten als Vollbild (#38) zum Prüfen und Nachlesen. Vergrößern geht mit zwei Fingern, doppeltem
- * Tippen oder den Schaltflächen – die Ansicht ist also auch ohne Gesten und mit Screenreader bedienbar.
+ * Seiten als Vollbild (#38) zum Prüfen und Nachlesen – oder das Foto eines Rezepts ganz, ohne Zuschnitt.
+ * Vergrößern geht mit zwei Fingern, doppeltem Tippen oder den Schaltflächen – die Ansicht ist also auch
+ * ohne Gesten und mit Screenreader bedienbar. Bei nur einer Seite gibt es kein Blättern.
  * [actions] sind zusätzliche Schaltflächen für die offene Seite.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -110,10 +111,11 @@ fun PageViewer(
     failed: Boolean,
     onPageChange: (Int) -> Unit,
     onClose: () -> Unit,
+    title: String = stringResource(R.string.area_page, page + 1, pageCount),
+    errorText: String = stringResource(R.string.page_load_error),
     actions: @Composable () -> Unit = {},
 ) {
     BackHandler(onBack = onClose)
-    val title = stringResource(R.string.area_page, page + 1, pageCount)
     var scale by remember(page) { mutableFloatStateOf(1f) }
     var offset by remember(page) { mutableStateOf(Offset.Zero) }
     var size by remember { mutableStateOf(IntSize.Zero) }
@@ -148,13 +150,16 @@ fun PageViewer(
                         horizontalArrangement = Arrangement.spacedBy(Spacing.s, Alignment.CenterHorizontally),
                         modifier = Modifier.fillMaxWidth(),
                     ) { actions() }
+                    val paged = pageCount > 1
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = if (paged) Arrangement.SpaceBetween else Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        IconButton(onClick = { onPageChange(page - 1) }, enabled = page > 0) {
-                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.page_previous))
+                        if (paged) {
+                            IconButton(onClick = { onPageChange(page - 1) }, enabled = page > 0) {
+                                Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.page_previous))
+                            }
                         }
                         Row {
                             IconButton(onClick = { zoomTo(scale / ZOOM_STEP) }, enabled = bitmap != null && scale > 1f) {
@@ -164,8 +169,10 @@ fun PageViewer(
                                 Icon(painterResource(R.drawable.ic_zoom_in), contentDescription = stringResource(R.string.zoom_in))
                             }
                         }
-                        IconButton(onClick = { onPageChange(page + 1) }, enabled = page < pageCount - 1) {
-                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.page_next))
+                        if (paged) {
+                            IconButton(onClick = { onPageChange(page + 1) }, enabled = page < pageCount - 1) {
+                                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.page_next))
+                            }
                         }
                     }
                 }
@@ -205,7 +212,7 @@ fun PageViewer(
                     )
                 }
             }
-            failed -> CenteredMessage(text = stringResource(R.string.page_load_error), modifier = frame)
+            failed -> CenteredMessage(text = errorText, modifier = frame)
             else -> CenteredMessage(text = "", modifier = frame) { CircularProgressIndicator() }
         }
     }

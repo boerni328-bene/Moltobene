@@ -248,6 +248,12 @@ class EditViewModel(
     /** „Seiten ansehen“ (#38): gespeicherte Originalseiten und die gerade gelesenen Seiten. */
     val viewer = PageViewerModel(viewModelScope) { index -> loadViewerPage(index) }
 
+    /** Das Rezeptfoto als Vollbild, ganz und zum Vergrößern. */
+    val photoViewer = PageViewerModel(viewModelScope) {
+        val photo = photoFile ?: throw IOException("Foto fehlt")
+        photoStore.loadPage(Uri.fromFile(photo), CropArea.WHOLE_PAGE)
+    }
+
     /** Anzahl der Seiten in „Seiten ansehen“. */
     val pageCount: Int get() = viewerPages().size
 
@@ -385,16 +391,29 @@ class EditViewModel(
         if (taken.isNotEmpty()) keepPages { session -> taken.map { pending.keepPage(session, it) } }
     }
 
-    /** Nimmt ein gerade aufgenommenes Foto in die Seitenübersicht auf; danach lässt sich die nächste Seite fotografieren. */
+    /**
+     * Fotoserie: true, wenn sich die Kamera gleich wieder für die nächste Seite öffnen soll. Die Oberfläche öffnet
+     * sie und ruft [cameraReopened] auf. „Zurück“ in der Kamera beendet die Serie, ebenso die Höchstzahl der Seiten.
+     */
+    var openCameraAgain by mutableStateOf(false)
+        private set
+
+    fun cameraReopened() {
+        openCameraAgain = false
+    }
+
+    /** Nimmt ein gerade aufgenommenes Foto in die Seitenübersicht auf; danach öffnet sich die Kamera für die nächste Seite. */
     fun onRecognitionCameraResult(success: Boolean) {
-        if (success && areaPages().size < MAX_PAGES) keepPages { session -> listOf(pending.keepCameraPage(session)) }
+        if (success && areaPages().size < MAX_PAGES) {
+            keepPages(continueSeries = true) { session -> listOf(pending.keepCameraPage(session)) }
+        }
     }
 
     /**
      * Legt die Seiten sofort als eigene Dateien ab – die Leseerlaubnis der Fotoauswahl gilt nur vorübergehend –
-     * und nimmt sie in die Seitenübersicht auf.
+     * und nimmt sie in die Seitenübersicht auf. Mit [continueSeries] öffnet sich danach die Kamera wieder.
      */
-    private fun keepPages(block: suspend (session: String) -> List<String>) {
+    private fun keepPages(continueSeries: Boolean = false, block: suspend (session: String) -> List<String>) {
         if (isRecognizing || isProcessingPhoto) return
         val session = ensureSession()
         viewModelScope.launch {
@@ -402,6 +421,8 @@ class EditViewModel(
             try {
                 val names = block(session)
                 addPages(names.map { PAGE_KEPT + it })
+                // Erst jetzt: Die Kamera schreibt jedes Foto in dieselbe Datei, das vorige ist nun kopiert.
+                if (continueSeries && areaPages().size < MAX_PAGES) openCameraAgain = true
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
