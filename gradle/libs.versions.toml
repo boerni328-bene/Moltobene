@@ -14,6 +14,7 @@ junit = "4.13.2"
 robolectric = "4.14.1"
 androidxTestRunner = "1.6.2"
 onnxruntime = "1.30.0"
+jsoup = "1.23.2"
 
 [libraries]
 # Legt die Kotlin-Version fest: Seit AGP 9 bringt das Android-Bauwerkzeug Kotlin selbst mit (siehe build.gradle.kts).
@@ -46,6 +47,8 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 onnxruntime-android = { group = "com.microsoft.onnxruntime", name = "onnxruntime-android", version.ref = "onnxruntime" }
 # Dasselbe für den PC: nur für Unit-Tests, die die Texterkennung mit echten Modellen prüfen; kommt nicht in die App.
 onnxruntime-jvm = { group = "com.microsoft.onnxruntime", name = "onnxruntime", version.ref = "onnxruntime" }
+# „Aus Link übernehmen“: liest HTML von Internetseiten (quelloffen, MIT). Geladen wird mit Android selbst, nicht mit jsoup.
+jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

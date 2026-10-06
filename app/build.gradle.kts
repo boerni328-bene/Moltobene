@@ -14,8 +14,8 @@ android {
         applicationId = "com.moltobene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 33
-        versionName = "0.15.1"
+        versionCode = 34
+        versionName = "0.16.0"
 
         // Rundgang durch die App auf dem Emulator (app/src/androidTest).
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -131,6 +131,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.onnxruntime.android)
+    implementation(libs.jsoup)
     debugImplementation(libs.androidx.ui.tooling)
 
     testImplementation(libs.junit)

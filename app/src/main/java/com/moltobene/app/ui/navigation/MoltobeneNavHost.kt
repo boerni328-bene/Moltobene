@@ -55,6 +55,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                 onAddRecipe = { navController.navigate(EditRoute()) },
                 onAddFromPhoto = { navController.navigate(EditRoute(fromPhoto = true)) },
                 onAddFromText = { navController.navigate(EditRoute(fromText = true)) },
+                onAddFromLink = { navController.navigate(EditRoute(fromLink = true)) },
                 onOpenSettings = { navController.navigate(SettingsRoute) },
             )
         }
@@ -88,6 +89,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                         container.preferences,
                         container.pendingRecognition,
                         container.sharedInput,
+                        container.webImporter,
                     )
                 },
                 snackbarHostState = snackbarHostState,

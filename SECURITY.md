@@ -14,8 +14,8 @@ Korrekturen gibt es nur für die jeweils neueste Version unter [Releases](https:
 
 - Rezepte und Fotos verlassen das Handy nur, wenn sie selbst geteilt oder gesichert werden.
 - Kein Konto, keine Werbung, kein Tracking, keine Analyse- oder Absturzdienste.
-- Die App fordert nur Berechtigungen an, die eine Funktion zwingend braucht. Derzeit sind es keine.
-- Jede Version wird beim Bauen auf Berechtigungen und bekannte Telemetrie-Bausteine geprüft (#49). Version 0.14.0 enthielt unbemerkt die Internet-Berechtigung und eine Telemetrie von Microsoft aus einem Baustein der Texterkennung (ONNX Runtime). Eine Prüfung hat gezeigt, dass sie nach jeder Texterkennung rund 1,6 KB verschlüsselte Daten an Microsoft gesendet hat; ab 0.14.1 ist beides entfernt.
+- Die App fordert nur Berechtigungen an, die eine Funktion zwingend braucht. Derzeit ist es nur der Internetzugang, ausschließlich für „Aus Link übernehmen“: nur verschlüsselt, ohne Cookies, ohne Abruf im Hintergrund und nie an Adressen im eigenen Netz.
+- Jede Version wird beim Bauen auf Berechtigungen und bekannte Telemetrie-Bausteine geprüft (#49). Version 0.14.0 enthielt unbemerkt die Internet-Berechtigung und eine Telemetrie von Microsoft aus einem Baustein der Texterkennung (ONNX Runtime). Eine Prüfung hat gezeigt, dass sie nach jeder Texterkennung rund 1,6 KB verschlüsselte Daten an Microsoft gesendet hat. Ab 0.14.1 ist die Telemetrie entfernt und bleibt es; die Internet-Berechtigung gibt es ab 0.16.0 wieder, nur für „Aus Link übernehmen“.
 - Jede APK ist mit demselben Schlüssel signiert. Fingerabdruck und Prüfsummen stehen in der [README](README.md#echtheit-prüfen).
 
 ---

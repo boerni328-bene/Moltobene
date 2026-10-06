@@ -2,13 +2,14 @@
 
 _Moltobene sammelt Kochrezepte aus allen Quellen an einem Ort, gespeichert nur auf dem eigenen Handy._
 
-Kostenlos, ohne Werbung, ohne Konto und ohne Tracking. Die App braucht keine einzige Berechtigung und keinen Internetzugang.
+Kostenlos, ohne Werbung, ohne Konto und ohne Tracking. Ins Internet geht die App nur, wenn ein Rezept aus einem Link übernommen wird; dafür braucht sie als einzige Berechtigung den Internetzugang.
 
-> **Hinweis zu Version 0.14.0:** Sie enthielt unbemerkt einen Baustein von Microsoft, der nach jeder Texterkennung Nutzungsdaten an Microsoft gesendet hat (in einer Prüfung nachgewiesen, [#49](https://github.com/boerni328-bene/Moltobene/issues/49)), und dafür die Internet-Berechtigung. Ab Version 0.14.1 ist beides entfernt; jede neue Version wird beim Bauen darauf geprüft. Bitte auf die neueste Version aktualisieren.
+> **Hinweis zu Version 0.14.0:** Sie enthielt unbemerkt einen Baustein von Microsoft, der nach jeder Texterkennung Nutzungsdaten an Microsoft gesendet hat (in einer Prüfung nachgewiesen, [#49](https://github.com/boerni328-bene/Moltobene/issues/49)), und dafür die Internet-Berechtigung. Ab Version 0.14.1 ist dieser Baustein entfernt; jede neue Version wird beim Bauen darauf geprüft. Bitte auf die neueste Version aktualisieren.
 
 ## Was die App kann
 
 - Rezepte hinzufügen und bearbeiten: Titel, Foto, Portionen, Zutaten, Zubereitung, Quelle und eigene Notizen
+- Rezepte aus Internetseiten übernehmen: Link einfügen oder die Seite aus dem Browser an Moltobene teilen. Titel, Zutaten, Zubereitung, Portionen, Zeiten und Foto kommen ins Rezept, die Quelle bleibt erhalten.
 - Rezepte aus Fotos übernehmen: Die Texterkennung liest Titel, Zutaten und Zubereitung aus Fotos von Kochbuch, Zettel oder Bildschirmfoto, auch über mehrere Seiten (Deutsch, Englisch, Italienisch, Französisch, Spanisch)
 - Rezepte aus Text übernehmen: eingefügt aus Nachrichten, E-Mails oder Notizen oder per „Teilen mit…“ aus anderen Apps; Titel, Zutaten und Zubereitung werden automatisch eingeordnet
 - Die Sammlung durchsuchen, mit Vorschaubildern
@@ -16,7 +17,7 @@ Kostenlos, ohne Werbung, ohne Konto und ohne Tracking. Die App braucht keine ein
 - Einzelne Rezepte teilen: als gut lesbaren Text mit Foto oder als Rezeptdatei im offenen Standard schema.org. Eigene Notizen bleiben dabei privat.
 - Die ganze Sammlung inklusive Fotos als Datei sichern und wiederherstellen, z. B. für den Umzug auf ein neues Handy
 
-Geplant sind unter anderem: Rezepte aus Internetseiten übernehmen sowie eine Kochansicht zum Abhaken und Umrechnen der Portionen.
+Geplant sind unter anderem: eine Kochansicht zum Abhaken und Umrechnen der Portionen sowie Schlagwörter und Favoriten.
 
 ## Installation
 
@@ -45,6 +46,7 @@ Moltobene wird nicht über den Play Store verteilt. Ob eine APK wirklich aus die
 - Die automatische Android-Cloud-Sicherung ist abgeschaltet. Gesichert wird über die eigene Sicherungsdatei.
 - Fotos werden verkleinert und ohne Aufnahmeort gespeichert und geteilt.
 - Die Texterkennung ([PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR) mit [ONNX Runtime](https://onnxruntime.ai), beides quelloffen) ist fest eingebaut und läuft nur auf dem Handy, ohne Internet und ohne Google-Dienste.
+- Ins Internet geht die App nur bei „Aus Link übernehmen“: Dann wird genau diese eine Seite geladen und, falls vorhanden, ihr Foto. Die Seite erfährt dabei – wie bei jedem Browser – die IP-Adresse des Handys, die Uhrzeit und die eingestellte Sprache. Die Verbindung ist immer verschlüsselt, Cookies werden nicht gespeichert, Angaben zum Handy werden nicht mitgeschickt. Dieselbe kurze Datenschutzerklärung steht in der App unter Einstellungen → Info → „Datenschutz“.
 
 ## Weiteres
 
@@ -55,4 +57,4 @@ Moltobene wird nicht über den Play Store verteilt. Ob eine APK wirklich aus die
 
 _Moltobene collects recipes from every source in one place, stored only on the phone itself._
 
-Free, no ads, no account, no tracking, no permissions and no internet access. Note: version 0.14.0 unintentionally contained a Microsoft component that sent usage data to Microsoft after each text recognition (verified in a test, [#49](https://github.com/boerni328-bene/Moltobene/issues/49)), along with the internet permission. Both were removed in 0.14.1, and every build is now checked for this; please update to the latest version. The app is available in English and German. To install, download `moltobene-<version>.apk` from [Releases](https://github.com/boerni328-bene/Moltobene/releases/latest) and open it on an Android 8.0+ phone. The signing certificate fingerprint and checksums are listed above under “Echtheit prüfen”.
+Free, no ads, no account, no tracking. The app only goes online when a recipe is imported from a link; the internet permission is the only one it needs. Note: version 0.14.0 unintentionally contained a Microsoft component that sent usage data to Microsoft after each text recognition (verified in a test, [#49](https://github.com/boerni328-bene/Moltobene/issues/49)), along with the internet permission. The component was removed in 0.14.1, and every build is now checked for it; please update to the latest version. The app is available in English and German. To install, download `moltobene-<version>.apk` from [Releases](https://github.com/boerni328-bene/Moltobene/releases/latest) and open it on an Android 8.0+ phone. The signing certificate fingerprint and checksums are listed above under “Echtheit prüfen”.

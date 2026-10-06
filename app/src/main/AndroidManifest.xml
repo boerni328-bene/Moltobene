@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Die App braucht keine einzige Berechtigung: Fotos kommen über die Android-Fotoauswahl,
-  die Kamera-App oder „Teilen mit…“, Sicherungen über den Android-Dateidialog. Kein Internet.
+  Die App braucht nur eine Berechtigung, den Internetzugang (siehe unten). Fotos kommen über die
+  Android-Fotoauswahl, die Kamera-App oder „Teilen mit…“, Sicherungen über den Android-Dateidialog.
   Der Build prüft die fertige APK gegen eine Erlaubt-Liste (build.yml, „Berechtigungen prüfen“).
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
     <!--
-      #49: ONNX Runtime (Texterkennung) bringt eine Telemetrie von Microsoft mit, die Nutzungsdaten ins Internet
-      senden kann, und dafür diese beiden Berechtigungen. Beides wird hier entfernt; zusätzlich schaltet
-      MoltobeneApplication die Telemetrie über ORT_DISABLE_TELEMETRY ab.
+      Internet (#55, vom Projektinhaber freigegeben): nur für „Aus Link übernehmen“, also nur, wenn ein Link
+      übernommen wird – dann wird genau diese Seite und ggf. ihr Foto geladen (data/web/HttpPageLoader).
+      Nur verschlüsselt (network_security_config), keine Cookies, kein Abruf im Hintergrund.
     -->
-    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+      #49: ONNX Runtime (Texterkennung) bringt eine Telemetrie von Microsoft mit, die Nutzungsdaten ins Internet
+      sendet, und dafür ACCESS_NETWORK_STATE. Beides bleibt entfernt, auch mit Internet-Berechtigung;
+      zusätzlich schaltet MoltobeneApplication die Telemetrie über ORT_DISABLE_TELEMETRY ab.
+    -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove" />
 
     <!--
@@ -30,6 +36,7 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:theme="@style/Theme.Moltobene">
         <activity
             android:name=".MainActivity"

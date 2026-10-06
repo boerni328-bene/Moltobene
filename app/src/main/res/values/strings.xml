@@ -70,7 +70,23 @@
     <string name="paste_from_clipboard">Paste from clipboard</string>
     <string name="clipboard_empty">The clipboard contains no text.</string>
     <string name="text_done">Text added to the recipe. Check that everything is in the right place.</string>
-    <string name="import_link_saved">Link saved as source. The recipe text can be copied from the page and added with “Import from text”.</string>
+    <string name="import_from_link">Import from link</string>
+    <string name="import_link_hint">Paste a link to a recipe page, e.g. from the browser. Only this one page is loaded.</string>
+    <string name="import_link_field">Link</string>
+    <string name="link_loading">Loading page …</string>
+    <string name="link_done">Recipe imported from the page. Check that everything is in the right place.</string>
+    <string name="link_text_done">The page had no recipe in the usual format, so its text was sorted instead. Check carefully that everything is in the right place.</string>
+    <string name="link_no_recipe">No recipe was found on the page. The link is saved as the source. The recipe text can be copied from the page and added with “Import from text”.</string>
+    <string name="link_invalid">This is not a link to a web page. Links start with https://</string>
+    <string name="link_error_offline">No connection to the page. The link is saved and can be imported again later with “Import from link”.</string>
+    <string name="link_error_timeout">The page did not respond in time. The link is saved; try again later with “Import from link”.</string>
+    <string name="link_error_not_found">There is no page (any more) at this link. Check the link.</string>
+    <string name="link_error_blocked">The page cannot be loaded by the app. The recipe text can be copied from the page and added with “Import from text”.</string>
+    <string name="link_error_server">The page is reporting an error right now. The link is saved; try again later.</string>
+    <string name="link_error_not_page">This link does not lead to a web page but, for example, to an image or a PDF.</string>
+    <string name="link_error_not_secure">The page cannot be loaded securely. Only pages with an encrypted connection are imported.</string>
+    <string name="link_error_not_allowed">This link does not lead to a public web page.</string>
+    <string name="link_error">The page could not be read. The link is saved as the source.</string>
     <string name="ocr_dialog_text">Reads title, ingredients and instructions from photos of a cookbook, a note or a screenshot. Sharp photos taken straight on work best. For longer recipes, take or choose one photo per page (up to %1$d pages) – everything is read together at the end. When taking photos, the camera opens again after each one; “Back” ends the series.</string>
     <string name="ocr_from_recipe_photo">Use recipe photo</string>
     <string name="ocr_choose_photos">Choose photos</string>
@@ -145,9 +161,22 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>View whole photos: tap a recipe photo to see it full screen and zoom in with two fingers or a double tap.</item>
-        <item>Photo series without interruption: after each photo the camera opens again for the next page.</item>
-        <item>Cookbook pages with several narrow columns or a title next to the ingredients are read in the right order.</item>
+        <item>Import from link: import recipes from cooking sites and recipe blogs with a link – with title, ingredients, instructions, servings, times and photo. Also via “Share” from the browser.</item>
+        <item>Times from imported recipes appear in the recipe view, e.g. “Total time: 45 min”.</item>
+        <item>Settings → About now contains a short privacy statement.</item>
+    </string-array>
+
+    <!-- Recipe view: times (duration in the device format) -->
+    <string name="recipe_time_prep">Prep time: %1$s</string>
+    <string name="recipe_time_total">Total time: %1$s</string>
+
+    <!-- Privacy (#55) -->
+    <string name="privacy_title">Privacy</string>
+    <string-array name="privacy_paragraphs">
+        <item>Recipes, photos and notes are stored only on this device. There is no account, no advertising, no tracking and no sharing with third parties.</item>
+        <item>The app only goes online for “Import from link”: it then loads exactly that one page and, if available, its photo. As with any browser, the page learns the device’s internet address (IP address), the time and the preferred language. No cookies are stored and no details about the device are sent.</item>
+        <item>Otherwise content only leaves the device when it is shared or backed up. Notes are never shared. The backup file is not encrypted.</item>
+        <item>Text recognition runs entirely on the device, without internet. Android’s automatic cloud backup is turned off.</item>
     </string-array>
 
     <!-- Bearbeiten -->

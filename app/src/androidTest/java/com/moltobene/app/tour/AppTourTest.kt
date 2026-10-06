@@ -267,19 +267,58 @@ class AppTourTest(private val variant: DisplayVariant) {
     }
 
     @Test
+    fun ausLinkUebernehmen() {
+        // Nachgestellte Rezeptseite statt echtem Internet (#55).
+        container().pageLoader = SamplePage.loader(activity)
+        clickVisible(text(R.string.import_recipe))
+        waitForText(text(R.string.import_from_link))
+        composeRule.onNodeWithText(text(R.string.import_from_link)).performClick()
+        waitForField(R.string.import_link_field)
+        screenshot("25-aus-link-uebernehmen")
+        field(R.string.import_link_field).performTextInput(SamplePage.URL)
+
+        composeRule.onNodeWithText(text(R.string.import_text_action)).performClick()
+        waitForText(text(R.string.link_done))
+        // Das Foto der Seite kommt kurz nach dem Rezept.
+        waitForText(text(R.string.photo_remove))
+        composeRule.onNode(hasSetTextAction() and hasText(SamplePage.TITLE)).performScrollTo().assertIsDisplayed()
+        screenshot("26-aus-link-uebernommen")
+
+        composeRule.onNodeWithText(text(R.string.save)).performClick()
+        waitForText("320 g Risottoreis")
+        screenshot("27-aus-link-rezept")
+        val recipe = runBlocking { container().repository.getAll().single() }
+        assertEquals(SamplePage.TITLE, recipe.title)
+        assertEquals(4, recipe.servings)
+        assertEquals(5, recipe.ingredients.size)
+        assertEquals(3, recipe.steps.size)
+        assertEquals(10, recipe.prepMinutes)
+        assertEquals(35, recipe.totalMinutes)
+        // Ohne Zählzusatz (utm_…) gespeichert.
+        assertEquals(SamplePage.CLEAN_URL, recipe.source?.url)
+        assertEquals("de", recipe.language)
+        assertEquals(1, recipe.photoIds.size)
+    }
+
+    @Test
     fun einstellungen() {
         composeRule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
         waitForText(text(R.string.backup_title))
-        screenshot("25-einstellungen")
+        screenshot("28-einstellungen")
 
         composeRule.onNodeWithText(text(R.string.whats_new_title, WhatsNew.VERSION_NAME)).performScrollTo().performClick()
         waitForText(text(R.string.close))
-        screenshot("26-neu-in-version")
-
+        screenshot("29-neu-in-version")
         composeRule.onNodeWithText(text(R.string.close)).performClick()
+
+        composeRule.onNodeWithText(text(R.string.privacy_title)).performScrollTo().performClick()
+        waitForText(text(R.string.close))
+        screenshot("30-datenschutz")
+        composeRule.onNodeWithText(text(R.string.close)).performClick()
+
         composeRule.onNodeWithText(text(R.string.licenses_title)).performScrollTo().performClick()
         waitForText(text(R.string.licenses_intro))
-        screenshot("27-lizenzen")
+        screenshot("31-lizenzen")
     }
 
     // --- Hilfsfunktionen ---

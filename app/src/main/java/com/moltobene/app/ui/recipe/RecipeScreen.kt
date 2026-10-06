@@ -5,6 +5,9 @@ import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
+import android.icu.text.MeasureFormat
+import android.icu.util.Measure
+import android.icu.util.MeasureUnit
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,6 +52,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
@@ -76,6 +80,7 @@ import com.moltobene.app.ui.components.RecipePhotoLarge
 import com.moltobene.app.ui.theme.Spacing
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -313,6 +318,7 @@ private fun RecipeContent(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            RecipeTimes(recipe.prepMinutes, recipe.totalMinutes)
 
             if (recipe.ingredients.isNotEmpty()) {
                 SectionTitle(stringResource(R.string.ingredients))
@@ -413,4 +419,31 @@ private fun SourceLink(url: String, snackbarHostState: SnackbarHostState) {
             style = MaterialTheme.typography.bodyLarge,
         )
     }
+}
+
+/** Zeiten aus einer Übernahme (#55), im Format des Handys, z. B. „Gesamtzeit: 1 Std., 30 Min.“. */
+@Composable
+private fun RecipeTimes(prepMinutes: Int?, totalMinutes: Int?) {
+    val locale = LocalConfiguration.current.locales[0]
+    listOfNotNull(
+        prepMinutes?.takeIf { it > 0 }?.let { R.string.recipe_time_prep to it },
+        totalMinutes?.takeIf { it > 0 }?.let { R.string.recipe_time_total to it },
+    ).forEach { (label, minutes) ->
+        Text(
+            text = stringResource(label, formatDuration(minutes, locale)),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+/** Dauer in Stunden und Minuten mit den Abkürzungen der Sprache, z. B. „1 Std., 30 Min.“ oder “1 hr, 30 min”. */
+private fun formatDuration(minutes: Int, locale: Locale): String {
+    val hours = minutes / 60
+    val rest = minutes % 60
+    val parts = buildList {
+        if (hours > 0) add(Measure(hours, MeasureUnit.HOUR))
+        if (rest > 0 || hours == 0) add(Measure(rest, MeasureUnit.MINUTE))
+    }
+    return MeasureFormat.getInstance(locale, MeasureFormat.FormatWidth.SHORT).formatMeasures(*parts.toTypedArray())
 }

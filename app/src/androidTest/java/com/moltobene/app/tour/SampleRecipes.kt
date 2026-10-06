@@ -49,6 +49,16 @@ object SampleRecipes {
         container.repository.saveAll(recipes)
     }
 
+    /** Gezeichnetes Foto des Gerichts auf der nachgestellten Rezeptseite ([SamplePage]). */
+    fun drawPagePhoto(context: Context, target: File) {
+        val file = drawPhoto(context, PhotoColors(0xFFB0BEC5, 0xFF607D8B, food = 0xFFFFF59D, garnish = 0xFF7CB342))
+        try {
+            file.copyTo(target, overwrite = true)
+        } finally {
+            file.delete()
+        }
+    }
+
     /** Titel des Rezepts, dessen Foto eine gezeichnete Kochbuchseite ist (für die Texterkennung). */
     const val PAGE_RECIPE = "Hefezopf"
 

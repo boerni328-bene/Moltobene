@@ -153,7 +153,8 @@ jobs:
         env:
           APK: dist/moltobene-${{ steps.version.outputs.name }}.apk
           # Nur innerhalb der App: AndroidX schützt damit eigene Empfänger (nur für die App selbst, für Nutzer unsichtbar).
-          ERLAUBT: com.moltobene.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+          # Internet (#55): nur für „Aus Link übernehmen“, vom Projektinhaber freigegeben.
+          ERLAUBT: com.moltobene.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION android.permission.INTERNET
           # Dauerhaft verboten, auch wenn die Internet-Berechtigung später gewollt zurückkommt.
           VERBOTEN: ai.onnxruntime.TelemetryInitializer android.permission.ACCESS_NETWORK_STATE
         run: |

@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -63,6 +64,7 @@ fun SettingsScreen(
     // Texte über LocalResources lesen: passt sich an, wenn sich z. B. die App-Sprache ändert.
     val resources = LocalResources.current
     var showWhatsNew by rememberSaveable { mutableStateOf(false) }
+    var showPrivacy by rememberSaveable { mutableStateOf(false) }
     val createBackup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
         if (uri != null) viewModel.backup(uri)
     }
@@ -120,6 +122,10 @@ fun SettingsScreen(
                 modifier = Modifier.clickable { showWhatsNew = true },
             )
             ListItem(
+                headlineContent = { Text(stringResource(R.string.privacy_title)) },
+                modifier = Modifier.clickable { showPrivacy = true },
+            )
+            ListItem(
                 headlineContent = { Text(stringResource(R.string.licenses_title)) },
                 modifier = Modifier.clickable(onClick = onOpenLicenses),
             )
@@ -127,6 +133,7 @@ fun SettingsScreen(
     }
 
     if (showWhatsNew) WhatsNewDialog(onDismiss = { showWhatsNew = false })
+    if (showPrivacy) PrivacyDialog(onDismiss = { showPrivacy = false })
 
     when (val current = viewModel.state) {
         is SettingsUiState.Working -> WorkingDialog(stringResource(current.label))
@@ -212,4 +219,26 @@ private fun WorkingDialog(text: String) {
             }
         }
     }
+}
+
+/** Kurze Datenschutzerklärung (#55): was gespeichert wird und wann die App ins Internet geht. */
+@Composable
+private fun PrivacyDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.privacy_title), modifier = Modifier.semantics { heading() }) },
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(Spacing.m),
+            ) {
+                stringArrayResource(R.array.privacy_paragraphs).forEach { paragraph ->
+                    Text(paragraph, style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) }
+        },
+    )
 }

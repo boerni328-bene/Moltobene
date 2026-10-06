@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.system.ErrnoException
 import android.system.Os
+import androidx.annotation.VisibleForTesting
 import com.moltobene.app.data.AppPreferences
 import com.moltobene.app.data.LegacyCleanup
 import com.moltobene.app.data.RecipeRepository
@@ -13,6 +14,9 @@ import com.moltobene.app.data.ocr.PendingRecognition
 import com.moltobene.app.data.ocr.TextRecognizer
 import com.moltobene.app.data.photos.PhotoStore
 import com.moltobene.app.data.share.RecipeSharer
+import com.moltobene.app.data.web.HttpPageLoader
+import com.moltobene.app.data.web.PageLoader
+import com.moltobene.app.data.web.WebImporter
 import com.moltobene.app.ui.edit.SharedInput
 
 class MoltobeneApplication : Application() {
@@ -56,4 +60,14 @@ class AppContainer(context: Context) {
     val textRecognizer: TextRecognizer by lazy { TextRecognizer(appContext) }
     val pendingRecognition: PendingRecognition by lazy { PendingRecognition(appContext, photoStore) }
     val sharedInput = SharedInput()
+
+    /**
+     * Einzige Stelle für Internetzugriffe (#55). Der Rundgang auf dem Emulator setzt hier einen Lader mit
+     * nachgestellten Seiten ein, damit er nicht vom echten Internet abhängt.
+     */
+    @VisibleForTesting
+    var pageLoader: PageLoader = HttpPageLoader()
+
+    /** Für „Aus Link übernehmen“; nutzt den jeweils aktuellen [pageLoader]. */
+    val webImporter: WebImporter get() = WebImporter(pageLoader, appContext.cacheDir)
 }

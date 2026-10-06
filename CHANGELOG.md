@@ -3,6 +3,21 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.16.0] – 2026-10-06 (versionCode 34)
+
+### Neu
+- **Aus Link übernehmen:** Rezepte von Koch-Portalen und Rezept-Blogs lassen sich jetzt mit ihrem Link übernehmen – mit Titel, Zutaten, Zubereitung, Portionen, Zeiten und Foto. Der Weg steht im Fenster „Rezept übernehmen“ an erster Stelle und beim Bearbeiten neben „Aus Foto übernehmen“ und „Aus Text übernehmen“. Ein Link lässt sich einfügen oder direkt aus der Zwischenablage übernehmen.
+- **„Teilen“ aus dem Browser:** Wird eine Rezeptseite aus dem Browser an Moltobene geteilt, lädt die App die Seite gleich und macht daraus ein Rezept.
+- Fast alle großen Koch-Portale und die üblichen Rezept-Blogs enthalten ihre Rezepte zusätzlich in einem Standardformat, das die App vollständig liest. Steht auf einer Seite kein Rezept in diesem Format, ordnet die App den Text der Seite ein, wie bei „Aus Text übernehmen“. Klappt auch das nicht, bleibt der Link als Quelle gespeichert.
+- **Nichts geht verloren:** Der Link wird schon vor dem Laden als Quelle gespeichert. Ohne Internet, bei einer Seite, die nicht antwortet, oder bei einer gesperrten Seite sagt eine Meldung, was passiert ist und was sich tun lässt. Das Laden lässt sich jederzeit abbrechen.
+- Übernommene Rezepte bleiben in ihrer Originalsprache und behalten ihre Quelle. Ein Hinweis bittet darum, das Ergebnis zu prüfen.
+- **Zeiten:** Vorbereitungs- und Gesamtzeit aus übernommenen Rezepten stehen in der Rezeptansicht, z. B. „Gesamtzeit: 45 Min.“.
+- **Datenschutzerklärung:** Unter Einstellungen → Info steht jetzt kurz, was die App speichert und wann sie ins Internet geht.
+
+### Geändert
+- Die App braucht jetzt eine einzige Berechtigung: den Internetzugang. Sie geht nur ins Internet, wenn ein Rezept aus einem Link übernommen wird. Dann wird genau diese eine Seite geladen, bei Bedarf auch ihr Foto. Die Verbindung ist immer verschlüsselt, Cookies werden nicht gespeichert, und es gibt keinen Abruf im Hintergrund. Die Übermittlung an Microsoft aus Version 0.14.0 bleibt abgeschaltet.
+- Unter „Open-Source-Lizenzen“ steht jetzt auch jsoup, das die Internetseiten liest.
+
 ## [0.15.1] – 2026-10-06 (versionCode 33)
 
 ### Behoben

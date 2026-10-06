@@ -18,3 +18,8 @@
 
 # Texterkennung (ONNX Runtime): der native Teil greift über feste Namen auf diese Klassen zu.
 -keep class ai.onnxruntime.** { *; }
+
+# jsoup („Aus Link übernehmen“): optionale Bausteine, die die App nicht mitliefert und nicht braucht.
+-dontwarn com.google.re2j.**
+-dontwarn org.jspecify.**
+-dontwarn java.net.http.**

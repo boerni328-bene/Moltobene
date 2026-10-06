@@ -38,6 +38,11 @@ internal val LICENSE_GROUPS = listOf(
         components = listOf(Component("ONNX Runtime", "Microsoft Corporation")),
     ),
     LicenseGroup(
+        licenseName = "MIT License",
+        file = "mit-jsoup.txt",
+        components = listOf(Component("jsoup", "Jonathan Hedley")),
+    ),
+    LicenseGroup(
         licenseName = "Third Party Notices",
         file = "onnxruntime-third-party.txt",
         components = listOf(Component("ONNX Runtime", "Microsoft Corporation")),

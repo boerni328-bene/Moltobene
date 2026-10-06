@@ -69,7 +69,23 @@
     <string name="paste_from_clipboard">Aus der Zwischenablage einfügen</string>
     <string name="clipboard_empty">Die Zwischenablage enthält keinen Text.</string>
     <string name="text_done">Text ins Rezept übernommen. Prüfen, ob alles an der richtigen Stelle steht.</string>
-    <string name="import_link_saved">Link als Quelle gespeichert. Den Rezepttext von der Seite kopieren und mit „Aus Text übernehmen“ einfügen.</string>
+    <string name="import_from_link">Aus Link übernehmen</string>
+    <string name="import_link_hint">Link zu einer Rezeptseite einfügen, z. B. aus dem Browser. Dafür wird genau diese eine Seite geladen.</string>
+    <string name="import_link_field">Link</string>
+    <string name="link_loading">Seite wird geladen …</string>
+    <string name="link_done">Rezept von der Seite übernommen. Prüfen, ob alles an der richtigen Stelle steht.</string>
+    <string name="link_text_done">Auf der Seite stand kein Rezept im üblichen Format, deshalb wurde ihr Text eingeordnet. Genau prüfen, ob alles an der richtigen Stelle steht.</string>
+    <string name="link_no_recipe">Auf der Seite wurde kein Rezept gefunden. Der Link ist als Quelle gespeichert. Den Rezepttext von der Seite kopieren und mit „Aus Text übernehmen“ einfügen.</string>
+    <string name="link_invalid">Das ist kein Link zu einer Internetseite. Links beginnen mit https://</string>
+    <string name="link_error_offline">Keine Verbindung zur Seite. Der Link ist gespeichert und lässt sich später mit „Aus Link übernehmen“ erneut übernehmen.</string>
+    <string name="link_error_timeout">Die Seite hat nicht rechtzeitig geantwortet. Der Link ist gespeichert; später mit „Aus Link übernehmen“ erneut versuchen.</string>
+    <string name="link_error_not_found">Unter diesem Link gibt es keine Seite (mehr). Den Link prüfen.</string>
+    <string name="link_error_blocked">Die Seite lässt sich von der App aus nicht abrufen. Den Rezepttext von der Seite kopieren und mit „Aus Text übernehmen“ einfügen.</string>
+    <string name="link_error_server">Die Seite meldet gerade einen Fehler. Der Link ist gespeichert; später erneut versuchen.</string>
+    <string name="link_error_not_page">Unter diesem Link liegt keine Internetseite, sondern z. B. ein Bild oder ein PDF.</string>
+    <string name="link_error_not_secure">Die Seite lässt sich nicht sicher abrufen. Übernommen werden nur Seiten mit verschlüsselter Verbindung.</string>
+    <string name="link_error_not_allowed">Dieser Link führt nicht zu einer öffentlichen Internetseite.</string>
+    <string name="link_error">Die Seite konnte nicht gelesen werden. Der Link ist als Quelle gespeichert.</string>
     <string name="ocr_dialog_text">Liest Titel, Zutaten und Zubereitung aus Fotos von Kochbuch, Zettel oder Bildschirmfoto. Am besten gelingt es mit einem scharfen, gerade aufgenommenen Foto. Längere Rezepte Seite für Seite fotografieren oder auswählen (bis zu %1$d Seiten) – am Ende wird alles zusammen gelesen. Beim Fotografieren öffnet sich die Kamera nach jedem Foto wieder; „Zurück“ beendet die Fotoserie.</string>
     <string name="ocr_from_recipe_photo">Rezeptfoto verwenden</string>
     <string name="ocr_choose_photos">Fotos auswählen</string>
@@ -143,9 +159,22 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Fotos ganz ansehen: Antippen zeigt das Foto eines Rezepts als Vollbild, vergrößern mit zwei Fingern oder doppeltem Tippen.</item>
-        <item>Fotoserie ohne Unterbrechung: Nach jedem Foto öffnet sich die Kamera gleich wieder für die nächste Seite.</item>
-        <item>Kochbuchseiten mit mehreren schmalen Spalten oder einem Titel neben den Zutaten werden in der richtigen Reihenfolge gelesen.</item>
+        <item>Aus Link übernehmen: Rezepte von Koch-Portalen und Rezept-Blogs per Link übernehmen – mit Titel, Zutaten, Zubereitung, Portionen, Zeiten und Foto. Auch über „Teilen“ aus dem Browser.</item>
+        <item>Zeiten aus übernommenen Rezepten stehen in der Rezeptansicht, z. B. „Gesamtzeit: 45 Min.“.</item>
+        <item>Unter Einstellungen → Info steht eine kurze Datenschutzerklärung.</item>
+    </string-array>
+
+    <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->
+    <string name="recipe_time_prep">Vorbereitung: %1$s</string>
+    <string name="recipe_time_total">Gesamtzeit: %1$s</string>
+
+    <!-- Datenschutz (#55) -->
+    <string name="privacy_title">Datenschutz</string>
+    <string-array name="privacy_paragraphs">
+        <item>Rezepte, Fotos und Notizen liegen nur auf diesem Handy. Es gibt kein Konto, keine Werbung, kein Tracking und keine Weitergabe an Dritte.</item>
+        <item>Ins Internet geht die App nur bei „Aus Link übernehmen“: Dann wird genau diese eine Seite geladen und, falls vorhanden, ihr Foto. Die Seite erfährt dabei – wie bei jedem Browser – die Internetadresse (IP-Adresse) des Handys, die Uhrzeit und die eingestellte Sprache. Cookies werden nicht gespeichert, Angaben zum Handy werden nicht mitgeschickt.</item>
+        <item>Sonst verlassen Inhalte das Handy nur, wenn sie selbst geteilt oder gesichert werden. Notizen werden nie geteilt. Die Sicherungsdatei ist nicht verschlüsselt.</item>
+        <item>Die Texterkennung läuft vollständig auf dem Handy, ohne Internet. Die automatische Cloud-Sicherung von Android ist abgeschaltet.</item>
     </string-array>
 
     <!-- Bearbeiten -->

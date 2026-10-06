@@ -69,7 +69,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.moltobene.app.R
+import com.moltobene.app.data.TextLinks
 import com.moltobene.app.data.share.IncomingText
+import com.moltobene.app.data.web.WebAddress
 import com.moltobene.app.ui.components.CenteredMessage
 import com.moltobene.app.ui.components.OptionButton
 import com.moltobene.app.ui.components.PageViewer
@@ -124,6 +126,8 @@ fun EditScreen(
     var showRecognitionDialog by rememberSaveable { mutableStateOf(viewModel.takeStartPrompt()) }
     // „Aus Text übernehmen“: Text aus der Zwischenablage einfügen oder selbst eintragen.
     var showTextDialog by rememberSaveable { mutableStateOf(viewModel.takeTextPrompt()) }
+    // „Aus Link übernehmen“: Link einfügen; die Seite wird dann geladen (#55).
+    var showLinkDialog by rememberSaveable { mutableStateOf(viewModel.takeLinkPrompt()) }
     val pickPages = rememberLauncherForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia(MAX_PAGES),
     ) { uris -> viewModel.recognizePhotos(uris) }
@@ -141,7 +145,7 @@ fun EditScreen(
             }
         }
     }
-    val busy = viewModel.isProcessingPhoto || viewModel.isRecognizing
+    val busy = viewModel.isProcessingPhoto || viewModel.isRecognizing || viewModel.isLoadingLink
 
     // Vor der Texterkennung: Seiten sammeln (Fotoserie) und am Ende alle zusammen lesen.
     viewModel.pageOverview?.let { overview ->
@@ -283,6 +287,7 @@ fun EditScreen(
                     enabled = !busy,
                     onStart = { showRecognitionDialog = true },
                     onImportText = { showTextDialog = true },
+                    onImportLink = { showLinkDialog = true },
                 )
 
                 OutlinedTextField(
@@ -391,6 +396,17 @@ fun EditScreen(
         )
     }
 
+    if (showLinkDialog) {
+        LinkImportDialog(
+            initial = viewModel.linkForImport,
+            onImport = { link ->
+                showLinkDialog = false
+                viewModel.importLink(link)
+            },
+            onDismiss = { showLinkDialog = false },
+        )
+    }
+
     // Die einzige Frage nach der Texterkennung – beim Speichern (#38).
     if (viewModel.askKeepPages) {
         AlertDialog(
@@ -428,8 +444,9 @@ fun EditScreen(
 }
 
 /**
- * Übernehmen: „Aus Foto übernehmen“ (Texterkennung mit Fortschritt und Abbrechen) und „Aus Text übernehmen“,
- * der Hinweis zum Prüfen, die gelesenen Seiten und der übernommene Text zum Nachsehen, Kopieren und Entfernen.
+ * Übernehmen: „Aus Link übernehmen“ (Laden der Seite mit Abbrechen), „Aus Foto übernehmen“ (Texterkennung mit
+ * Fortschritt und Abbrechen) und „Aus Text übernehmen“, der Hinweis zum Prüfen, die gelesenen Seiten und der
+ * übernommene Text zum Nachsehen, Kopieren und Entfernen.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -438,6 +455,7 @@ private fun RecognitionSection(
     enabled: Boolean,
     onStart: () -> Unit,
     onImportText: () -> Unit,
+    onImportLink: () -> Unit,
 ) {
     var showText by rememberSaveable { mutableStateOf(false) }
     var confirmRemoveText by rememberSaveable { mutableStateOf(false) }
@@ -488,15 +506,37 @@ private fun RecognitionSection(
                     }
                 }
             }
-            RecognitionState.Idle -> if (viewModel.recognitionInterrupted) {
-                InterruptedRecognition(
+            RecognitionState.Idle -> when {
+                viewModel.isLoadingLink -> Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = MaterialTheme.shapes.large,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(modifier = Modifier.padding(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
+                            Text(
+                                text = stringResource(R.string.link_loading),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .semantics { liveRegion = LiveRegionMode.Polite },
+                            )
+                            TextButton(onClick = viewModel::cancelLinkImport) { Text(stringResource(R.string.cancel)) }
+                        }
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    }
+                }
+                viewModel.recognitionInterrupted -> InterruptedRecognition(
                     enabled = enabled,
                     onDiscard = viewModel::discardRecognition,
                     onRetry = viewModel::retryRecognition,
                 )
-            } else {
-                OptionButton(R.drawable.ic_document_scanner, R.string.import_from_photo, onStart, enabled = enabled)
-                OptionButton(R.drawable.ic_content_paste, R.string.import_from_text, onImportText, enabled = enabled)
+                else -> {
+                    OptionButton(R.drawable.ic_link, R.string.import_from_link, onImportLink, enabled = enabled)
+                    OptionButton(R.drawable.ic_document_scanner, R.string.import_from_photo, onStart, enabled = enabled)
+                    OptionButton(R.drawable.ic_content_paste, R.string.import_from_text, onImportText, enabled = enabled)
+                }
             }
         }
 
@@ -733,6 +773,64 @@ private fun TextImportDialog(onImport: (String) -> Unit, onDismiss: () -> Unit) 
         },
         confirmButton = {
             TextButton(onClick = { onImport(text) }, enabled = text.isNotBlank()) {
+                Text(stringResource(R.string.import_text_action))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+        },
+    )
+}
+
+/**
+ * „Aus Link übernehmen“ (#55): Link zu einer Rezeptseite einfügen, z. B. aus dem Browser. Die Zwischenablage wird nur
+ * gelesen, wenn „Aus der Zwischenablage einfügen“ angetippt wird; steht dort mehr Text, zählt der erste Link darin.
+ */
+@Composable
+private fun LinkImportDialog(initial: String, onImport: (String) -> Unit, onDismiss: () -> Unit) {
+    var link by rememberSaveable { mutableStateOf(initial) }
+    var clipboardEmpty by rememberSaveable { mutableStateOf(false) }
+    val clipboard = LocalClipboard.current
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.import_from_link), modifier = Modifier.semantics { heading() }) },
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(Spacing.s),
+            ) {
+                Text(stringResource(R.string.import_link_hint))
+                OutlinedTextField(
+                    value = link,
+                    onValueChange = { link = it.take(WebAddress.MAX_LENGTH) },
+                    label = { Text(stringResource(R.string.import_link_field)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OptionButton(R.drawable.ic_content_paste, R.string.paste_from_clipboard, onClick = {
+                    scope.launch {
+                        val pasted = clipboard.getClipEntry()?.clipData
+                            ?.takeIf { it.itemCount > 0 }
+                            ?.getItemAt(0)?.coerceToText(context)?.toString()?.trim().orEmpty()
+                        clipboardEmpty = pasted.isEmpty()
+                        if (pasted.isNotEmpty()) link = (TextLinks.first(pasted) ?: pasted).take(WebAddress.MAX_LENGTH)
+                    }
+                })
+                if (clipboardEmpty) {
+                    Text(
+                        text = stringResource(R.string.clipboard_empty),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onImport(link) }, enabled = link.isNotBlank()) {
                 Text(stringResource(R.string.import_text_action))
             }
         },
