@@ -79,6 +79,7 @@
     <string name="ocr_done">Text added to the recipe. Check quantities and units for reading errors.</string>
     <string name="ocr_nothing">No text found. Sharp photos taken straight on in good light work best.</string>
     <string name="ocr_error">The text could not be recognized. Try again or choose another photo.</string>
+    <string name="ocr_low_memory">Not enough free memory for text recognition. Close other apps and try again, or read fewer pages at once.</string>
     <string name="ocr_interrupted">Text recognition was interrupted.</string>
     <string name="ocr_retry">Recognize again</string>
     <string name="ocr_language">Language of the text</string>

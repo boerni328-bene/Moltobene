@@ -3,6 +3,16 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.15.1] – 2026-10-06 (versionCode 33)
+
+### Behoben
+- **Texterkennung auf Handys mit wenig Speicher:** Reicht der Speicher für die Texterkennung nicht, stürzt die App nicht mehr ab. Stattdessen erscheint: „Für die Texterkennung ist gerade zu wenig Speicher frei. Andere Apps schließen und erneut versuchen oder weniger Seiten auf einmal lesen.“
+- **Seiten bleiben nach einem Fehler erhalten:** Klappt die Texterkennung nicht, geht es zurück zur Seitenübersicht. Die Fotos müssen nicht neu ausgewählt werden; „Text erkennen“ lässt sich gleich wiederholen, und einzelne Seiten lassen sich vorher entfernen.
+- Vor dem Lesen der Seiten werden die bisherigen Eingaben eines neuen Rezepts als Entwurf gesichert, falls Android die App währenddessen beendet.
+
+### Geändert
+- Die Texterkennung braucht weniger vom knappen Arbeitsspeicher der App: Das große Lesemodell (21 MB) wird nicht mehr doppelt im Speicher gehalten.
+
 ## [0.15.0] – 2026-10-05 (versionCode 32)
 
 ### Neu

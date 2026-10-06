@@ -29,8 +29,10 @@ internal object TestImages {
     fun model(name: String): File = File("src/main/assets/${PaddleOcr.MODEL_DIR}", name)
 
     fun openOcr(): PaddleOcr = PaddleOcr(
-        detectionModel = model(PaddleOcr.DETECTION_MODEL).readBytes(),
-        recognitionModel = model(PaddleOcr.RECOGNITION_MODEL).readBytes(),
+        detectionModel = modelBuffer(model(PaddleOcr.DETECTION_MODEL)),
+        recognitionModel = modelBuffer(model(PaddleOcr.RECOGNITION_MODEL)),
         dictionary = model(PaddleOcr.DICTIONARY).readLines(Charsets.UTF_8),
     )
+
+    private fun modelBuffer(file: File) = file.inputStream().use { PaddleOcr.modelBuffer(it, file.length().toInt()) }
 }

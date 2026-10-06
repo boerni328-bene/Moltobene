@@ -78,6 +78,7 @@
     <string name="ocr_done">Text ins Rezept übernommen. Mengen und Einheiten auf Lesefehler prüfen.</string>
     <string name="ocr_nothing">Kein Text gefunden. Am besten klappt es mit einem scharfen, gerade aufgenommenen Foto bei gutem Licht.</string>
     <string name="ocr_error">Der Text konnte nicht erkannt werden. Erneut versuchen oder ein anderes Foto wählen.</string>
+    <string name="ocr_low_memory">Für die Texterkennung ist gerade zu wenig Speicher frei. Andere Apps schließen und erneut versuchen oder weniger Seiten auf einmal lesen.</string>
     <string name="ocr_interrupted">Texterkennung wurde unterbrochen.</string>
     <string name="ocr_retry">Erneut erkennen</string>
     <string name="ocr_language">Sprache des Textes</string>

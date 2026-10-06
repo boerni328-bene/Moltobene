@@ -540,6 +540,16 @@ class EditViewModel(
     /** Seitenübersicht abbrechen: Es wird nichts gelesen, die kopierten Seiten werden gelöscht. */
     fun cancelPages() = finishRun(read = false)
 
+    /**
+     * Nach einem Fehler (#50) zurück zur Seitenübersicht: Seiten und Bereiche bleiben, „Text erkennen“ lässt sich
+     * wiederholen, z. B. nachdem andere Apps geschlossen oder Seiten entfernt wurden.
+     */
+    private fun backToPages() {
+        recognitionStartedField.value = false
+        recognitionInterrupted = false
+        loadThumbnails()
+    }
+
     /** „Erneut erkennen“ nach einer Unterbrechung: dieselben Seiten mit denselben Bereichen lesen. */
     fun retryRecognition() {
         if (recognitionInterrupted) startRecognition()
@@ -709,8 +719,12 @@ class EditViewModel(
         recognition = RecognitionState.Running(1, pages.size)
         val session = sessionField.value
         val current = TextRecognizer.Run().also { run = it }
+        // #50: Bisherige Eingaben eines neuen Rezepts vorher als Entwurf sichern – falls Android die App
+        // während der Erkennung wegen Speichermangels doch beendet.
+        saveDraft()
         viewModelScope.launch {
             var read = false
+            var failed = false
             try {
                 // Ein Ergebnis einer früheren Erkennung darf nicht für diese gehalten werden.
                 session?.let { runCatching { pending.deleteResult(it) } }
@@ -733,12 +747,16 @@ class EditViewModel(
                 // Abgebrochen: nichts ändern.
             } catch (e: CancellationException) {
                 throw e
+            } catch (e: TextRecognizer.LowMemoryException) {
+                message = R.string.ocr_low_memory
+                failed = true
             } catch (e: Exception) {
                 message = R.string.ocr_error
+                failed = true
             } finally {
                 if (run === current) run = null
                 recognition = RecognitionState.Idle
-                finishRun(read)
+                if (failed) backToPages() else finishRun(read)
             }
         }
     }

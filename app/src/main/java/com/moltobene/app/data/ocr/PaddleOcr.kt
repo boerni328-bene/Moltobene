@@ -3,19 +3,27 @@ package com.moltobene.app.data.ocr
 import ai.onnxruntime.OnnxTensor
 import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
+import java.io.EOFException
+import java.io.IOException
+import java.io.InputStream
+import java.nio.ByteBuffer
+import java.nio.channels.Channels
 
 /**
  * Texterkennung mit PP-OCRv6 (PaddleOCR) über ONNX Runtime, nur auf dem Handy: ein kleines Modell sucht die
  * Textzeilen, ein größeres liest jede Zeile. Zu jeder Zeile gibt es ihre Lage auf der Seite, daraus entsteht in
  * [ReadingOrder] die Lesereihenfolge. Ohne Android-Abhängigkeiten, damit es auch in Unit-Tests läuft.
  *
+ * Die Modelle kommen als direkte Puffer ([modelBuffer]): Sie liegen außerhalb des Java-Speichers, der auf
+ * günstigen Handys oft nur 128–192 MB groß ist; das Lesemodell allein hat 21 MB (#50).
+ *
  * @param detectionModel Modell für die Zeilensuche (ONNX)
  * @param recognitionModel Modell zum Lesen einer Zeile (ONNX)
  * @param dictionary Zeichen des Lesemodells, ein Zeichen je Eintrag
  */
 class PaddleOcr(
-    detectionModel: ByteArray,
-    recognitionModel: ByteArray,
+    detectionModel: ByteBuffer,
+    recognitionModel: ByteBuffer,
     dictionary: List<String>,
     threads: Int = DEFAULT_THREADS,
 ) : AutoCloseable {
@@ -93,6 +101,21 @@ class PaddleOcr(
         const val DETECTION_MODEL = "det.onnx"
         const val RECOGNITION_MODEL = "rec.onnx"
         const val DICTIONARY = "keys.txt"
+
+        /**
+         * Liest ein Modell mit [size] Bytes in einen direkten Puffer außerhalb des Java-Speichers,
+         * stückweise und ohne Kopie im Java-Speicher.
+         */
+        fun modelBuffer(input: InputStream, size: Int): ByteBuffer {
+            val buffer = ByteBuffer.allocateDirect(size)
+            val channel = Channels.newChannel(input)
+            while (buffer.hasRemaining()) {
+                if (channel.read(buffer) < 0) throw EOFException("Modell unvollständig")
+            }
+            if (input.read() >= 0) throw IOException("Modell größer als erwartet")
+            buffer.flip()
+            return buffer
+        }
 
         /** Längste Seite für die Zeilensuche; in Tests mit nachgestellten Handyfotos der beste Kompromiss. */
         const val DETECTION_MAX_SIDE = 1600

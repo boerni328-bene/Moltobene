@@ -37,6 +37,12 @@ class TextRecognizer(private val context: Context) {
     class CancelledException : Exception()
 
     /**
+     * Für die Erkennung war zu wenig Speicher frei (#50). Statt eines Absturzes ein normaler Fehler:
+     * Seiten und Eingaben bleiben erhalten, die Erkennung lässt sich wiederholen.
+     */
+    class LowMemoryException(cause: Throwable) : IOException("Zu wenig Speicher für die Texterkennung", cause)
+
+    /**
      * Eine Erkennung (#43). Sie lässt sich jederzeit abbrechen – auch in den ersten Sekunden, bevor
      * das Lesen richtig begonnen hat, und mitten in einer Rechnung der Modelle. Darf von jedem Thread aus
      * abgebrochen werden.
@@ -76,6 +82,23 @@ class TextRecognizer(private val context: Context) {
         chosenLanguage: String?,
         onProgress: (page: Int, percent: Int) -> Unit,
     ): Result = mutex.withLock {
+        try {
+            recognizePages(run, pages, preferredLanguage, chosenLanguage, onProgress)
+        } catch (e: OutOfMemoryError) {
+            throw LowMemoryException(e)
+        } catch (e: LinkageError) {
+            // Die Programmbibliothek der Erkennung ließ sich nicht laden, z. B. bei knappem Speicher.
+            throw IOException("Texterkennung nicht verfügbar", e)
+        }
+    }
+
+    private suspend fun recognizePages(
+        run: Run,
+        pages: List<Page>,
+        preferredLanguage: String,
+        chosenLanguage: String?,
+        onProgress: (page: Int, percent: Int) -> Unit,
+    ): Result =
         withContext(Dispatchers.Default) {
             run.check()
             val progress = Progress(pages.size, onProgress)
@@ -114,14 +137,14 @@ class TextRecognizer(private val context: Context) {
             val found = chosenLanguage?.let { TextLanguage.supportedOrDefault(it) } ?: TextLanguage.detect(text)
             Result(parts, found ?: TextLanguage.supportedOrDefault(preferredLanguage), detected = found != null)
         }
-    }
 
     /** Lädt die beiden Modelle und die Zeichenliste aus den mitgelieferten Dateien. */
     private suspend fun openModels(): PaddleOcr = withContext(Dispatchers.IO) {
         val assets = context.assets
         val dir = PaddleOcr.MODEL_DIR
-        val detection = assets.open("$dir/${PaddleOcr.DETECTION_MODEL}").use { it.readBytes() }
-        val recognition = assets.open("$dir/${PaddleOcr.RECOGNITION_MODEL}").use { it.readBytes() }
+        // Außerhalb des Java-Speichers (#50); available() liefert bei Dateien aus assets ihre ganze Größe.
+        val detection = assets.open("$dir/${PaddleOcr.DETECTION_MODEL}").use { PaddleOcr.modelBuffer(it, it.available()) }
+        val recognition = assets.open("$dir/${PaddleOcr.RECOGNITION_MODEL}").use { PaddleOcr.modelBuffer(it, it.available()) }
         val dictionary = assets.open("$dir/${PaddleOcr.DICTIONARY}").bufferedReader(Charsets.UTF_8).use { it.readLines() }
         PaddleOcr(detection, recognition, dictionary)
     }
