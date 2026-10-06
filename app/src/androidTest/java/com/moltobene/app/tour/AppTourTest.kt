@@ -1,5 +1,6 @@
 package com.moltobene.app.tour
 
+import android.content.Intent
 import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.ui.semantics.SemanticsActions
@@ -20,9 +21,13 @@ import androidx.compose.ui.test.performTextInput
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.test.filters.SdkSuppress
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
+import androidx.test.runner.lifecycle.Stage
 import com.moltobene.app.MainActivity
 import com.moltobene.app.MoltobeneApplication
 import com.moltobene.app.R
+import com.moltobene.app.data.share.RecipeJsonLd
 import com.moltobene.app.ui.whatsnew.WhatsNew
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -300,25 +305,63 @@ class AppTourTest(private val variant: DisplayVariant) {
         assertEquals(1, recipe.photoIds.size)
     }
 
+    /**
+     * „Öffnen mit…“ für eine Rezeptdatei (#54), wie aus WhatsApp oder dem Dateimanager: Android öffnet Moltobene
+     * mit der Datei, die App liest sie ohne Internet und übernimmt auch das eingebettete Foto.
+     */
+    @Test
+    fun ausDateiUebernehmen() {
+        val file = SamplePage.recipeFile(activity)
+        try {
+            activity.startActivity(
+                Intent(Intent.ACTION_VIEW)
+                    .setDataAndType(file, RecipeJsonLd.MIME_TYPE)
+                    .setClass(activity, MainActivity::class.java)
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION),
+            )
+            waitForText(text(R.string.file_done))
+            waitForText(text(R.string.photo_remove))
+            composeRule.onNode(hasSetTextAction() and hasText(SamplePage.FILE_TITLE)).performScrollTo().assertIsDisplayed()
+            screenshot("28-aus-datei-uebernommen")
+
+            composeRule.onNodeWithText(text(R.string.save)).performClick()
+            waitForText(SamplePage.FILE_INGREDIENT)
+            val recipe = runBlocking { container().repository.getAll().single() }
+            assertEquals(SamplePage.FILE_TITLE, recipe.title)
+            assertEquals(3, recipe.servings)
+            assertEquals(3, recipe.ingredients.size)
+            assertEquals(3, recipe.steps.size)
+            assertEquals(15, recipe.prepMinutes)
+            assertEquals(40, recipe.totalMinutes)
+            // Buch und Seite aus „Familienkochbuch, S. 12“ getrennt.
+            assertEquals("Familienkochbuch", recipe.source?.name)
+            assertEquals("12", recipe.source?.page)
+            assertEquals(1, recipe.photoIds.size)
+        } finally {
+            SamplePage.deleteRecipeFile(activity, file)
+            closeOtherWindows()
+        }
+    }
+
     @Test
     fun einstellungen() {
         composeRule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
         waitForText(text(R.string.backup_title))
-        screenshot("28-einstellungen")
+        screenshot("29-einstellungen")
 
         composeRule.onNodeWithText(text(R.string.whats_new_title, WhatsNew.VERSION_NAME)).performScrollTo().performClick()
         waitForText(text(R.string.close))
-        screenshot("29-neu-in-version")
+        screenshot("30-neu-in-version")
         composeRule.onNodeWithText(text(R.string.close)).performClick()
 
         composeRule.onNodeWithText(text(R.string.privacy_title)).performScrollTo().performClick()
         waitForText(text(R.string.close))
-        screenshot("30-datenschutz")
+        screenshot("31-datenschutz")
         composeRule.onNodeWithText(text(R.string.close)).performClick()
 
         composeRule.onNodeWithText(text(R.string.licenses_title)).performScrollTo().performClick()
         waitForText(text(R.string.licenses_intro))
-        screenshot("31-lizenzen")
+        screenshot("32-lizenzen")
     }
 
     // --- Hilfsfunktionen ---
@@ -335,6 +378,13 @@ class AppTourTest(private val variant: DisplayVariant) {
     }
 
     private fun container() = (activity.application as MoltobeneApplication).container
+
+    /** Schließt Fenster der App, die ein Schritt zusätzlich geöffnet hat (z. B. über „Öffnen mit…“). */
+    private fun closeOtherWindows() = InstrumentationRegistry.getInstrumentation().runOnMainSync {
+        ActivityLifecycleMonitorRegistry.getInstance().getActivitiesInStage(Stage.RESUMED)
+            .filter { it !== activity }
+            .forEach { it.finish() }
+    }
 
     private fun addSampleRecipes() = runBlocking { SampleRecipes.addTo(container(), activity) }
 

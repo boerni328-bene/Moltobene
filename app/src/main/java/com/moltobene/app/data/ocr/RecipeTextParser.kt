@@ -66,13 +66,22 @@ object RecipeTextParser {
         "personen|portionen|pers\\.?|people|persons|servings?|portions?|persone|porzioni|personnes|parts|personas|porciones|raciones"
     private const val PIECE_WORDS = "stück|stücke|stk\\.?|pieces?|pezzi|pièces|piezas"
     private val SERVINGS_PATTERNS = listOf(
+        // Eine eigene Zeile mit Zahl und eigener Einheit: „Für 1 Zopf“, „Für 1 Springform (26 cm)“, „For 12 muffins“.
+        Regex(
+            "^\\s*(?:für|fuer|for|per|pour|para)\\s+(\\d{1,3})\\s+(\\p{L}[\\p{L}-]{1,30}(?:\\s*\\([^)]{1,20}\\))?)\\s*[:.]?\\s*$",
+            RegexOption.IGNORE_CASE,
+        ),
         Regex("\\b(?:für|fuer|for|per|pour|para)\\s+(\\d{1,3})(?:\\s*-\\s*\\d{1,3})?\\s*($PERSON_WORDS|$PIECE_WORDS)?\\b", RegexOption.IGNORE_CASE),
         Regex("\\b(?:serves|makes|ergibt|reicht für|dosi per|rend|rinde)\\s*:?\\s*(\\d{1,3})\\s*($PIECE_WORDS)?", RegexOption.IGNORE_CASE),
         // Nur eine eigene Zeile wie „12 Stück“ – „1 Stk. Zwiebel“ ist eine Zutat.
         Regex("^(\\d{1,3})\\s+($PERSON_WORDS|$PIECE_WORDS)\\s*$", RegexOption.IGNORE_CASE),
         Regex("\\b(?:$PERSON_WORDS)\\s*:\\s*(\\d{1,3})", RegexOption.IGNORE_CASE),
     )
-    private val PIECES = Regex("^($PIECE_WORDS)$", RegexOption.IGNORE_CASE)
+    private val PERSONS = Regex("^($PERSON_WORDS)$", RegexOption.IGNORE_CASE)
+    private val DURATION_UNITS = Regex(
+        "^(min\\.?|minute|minuten|minutes|minuti|minutos|std\\.?|stunde|stunden|hours?|ore|heures?|horas?|sek\\.?|sekunden|seconds|grad|degrees)\\b",
+        RegexOption.IGNORE_CASE,
+    )
 
     /** Werbung auf Rezept-Seiten („Anzeige“) und Zeilen mit Zeichen, die in Rezepten kaum vorkommen. */
     private val AD_MARKERS = Regex("\\b(anzeige|werbung|advertisement|sponsored|pubblicità|publicité|publicidad)\\b", RegexOption.IGNORE_CASE)
@@ -226,7 +235,9 @@ object RecipeTextParser {
             if (!isHeading && (line.length > 40 || index == stepsHeading)) continue
             val match = SERVINGS_PATTERNS.firstNotNullOfOrNull { it.find(line) } ?: continue
             val count = match.groupValues[1].toIntOrNull()?.takeIf { it in 1..999 } ?: continue
-            val unit = match.groupValues.getOrNull(2)?.takeIf { PIECES.matches(it) }
+            // Personen und Portionen sind keine eigene Einheit; Zeitangaben („Für 10 Minuten“) sind keine Portionen.
+            val unit = match.groupValues.getOrNull(2)?.trim()?.takeIf { it.isNotEmpty() && !PERSONS.matches(it) }
+            if (unit != null && DURATION_UNITS.containsMatchIn(unit)) continue
             return Servings(count, unit, if (isHeading) null else index)
         }
         return null

@@ -21,6 +21,8 @@ data class WebRecipe(
     /** Sprache als Kürzel wie „de“, nur wenn sie angegeben ist. */
     val language: String? = null,
     val url: String? = null,
+    /** Quelle ohne Link, z. B. „Omas Kochbuch, S. 47“ (schema.org isBasedOn), wie Moltobene sie in Rezeptdateien schreibt. */
+    val sourceName: String? = null,
 ) {
     /** Steht genug da, um daraus einen Entwurf zu machen? */
     val hasContent: Boolean get() = ingredients.isNotEmpty() || steps.isNotEmpty()

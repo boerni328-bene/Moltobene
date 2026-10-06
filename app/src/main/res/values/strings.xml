@@ -87,6 +87,13 @@
     <string name="link_error_not_secure">The page cannot be loaded securely. Only pages with an encrypted connection are imported.</string>
     <string name="link_error_not_allowed">This link does not lead to a public web page.</string>
     <string name="link_error">The page could not be read. The link is saved as the source.</string>
+    <string name="import_from_file">Import from file</string>
+    <string name="file_loading">Reading file …</string>
+    <string name="file_done">Recipe imported from the file. Check that everything is in the right place.</string>
+    <string name="file_no_recipe">No recipe was found in the file. Recipe files, e.g. shared from Moltobene, and saved recipe pages can be imported.</string>
+    <string name="file_error">The file could not be read.</string>
+    <string name="file_too_large">The file is too large for a recipe (10 MB at most).</string>
+    <string name="file_chooser_unavailable">There is no app on this device for choosing files.</string>
     <string name="ocr_dialog_text">Reads title, ingredients and instructions from photos of a cookbook, a note or a screenshot. Sharp photos taken straight on work best. For longer recipes, take or choose one photo per page (up to %1$d pages) – everything is read together at the end. When taking photos, the camera opens again after each one; “Back” ends the series.</string>
     <string name="ocr_from_recipe_photo">Use recipe photo</string>
     <string name="ocr_choose_photos">Choose photos</string>
@@ -161,9 +168,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Import from link: import recipes from cooking sites and recipe blogs with a link – with title, ingredients, instructions, servings, times and photo. Also via “Share” from the browser.</item>
-        <item>Times from imported recipes appear in the recipe view, e.g. “Total time: 45 min”.</item>
-        <item>Settings → About now contains a short privacy statement.</item>
+        <item>Import from file: recipe files that someone shared from Moltobene can be opened directly from WhatsApp, email or the file manager – including the photo, without internet. Saved recipe pages are read as well.</item>
+        <item>Recipe text shared from Moltobene keeps its source when imported, e.g. book and page.</item>
+        <item>Servings such as “For 1 loaf” are imported with their unit.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->

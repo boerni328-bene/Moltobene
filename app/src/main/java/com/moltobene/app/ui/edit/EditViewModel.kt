@@ -2,6 +2,7 @@ package com.moltobene.app.ui.edit
 
 import android.graphics.Bitmap
 import android.net.Uri
+import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -18,6 +19,7 @@ import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeIds
 import com.moltobene.app.data.RecipeRepository
 import com.moltobene.app.data.RecipeText
+import com.moltobene.app.data.SourceLine
 import com.moltobene.app.data.TextLinks
 import com.moltobene.app.data.ocr.AreaFrame
 import com.moltobene.app.data.ocr.AreaKind
@@ -29,7 +31,9 @@ import com.moltobene.app.data.ocr.TextLanguage
 import com.moltobene.app.data.ocr.TextRecognizer
 import com.moltobene.app.data.ocr.boundsOf
 import com.moltobene.app.data.photos.PhotoStore
+import com.moltobene.app.data.share.IncomingRecipeFile
 import com.moltobene.app.data.share.IncomingText
+import com.moltobene.app.data.share.RecipeFileReader
 import com.moltobene.app.data.web.WebAddress
 import com.moltobene.app.data.web.WebException
 import com.moltobene.app.data.web.WebImporter
@@ -98,6 +102,7 @@ class EditViewModel(
     private val pending: PendingRecognition,
     private val sharedInput: SharedInput,
     private val webImporter: WebImporter,
+    private val recipeFiles: RecipeFileReader,
 ) : ViewModel() {
 
     private val route = handle.toRoute<EditRoute>()
@@ -230,6 +235,7 @@ class EditViewModel(
         CHECK_TEXT -> R.string.text_done
         CHECK_LINK -> R.string.link_done
         CHECK_LINK_TEXT -> R.string.link_text_done
+        CHECK_FILE -> R.string.file_done
         else -> null
     }
     val askKeepPages: Boolean get() = askKeepPagesField.value
@@ -251,10 +257,14 @@ class EditViewModel(
     var recognitionInterrupted by mutableStateOf(false)
         private set
 
-    /** Eine Seite wird gerade geladen (#55); „Abbrechen“ beendet das sofort. */
-    var isLoadingLink by mutableStateOf(false)
+    /**
+     * Eine Seite wird geladen (#55) oder eine Rezeptdatei gelesen (#54): der Text dazu, sonst null.
+     * „Abbrechen“ beendet das sofort.
+     */
+    var importing by mutableStateOf<Int?>(null)
         private set
-    private var linkJob: Job? = null
+    val isImporting: Boolean get() = importing != null
+    private var importJob: Job? = null
 
     /** Foto der Seite, deren Bereich gerade gewählt wird; null, solange es lädt. */
     var areaPreview by mutableStateOf<Bitmap?>(null)
@@ -396,18 +406,26 @@ class EditViewModel(
         return true
     }
 
+    /** „Aus Datei übernehmen“ in der Sammlung: Die Dateiauswahl erscheint beim ersten Öffnen von selbst. */
+    fun takeFilePrompt(): Boolean {
+        if (!route.fromFile || startPromptShownField.value) return false
+        startPromptShownField.value = true
+        return true
+    }
+
     /** Vorbelegung für „Aus Link übernehmen“: der Link aus „Quelle“, z. B. für einen neuen Versuch ohne Netz. */
     val linkForImport: String get() = source.trim().takeIf { RecipeText.isWebLink(it) }.orEmpty()
 
     /**
-     * Inhalt aus „Teilen mit…“: Bilder (#46) werden gleich kopiert und kommen in die Seitenübersicht,
-     * Text wird wie bei „Aus Text übernehmen“ aufgeteilt.
+     * Inhalt aus „Teilen mit…“ bzw. „Öffnen mit…“: Bilder (#46) werden gleich kopiert und kommen in die
+     * Seitenübersicht, Text wird wie bei „Aus Text übernehmen“ aufgeteilt, eine Rezeptdatei (#54) gelesen.
      */
     private fun takeShared() {
         sharedTakenField.value = true
         when (val content = sharedInput.take()) {
             is SharedContent.Photos -> recognizePhotos(content.uris)
             is SharedContent.Text -> importText(content.shared.text, content.shared.subject)
+            is SharedContent.RecipeFile -> importFile(content.uri)
             null -> Unit
         }
     }
@@ -853,10 +871,17 @@ class EditViewModel(
             importLink(sharedLink.url, fallbackTitle = sharedLink.title ?: subject)
             return
         }
-        val language = TextLanguage.detect(text)
-        mergeIntoForm(text, RecipeTextParser.parse(text, language, typed = true), language)
+        // „Quelle: …“ am Ende (so teilt Moltobene selbst) wird zur Quelle, nicht zum letzten Schritt (#54).
+        val split = SourceLine.split(text)
+        val language = TextLanguage.detect(split.text)
+        mergeIntoForm(text, RecipeTextParser.parse(split.text, language, typed = true), language)
         if (title.isBlank()) subject?.let { title = it }
-        if (source.isBlank()) TextLinks.first(text)?.let { source = it }
+        if (source.isBlank()) {
+            split.source?.let { shared ->
+                source = shared
+                if (sourcePage.isBlank()) split.page?.let { sourcePage = it }
+            } ?: TextLinks.first(text)?.let { source = it }
+        }
         checkHintField.value = CHECK_TEXT
     }
 
@@ -868,7 +893,7 @@ class EditViewModel(
      * @param fallbackTitle Titel, falls die Seite keinen liefert, z. B. der Titel aus „Teilen mit…“
      */
     fun importLink(raw: String, fallbackTitle: String? = null) {
-        if (isLoadingLink || isRecognizing) return
+        if (isImporting || isRecognizing) return
         val url = WebAddress.normalize(TextLinks.first(raw) ?: raw.trim())
         if (url == null) {
             message = R.string.link_invalid
@@ -876,16 +901,17 @@ class EditViewModel(
         }
         if (source.isBlank()) source = url
         saveDraft()
-        isLoadingLink = true
-        linkJob = viewModelScope.launch {
+        importing = R.string.link_loading
+        importJob = viewModelScope.launch {
             try {
                 val result = webImporter.import(url)
                 // Nach einer Weiterleitung (z. B. von einem Kurzlink) zählt die Adresse der Seite selbst.
                 if (source.trim() == url && result.url != url) source = result.url
                 when (result) {
-                    is WebImporter.Result.Found -> applyWebRecipe(result.recipe, result.url)
-                    is WebImporter.Result.TextOnly -> if (!applyPageText(result)) noRecipe(result.title ?: fallbackTitle)
-                    is WebImporter.Result.NoRecipe -> noRecipe(result.title ?: fallbackTitle)
+                    is WebImporter.Result.Found -> applyWebRecipe(result.recipe, result.url, CHECK_LINK, fromFile = false)
+                    is WebImporter.Result.TextOnly ->
+                        if (!applyPageText(result, fromFile = false)) noRecipe(result.title ?: fallbackTitle, R.string.link_no_recipe)
+                    is WebImporter.Result.NoRecipe -> noRecipe(result.title ?: fallbackTitle, R.string.link_no_recipe)
                 }
             } catch (e: CancellationException) {
                 throw e
@@ -896,19 +922,68 @@ class EditViewModel(
                 if (title.isBlank()) fallbackTitle?.let { title = it }
                 message = R.string.link_error
             } finally {
-                isLoadingLink = false
-                linkJob = null
+                importing = null
+                importJob = null
                 saveDraft()
             }
         }
     }
 
-    /** „Abbrechen“ beim Laden: Die Verbindung wird sofort getrennt; der Link bleibt als Quelle. */
-    fun cancelLinkImport() {
-        linkJob?.cancel()
+    /**
+     * „Aus Datei übernehmen“ (#54): eine Rezeptdatei (schema.org/Recipe, z. B. von Moltobene geteilt) oder eine
+     * gespeicherte Rezeptseite. Ohne Internet: Nur ein in der Datei eingebettetes Foto wird übernommen, Links auf
+     * Fotos im Internet werden nicht abgerufen. Die Datei wird sofort gelesen, weil die Leseerlaubnis nur kurz gilt.
+     */
+    fun importFile(uri: Uri) {
+        if (isImporting || isRecognizing) return
+        importing = R.string.file_loading
+        importJob = viewModelScope.launch {
+            try {
+                when (val result = webImporter.readFile(recipeFiles.read(uri))) {
+                    is WebImporter.Result.Found -> {
+                        val recipe = result.recipe
+                        if (source.isBlank()) {
+                            val url = recipe.url
+                            if (url != null) {
+                                source = url
+                            } else {
+                                // „Familienkochbuch, S. 12“ aus einer Moltobene-Datei: Buch und Seite getrennt (#40).
+                                recipe.sourceName?.let(SourceLine::withPage)?.let { (name, page) ->
+                                    source = name
+                                    if (sourcePage.isBlank()) page?.let { sourcePage = it }
+                                }
+                            }
+                        }
+                        applyWebRecipe(recipe, recipe.url ?: recipe.sourceName, CHECK_FILE, fromFile = true)
+                    }
+                    is WebImporter.Result.TextOnly ->
+                        if (!applyPageText(result, fromFile = true)) noRecipe(result.title, R.string.file_no_recipe)
+                    is WebImporter.Result.NoRecipe -> noRecipe(result.title, R.string.file_no_recipe)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: IncomingRecipeFile.TooLargeException) {
+                message = R.string.file_too_large
+            } catch (e: Exception) {
+                message = R.string.file_error
+            } finally {
+                importing = null
+                importJob = null
+                saveDraft()
+            }
+        }
     }
 
-    private fun applyWebRecipe(recipe: WebRecipe, pageUrl: String) {
+    /** „Abbrechen“ beim Laden einer Seite oder Lesen einer Datei; beim Link wird die Verbindung sofort getrennt. */
+    fun cancelImport() {
+        importJob?.cancel()
+    }
+
+    /**
+     * @param sourceText Link oder Quelle für den übernommenen Text
+     * @param fromFile aus einer Datei: dann nur ein eingebettetes Foto, sonst nur ein Foto aus dem Internet
+     */
+    private fun applyWebRecipe(recipe: WebRecipe, sourceText: String?, hint: String, fromFile: Boolean) {
         val language = recipe.language
             ?: TextLanguage.detect((recipe.ingredients + recipe.steps).joinToString("\n"))
         val parsed = ParsedRecipe(
@@ -918,38 +993,44 @@ class EditViewModel(
             ingredients = recipe.ingredients,
             steps = recipe.steps,
         )
-        mergeIntoForm(recipe.toText(pageUrl), parsed, language)
+        mergeIntoForm(recipe.toText(sourceText), parsed, language)
         if (prepMinutesField.value == 0) prepMinutesField.value = recipe.prepMinutes ?: 0
         if (totalMinutesField.value == 0) totalMinutesField.value = recipe.totalMinutes ?: 0
-        checkHintField.value = CHECK_LINK
-        if (!hasPhoto) recipe.imageUrls.firstOrNull()?.let(::loadWebPhoto)
+        checkHintField.value = hint
+        if (!hasPhoto) recipe.imageUrls.firstOrNull { isUsablePhoto(it, fromFile) }?.let { loadPhoto(it, fromFile) }
     }
 
     /**
-     * Seite ohne Rezept im Standardformat: Ihr Text wird wie bei „Aus Text übernehmen“ eingeordnet.
-     * Liefert false, wenn darin weder Zutaten noch Schritte zu finden sind.
+     * Seite (oder gespeicherte Seite) ohne Rezept im Standardformat: Ihr Text wird wie bei „Aus Text übernehmen“
+     * eingeordnet. Liefert false, wenn darin weder Zutaten noch Schritte zu finden sind.
      */
-    private fun applyPageText(result: WebImporter.Result.TextOnly): Boolean {
+    private fun applyPageText(result: WebImporter.Result.TextOnly, fromFile: Boolean): Boolean {
         val language = result.language?.takeIf { it in TextLanguage.SUPPORTED } ?: TextLanguage.detect(result.text)
         val parsed = RecipeTextParser.parse(result.text, language, typed = true)
         if (parsed.ingredients.isEmpty() && parsed.steps.isEmpty()) return false
         mergeIntoForm(result.text, parsed.copy(title = result.title ?: parsed.title), language)
         checkHintField.value = CHECK_LINK_TEXT
-        if (!hasPhoto) result.imageUrl?.let(::loadWebPhoto)
+        if (!hasPhoto) result.imageUrl?.takeIf { isUsablePhoto(it, fromFile) }?.let { loadPhoto(it, fromFile) }
         return true
     }
 
-    private fun noRecipe(pageTitle: String?) {
+    private fun noRecipe(pageTitle: String?, @StringRes text: Int) {
         if (title.isBlank()) pageTitle?.let { title = it }
-        message = R.string.link_no_recipe
+        message = text
     }
 
-    /** Das Foto der Seite wird Rezeptfoto – nur ein Zusatz: Klappt es nicht, bleibt das Rezept ohne Foto. */
-    private fun loadWebPhoto(url: String) {
+    /** Aus einer Datei nur eingebettete Fotos (ohne Internet), von einer Seite nur Fotos aus dem Internet. */
+    private fun isUsablePhoto(link: String, fromFile: Boolean): Boolean = when {
+        fromFile -> link.startsWith("data:", ignoreCase = true)
+        else -> link.startsWith("https://", ignoreCase = true) || link.startsWith("http://", ignoreCase = true)
+    }
+
+    /** Das Foto der Seite bzw. Datei wird Rezeptfoto – nur ein Zusatz: Klappt es nicht, bleibt das Rezept ohne Foto. */
+    private fun loadPhoto(link: String, fromFile: Boolean) {
         viewModelScope.launch {
             isProcessingPhoto = true
             try {
-                val file = webImporter.downloadPhoto(url)
+                val file = if (fromFile) webImporter.embeddedPhoto(link) else webImporter.downloadPhoto(link)
                 try {
                     if (!hasPhoto) replacePhoto(photoStore.importFromUri(Uri.fromFile(file)))
                 } finally {
@@ -1046,6 +1127,7 @@ class EditViewModel(
         const val CHECK_TEXT = "text"
         const val CHECK_LINK = "link"
         const val CHECK_LINK_TEXT = "linkText"
+        const val CHECK_FILE = "file"
         /** Kantenlänge der Vorschaubilder in der Seitenübersicht. */
         const val THUMBNAIL_EDGE = 480
     }

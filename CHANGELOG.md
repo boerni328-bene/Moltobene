@@ -3,6 +3,17 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.17.0] – 2026-10-06 (versionCode 35)
+
+### Neu
+- **Aus Datei übernehmen:** Rezeptdateien lassen sich jetzt übernehmen. Gemeint sind etwa Dateien, die jemand mit „Als Rezeptdatei teilen“ aus Moltobene verschickt hat, oder Rezepte anderer Apps im offenen Standardformat. Eine solche Datei öffnet sich direkt aus WhatsApp, E-Mail oder dem Dateimanager über „Öffnen mit…“ bzw. „Teilen mit…“. Alternativ steht „Aus Datei übernehmen“ im Fenster „Rezept übernehmen“. Titel, Zutaten, Zubereitung, Portionen, Zeiten, Quelle und das mitgeschickte Foto kommen ins Rezept.
+- Auch gespeicherte Rezeptseiten (HTML) werden gelesen.
+- Dateien werden ohne Internet gelesen. Steht in einer Datei nur ein Link auf ein Foto im Internet, wird es nicht geladen. Dateien über 10 MB werden nicht angenommen.
+
+### Behoben
+- Ein mit Moltobene geteilter Rezepttext endet mit „Quelle: …“. Beim Übernehmen mit „Aus Text übernehmen“ landete diese Zeile bisher als letzter Schritt in der Zubereitung. Jetzt wird sie zur Quelle; bei Büchern kommt auch die Seite ins Feld „Seite“.
+- Portionsangaben wie „Für 1 Zopf“ oder „Für 1 Springform (26 cm)“ wurden zu „1 Portion“. Jetzt bleibt die Einheit erhalten. Zeitangaben wie „Für 10 Minuten“ gelten nicht mehr als Portionen.
+
 ## [0.16.0] – 2026-10-06 (versionCode 34)
 
 ### Neu

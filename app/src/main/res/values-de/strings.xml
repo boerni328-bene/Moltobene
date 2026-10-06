@@ -86,6 +86,13 @@
     <string name="link_error_not_secure">Die Seite lässt sich nicht sicher abrufen. Übernommen werden nur Seiten mit verschlüsselter Verbindung.</string>
     <string name="link_error_not_allowed">Dieser Link führt nicht zu einer öffentlichen Internetseite.</string>
     <string name="link_error">Die Seite konnte nicht gelesen werden. Der Link ist als Quelle gespeichert.</string>
+    <string name="import_from_file">Aus Datei übernehmen</string>
+    <string name="file_loading">Datei wird gelesen …</string>
+    <string name="file_done">Rezept aus der Datei übernommen. Prüfen, ob alles an der richtigen Stelle steht.</string>
+    <string name="file_no_recipe">In der Datei wurde kein Rezept gefunden. Übernommen werden Rezeptdateien, z. B. von Moltobene geteilte, und gespeicherte Rezeptseiten.</string>
+    <string name="file_error">Die Datei konnte nicht gelesen werden.</string>
+    <string name="file_too_large">Die Datei ist zu groß für ein Rezept (höchstens 10 MB).</string>
+    <string name="file_chooser_unavailable">Auf diesem Handy gibt es keine App zum Auswählen von Dateien.</string>
     <string name="ocr_dialog_text">Liest Titel, Zutaten und Zubereitung aus Fotos von Kochbuch, Zettel oder Bildschirmfoto. Am besten gelingt es mit einem scharfen, gerade aufgenommenen Foto. Längere Rezepte Seite für Seite fotografieren oder auswählen (bis zu %1$d Seiten) – am Ende wird alles zusammen gelesen. Beim Fotografieren öffnet sich die Kamera nach jedem Foto wieder; „Zurück“ beendet die Fotoserie.</string>
     <string name="ocr_from_recipe_photo">Rezeptfoto verwenden</string>
     <string name="ocr_choose_photos">Fotos auswählen</string>
@@ -159,9 +166,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Aus Link übernehmen: Rezepte von Koch-Portalen und Rezept-Blogs per Link übernehmen – mit Titel, Zutaten, Zubereitung, Portionen, Zeiten und Foto. Auch über „Teilen“ aus dem Browser.</item>
-        <item>Zeiten aus übernommenen Rezepten stehen in der Rezeptansicht, z. B. „Gesamtzeit: 45 Min.“.</item>
-        <item>Unter Einstellungen → Info steht eine kurze Datenschutzerklärung.</item>
+        <item>Aus Datei übernehmen: Rezeptdateien, die jemand mit Moltobene geteilt hat, lassen sich direkt aus WhatsApp, E-Mail oder dem Dateimanager öffnen – samt Foto, ohne Internet. Auch gespeicherte Rezeptseiten werden gelesen.</item>
+        <item>Ein mit Moltobene geteilter Rezepttext behält beim Übernehmen seine Quelle, z. B. Buch und Seite.</item>
+        <item>Portionsangaben wie „Für 1 Zopf“ werden mit ihrer Einheit übernommen.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->

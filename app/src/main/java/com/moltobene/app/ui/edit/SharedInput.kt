@@ -3,10 +3,11 @@ package com.moltobene.app.ui.edit
 import android.net.Uri
 import com.moltobene.app.data.share.IncomingText
 
-/** Was per „Teilen mit…“ an Moltobene kommt: Bilder (#46) oder Text. */
+/** Was per „Teilen mit…“ oder „Öffnen mit…“ an Moltobene kommt: Bilder (#46), Text oder eine Rezeptdatei (#54). */
 sealed interface SharedContent {
     data class Photos(val uris: List<Uri>) : SharedContent
     data class Text(val shared: IncomingText.Shared) : SharedContent
+    data class RecipeFile(val uri: Uri) : SharedContent
 }
 
 /**

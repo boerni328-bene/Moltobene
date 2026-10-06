@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.moltobene.app.data.share.IncomingImages
+import com.moltobene.app.data.share.IncomingRecipeFile
 import com.moltobene.app.data.share.IncomingText
 import com.moltobene.app.ui.edit.SharedContent
 import com.moltobene.app.ui.navigation.MoltobeneNavHost
@@ -14,7 +15,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        // Bilder (#46) oder Text aus „Teilen mit…“ – nur beim ersten Start, nicht noch einmal nach dem Drehen.
+        // Bilder (#46), Text oder Rezeptdateien (#54) aus „Teilen mit…“ bzw. „Öffnen mit…“ –
+        // nur beim ersten Start, nicht noch einmal nach dem Drehen.
         val shared = if (savedInstanceState == null) sharedContent() else null
         setContent {
             MoltobeneTheme {
@@ -24,7 +26,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun sharedContent(): SharedContent? {
-        val photos = IncomingImages.from(intent, ownAuthority = "$packageName.fileprovider")
+        val ownAuthority = "$packageName.fileprovider"
+        IncomingRecipeFile.from(intent, ownAuthority)?.let { return SharedContent.RecipeFile(it) }
+        val photos = IncomingImages.from(intent, ownAuthority)
         if (photos.isNotEmpty()) return SharedContent.Photos(photos)
         return IncomingText.from(intent)?.let { SharedContent.Text(it) }
     }

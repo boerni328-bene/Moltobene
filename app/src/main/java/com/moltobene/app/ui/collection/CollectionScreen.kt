@@ -73,6 +73,7 @@ fun CollectionScreen(
     onAddFromPhoto: () -> Unit,
     onAddFromText: () -> Unit,
     onAddFromLink: () -> Unit,
+    onAddFromFile: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -92,6 +93,10 @@ fun CollectionScreen(
             onFromLink = {
                 chooseImport = false
                 onAddFromLink()
+            },
+            onFromFile = {
+                chooseImport = false
+                onAddFromFile()
             },
             onDismiss = { chooseImport = false },
         )
@@ -256,9 +261,15 @@ private fun EmptyCollection(onAddRecipe: () -> Unit, onImport: () -> Unit) {
     }
 }
 
-/** Woher das Rezept kommt: Link, Foto oder Text. */
+/** Woher das Rezept kommt: Link, Foto, Text oder Datei. */
 @Composable
-private fun ImportChooser(onFromPhoto: () -> Unit, onFromText: () -> Unit, onFromLink: () -> Unit, onDismiss: () -> Unit) {
+private fun ImportChooser(
+    onFromPhoto: () -> Unit,
+    onFromText: () -> Unit,
+    onFromLink: () -> Unit,
+    onFromFile: () -> Unit,
+    onDismiss: () -> Unit,
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.import_recipe), modifier = Modifier.semantics { heading() }) },
@@ -271,6 +282,7 @@ private fun ImportChooser(onFromPhoto: () -> Unit, onFromText: () -> Unit, onFro
                 OptionButton(R.drawable.ic_link, R.string.import_from_link, onFromLink)
                 OptionButton(R.drawable.ic_document_scanner, R.string.import_from_photo, onFromPhoto)
                 OptionButton(R.drawable.ic_content_paste, R.string.import_from_text, onFromText)
+                OptionButton(R.drawable.ic_description, R.string.import_from_file, onFromFile)
             }
         },
         confirmButton = {

@@ -82,6 +82,8 @@ object RecipeJsonLdReader {
             language = language(text(item["inLanguage"])),
             url = listOfNotNull(text(item["url"]), idOf(item["mainEntityOfPage"]))
                 .firstOrNull { it.startsWith("https://", ignoreCase = true) || it.startsWith("http://", ignoreCase = true) },
+            sourceName = HtmlText.inline(text(item["isBasedOn"]))
+                .takeIf { it.isNotEmpty() && !it.startsWith("http", ignoreCase = true) },
         )
     }
 
@@ -174,7 +176,7 @@ object RecipeJsonLdReader {
     internal fun absolute(value: String?, baseUrl: String?): String? {
         val link = value?.trim()?.takeIf { it.isNotEmpty() } ?: return null
         if (link.startsWith("data:image/", ignoreCase = true)) return link
-        val resolved = runCatching { if (baseUrl != null) URL(URL(baseUrl), link).toString() else URL(link).toString() }
+        val resolved = runCatching { if (!baseUrl.isNullOrBlank()) URL(URL(baseUrl), link).toString() else URL(link).toString() }
             .getOrNull() ?: return null
         return resolved.takeIf { it.startsWith("https://", ignoreCase = true) || it.startsWith("http://", ignoreCase = true) }
     }

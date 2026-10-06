@@ -38,6 +38,20 @@ class RecipeTextParserTest {
         assertEquals("Etwa 40 Minuten backen, bis die Streusel goldbraun sind.", recipe.steps[3])
     }
 
+    /** „Für 1 Zopf“ ist 1 Zopf, nicht 1 Portion (#54); Personen und Zeitangaben bleiben ohne Einheit. */
+    @Test
+    fun portionenMitEigenerEinheit() {
+        fun servings(line: String): Pair<Int?, String?> =
+            RecipeTextParser.parse("Hefezopf\n$line\nZutaten\n500 g Mehl\nZubereitung\nAlles verkneten.", "de", typed = true)
+                .let { it.servings to it.servingsUnit }
+        assertEquals(1 to "Zopf", servings("Für 1 Zopf"))
+        assertEquals(1 to "Springform (26 cm)", servings("Für 1 Springform (26 cm)"))
+        assertEquals(12 to "muffins", servings("For 12 muffins:"))
+        assertEquals(4 to null, servings("Für 4 Personen"))
+        assertEquals(12 to "Stück", servings("Für 12 Stück"))
+        assertEquals(null to null, servings("Für 10 Minuten"))
+    }
+
     @Test
     fun englischesRezeptMitNummeriertenSchritten() {
         val recipe = RecipeTextParser.parse(resource("en.txt"))

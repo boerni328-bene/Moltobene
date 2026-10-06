@@ -79,6 +79,14 @@ import com.moltobene.app.ui.components.RecipePhotoLarge
 import com.moltobene.app.ui.theme.Spacing
 import kotlinx.coroutines.launch
 
+/**
+ * Dateitypen für „Aus Datei übernehmen“: Rezeptdateien (schema.org), gespeicherte Rezeptseiten und Text.
+ * Manche Speicherorte kennen den Typ einer .json-Datei nicht; ob ein Rezept darin steht, zeigt erst der Inhalt.
+ */
+private val RECIPE_FILE_TYPES = arrayOf(
+    "application/json", "application/ld+json", "text/html", "text/plain", "application/octet-stream",
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditScreen(
@@ -91,6 +99,7 @@ fun EditScreen(
     val savedMessage = stringResource(R.string.recipe_saved)
     val onRecipeSaved: (String, Boolean) -> Unit = { id, wasNew -> onSaved(id, wasNew, savedMessage) }
     val cameraMissing = stringResource(R.string.camera_unavailable)
+    val fileChooserMissing = stringResource(R.string.file_chooser_unavailable)
     val scope = rememberCoroutineScope()
 
     val requestClose: () -> Unit = {
@@ -128,6 +137,19 @@ fun EditScreen(
     var showTextDialog by rememberSaveable { mutableStateOf(viewModel.takeTextPrompt()) }
     // „Aus Link übernehmen“: Link einfügen; die Seite wird dann geladen (#55).
     var showLinkDialog by rememberSaveable { mutableStateOf(viewModel.takeLinkPrompt()) }
+    // „Aus Datei übernehmen“ (#54): Rezeptdatei oder gespeicherte Rezeptseite in der Dateiauswahl von Android wählen.
+    val openRecipeFile = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) viewModel.importFile(uri)
+    }
+    LaunchedEffect(Unit) {
+        if (viewModel.takeFilePrompt()) {
+            try {
+                openRecipeFile.launch(RECIPE_FILE_TYPES)
+            } catch (e: ActivityNotFoundException) {
+                scope.launch { snackbarHostState.showSnackbar(fileChooserMissing) }
+            }
+        }
+    }
     val pickPages = rememberLauncherForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia(MAX_PAGES),
     ) { uris -> viewModel.recognizePhotos(uris) }
@@ -145,7 +167,7 @@ fun EditScreen(
             }
         }
     }
-    val busy = viewModel.isProcessingPhoto || viewModel.isRecognizing || viewModel.isLoadingLink
+    val busy = viewModel.isProcessingPhoto || viewModel.isRecognizing || viewModel.isImporting
 
     // Vor der Texterkennung: Seiten sammeln (Fotoserie) und am Ende alle zusammen lesen.
     viewModel.pageOverview?.let { overview ->
@@ -507,7 +529,7 @@ private fun RecognitionSection(
                 }
             }
             RecognitionState.Idle -> when {
-                viewModel.isLoadingLink -> Surface(
+                viewModel.isImporting -> Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant,
                     shape = MaterialTheme.shapes.large,
                     modifier = Modifier.fillMaxWidth(),
@@ -515,14 +537,14 @@ private fun RecognitionSection(
                     Column(modifier = Modifier.padding(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
                             Text(
-                                text = stringResource(R.string.link_loading),
+                                text = stringResource(viewModel.importing ?: R.string.link_loading),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier
                                     .weight(1f)
                                     .semantics { liveRegion = LiveRegionMode.Polite },
                             )
-                            TextButton(onClick = viewModel::cancelLinkImport) { Text(stringResource(R.string.cancel)) }
+                            TextButton(onClick = viewModel::cancelImport) { Text(stringResource(R.string.cancel)) }
                         }
                         LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                     }

@@ -70,6 +70,24 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
             </intent-filter>
+            <!--
+              Rezeptdateien (#54) über „Teilen mit…“ und „Öffnen mit…“, z. B. eine Datei, die jemand mit Moltobene
+              geteilt hat. Nur content://-Adressen anderer Apps, höchstens 10 MB, daraus wird nur Text
+              (siehe IncomingRecipeFile). Fotos im Internet werden dabei nie abgerufen.
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/json" />
+                <data android:mimeType="application/ld+json" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content" />
+                <data android:mimeType="application/json" />
+                <data android:mimeType="application/ld+json" />
+            </intent-filter>
         </activity>
 
         <!--

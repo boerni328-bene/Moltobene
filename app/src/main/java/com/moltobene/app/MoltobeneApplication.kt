@@ -13,6 +13,7 @@ import com.moltobene.app.data.db.MoltobeneDatabase
 import com.moltobene.app.data.ocr.PendingRecognition
 import com.moltobene.app.data.ocr.TextRecognizer
 import com.moltobene.app.data.photos.PhotoStore
+import com.moltobene.app.data.share.RecipeFileReader
 import com.moltobene.app.data.share.RecipeSharer
 import com.moltobene.app.data.web.HttpPageLoader
 import com.moltobene.app.data.web.PageLoader
@@ -60,6 +61,7 @@ class AppContainer(context: Context) {
     val textRecognizer: TextRecognizer by lazy { TextRecognizer(appContext) }
     val pendingRecognition: PendingRecognition by lazy { PendingRecognition(appContext, photoStore) }
     val sharedInput = SharedInput()
+    val recipeFileReader: RecipeFileReader by lazy { RecipeFileReader(appContext) }
 
     /**
      * Einzige Stelle für Internetzugriffe (#55). Der Rundgang auf dem Emulator setzt hier einen Lader mit
