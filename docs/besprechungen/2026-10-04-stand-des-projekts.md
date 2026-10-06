@@ -239,6 +239,19 @@ Sicherheit hat ihn eingebracht, der Moderator hat ihn an der Release-APK nachgep
   - Zwischengespeichert wurde im Cache-Ordner der App. Diesen nimmt ein Umzug auf ein neues Handy nie mit.
 - **Dependabot-Warnungen einschalten (S3):** weiter offen, die Entscheidung des Projektinhabers steht aus.
 
+### Nachtrag vom 06.10.2026
+
+- **Entscheidungen des Projektinhabers zu den drei offenen Punkten:** jeweils „ja“.
+  - Dependabot-Warnungen sind eingeschaltet. Automatische Pull-Requests bleiben aus. GitHub erkennt bisher nur die Bausteine des Bauablaufs, nicht die Gradle-Bausteine der App. Dafür ist eine Meldung der Bausteine aus dem Build nötig; der Job braucht Schreibrecht, darüber wird noch entschieden.
+  - Der Mitschnitt wurde gemacht (Ergebnis unten).
+  - „Zuletzt gesichert“ steht in den Einstellungen. Zusätzlich erscheint ein ruhiger Hinweis in der Sammlung, wenn seit der letzten Sicherung viele Rezepte dazugekommen sind (#51).
+- **Ergebnis des Mitschnitts:** Version 0.14.0 hat nach der Texterkennung tatsächlich Daten an Microsoft gesendet.
+  - **Aufbau der Prüfung:** Rundgang von 0.14.0 mit Texterkennung auf einem virtuellen Handy, danach zweimal Start der veröffentlichten APK. Mitgeschnitten wurden Namensanfragen und verschlüsselte Verbindungen.
+  - **Beobachtet:** Etwa 10 Sekunden nach der Texterkennung fragte die App nach `mobile.events.data.microsoft.com`. Danach baute sie eine verschlüsselte Verbindung dorthin auf (Microsoft-Sammelserver, Servername im Verbindungsaufbau sichtbar) und übertrug rund 1,6 KB verschlüsselte Daten; der Server antwortete.
+  - **Wiederholbar:** In zwei Läufen zeigte sich dasselbe. Der bloße App-Start ohne Texterkennung löste keine Verbindung aus.
+  - **Inhalt:** Er ist verschlüsselt und nicht einsehbar. Laut Quelltext von ONNX Runtime gehören dazu Angaben zum Handy (u. a. eine gehashte Geräte-Kennung, Modell) und zur Nutzung der Erkennung. Für Fotos ist die Datenmenge viel zu klein.
+  - **Folge:** README, `SECURITY.md` und der Hinweis am Release v0.14.0 sagen jetzt „gesendet“ statt „konnte senden“.
+
 ## Zurückgezogen / bereits als Issue vorhanden
 
 - **Zurückgezogen oder abgeschwächt:**
