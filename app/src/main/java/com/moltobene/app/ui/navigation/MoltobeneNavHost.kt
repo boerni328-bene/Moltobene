@@ -85,6 +85,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                     showMessage(message)
                 },
                 onOpenSettings = { navController.navigate(SettingsRoute) },
+                timerLauncher = container.timerLauncher,
             )
         }
         composable<EditRoute> {

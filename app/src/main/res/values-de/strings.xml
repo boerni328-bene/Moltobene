@@ -73,6 +73,12 @@
     <string name="servings_more">Mehr Portionen</string>
     <string name="servings_scaled_hint">Mengen umgerechnet. Im Rezept: %1$s. Umgerechnet werden nur Mengen am Anfang einer Zeile und in Klammern.</string>
     <string name="servings_reset">Zurücksetzen</string>
+    <!-- Timer beim aktuellen Schritt; gestellt wird er in der Uhr-App des Handys. %1$s ist die Dauer, z. B. „40 Min.“ -->
+    <string name="timer_start">Timer für %1$s starten</string>
+    <string name="timer_started">Timer für %1$s läuft in der Uhr-App.</string>
+    <string name="timer_unavailable">Keine Uhr-App für Timer gefunden.</string>
+    <!-- Bezeichnung des Timers in der Uhr-App: Titel des Rezepts und Nummer des Schritts -->
+    <string name="timer_label">%1$s, Schritt %2$d</string>
 
     <!-- Teilen -->
     <string name="share_recipe">Rezept teilen</string>
@@ -192,9 +198,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Rezepte übersetzen: Deutsche und englische Rezepte lassen sich in der Rezeptansicht mit „DE | EN“ übersetzen, direkt auf dem Handy und ohne Internet. Das Original bleibt erhalten.</item>
-        <item>Dafür einmal das Sprachpaket Deutsch–Englisch unter Einstellungen → Übersetzung herunterladen (etwa 172 MB, am besten im WLAN).</item>
-        <item>Abhaken und Portionen umrechnen funktionieren auch in der Übersetzung.</item>
+        <item>Timer beim Kochen: Steht im aktuellen Schritt eine Zeit wie „40 Minuten backen“, erscheint darunter „Timer für 40 Min. starten“.</item>
+        <item>Der Timer läuft in der Uhr-App des Handys und klingelt auch, wenn das Handy gesperrt oder Moltobene geschlossen ist.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->
@@ -209,6 +214,7 @@
         <item>Sonst verlassen Inhalte das Handy nur, wenn sie selbst geteilt oder gesichert werden. Notizen werden nie geteilt. Die Sicherungsdatei ist nicht verschlüsselt.</item>
         <item>Das Sprachpaket kommt von der Projektseite auf GitHub. GitHub erfährt dabei die Internetadresse (IP-Adresse) des Handys und die Uhrzeit. Rezepte werden dabei nicht gesendet.</item>
         <item>Texterkennung und Übersetzung laufen vollständig auf dem Handy, ohne Internet. Die automatische Cloud-Sicherung von Android ist abgeschaltet.</item>
+        <item>Ein Timer beim Kochen wird in der Uhr-App des Handys gestellt. Sie erfährt dabei nur die Dauer, den Titel des Rezepts und die Nummer des Schritts.</item>
     </string-array>
 
     <!-- Bearbeiten -->

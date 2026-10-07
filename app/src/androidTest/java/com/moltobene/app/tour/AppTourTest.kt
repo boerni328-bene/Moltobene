@@ -1,6 +1,9 @@
 package com.moltobene.app.tour
 
 import android.content.Intent
+import android.icu.text.MeasureFormat
+import android.icu.util.Measure
+import android.icu.util.MeasureUnit
 import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.ui.semantics.SemanticsActions
@@ -31,6 +34,7 @@ import com.moltobene.app.MainActivity
 import com.moltobene.app.MoltobeneApplication
 import com.moltobene.app.R
 import com.moltobene.app.data.share.RecipeJsonLd
+import com.moltobene.app.ui.recipe.TimerLauncher
 import com.moltobene.app.ui.whatsnew.WhatsNew
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -42,6 +46,7 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Rundgang durch die App auf einem echten Android (Emulator): bedient die wichtigsten Wege wie ein Mensch,
@@ -172,9 +177,14 @@ class AppTourTest(private val variant: DisplayVariant) {
         assertTrue(SampleRecipes.POTATO_SALAD in titles)
     }
 
-    /** Kochen (#56): Zutat abhaken, aktueller Schritt, Portionen umrechnen – das gespeicherte Rezept bleibt. */
+    /**
+     * Kochen (#56): Zutat abhaken, aktueller Schritt, Timer, Portionen umrechnen – das gespeicherte Rezept bleibt.
+     * Der Timer wird nachgestellt; die echte Uhr-App würde sonst noch nach dem Rundgang klingeln.
+     */
     @Test
     fun kochen() {
+        val timers = CopyOnWriteArrayList<Pair<Int, String>>()
+        container().timerLauncher = TimerLauncher { _, seconds, label -> timers.add(seconds to label) }
         addSampleRecipes()
         openRecipe(SampleRecipes.TOMATO_SAUCE)
         waitForText("800 g reife Tomaten")
@@ -182,7 +192,18 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithText("800 g reife Tomaten").performScrollTo().performClick()
         composeRule.onNodeWithText("800 g reife Tomaten").assertIsOn()
         composeRule.onNodeWithText("Tomaten würfeln", substring = true).performScrollTo().performClick()
+        // Der aktuelle Schritt nennt „20 Minuten“: Der Timer wird angeboten, gestellt wird er erst auf Tippen.
+        val timerButton = composeRule.onNodeWithText(text(R.string.timer_start, minutes(20)))
+        timerButton.performScrollTo()
         screenshot("12a-kochen-abgehakt")
+        assertTrue(timers.isEmpty())
+
+        timerButton.performClick()
+        waitForText(text(R.string.timer_started, minutes(20)))
+        screenshot("12a2-timer-gestartet")
+        assertEquals(listOf(20 * 60 to text(R.string.timer_label, SampleRecipes.TOMATO_SAUCE, 2)), timers.toList())
+        // Die Meldung verschwindet von selbst; vorher könnte sie Knöpfe weiter unten verdecken.
+        waitUntilGone(text(R.string.timer_started, minutes(20)))
 
         // Von 4 auf 8 Portionen: Nur die Anzeige ändert sich, das Häkchen bleibt.
         repeat(4) {
@@ -509,6 +530,11 @@ class AppTourTest(private val variant: DisplayVariant) {
     }
 
     private fun container() = (activity.application as MoltobeneApplication).container
+
+    /** Minuten so geschrieben wie in der App, z. B. „20 Min.“ bzw. “20 min”. */
+    private fun minutes(count: Int): String =
+        MeasureFormat.getInstance(activity.resources.configuration.locales[0], MeasureFormat.FormatWidth.SHORT)
+            .formatMeasures(Measure(count, MeasureUnit.MINUTE))
 
     /** Schließt Fenster der App, die ein Schritt zusätzlich geöffnet hat (z. B. über „Öffnen mit…“). */
     private fun closeOtherWindows() = InstrumentationRegistry.getInstrumentation().runOnMainSync {

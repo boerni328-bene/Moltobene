@@ -154,7 +154,8 @@ jobs:
           APK: dist/moltobene-${{ steps.version.outputs.name }}.apk
           # Nur innerhalb der App: AndroidX schützt damit eigene Empfänger (nur für die App selbst, für Nutzer unsichtbar).
           # Internet (#55): nur für „Aus Link übernehmen“, vom Projektinhaber freigegeben.
-          ERLAUBT: com.moltobene.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION android.permission.INTERNET
+          # Wecker stellen: nur für den Timer beim Kochen in der Uhr-App, vom Projektinhaber am 07.10.2026 freigegeben.
+          ERLAUBT: com.moltobene.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION android.permission.INTERNET com.android.alarm.permission.SET_ALARM
           # Dauerhaft verboten, auch wenn die Internet-Berechtigung später gewollt zurückkommt.
           VERBOTEN: ai.onnxruntime.TelemetryInitializer android.permission.ACCESS_NETWORK_STATE
         run: |

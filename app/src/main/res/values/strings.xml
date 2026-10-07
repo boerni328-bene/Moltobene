@@ -74,6 +74,12 @@
     <string name="servings_more">More servings</string>
     <string name="servings_scaled_hint">Amounts adjusted. In the recipe: %1$s. Only amounts at the start of a line and in brackets are adjusted.</string>
     <string name="servings_reset">Reset</string>
+    <!-- Timer for the current step; it is set in the device's clock app. %1$s is the duration, e.g. “40 min” -->
+    <string name="timer_start">Start timer for %1$s</string>
+    <string name="timer_started">Timer for %1$s is running in the clock app.</string>
+    <string name="timer_unavailable">No clock app for timers found.</string>
+    <!-- Name of the timer in the clock app: recipe title and step number -->
+    <string name="timer_label">%1$s, step %2$d</string>
 
     <!-- Teilen -->
     <string name="share_recipe">Share recipe</string>
@@ -194,9 +200,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Translate recipes: German and English recipes can be translated in the recipe view with “DE | EN”, right on the device and without internet. The original is kept.</item>
-        <item>To do so, download the language pack German–English once under Settings → Translation (about 172 MB, ideally over Wi-Fi).</item>
-        <item>Checking off and adjusting servings also work in the translation.</item>
+        <item>Cooking timer: If the current step mentions a time such as “bake for 40 minutes”, “Start timer for 40 min” appears below it.</item>
+        <item>The timer runs in the device’s clock app and rings even when the device is locked or Moltobene is closed.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->
@@ -211,6 +216,7 @@
         <item>Otherwise content only leaves the device when it is shared or backed up. Notes are never shared. The backup file is not encrypted.</item>
         <item>The language pack comes from the project page on GitHub. GitHub learns the device’s internet address (IP address) and the time. No recipes are sent.</item>
         <item>Text recognition and translation run entirely on the device, without internet. Android’s automatic cloud backup is turned off.</item>
+        <item>A cooking timer is set in the device’s clock app. The clock app only receives the duration, the recipe title and the step number.</item>
     </string-array>
 
     <!-- Bearbeiten -->

@@ -25,6 +25,8 @@ import com.moltobene.app.data.web.HttpPageLoader
 import com.moltobene.app.data.web.PageLoader
 import com.moltobene.app.data.web.WebImporter
 import com.moltobene.app.ui.edit.SharedInput
+import com.moltobene.app.ui.recipe.ClockAppTimer
+import com.moltobene.app.ui.recipe.TimerLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -102,6 +104,10 @@ class AppContainer(context: Context) {
     val translations: RecipeTranslations by lazy {
         RecipeTranslations(TranslationStore(File(appContext.noBackupFilesDir, TRANSLATIONS_DIR))) { translationEngine }
     }
+
+    /** Timer beim Kochen in der Uhr-App. Der Rundgang setzt hier einen nachgestellten Timer ein. */
+    @VisibleForTesting
+    var timerLauncher: TimerLauncher = ClockAppTimer
 
     /** Für „Aus Link übernehmen“; nutzt den jeweils aktuellen [pageLoader]. */
     val webImporter: WebImporter get() = WebImporter(pageLoader, appContext.cacheDir)

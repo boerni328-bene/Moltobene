@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Die App braucht nur eine Berechtigung, den Internetzugang (siehe unten). Fotos kommen über die
+  Die App braucht nur zwei Berechtigungen: den Internetzugang und „Wecker stellen“ für den Timer (siehe unten). Fotos kommen über die
   Android-Fotoauswahl, die Kamera-App oder „Teilen mit…“, Sicherungen über den Android-Dateidialog.
   Der Build prüft die fertige APK gegen eine Erlaubt-Liste (build.yml, „Berechtigungen prüfen“).
 -->
@@ -13,6 +13,13 @@
       Nur verschlüsselt (network_security_config), keine Cookies, kein Abruf im Hintergrund.
     -->
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+      Wecker stellen (vom Projektinhaber am 07.10.2026 freigegeben): nur für den Timer beim Kochen. Ein Tippen auf
+      „Timer für … starten“ stellt ihn in der Uhr-App des Handys (ui/recipe/TimerLauncher), die Uhr-App erfährt nur
+      Dauer, Titel und Schritt. Android fragt dafür nicht nach; die Berechtigung erlaubt keinen Zugriff auf Daten.
+    -->
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
 
     <!--
       #49: ONNX Runtime (Texterkennung) bringt eine Telemetrie von Microsoft mit, die Nutzungsdaten ins Internet

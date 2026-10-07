@@ -3,6 +3,14 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.22.0] – 2026-10-07 (versionCode 42)
+
+### Neu
+- **Timer beim Kochen:** Steht im aktuellen Schritt eine Zeit, z. B. „40 Minuten backen“ oder „1 ½ Stunden schmoren“, erscheint darunter „Timer für 40 Min. starten“. Ein Tippen stellt den Timer in der Uhr-App des Handys. Dort klingelt er zuverlässig, auch wenn das Handy gesperrt oder Moltobene geschlossen ist. Eine kurze Meldung bestätigt das. Von selbst startet nie ein Timer.
+- Erkannt werden Minuten, Stunden und Sekunden, auch „1 Std. 30 Min.“, „eine halbe Stunde“ oder “half an hour”. Bei einer Spanne wie „20–25 Minuten“ läuft der Timer über die kürzere Zeit, damit rechtzeitig nachgesehen werden kann. Stehen zwei Zeiten im Schritt, gibt es zwei Timer zur Wahl. Das funktioniert auch in der Übersetzung.
+- In der Uhr-App heißt der Timer wie das Rezept, mit der Nummer des Schritts, z. B. „Tomatensoße, Schritt 2“.
+- Dafür braucht die App eine zweite Berechtigung: „Wecker stellen“. Android fragt dabei nicht nach; sie erlaubt nur, einen Timer in der Uhr-App zu stellen. Die Datenschutzerklärung nennt das.
+
 ## [0.21.0] – 2026-10-07 (versionCode 41)
 
 ### Neu

@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -94,6 +95,7 @@ import com.moltobene.app.R
 import com.moltobene.app.data.AmountScaling
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeText
+import com.moltobene.app.data.StepTimes
 import com.moltobene.app.data.ocr.TextLanguage
 import com.moltobene.app.data.share.PreparedShare
 import com.moltobene.app.data.share.ShareLabels
@@ -118,6 +120,7 @@ fun RecipeScreen(
     onEdit: (String) -> Unit,
     onDeleted: (String) -> Unit,
     onOpenSettings: () -> Unit,
+    timerLauncher: TimerLauncher,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val translation by viewModel.translation.collectAsStateWithLifecycle()
@@ -130,6 +133,8 @@ fun RecipeScreen(
     val deletedMessage = stringResource(R.string.recipe_deleted)
     val context = LocalContext.current
     val resources = LocalResources.current
+    val locale = LocalConfiguration.current.locales[0]
+    val scope = rememberCoroutineScope()
 
     KeepScreenOn()
 
@@ -247,6 +252,18 @@ fun RecipeScreen(
                     onToggleIngredient = viewModel::toggleIngredient,
                     onToggleStep = viewModel::toggleCurrentStep,
                     onServingsChange = viewModel::setServings,
+                    onStartTimer = { seconds, label ->
+                        val duration = formatDuration(seconds, locale)
+                        val message = if (timerLauncher.start(context, seconds, label)) {
+                            resources.getString(R.string.timer_started, duration)
+                        } else {
+                            resources.getString(R.string.timer_unavailable)
+                        }
+                        scope.launch {
+                            snackbarHostState.currentSnackbarData?.dismiss()
+                            snackbarHostState.showSnackbar(message)
+                        }
+                    },
                 ),
                 translation = TranslationActions(
                     state = translation,
@@ -336,7 +353,7 @@ private fun KeepScreenOn() {
     }
 }
 
-/** Was beim Kochen dazukommt (#56): Häkchen, aktueller Schritt und angezeigte Portionen. */
+/** Was beim Kochen dazukommt (#56): Häkchen, aktueller Schritt, angezeigte Portionen und der Timer. */
 private class CookingState(
     val checked: Set<String>,
     val currentStep: String?,
@@ -344,6 +361,8 @@ private class CookingState(
     val onToggleIngredient: (Int, String) -> Unit,
     val onToggleStep: (Int, String) -> Unit,
     val onServingsChange: (Int?) -> Unit,
+    /** Stellt einen Timer über [seconds] mit der Bezeichnung [label] in der Uhr-App. */
+    val onStartTimer: (seconds: Int, label: String) -> Unit,
 )
 
 /** „Rezept übersetzen“ (#60): Zustand und Aktionen für den Umschalter „DE | EN“. */
@@ -365,6 +384,7 @@ private fun RecipeContent(
     onShowPhoto: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val resources = LocalResources.current
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -451,12 +471,20 @@ private fun RecipeContent(
             if (recipe.steps.isNotEmpty()) {
                 SectionTitle(stringResource(R.string.instructions))
                 val steps = translated?.steps?.takeIf { it.size == recipe.steps.size } ?: recipe.steps
+                val stepLanguage = translated?.language ?: recipe.language
                 recipe.steps.forEachIndexed { index, step ->
+                    val current = cooking.currentStep == RecipeViewModel.progressKey(index, step)
                     StepRow(
                         number = index + 1,
                         text = localized(steps[index], textLocale),
-                        current = cooking.currentStep == RecipeViewModel.progressKey(index, step),
+                        current = current,
+                        // Timer nur beim aktuellen Schritt und erst auf Tippen, z. B. bei „40 Minuten backen“.
+                        timers = if (current) StepTimes.find(steps[index], stepLanguage) else emptyList(),
                         onClick = { cooking.onToggleStep(index, step) },
+                        onStartTimer = { seconds ->
+                            val label = title.ifBlank { resources.getString(R.string.untitled_recipe) }
+                            cooking.onStartTimer(seconds, resources.getString(R.string.timer_label, label, index + 1))
+                        },
                     )
                 }
             }
@@ -472,7 +500,6 @@ private fun RecipeContent(
                 if (url != null && RecipeText.isWebLink(url)) {
                     SourceLink(url = url, snackbarHostState = snackbarHostState)
                 } else {
-                    val resources = LocalResources.current
                     val text = listOfNotNull(
                         source.name,
                         source.page?.let { page -> RecipeText.formatPage(page) { resources.getString(R.string.source_page, it) } },
@@ -566,9 +593,19 @@ private fun IngredientRow(parts: List<AmountScaling.Part>, locale: LocaleList?, 
     }
 }
 
-/** Ein Schritt; antippen markiert ihn als aktuellen Schritt – mit Symbol und Hintergrund, nicht nur über die Farbe. */
+/**
+ * Ein Schritt; antippen markiert ihn als aktuellen Schritt – mit Symbol und Hintergrund, nicht nur über die Farbe.
+ * Nennt der aktuelle Schritt Zeiten ([timers] in Sekunden), steht darunter je Zeit „Timer für … starten“.
+ */
 @Composable
-private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, onClick: () -> Unit) {
+private fun StepRow(
+    number: Int,
+    text: AnnotatedString,
+    current: Boolean,
+    timers: List<Int>,
+    onClick: () -> Unit,
+    onStartTimer: (Int) -> Unit,
+) {
     val currentLabel = stringResource(R.string.step_current)
     val markLabel = stringResource(R.string.step_mark_current)
     val highlight = if (current) {
@@ -576,28 +613,55 @@ private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, onClic
     } else {
         Modifier
     }
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(Spacing.s),
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 48.dp)
             .clip(MaterialTheme.shapes.medium)
-            .then(highlight)
-            .clickable(onClickLabel = markLabel, onClick = onClick)
-            .padding(Spacing.s)
-            .semantics(mergeDescendants = true) { if (current) stateDescription = currentLabel },
+            .then(highlight),
     ) {
-        val color = if (current) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface
-        if (current) {
-            Icon(Icons.Filled.PlayArrow, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(Spacing.s),
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 48.dp)
+                .clickable(onClickLabel = markLabel, onClick = onClick)
+                .padding(Spacing.s)
+                .semantics(mergeDescendants = true) { if (current) stateDescription = currentLabel },
+        ) {
+            val color = if (current) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface
+            if (current) {
+                Icon(Icons.Filled.PlayArrow, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            }
+            Text(
+                text = "$number.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.widthIn(min = 24.dp),
+            )
+            Text(text, style = MaterialTheme.typography.bodyLarge, color = color)
         }
-        Text(
-            text = "$number.",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.widthIn(min = 24.dp),
-        )
-        Text(text, style = MaterialTheme.typography.bodyLarge, color = color)
+        timers.forEach { seconds ->
+            TimerButton(
+                seconds = seconds,
+                onClick = { onStartTimer(seconds) },
+                modifier = Modifier.padding(start = Spacing.s, end = Spacing.s, bottom = Spacing.s),
+            )
+        }
+    }
+}
+
+/** „Timer für 40 Min. starten“; der Screenreader liest die Dauer ausgeschrieben („40 Minuten“). */
+@Composable
+private fun TimerButton(seconds: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val locale = LocalConfiguration.current.locales[0]
+    val description = stringResource(R.string.timer_start, formatDuration(seconds, locale, MeasureFormat.FormatWidth.WIDE))
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier.semantics { contentDescription = description },
+    ) {
+        Icon(painterResource(R.drawable.ic_timer), contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+        Text(stringResource(R.string.timer_start, formatDuration(seconds, locale)))
     }
 }
 
@@ -737,20 +801,32 @@ private fun RecipeTimes(prepMinutes: Int?, totalMinutes: Int?) {
         totalMinutes?.takeIf { it > 0 }?.let { R.string.recipe_time_total to it },
     ).forEach { (label, minutes) ->
         Text(
-            text = stringResource(label, formatDuration(minutes, locale)),
+            text = stringResource(label, formatDuration(minutes * SECONDS_PER_MINUTE, locale)),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
 
-/** Dauer in Stunden und Minuten mit den Abkürzungen der Sprache, z. B. „1 Std., 30 Min.“ oder “1 hr, 30 min”. */
-private fun formatDuration(minutes: Int, locale: Locale): String {
-    val hours = minutes / 60
-    val rest = minutes % 60
+/**
+ * Dauer in Stunden, Minuten und Sekunden mit den Abkürzungen der Sprache, z. B. „1 Std., 30 Min.“ oder
+ * “1 hr, 30 min”; mit [width] WIDE ausgeschrieben für den Screenreader („1 Stunde, 30 Minuten“).
+ */
+private fun formatDuration(
+    seconds: Int,
+    locale: Locale,
+    width: MeasureFormat.FormatWidth = MeasureFormat.FormatWidth.SHORT,
+): String {
+    val hours = seconds / SECONDS_PER_HOUR
+    val minutes = seconds % SECONDS_PER_HOUR / SECONDS_PER_MINUTE
+    val rest = seconds % SECONDS_PER_MINUTE
     val parts = buildList {
         if (hours > 0) add(Measure(hours, MeasureUnit.HOUR))
-        if (rest > 0 || hours == 0) add(Measure(rest, MeasureUnit.MINUTE))
+        if (minutes > 0) add(Measure(minutes, MeasureUnit.MINUTE))
+        if (rest > 0 || isEmpty()) add(Measure(rest, MeasureUnit.SECOND))
     }
-    return MeasureFormat.getInstance(locale, MeasureFormat.FormatWidth.SHORT).formatMeasures(*parts.toTypedArray())
+    return MeasureFormat.getInstance(locale, width).formatMeasures(*parts.toTypedArray())
 }
+
+private const val SECONDS_PER_MINUTE = 60
+private const val SECONDS_PER_HOUR = 3600
