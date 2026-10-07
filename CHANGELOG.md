@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.17.1] – 2026-10-07 (versionCode 36)
+
+### Geändert
+- Keine sichtbaren Änderungen an der App. GitHub prüft die Bausteine der App jetzt auch auf bekannte Sicherheitslücken und warnt, falls eine bekannt wird. Dafür darf GitHub die Liste der Bausteine ermitteln, ohne die App zu bauen. Dass auf GitHub nie eine unsignierte Version entsteht, ist weiterhin sichergestellt.
+
 ## [0.17.0] – 2026-10-06 (versionCode 35)
 
 ### Neu

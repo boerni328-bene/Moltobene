@@ -6,6 +6,9 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+/** Aufgaben, die eine Release-APK packen oder signieren (z. B. packageRelease); nur sie brauchen den Schlüssel. */
+val releasePackagingTask = Regex("(package|sign).*Release.*")
+
 android {
     namespace = "com.moltobene.app"
     compileSdk = 37
@@ -14,8 +17,8 @@ android {
         applicationId = "com.moltobene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 35
-        versionName = "0.17.0"
+        versionCode = 36
+        versionName = "0.17.1"
 
         // Rundgang durch die App auf dem Emulator (app/src/androidTest).
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -42,12 +45,17 @@ android {
     }
 
     // Der Signaturschlüssel kommt aus Umgebungsvariablen (auf GitHub aus den Secrets).
-    // Auf GitHub (CI=true) ist er Pflicht, damit nie eine unsignierte APK veröffentlicht wird.
-    // Ausnahme: Der Rundgang auf dem Emulator baut nur Debug-Versionen und bekommt keine Secrets.
+    // Auf GitHub (CI=true) ist er Pflicht, sobald eine Release-APK gepackt würde – so wird nie eine unsignierte
+    // APK veröffentlicht (#8). Ohne Schlüssel laufen dürfen alle Aufgaben, die nichts für ein Release packen:
+    // der Rundgang auf dem Emulator (nur Debug-Versionen) und das Ermitteln der Bausteine für die
+    // Sicherheitswarnungen von GitHub („Automatic dependency submission“).
     val keystoreFile = System.getenv("KEYSTORE_FILE")
-    val onlyDebugTasks = gradle.startParameter.taskNames.let { tasks -> tasks.isNotEmpty() && tasks.all { "Debug" in it } }
-    if (System.getenv("CI") == "true" && keystoreFile == null && !onlyDebugTasks) {
-        throw GradleException("Signaturschlüssel fehlt (KEYSTORE_FILE). Ohne Signatur wird auf GitHub nicht gebaut.")
+    if (System.getenv("CI") == "true" && keystoreFile == null) {
+        gradle.taskGraph.whenReady {
+            if (allTasks.any { releasePackagingTask.matches(it.name) }) {
+                throw GradleException("Signaturschlüssel fehlt (KEYSTORE_FILE). Ohne Signatur wird auf GitHub nicht gebaut.")
+            }
+        }
     }
     signingConfigs {
         if (keystoreFile != null) {
