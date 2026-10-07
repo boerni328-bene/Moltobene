@@ -16,7 +16,8 @@ import kotlin.math.abs
 
 /**
  * Bereitet jeden Test vor, bevor die App startet: Sprache, Hell/Dunkel und Schriftgröße einstellen
- * und die Sammlung leeren. Danach wird die Schriftgröße wieder zurückgesetzt.
+ * und die Sammlung leeren. Die Schriftgröße bleibt danach, wie sie ist: Die Tests einer Darstellung laufen
+ * nacheinander, und schnelles Hin- und Herschalten zwischen den Tests kam nicht immer rechtzeitig an.
  */
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class DeviceSetupRule(private val variant: DisplayVariant) : ExternalResource() {
@@ -34,16 +35,17 @@ class DeviceSetupRule(private val variant: DisplayVariant) : ExternalResource() 
         runBlocking { resetApp() }
     }
 
-    override fun after() = setFontScale(1f)
-
     /** Schriftgröße des ganzen Handys (wie in den Android-Einstellungen), 2 = 200 %. */
     private fun setFontScale(scale: Float) {
+        fun applied() = abs(context.resources.configuration.fontScale - scale) <= 0.01f
+        if (applied()) return
         TestDevice.shell("settings put system font_scale $scale")
-        // Die neue Einstellung kommt mit kurzer Verzögerung in der App an.
-        val deadline = SystemClock.uptimeMillis() + 5_000
-        while (abs(context.resources.configuration.fontScale - scale) > 0.01f && SystemClock.uptimeMillis() < deadline) {
+        // Die neue Einstellung kommt mit Verzögerung im Handy und in der App an.
+        val deadline = SystemClock.uptimeMillis() + 15_000
+        while (!applied() && SystemClock.uptimeMillis() < deadline) {
             Thread.sleep(100)
         }
+        check(applied()) { "Schriftgröße $scale nicht übernommen" }
     }
 
     private suspend fun resetApp() {
@@ -51,5 +53,7 @@ class DeviceSetupRule(private val variant: DisplayVariant) : ExternalResource() 
         container.repository.getAll().forEach { container.repository.delete(it.id) }
         // „Neu in Version …“ gilt als gesehen, damit es nicht unerwartet über dem Rundgang erscheint.
         container.preferences.setLastSeenVersionCode(BuildConfig.VERSION_CODE)
+        // Der Hinweis zum Sichern (#51) beginnt in jedem Durchgang wieder sichtbar.
+        container.preferences.setBackupHintHiddenAt(0)
     }
 }

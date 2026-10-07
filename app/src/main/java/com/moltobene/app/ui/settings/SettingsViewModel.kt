@@ -7,6 +7,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moltobene.app.R
+import com.moltobene.app.data.AppPreferences
+import com.moltobene.app.data.StorageFull
 import com.moltobene.app.data.backup.BackupManager
 import com.moltobene.app.data.backup.BackupReader
 import kotlinx.coroutines.CancellationException
@@ -23,13 +25,24 @@ sealed interface SettingsUiState {
 
 sealed interface SettingsEvent {
     data class BackupDone(val count: Int) : SettingsEvent
-    data object BackupFailed : SettingsEvent
+    data class BackupFailed(val problem: BackupManager.BackupException.Problem) : SettingsEvent
     data class RestoreDone(val restored: Int) : SettingsEvent
     data class RestoreProblem(val problem: BackupReader.Problem) : SettingsEvent
     data object RestoreFailed : SettingsEvent
 }
 
-class SettingsViewModel(private val backupManager: BackupManager) : ViewModel() {
+class SettingsViewModel(
+    private val backupManager: BackupManager,
+    private val preferences: AppPreferences,
+) : ViewModel() {
+
+    /** Letzte geprüfte Sicherung für „Zuletzt gesichert: …“ (#51); null, solange sie lädt oder es keine gibt. */
+    var lastBackup by mutableStateOf<AppPreferences.LastBackup?>(null)
+        private set
+
+    init {
+        viewModelScope.launch { lastBackup = runCatching { preferences.lastBackup() }.getOrNull() }
+    }
 
     var state by mutableStateOf<SettingsUiState>(SettingsUiState.Idle)
         private set
@@ -41,11 +54,18 @@ class SettingsViewModel(private val backupManager: BackupManager) : ViewModel() 
         state = SettingsUiState.Working(R.string.backup_running)
         viewModelScope.launch {
             event = try {
-                SettingsEvent.BackupDone(backupManager.export(uri))
+                val count = backupManager.export(uri)
+                // Erst die geprüfte Sicherung zählt als „zuletzt gesichert“.
+                val backup = AppPreferences.LastBackup(System.currentTimeMillis(), count)
+                runCatching { preferences.setLastBackup(backup) }
+                lastBackup = backup
+                SettingsEvent.BackupDone(count)
             } catch (e: CancellationException) {
                 throw e
+            } catch (e: BackupManager.BackupException) {
+                SettingsEvent.BackupFailed(e.problem)
             } catch (e: Exception) {
-                SettingsEvent.BackupFailed
+                SettingsEvent.BackupFailed(BackupManager.BackupException.Problem.FAILED)
             }
             state = SettingsUiState.Idle
         }
@@ -77,13 +97,28 @@ class SettingsViewModel(private val backupManager: BackupManager) : ViewModel() 
         viewModelScope.launch {
             event = try {
                 val result = backupManager.applyRestore(preview)
+                rememberRestoredBackup(preview)
                 SettingsEvent.RestoreDone(result.added + result.replaced)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                SettingsEvent.RestoreFailed
+                if (StorageFull.isCause(e)) SettingsEvent.RestoreProblem(BackupReader.Problem.NO_SPACE) else SettingsEvent.RestoreFailed
             }
             state = SettingsUiState.Idle
+        }
+    }
+
+    /**
+     * Nach dem Wiederherstellen, z. B. auf einem neuen Handy: Die Rezepte stecken in der Sicherung, aus der sie kommen.
+     * Ist sie neuer als die zuletzt gemerkte, gilt sie als „zuletzt gesichert“ – sonst hieße es fälschlich,
+     * die ganze Sammlung sei noch nicht gesichert.
+     */
+    private suspend fun rememberRestoredBackup(preview: BackupManager.RestorePreview) {
+        val current = runCatching { preferences.lastBackup() }.getOrNull()
+        if (current == null || current.at < preview.backupCreatedAt) {
+            val backup = AppPreferences.LastBackup(preview.backupCreatedAt, preview.total)
+            runCatching { preferences.setLastBackup(backup) }
+            lastBackup = backup
         }
     }
 

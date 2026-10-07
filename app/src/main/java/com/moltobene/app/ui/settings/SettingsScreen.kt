@@ -43,6 +43,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.moltobene.app.BuildConfig
 import com.moltobene.app.R
+import com.moltobene.app.data.backup.BackupManager
 import com.moltobene.app.data.backup.BackupReader
 import com.moltobene.app.ui.theme.Spacing
 import com.moltobene.app.ui.whatsnew.WhatsNew
@@ -102,7 +103,23 @@ fun SettingsScreen(
             SectionHeader(stringResource(R.string.collection_title))
             ListItem(
                 headlineContent = { Text(stringResource(R.string.backup_title)) },
-                supportingContent = { Text(stringResource(R.string.backup_text)) },
+                supportingContent = {
+                    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                        Text(stringResource(R.string.backup_text))
+                        // Wann zuletzt geprüft gesichert wurde (#51) – im Format des Handys.
+                        val last = viewModel.lastBackup
+                        Text(
+                            text = if (last == null) {
+                                stringResource(R.string.backup_never)
+                            } else {
+                                val date = DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(last.at))
+                                pluralStringResource(R.plurals.backup_last, last.recipes, last.recipes, date)
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                },
                 modifier = Modifier.clickable {
                     createBackup.launch(resources.getString(R.string.backup_file_name, LocalDate.now().toString()))
                 },
@@ -172,7 +189,13 @@ fun SettingsScreen(
 @Composable
 private fun eventText(event: SettingsEvent): String = when (event) {
     is SettingsEvent.BackupDone -> pluralStringResource(R.plurals.backup_done, event.count, event.count)
-    SettingsEvent.BackupFailed -> stringResource(R.string.backup_error)
+    is SettingsEvent.BackupFailed -> stringResource(
+        when (event.problem) {
+            BackupManager.BackupException.Problem.NO_SPACE -> R.string.backup_error_space
+            BackupManager.BackupException.Problem.INCOMPLETE -> R.string.backup_error_incomplete
+            BackupManager.BackupException.Problem.FAILED -> R.string.backup_error
+        },
+    )
     is SettingsEvent.RestoreDone -> if (event.restored == 0) {
         stringResource(R.string.restore_nothing_new)
     } else {
@@ -184,6 +207,7 @@ private fun eventText(event: SettingsEvent): String = when (event) {
             BackupReader.Problem.NEWER_VERSION -> R.string.restore_error_newer
             BackupReader.Problem.DAMAGED -> R.string.restore_error_damaged
             BackupReader.Problem.TOO_LARGE -> R.string.restore_error_too_large
+            BackupReader.Problem.NO_SPACE -> R.string.restore_error_space
         }
     )
     SettingsEvent.RestoreFailed -> stringResource(R.string.restore_error_failed)

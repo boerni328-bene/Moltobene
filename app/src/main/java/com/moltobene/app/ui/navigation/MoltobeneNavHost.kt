@@ -48,7 +48,12 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
         composable<CollectionRoute> {
             CollectionScreen(
                 viewModel = viewModel {
-                    CollectionViewModel(container.repository, container.photoStore, container.pendingRecognition)
+                    CollectionViewModel(
+                        container.repository,
+                        container.photoStore,
+                        container.pendingRecognition,
+                        container.preferences,
+                    )
                 },
                 snackbarHostState = snackbarHostState,
                 onOpenRecipe = { id -> navController.navigate(RecipeRoute(id)) },
@@ -110,7 +115,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
         }
         composable<SettingsRoute> {
             SettingsScreen(
-                viewModel = viewModel { SettingsViewModel(container.backupManager) },
+                viewModel = viewModel { SettingsViewModel(container.backupManager, container.preferences) },
                 snackbarHostState = snackbarHostState,
                 onBack = { navController.popBackStack() },
                 onOpenLicenses = { navController.navigate(LicensesRoute) },

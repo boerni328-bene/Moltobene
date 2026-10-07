@@ -59,6 +59,23 @@ object SampleRecipes {
         }
     }
 
+    /** Viele einfache Rezepte ohne Foto, z. B. für den Hinweis zum Sichern (#51). */
+    suspend fun addPlain(container: AppContainer, count: Int) {
+        val now = System.currentTimeMillis()
+        container.repository.saveAll(
+            (1..count).map { index ->
+                Recipe(
+                    id = RecipeIds.newId(),
+                    title = "Rezept $index",
+                    ingredients = listOf(Ingredient("1 Zutat")),
+                    steps = listOf("Zubereiten."),
+                    createdAt = now - index,
+                    updatedAt = now - index,
+                )
+            },
+        )
+    }
+
     /** Titel des Rezepts, dessen Foto eine gezeichnete Kochbuchseite ist (für die Texterkennung). */
     const val PAGE_RECIPE = "Hefezopf"
 

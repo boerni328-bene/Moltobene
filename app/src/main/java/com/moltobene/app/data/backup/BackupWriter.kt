@@ -10,13 +10,15 @@ object BackupWriter {
 
     /**
      * @param photos Fotokennung → (Detailbild, Vorschaubild). Fehlende Dateien werden übersprungen.
+     * @return Zahl der geschriebenen Einträge – zum Prüfen der fertigen Datei (#51)
      */
     fun write(
         out: OutputStream,
         manifest: BackupManifest,
         recipes: List<BackupRecipe>,
         photos: Map<String, Pair<File, File>>,
-    ) {
+    ): Int {
+        var entries = 2
         ZipOutputStream(out.buffered()).use { zip ->
             zip.putNextEntry(ZipEntry(BackupFormat.MANIFEST_ENTRY))
             zip.write(BackupFormat.json.encodeToString(BackupManifest.serializer(), manifest).toByteArray())
@@ -28,10 +30,17 @@ object BackupWriter {
 
             photos.forEach { (photoId, files) ->
                 val (full, thumb) = files
-                if (full.isFile) copyEntry(zip, BackupFormat.photoEntry(photoId), full)
-                if (thumb.isFile) copyEntry(zip, BackupFormat.thumbEntry(photoId), thumb)
+                if (full.isFile) {
+                    copyEntry(zip, BackupFormat.photoEntry(photoId), full)
+                    entries++
+                }
+                if (thumb.isFile) {
+                    copyEntry(zip, BackupFormat.thumbEntry(photoId), thumb)
+                    entries++
+                }
             }
         }
+        return entries
     }
 
     private fun copyEntry(zip: ZipOutputStream, name: String, file: File) {

@@ -39,6 +39,9 @@ class RecipeRepository(
 
     suspend fun updatedAtById(): Map<String, Long> = dao.getAllUpdatedAt().associate { it.id to it.updatedAt }
 
+    /** Zahl der Rezepte, die seit [since] hinzugefügt oder geändert wurden; aktualisiert sich von selbst. */
+    fun observeChangedSince(since: Long): Flow<Int> = dao.observeChangedSince(since)
+
     suspend fun save(recipe: Recipe) = dao.save(recipe.toRows())
 
     /** Speichert alle Rezepte in einem Schritt – schlägt einer fehl, bleibt die Sammlung unverändert. */

@@ -121,6 +121,23 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("10-suche-ohne-treffer")
     }
 
+    /** Ruhiger Hinweis zum Sichern (#51): ab 10 ungesicherten Rezepten, führt zu den Einstellungen, lässt sich ausblenden. */
+    @Test
+    fun sicherungsHinweis() {
+        runBlocking { SampleRecipes.addPlain(container(), count = 12) }
+        val hint = activity.resources.getQuantityString(R.plurals.backup_hint, 12, 12)
+        waitForText(hint)
+        screenshot("08a-sicherungshinweis")
+
+        composeRule.onNodeWithText(text(R.string.backup_hint_action)).performClick()
+        waitForText(text(R.string.backup_never))
+        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+        waitForText(hint)
+
+        composeRule.onNodeWithContentDescription(text(R.string.backup_hint_hide)).performClick()
+        waitUntilGone(hint)
+    }
+
     @Test
     fun rezeptAnsehenUndLoeschen() {
         addSampleRecipes()

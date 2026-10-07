@@ -168,9 +168,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Import from file: recipe files that someone shared from Moltobene can be opened directly from WhatsApp, email or the file manager – including the photo, without internet. Saved recipe pages are read as well.</item>
-        <item>Recipe text shared from Moltobene keeps its source when imported, e.g. book and page.</item>
-        <item>Servings such as “For 1 loaf” are imported with their unit.</item>
+        <item>Checked backups: after backing up, the app reads the file again and only then reports “Collection backed up”. An incomplete file is removed.</item>
+        <item>Settings show when the collection was last backed up.</item>
+        <item>If 10 or more recipes are not backed up yet, a quiet hint in the collection says so.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->
@@ -220,6 +220,20 @@
         <item quantity="other">Collection backed up: %d recipes</item>
     </plurals>
     <string name="backup_error">The collection could not be backed up.</string>
+    <string name="backup_error_space">Not enough storage space for the backup. Free up space or choose another location.</string>
+    <string name="backup_error_incomplete">The backup file was incomplete after writing and has been removed. Back up again, ideally to another location.</string>
+    <string name="backup_never">Never backed up</string>
+    <plurals name="backup_last">
+        <item quantity="one">Last backed up: %2$s, %1$d recipe</item>
+        <item quantity="other">Last backed up: %2$s, %1$d recipes</item>
+    </plurals>
+    <plurals name="backup_hint">
+        <item quantity="one">%d recipe is not backed up yet.</item>
+        <item quantity="other">%d recipes are not backed up yet.</item>
+    </plurals>
+    <string name="backup_hint_action">Back up</string>
+    <string name="backup_hint_hide">Hide hint</string>
+    <string name="restore_error_space">Not enough storage space on the device to read the backup. Free up space and try again.</string>
     <string name="restore_title">Restore collection</string>
     <string name="restore_text">Imports recipes from a backup file. Existing recipes are kept.</string>
     <string name="restore_checking">Checking backup …</string>

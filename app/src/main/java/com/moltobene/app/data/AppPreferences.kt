@@ -30,6 +30,34 @@ class AppPreferences(context: Context) {
         prefs.edit { putString(KEY_RECOGNITION_LANGUAGE, language) }
     }
 
+    /** Letzte geprüfte Sicherung (#51): Zeitpunkt und Zahl der Rezepte. */
+    data class LastBackup(val at: Long, val recipes: Int)
+
+    /** Die letzte geprüfte Sicherung; null, wenn auf diesem Handy noch nie gesichert wurde. */
+    suspend fun lastBackup(): LastBackup? = withContext(Dispatchers.IO) {
+        if (!prefs.contains(KEY_LAST_BACKUP_AT)) return@withContext null
+        LastBackup(prefs.getLong(KEY_LAST_BACKUP_AT, 0), prefs.getInt(KEY_LAST_BACKUP_RECIPES, 0))
+    }
+
+    /** Merkt sich eine Sicherung; der Hinweis in der Sammlung beginnt danach wieder bei null. */
+    suspend fun setLastBackup(backup: LastBackup) = withContext(Dispatchers.IO) {
+        prefs.edit {
+            putLong(KEY_LAST_BACKUP_AT, backup.at)
+            putInt(KEY_LAST_BACKUP_RECIPES, backup.recipes)
+            putInt(KEY_BACKUP_HINT_HIDDEN_AT, 0)
+        }
+    }
+
+    /**
+     * Wie viele Rezepte ungesichert waren, als der Hinweis in der Sammlung ausgeblendet wurde (0 = nicht ausgeblendet).
+     * Er erscheint erst wieder, wenn noch einmal so viele dazugekommen sind, wie für den Hinweis nötig sind.
+     */
+    suspend fun backupHintHiddenAt(): Int = withContext(Dispatchers.IO) { prefs.getInt(KEY_BACKUP_HINT_HIDDEN_AT, 0) }
+
+    suspend fun setBackupHintHiddenAt(unsaved: Int) = withContext(Dispatchers.IO) {
+        prefs.edit { putInt(KEY_BACKUP_HINT_HIDDEN_AT, unsaved) }
+    }
+
     /** true, wenn die App frisch installiert und noch nie aktualisiert wurde. */
     suspend fun isFreshInstall(): Boolean = withContext(Dispatchers.IO) {
         val manager = appContext.packageManager
@@ -46,5 +74,8 @@ class AppPreferences(context: Context) {
         const val FILE_NAME = "moltobene"
         const val KEY_LAST_SEEN_VERSION = "last_seen_version_code"
         const val KEY_RECOGNITION_LANGUAGE = "recognition_language"
+        const val KEY_LAST_BACKUP_AT = "last_backup_at"
+        const val KEY_LAST_BACKUP_RECIPES = "last_backup_recipes"
+        const val KEY_BACKUP_HINT_HIDDEN_AT = "backup_hint_hidden_at"
     }
 }

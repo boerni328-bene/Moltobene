@@ -3,6 +3,16 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.18.0] – 2026-10-07 (versionCode 37)
+
+### Neu
+- **Sicherung geprüft:** Nach dem Sichern liest die App die Sicherungsdatei noch einmal: das Inhaltsverzeichnis und die Liste der Rezepte. Erst wenn alles da ist, kommt „Sammlung gesichert“. Fotos werden dafür nicht noch einmal ausgepackt, das Sichern dauert also kaum länger. Ist die Datei unvollständig, etwa weil der Speicher voll war oder die App beendet wurde, wird sie entfernt. So bleibt keine Sicherung liegen, die sich später nicht wiederherstellen lässt.
+- **Zuletzt gesichert:** In den Einstellungen steht unter „Sammlung sichern“, wann zuletzt gesichert wurde und wie viele Rezepte es waren, oder „Noch nie gesichert“. Nach dem Wiederherstellen auf einem neuen Handy gilt die verwendete Sicherung als letzte.
+- **Ruhiger Hinweis in der Sammlung:** Sind 10 oder mehr Rezepte neu oder geändert und noch nicht gesichert, steht oben in der Sammlung z. B. „12 Rezepte sind noch nicht gesichert.“ mit „Sichern“. Der Hinweis lässt sich ausblenden und erscheint erst nach 10 weiteren Rezepten wieder. Es gibt kein Fenster und keine Benachrichtigung.
+
+### Geändert
+- Ist beim Sichern oder Wiederherstellen kein Speicherplatz mehr frei, sagt die App das jetzt genau so und nennt den nächsten Schritt. Bisher hieß es beim Wiederherstellen fälschlich „Die Sicherungsdatei ist beschädigt“.
+
 ## [0.17.1] – 2026-10-07 (versionCode 36)
 
 ### Geändert

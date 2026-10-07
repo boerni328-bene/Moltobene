@@ -52,6 +52,10 @@ abstract class RecipeDao {
     @Query("SELECT id, updatedAt FROM recipes")
     abstract suspend fun getAllUpdatedAt(): List<RecipeUpdatedAt>
 
+    /** Wie viele Rezepte seit [since] hinzugefügt oder geändert wurden – für den Hinweis zum Sichern (#51). */
+    @Query("SELECT COUNT(*) FROM recipes WHERE updatedAt > :since")
+    abstract fun observeChangedSince(since: Long): Flow<Int>
+
     @Query("SELECT photoId FROM recipe_photos")
     abstract suspend fun getAllPhotoIds(): List<String>
 

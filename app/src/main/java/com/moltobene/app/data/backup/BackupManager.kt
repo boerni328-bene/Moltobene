@@ -2,9 +2,13 @@ package com.moltobene.app.data.backup
 
 import android.content.Context
 import android.net.Uri
+import android.os.ParcelFileDescriptor
+import android.provider.DocumentsContract
 import com.moltobene.app.BuildConfig
 import com.moltobene.app.data.RecipeRepository
+import com.moltobene.app.data.StorageFull
 import com.moltobene.app.data.photos.PhotoStore
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -37,7 +41,27 @@ class BackupManager(
 
     private val restoreDir: File get() = File(context.cacheDir, "restore")
 
-    /** Schreibt alle Rezepte mit Fotos in die gewählte Datei. Liefert die Anzahl der Rezepte. */
+    /** Sichern ist fehlgeschlagen; [problem] sagt warum, damit die Meldung den nächsten Schritt nennen kann. */
+    class BackupException(val problem: Problem, cause: Throwable? = null) : IOException(problem.name, cause) {
+        enum class Problem {
+            /** Am Speicherort ist kein Platz mehr. */
+            NO_SPACE,
+
+            /** Die Datei ließ sich nach dem Schreiben nicht vollständig lesen. */
+            INCOMPLETE,
+
+            /** Sonstiger Fehler beim Schreiben. */
+            FAILED,
+        }
+    }
+
+    /**
+     * Schreibt alle Rezepte mit Fotos in die gewählte Datei und prüft sie danach (#51): Erst wenn sie sich vollständig
+     * lesen lässt, gilt die Sammlung als gesichert. Sonst wird die unvollständige Datei entfernt, damit keine
+     * Sicherung mit gültigem Namen liegen bleibt, die sich später nicht wiederherstellen lässt.
+     * @return Anzahl der Rezepte
+     * @throws BackupException
+     */
     suspend fun export(uri: Uri): Int = withContext(Dispatchers.IO) {
         val recipes = repository.getAll()
         val photos = recipes.flatMap { it.photoIds + it.pageIds }.distinct()
@@ -47,9 +71,62 @@ class BackupManager(
             createdAt = System.currentTimeMillis(),
             recipeCount = recipes.size,
         )
-        val out = context.contentResolver.openOutputStream(uri, "wt") ?: throw IOException("Datei nicht beschreibbar")
-        out.use { BackupWriter.write(it, manifest, recipes.map { recipe -> recipe.toBackup() }, photos) }
+        try {
+            val out = context.contentResolver.openOutputStream(uri, "wt") ?: throw IOException("Datei nicht beschreibbar")
+            val entries = out.use { BackupWriter.write(it, manifest, recipes.map { recipe -> recipe.toBackup() }, photos) }
+            try {
+                check(uri, entries, recipes.size)
+            } catch (e: IOException) {
+                if (StorageFull.isCause(e)) throw e
+                throw BackupException(BackupException.Problem.INCOMPLETE, e)
+            }
+        } catch (e: CancellationException) {
+            deleteQuietly(uri)
+            throw e
+        } catch (e: Exception) {
+            deleteQuietly(uri)
+            throw when {
+                e is BackupException -> e
+                StorageFull.isCause(e) -> BackupException(BackupException.Problem.NO_SPACE, e)
+                else -> BackupException(BackupException.Problem.FAILED, e)
+            }
+        }
         recipes.size
+    }
+
+    /**
+     * Liest die fertige Datei: das Inhaltsverzeichnis am Ende und die Rezeptliste am Anfang, ohne die Fotos noch
+     * einmal auszupacken. Lässt sich am Speicherort nicht springen (z. B. bei manchen Cloud-Speichern), wird die
+     * Datei einmal ganz gelesen.
+     */
+    private fun check(uri: Uri, entries: Int, recipes: Int) {
+        val resolver = context.contentResolver
+        val names = try {
+            resolver.openFileDescriptor(uri, "r")?.let { descriptor ->
+                ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { stream ->
+                    val channel = stream.channel
+                    if (channel.size() > 0) BackupCheck.entryNames(channel) else null
+                }
+            }
+        } catch (e: BackupCheck.IncompleteException) {
+            throw e
+        } catch (e: IOException) {
+            null
+        } catch (e: UnsupportedOperationException) {
+            null
+        }
+        val input = { resolver.openInputStream(uri) ?: throw IOException("Datei nicht lesbar") }
+        if (names != null) {
+            val count = input().use { BackupCheck.recipeCount(it) }
+            BackupCheck.verify(names.size, count, entries, recipes)
+        } else {
+            val (found, count) = input().use { BackupCheck.streamingCheck(it) }
+            BackupCheck.verify(found, count, entries, recipes)
+        }
+    }
+
+    private fun deleteQuietly(uri: Uri) {
+        runCatching { DocumentsContract.deleteDocument(context.contentResolver, uri) }
     }
 
     /** Liest und prüft die Sicherung vollständig und erstellt eine Vorschau. */

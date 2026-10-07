@@ -1,6 +1,7 @@
 package com.moltobene.app.data.backup
 
 import com.moltobene.app.data.RecipeIds
+import com.moltobene.app.data.StorageFull
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -26,7 +27,8 @@ class BackupReader(private val limits: Limits = Limits()) {
         val maxTotalBytes: Long = 4L * 1024 * 1024 * 1024,
     )
 
-    enum class Problem { NOT_A_BACKUP, NEWER_VERSION, DAMAGED, TOO_LARGE }
+    /** [NO_SPACE]: Beim Auspacken war auf dem Handy kein Platz mehr (#51) – die Datei selbst ist in Ordnung. */
+    enum class Problem { NOT_A_BACKUP, NEWER_VERSION, DAMAGED, TOO_LARGE, NO_SPACE }
 
     sealed interface Result {
         /** [photoDir] enthält die ausgepackten Fotos als <id>.jpg und <id>_thumb.jpg. */
@@ -85,7 +87,7 @@ class BackupReader(private val limits: Limits = Limits()) {
         } catch (e: ZipException) {
             return Result.Failed(Problem.NOT_A_BACKUP)
         } catch (e: IOException) {
-            return Result.Failed(Problem.DAMAGED)
+            return Result.Failed(if (StorageFull.isCause(e)) Problem.NO_SPACE else Problem.DAMAGED)
         }
 
         val manifest = manifestText?.let {

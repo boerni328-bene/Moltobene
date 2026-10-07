@@ -19,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -36,6 +37,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -46,7 +48,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -54,6 +58,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moltobene.app.R
 import com.moltobene.app.ui.components.CenteredMessage
@@ -78,6 +84,9 @@ fun CollectionScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val query by viewModel.query.collectAsStateWithLifecycle()
+    val backupHint by viewModel.backupHint.collectAsStateWithLifecycle()
+    // Beim Zurückkehren neu lesen, z. B. nachdem in den Einstellungen gesichert wurde (#51).
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshBackupHint() }
     // „Rezept übernehmen“: Auswahl der Erfassungswege, damit unten rechts nur zwei Knöpfe stehen.
     var chooseImport by rememberSaveable { mutableStateOf(false) }
     if (chooseImport) {
@@ -143,6 +152,13 @@ fun CollectionScreen(
                         EmptyCollection(onAddRecipe = onAddRecipe, onImport = { chooseImport = true })
                     } else {
                         SearchField(query = query, onQueryChange = viewModel::onQueryChange)
+                        backupHint?.takeIf { query.isBlank() }?.let { unsaved ->
+                            BackupHint(
+                                unsaved = unsaved,
+                                onBackup = onOpenSettings,
+                                onHide = { viewModel.hideBackupHint(unsaved) },
+                            )
+                        }
                         if (current.items.isEmpty()) {
                             CenteredMessage(text = stringResource(R.string.search_no_results))
                         } else {
@@ -290,3 +306,48 @@ private fun ImportChooser(
         },
     )
 }
+
+/**
+ * Ruhiger Hinweis zum Sichern (#51): kein Fenster und keine Benachrichtigung. „Sichern“ führt zu den Einstellungen;
+ * ausgeblendet erscheint er erst wieder, wenn weitere Rezepte ungesichert sind.
+ */
+@Composable
+private fun BackupHint(unsaved: Int, onBackup: () -> Unit, onHide: () -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.m, vertical = Spacing.xs),
+    ) {
+        val text = pluralStringResource(R.plurals.backup_hint, unsaved, unsaved)
+        val actions = @Composable {
+            TextButton(onClick = onBackup) { Text(stringResource(R.string.backup_hint_action)) }
+            IconButton(onClick = onHide) {
+                Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.backup_hint_hide))
+            }
+        }
+        // Mit großer Schrift bliebe neben den Schaltflächen kaum Platz: Dann stehen sie unter dem Text.
+        if (LocalDensity.current.fontScale >= LARGE_FONT_SCALE) {
+            Column(modifier = Modifier.padding(start = Spacing.m, top = Spacing.s)) {
+                Text(text = text, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(end = Spacing.m))
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.align(Alignment.End)) { actions() }
+            }
+        } else {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = Spacing.m)) {
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = Spacing.s),
+                )
+                actions()
+            }
+        }
+    }
+}
+
+/** Ab dieser Schriftgröße (Einstellung des Handys) stehen Schaltflächen unter statt neben einem Hinweis. */
+private const val LARGE_FONT_SCALE = 1.5f

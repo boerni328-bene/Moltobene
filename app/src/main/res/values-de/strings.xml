@@ -166,9 +166,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Aus Datei übernehmen: Rezeptdateien, die jemand mit Moltobene geteilt hat, lassen sich direkt aus WhatsApp, E-Mail oder dem Dateimanager öffnen – samt Foto, ohne Internet. Auch gespeicherte Rezeptseiten werden gelesen.</item>
-        <item>Ein mit Moltobene geteilter Rezepttext behält beim Übernehmen seine Quelle, z. B. Buch und Seite.</item>
-        <item>Portionsangaben wie „Für 1 Zopf“ werden mit ihrer Einheit übernommen.</item>
+        <item>Sicherung geprüft: Nach dem Sichern liest die App die Datei noch einmal und meldet erst dann „Sammlung gesichert“. Eine unvollständige Datei wird entfernt.</item>
+        <item>In den Einstellungen steht, wann zuletzt gesichert wurde.</item>
+        <item>Sind 10 oder mehr Rezepte noch nicht gesichert, erinnert ein ruhiger Hinweis in der Sammlung daran.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->
@@ -218,6 +218,20 @@
         <item quantity="other">Sammlung gesichert: %d Rezepte</item>
     </plurals>
     <string name="backup_error">Die Sammlung konnte nicht gesichert werden.</string>
+    <string name="backup_error_space">Nicht genug Speicherplatz für die Sicherung. Platz schaffen oder einen anderen Speicherort wählen.</string>
+    <string name="backup_error_incomplete">Die Sicherungsdatei war nach dem Schreiben nicht vollständig und wurde entfernt. Erneut sichern, am besten an einem anderen Speicherort.</string>
+    <string name="backup_never">Noch nie gesichert</string>
+    <plurals name="backup_last">
+        <item quantity="one">Zuletzt gesichert: %2$s, %1$d Rezept</item>
+        <item quantity="other">Zuletzt gesichert: %2$s, %1$d Rezepte</item>
+    </plurals>
+    <plurals name="backup_hint">
+        <item quantity="one">%d Rezept ist noch nicht gesichert.</item>
+        <item quantity="other">%d Rezepte sind noch nicht gesichert.</item>
+    </plurals>
+    <string name="backup_hint_action">Sichern</string>
+    <string name="backup_hint_hide">Hinweis ausblenden</string>
+    <string name="restore_error_space">Nicht genug Speicherplatz auf dem Handy, um die Sicherung zu lesen. Platz schaffen und erneut versuchen.</string>
     <string name="restore_title">Sammlung wiederherstellen</string>
     <string name="restore_text">Rezepte aus einer Sicherungsdatei übernehmen. Vorhandene Rezepte bleiben erhalten.</string>
     <string name="restore_checking">Sicherung wird geprüft …</string>
