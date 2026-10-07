@@ -35,7 +35,7 @@ import javax.net.ssl.SSLException
 class HttpPageLoader(private val language: () -> String = { Locale.getDefault().toLanguageTag() }) : PageLoader {
 
     override suspend fun loadPage(url: String): WebPage = withTotalTimeout {
-        fetch(url, PAGE_ACCEPT, PAGE_TYPES) { connection, finalUrl ->
+        fetch(url, PAGE_ACCEPT, PAGE_TYPES, PAGE_FETCH) { connection, finalUrl ->
             // Längere Seiten werden abgeschnitten: Die Rezeptangaben stehen fast immer weit vorn.
             val body = connection.inputStream.use { readUpTo(it, MAX_PAGE_BYTES) }
             WebPage(finalUrl, body, charsetOf(connection.contentType))
@@ -43,7 +43,7 @@ class HttpPageLoader(private val language: () -> String = { Locale.getDefault().
     }
 
     override suspend fun loadImage(url: String, target: File) = withTotalTimeout {
-        fetch(url, IMAGE_ACCEPT, IMAGE_TYPES) { connection, _ ->
+        fetch(url, IMAGE_ACCEPT, IMAGE_TYPES, IMAGE_FETCH) { connection, _ ->
             if (connection.contentLengthLong > MAX_IMAGE_BYTES) throw WebException(Problem.TOO_LARGE)
             connection.inputStream.use { input -> target.outputStream().use { copyAtMost(input, it, MAX_IMAGE_BYTES) } }
         }
@@ -65,11 +65,12 @@ class HttpPageLoader(private val language: () -> String = { Locale.getDefault().
         start: String,
         accept: String,
         types: List<String>,
+        fetchHeaders: Map<String, String>,
         read: (HttpsURLConnection, String) -> T,
     ): T {
         var url = WebAddress.normalize(start) ?: throw WebException(Problem.NOT_ALLOWED)
         repeat(MAX_REDIRECTS + 1) {
-            val connection = open(url, accept)
+            val connection = open(url, accept, fetchHeaders)
             when (val step = withConnection(connection) { respond(connection, url, types, read) }) {
                 is Step.Done -> return step.value
                 is Step.Redirect -> url = step.url
@@ -79,7 +80,7 @@ class HttpPageLoader(private val language: () -> String = { Locale.getDefault().
     }
 
     /** Baut die Verbindung auf, nachdem geprüft ist, dass der Name ins öffentliche Internet zeigt. */
-    private suspend fun open(url: String, accept: String): HttpsURLConnection = withContext(Dispatchers.IO) {
+    private suspend fun open(url: String, accept: String, fetchHeaders: Map<String, String>): HttpsURLConnection = withContext(Dispatchers.IO) {
         val parsed = URL(url)
         val addresses = try {
             InetAddress.getAllByName(parsed.host)
@@ -96,6 +97,7 @@ class HttpPageLoader(private val language: () -> String = { Locale.getDefault().
             setRequestProperty("User-Agent", USER_AGENT)
             setRequestProperty("Accept", accept)
             setRequestProperty("Accept-Language", acceptLanguage())
+            fetchHeaders.forEach { (name, value) -> setRequestProperty(name, value) }
         }
     }
 
@@ -168,6 +170,23 @@ class HttpPageLoader(private val language: () -> String = { Locale.getDefault().
          */
         const val USER_AGENT =
             "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36"
+
+        /**
+         * Angaben, die jeder Browser beim Öffnen einer Seite mitschickt: „eine Seite, direkt aufgerufen“. Ohne sie
+         * weisen manche Koch-Portale die App ab (z. B. REWE oder Cookie and Kate, geprüft am 07.10.2026). Sie
+         * enthalten nichts über das Handy oder die Person.
+         */
+        private val PAGE_FETCH = mapOf(
+            "Sec-Fetch-Dest" to "document",
+            "Sec-Fetch-Mode" to "navigate",
+            "Sec-Fetch-Site" to "none",
+            "Sec-Fetch-User" to "?1",
+        )
+        private val IMAGE_FETCH = mapOf(
+            "Sec-Fetch-Dest" to "image",
+            "Sec-Fetch-Mode" to "no-cors",
+            "Sec-Fetch-Site" to "cross-site",
+        )
 
         private const val PAGE_ACCEPT = "text/html,application/xhtml+xml,application/ld+json;q=0.9,*/*;q=0.5"
         private const val IMAGE_ACCEPT = "image/jpeg,image/png,image/webp,image/*;q=0.8"

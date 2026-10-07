@@ -10,6 +10,7 @@ Kostenlos, ohne Werbung, ohne Konto und ohne Tracking. Ins Internet geht die App
 
 - Rezepte hinzufügen und bearbeiten: Titel, Foto, Portionen, Zutaten, Zubereitung, Quelle und eigene Notizen
 - Rezepte aus Internetseiten übernehmen: Link einfügen oder die Seite aus dem Browser an Moltobene teilen. Titel, Zutaten, Zubereitung, Portionen, Zeiten und Foto kommen ins Rezept, die Quelle bleibt erhalten.
+- Rezepte aus YouTube-Videos übernehmen (bestmöglicher Versuch): Die App liest das Rezept aus der Videobeschreibung. Verweist sie auf das ganze Rezept auf einer Internetseite, lässt es sich auf Wunsch von dort übernehmen.
 - Rezeptdateien übernehmen: Dateien, die jemand aus Moltobene geteilt hat, oder Rezepte im offenen Standard schema.org direkt aus WhatsApp, E-Mail oder dem Dateimanager öffnen – ohne Internet, mit Foto
 - Rezepte aus Fotos übernehmen: Die Texterkennung liest Titel, Zutaten und Zubereitung aus Fotos von Kochbuch, Zettel oder Bildschirmfoto, auch über mehrere Seiten (Deutsch, Englisch, Italienisch, Französisch, Spanisch)
 - Rezepte aus Text übernehmen: eingefügt aus Nachrichten, E-Mails oder Notizen oder per „Teilen mit…“ aus anderen Apps; Titel, Zutaten und Zubereitung werden automatisch eingeordnet

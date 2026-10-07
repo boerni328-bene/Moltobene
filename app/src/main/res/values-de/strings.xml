@@ -70,7 +70,7 @@
     <string name="clipboard_empty">Die Zwischenablage enthält keinen Text.</string>
     <string name="text_done">Text ins Rezept übernommen. Prüfen, ob alles an der richtigen Stelle steht.</string>
     <string name="import_from_link">Aus Link übernehmen</string>
-    <string name="import_link_hint">Link zu einer Rezeptseite einfügen, z. B. aus dem Browser. Dafür wird genau diese eine Seite geladen.</string>
+    <string name="import_link_hint">Link zu einer Rezeptseite oder einem YouTube-Video einfügen, z. B. aus dem Browser. Dafür wird genau diese eine Seite geladen.</string>
     <string name="import_link_field">Link</string>
     <string name="link_loading">Seite wird geladen …</string>
     <string name="link_done">Rezept von der Seite übernommen. Prüfen, ob alles an der richtigen Stelle steht.</string>
@@ -89,6 +89,10 @@
     <string name="import_from_file">Aus Datei übernehmen</string>
     <string name="file_loading">Datei wird gelesen …</string>
     <string name="file_done">Rezept aus der Datei übernommen. Prüfen, ob alles an der richtigen Stelle steht.</string>
+    <string name="video_done">Rezept aus der Videobeschreibung übernommen. Mit dem Video vergleichen: In Beschreibungen fehlen oft Mengen oder Schritte.</string>
+    <string name="video_no_recipe">In der Videobeschreibung steht kein Rezept. Titel und Link sind gespeichert, die Beschreibung steht unter „Übernommener Text“.</string>
+    <string name="video_link_only">In der Videobeschreibung steht kein Rezept, aber ein Link dazu. Titel und Link des Videos sind gespeichert.</string>
+    <string name="video_recipe_link">Die Videobeschreibung verweist auf ein Rezept bei %1$s.</string>
     <string name="file_no_recipe">In der Datei wurde kein Rezept gefunden. Übernommen werden Rezeptdateien, z. B. von Moltobene geteilte, und gespeicherte Rezeptseiten.</string>
     <string name="file_error">Die Datei konnte nicht gelesen werden.</string>
     <string name="file_too_large">Die Datei ist zu groß für ein Rezept (höchstens 10 MB).</string>
@@ -166,9 +170,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Sicherung geprüft: Nach dem Sichern liest die App die Datei noch einmal und meldet erst dann „Sammlung gesichert“. Eine unvollständige Datei wird entfernt.</item>
-        <item>In den Einstellungen steht, wann zuletzt gesichert wurde.</item>
-        <item>Sind 10 oder mehr Rezepte noch nicht gesichert, erinnert ein ruhiger Hinweis in der Sammlung daran.</item>
+        <item>YouTube: Ein Link zu einem Kochvideo übernimmt das Rezept aus der Videobeschreibung, mit Titel, Vorschaubild und Link zum Video als Quelle.</item>
+        <item>Verweist die Beschreibung auf das ganze Rezept auf einer Internetseite, lässt es sich mit einem Tippen von dort übernehmen.</item>
+        <item>Rezepte von weiteren Koch-Portalen lassen sich übernehmen, die die App bisher abgewiesen haben.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->

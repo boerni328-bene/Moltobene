@@ -38,7 +38,7 @@ object RecipeTextParser {
         RegexOption.IGNORE_CASE,
     )
     private val STEPS_HEADING = Regex(
-        "^(zubereitung|anleitung|so geht'?s|so wird'?s gemacht|arbeitsschritte|instructions?|directions?|method|" +
+        "^(zubereitung|anleitung|so (einfach |schnell |leicht )?geht'?s|so wird'?s gemacht|arbeitsschritte|instructions?|directions?|method|" +
             "preparation|steps|preparazione|procedimento|realisation|preparacion|elaboracion|" +
             "instrucciones|modo de preparacion)\\b[^0-9]{0,30}$",
         RegexOption.IGNORE_CASE,
@@ -307,12 +307,12 @@ object RecipeTextParser {
         return false
     }
 
-    private fun isIngredientHeading(line: String): Boolean {
+    internal fun isIngredientHeading(line: String): Boolean {
         val text = withoutAccents(line.trimEnd(':').trim())
         return INGREDIENT_HEADING.matches(text) || NEEDS_HEADING.matches(text)
     }
 
-    private fun isStepsHeading(line: String): Boolean {
+    internal fun isStepsHeading(line: String): Boolean {
         val text = line.trimEnd(':').trim()
         return STEPS_HEADING.matches(withoutAccents(text)) && !TIME_WORDS.containsMatchIn(text)
     }

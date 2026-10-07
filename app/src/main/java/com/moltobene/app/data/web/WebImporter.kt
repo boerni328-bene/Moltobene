@@ -29,12 +29,45 @@ class WebImporter(private val loader: PageLoader, private val cacheDir: File) {
 
         /** Auf der Seite steht kein erkennbares Rezept; nur der Titel der Seite ist bekannt. */
         data class NoRecipe(override val url: String, val title: String?) : Result
+
+        /**
+         * Ein YouTube-Video: [recipe] ist das Rezept aus der Beschreibung, falls darin eines steht. [recipeLink] ist
+         * ein Link zum Rezept auf einer Internetseite, den die Beschreibung nennt – er wird nur auf Wunsch geladen.
+         */
+        data class Video(
+            override val url: String,
+            val video: YouTube.Video,
+            val recipe: WebRecipe?,
+            val recipeLink: String?,
+        ) : Result {
+            /** Titel und vollständige Beschreibung für „Übernommener Text“ – so geht nichts verloren. */
+            val text: String get() = listOfNotNull(video.title, video.description.trim().ifEmpty { null }).joinToString("\n\n")
+        }
     }
 
     /** @throws WebException wenn die Seite nicht geladen werden konnte */
     suspend fun import(url: String): Result {
+        YouTube.videoId(url)?.let { return importVideo(it) }
         val page = loader.loadPage(url)
         return withContext(Dispatchers.Default) { classify(page.url, RecipePage.read(page)) }
+    }
+
+    /**
+     * YouTube (Vision: „nur als bestmöglicher Versuch“): Das Rezept steht höchstens in der Beschreibung des Videos.
+     * Als Quelle zählt der Link zum Video ohne Zusätze, mit denen YouTube Weitergaben verfolgt.
+     * @throws WebException wenn die Seite nicht geladen werden konnte oder kein Video enthält
+     */
+    private suspend fun importVideo(id: String): Result {
+        val page = loader.loadPage(YouTube.pageUrl(id))
+        return withContext(Dispatchers.Default) {
+            val video = YouTube.read(page) ?: throw WebException(WebException.Problem.BLOCKED)
+            Result.Video(
+                url = YouTube.watchUrl(video.id),
+                video = video,
+                recipe = VideoDescription.recipe(video),
+                recipeLink = VideoDescription.recipeLink(video.description),
+            )
+        }
     }
 
     /**

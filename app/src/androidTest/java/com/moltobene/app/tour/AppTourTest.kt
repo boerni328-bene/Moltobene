@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasAnySibling
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -319,6 +320,46 @@ class AppTourTest(private val variant: DisplayVariant) {
         // Ohne Zählzusatz (utm_…) gespeichert.
         assertEquals(SamplePage.CLEAN_URL, recipe.source?.url)
         assertEquals("de", recipe.language)
+        assertEquals(1, recipe.photoIds.size)
+    }
+
+    /**
+     * „Aus Link übernehmen“ mit einem YouTube-Video: Die Zutaten kommen aus der Videobeschreibung, der Link zum
+     * ganzen Rezept wird angeboten und erst auf Wunsch geladen. Dessen Rezept ersetzt dann die Zutaten aus der
+     * Beschreibung; als Quelle bleibt das Video – ohne den Zusatz „si=…“.
+     */
+    @Test
+    fun ausVideoUebernehmen() {
+        container().pageLoader = SamplePage.loader(activity)
+        clickVisible(text(R.string.import_recipe))
+        waitForText(text(R.string.import_from_link))
+        composeRule.onNodeWithText(text(R.string.import_from_link)).performClick()
+        waitForField(R.string.import_link_field)
+        field(R.string.import_link_field).performTextInput(SamplePage.VIDEO_URL)
+        composeRule.onNodeWithText(text(R.string.import_text_action)).performClick()
+
+        waitForText(text(R.string.video_done))
+        // Das Vorschaubild des Videos wird zum Foto, kurz nach dem Rezept.
+        waitForText(text(R.string.photo_remove))
+        composeRule.onNode(hasText(SamplePage.VIDEO_INGREDIENT, substring = true) and hasSetTextAction()).assertExists()
+        // Das Angebot ganz zeigen: Text und Schaltfläche darunter.
+        val offer = text(R.string.video_recipe_link, SamplePage.VIDEO_SITE)
+        val offerButton = composeRule.onNode(hasText(text(R.string.import_from_link)) and hasAnySibling(hasText(offer)))
+        offerButton.performScrollTo().assertIsDisplayed()
+        screenshot("27a-aus-video-uebernommen")
+
+        offerButton.performClick()
+        waitForText(text(R.string.link_done))
+        waitUntilGone(offer)
+
+        composeRule.onNodeWithText(text(R.string.save)).performClick()
+        waitForText("320 g Risottoreis")
+        val recipe = runBlocking { container().repository.getAll().single() }
+        assertEquals(SamplePage.TITLE, recipe.title)
+        // Die Zutaten der Rezeptseite ersetzen die aus der Beschreibung, statt sie zu verdoppeln.
+        assertEquals(5, recipe.ingredients.size)
+        assertEquals(3, recipe.steps.size)
+        assertEquals(SamplePage.VIDEO_WATCH_URL, recipe.source?.url)
         assertEquals(1, recipe.photoIds.size)
     }
 

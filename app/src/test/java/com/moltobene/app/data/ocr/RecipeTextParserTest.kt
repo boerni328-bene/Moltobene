@@ -1,6 +1,7 @@
 package com.moltobene.app.data.ocr
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -279,6 +280,16 @@ class RecipeTextParserTest {
         assertEquals(listOf("Den Teig kneten und eine Stunde ruhen lassen.", "Im Ofen backen."), wrapped.steps)
         // Erkannter Text aus der Texterkennung bleibt wie bisher: Zeilen ohne Leerzeile gehören zusammen.
         assertEquals(1, RecipeTextParser.parse(text).steps.size)
+    }
+
+    /** „So einfach geht’s:“ steht in Videobeschreibungen oft statt „Zubereitung“. */
+    @Test
+    fun soEinfachGehtsIstZubereitung() {
+        val recipe = RecipeTextParser.parse("Zutaten:\n120 g Pasta\n3 EL Olivenöl\n\nSo einfach geht’s:\nNudeln kochen.\nMit Öl mischen.", "de", typed = true)
+        assertEquals(listOf("120 g Pasta", "3 EL Olivenöl"), recipe.ingredients)
+        assertEquals(listOf("Nudeln kochen.", "Mit Öl mischen."), recipe.steps)
+        assertTrue(RecipeTextParser.isStepsHeading("So geht's"))
+        assertFalse(RecipeTextParser.isStepsHeading("So geht es weiter mit dem Teig, der jetzt ruhen muss"))
     }
 
     @Test

@@ -45,9 +45,38 @@ object SamplePage {
         </head><body><article><h1>Zitronen-Risotto</h1><p>Eine lange Geschichte vor dem Rezept …</p></article></body></html>
     """.trimIndent()
 
-    /** Lader, der statt ins Internet zu gehen die nachgestellte Seite und ein gezeichnetes Foto liefert. */
+    /** Geteilter Link zu einem Video, wie ihn die YouTube-App weitergibt – mit „si=…“ zum Verfolgen der Weitergabe. */
+    const val VIDEO_URL = "https://youtu.be/AbCdEfGhIjK?si=rundgang"
+    const val VIDEO_WATCH_URL = "https://www.youtube.com/watch?v=AbCdEfGhIjK"
+    const val VIDEO_SITE = "rezepte.example"
+    const val VIDEO_INGREDIENT = "1 Bio-Zitrone"
+
+    /**
+     * Nachgestellte YouTube-Videoseite (selbst geschrieben, nach dem Aufbau echter Videoseiten): In der Beschreibung
+     * stehen nur die Zutaten und ein Link zum ganzen Rezept – der führt zur nachgestellten Rezeptseite oben.
+     */
+    private val VIDEO_HTML = """
+        <!doctype html>
+        <html lang="de"><head>
+          <title>Zitronen-Risotto - YouTube</title>
+          <meta property="og:image" content="https://i.ytimg.com/vi/AbCdEfGhIjK/maxresdefault.jpg">
+        </head><body>
+          <script>var ytInitialPlayerResponse = null;</script>
+          <script>var ytInitialPlayerResponse = {"playabilityStatus":{"status":"OK"},"videoDetails":{"videoId":"AbCdEfGhIjK","title":"Zitronen-Risotto mit Parmesan 🍋 #shorts","author":"Beispielküche","shortDescription":"Cremig und frisch in einer halben Stunde.\n\n0:00 Intro\n0:20 Kochen\n\nZutaten für 4 Portionen:\n320 g Risottoreis\n1 Bio-Zitrone\n50 g Parmesan\n\nDas ganze Rezept mit allen Schritten: https://rezepte.example/zitronen-risotto\n\nFolge uns auf Instagram: https://instagram.com/beispielkueche\n\n#risotto #rundgang"}};</script>
+        </body></html>
+    """.trimIndent()
+
+    /**
+     * Lader, der statt ins Internet zu gehen die nachgestellten Seiten und ein gezeichnetes Foto liefert:
+     * für YouTube die Videoseite, sonst die Rezeptseite.
+     */
     fun loader(context: Context): PageLoader = object : PageLoader {
-        override suspend fun loadPage(url: String): WebPage = WebPage(CLEAN_URL, HTML.toByteArray(), "UTF-8")
+        override suspend fun loadPage(url: String): WebPage =
+            if (url.contains("youtube.com")) {
+                WebPage(url, VIDEO_HTML.toByteArray(), "UTF-8")
+            } else {
+                WebPage(CLEAN_URL, HTML.toByteArray(), "UTF-8")
+            }
 
         override suspend fun loadImage(url: String, target: File) = SampleRecipes.drawPagePhoto(context, target)
     }

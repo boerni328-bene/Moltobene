@@ -581,6 +581,32 @@ private fun RecognitionSection(
             }
         }
 
+        // Ein Link zum Rezept aus der Videobeschreibung wird erst auf Wunsch geladen; die Seite steht vorher da.
+        val videoSite = viewModel.videoRecipeSite
+        if (videoSite != null && !viewModel.isImporting) {
+            Surface(
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Column(modifier = Modifier.padding(start = Spacing.m, top = Spacing.m, end = Spacing.s, bottom = Spacing.xs)) {
+                    Text(
+                        text = stringResource(R.string.video_recipe_link, videoSite),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(end = Spacing.s),
+                    )
+                    TextButton(
+                        onClick = viewModel::importVideoRecipeLink,
+                        enabled = enabled,
+                        modifier = Modifier.align(Alignment.End),
+                    ) {
+                        Text(stringResource(R.string.import_from_link))
+                    }
+                }
+            }
+        }
+
         val hasText = viewModel.recognizedText.isNotBlank()
         if (viewModel.pageCount > 0 || hasText) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {

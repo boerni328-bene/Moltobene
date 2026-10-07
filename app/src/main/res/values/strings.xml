@@ -71,7 +71,7 @@
     <string name="clipboard_empty">The clipboard contains no text.</string>
     <string name="text_done">Text added to the recipe. Check that everything is in the right place.</string>
     <string name="import_from_link">Import from link</string>
-    <string name="import_link_hint">Paste a link to a recipe page, e.g. from the browser. Only this one page is loaded.</string>
+    <string name="import_link_hint">Paste a link to a recipe page or a YouTube video, e.g. from the browser. Only this one page is loaded.</string>
     <string name="import_link_field">Link</string>
     <string name="link_loading">Loading page …</string>
     <string name="link_done">Recipe imported from the page. Check that everything is in the right place.</string>
@@ -90,6 +90,10 @@
     <string name="import_from_file">Import from file</string>
     <string name="file_loading">Reading file …</string>
     <string name="file_done">Recipe imported from the file. Check that everything is in the right place.</string>
+    <string name="video_done">Recipe imported from the video description. Compare it with the video: descriptions often lack amounts or steps.</string>
+    <string name="video_no_recipe">The video description contains no recipe. Title and link are saved, the description is under “Imported text”.</string>
+    <string name="video_link_only">The video description contains no recipe, only a link to it. Title and link of the video are saved.</string>
+    <string name="video_recipe_link">The video description links to a recipe on %1$s.</string>
     <string name="file_no_recipe">No recipe was found in the file. Recipe files, e.g. shared from Moltobene, and saved recipe pages can be imported.</string>
     <string name="file_error">The file could not be read.</string>
     <string name="file_too_large">The file is too large for a recipe (10 MB at most).</string>
@@ -168,9 +172,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Checked backups: after backing up, the app reads the file again and only then reports “Collection backed up”. An incomplete file is removed.</item>
-        <item>Settings show when the collection was last backed up.</item>
-        <item>If 10 or more recipes are not backed up yet, a quiet hint in the collection says so.</item>
+        <item>YouTube: a link to a cooking video imports the recipe from the video description, with title, preview image and the video link as source.</item>
+        <item>If the description links to the full recipe on a website, it can be imported from there with one tap.</item>
+        <item>Recipes can now be imported from more cooking websites that previously turned the app away.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->

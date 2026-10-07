@@ -3,6 +3,19 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.19.0] – 2026-10-07 (versionCode 38)
+
+### Neu
+- **Rezepte aus YouTube-Videos:** „Aus Link übernehmen“ und „Teilen mit…“ aus der YouTube-App nehmen jetzt auch Links zu Kochvideos an, auch Shorts. Die App liest die Videobeschreibung. Steht dort ein Rezept, kommen Zutaten, Portionen und, falls vorhanden, die Zubereitung ins Rezept, dazu der Titel und das Vorschaubild des Videos. Werbung, Links, Kapitelmarken und Schlagwörter bleiben draußen. Als Quelle wird der Link zum Video gespeichert, ohne den Zusatz, mit dem YouTube verfolgt, wer einen Link geteilt hat. Ein Hinweis erinnert daran, das Rezept mit dem Video zu vergleichen, denn in Beschreibungen fehlt oft etwas.
+- **Link zum ganzen Rezept:** Verweist die Videobeschreibung auf das Rezept auf einer Internetseite, steht das unter dem Rezept, z. B. „Die Videobeschreibung verweist auf ein Rezept bei …“. Mit „Aus Link übernehmen“ wird das Rezept von dort übernommen und ersetzt, was aus der Beschreibung kam, solange daran noch nichts geändert wurde. Geladen wird diese Seite nur auf Wunsch.
+- Steht in der Beschreibung kein Rezept, bleiben Titel und Link des Videos als Entwurf erhalten, die ganze Beschreibung steht unter „Übernommener Text“.
+
+### Geändert
+- Einige Koch-Portale haben die App bisher abgewiesen (z. B. REWE, EDEKA oder Cookie and Kate). Die App fragt Seiten jetzt so an wie ein üblicher Browser, deshalb lassen sich auch dort Rezepte übernehmen. Dabei werden keine Angaben zum Handy oder zur Person mitgeschickt.
+- „So einfach geht’s“ wird wie „Zubereitung“ als Überschrift erkannt, auch bei „Aus Text übernehmen“.
+
+YouTube kann den Aufbau seiner Seiten jederzeit ändern. Die Übernahme aus Videos ist deshalb ein bestmöglicher Versuch ohne Zusage.
+
 ## [0.18.0] – 2026-10-07 (versionCode 37)
 
 ### Neu

@@ -138,6 +138,14 @@ class EditViewModel(
      * [CHECK_RECOGNIZED] nach der Texterkennung, [CHECK_TEXT] nach „Aus Text übernehmen“, sonst leer.
      */
     private val checkHintField = SavedField(handle, "checkHintKind", "")
+    /** Link zum Rezept aus einer Videobeschreibung, der angeboten wird; leer, wenn es keinen gibt. */
+    private val videoLinkField = SavedField(handle, "videoRecipeLink", "")
+    /**
+     * Titel, Portionen, Zutaten und Schritte vor und nach dem Übernehmen einer Videobeschreibung (siehe [snapshot]):
+     * Solange danach nichts geändert wurde, ersetzt das Rezept der verlinkten Seite, was aus der Beschreibung kam.
+     */
+    private val videoBeforeField = SavedField(handle, "videoBefore", "")
+    private val videoAfterField = SavedField(handle, "videoAfter", "")
     /** Seiten für „Bereich auswählen“ und die laufende Erkennung, eine je Zeile: „photo:<Kennung>“ oder „page:<Name>“. */
     private val areaPagesField = SavedField(handle, "areaPages", "")
     /** Rahmen je Seite (#39), Seiten getrennt mit „;“ – siehe [AreaFrame.encodeAll]. */
@@ -236,8 +244,16 @@ class EditViewModel(
         CHECK_LINK -> R.string.link_done
         CHECK_LINK_TEXT -> R.string.link_text_done
         CHECK_FILE -> R.string.file_done
+        CHECK_VIDEO -> R.string.video_done
         else -> null
     }
+
+    /** Link zum Rezept, den die Videobeschreibung nennt (#55); er wird nur auf Wunsch geladen. */
+    val videoRecipeLink: String? get() = videoLinkField.value.ifEmpty { null }
+
+    /** Name der Seite hinter [videoRecipeLink], z. B. „ricette.example.it“ – so ist vor dem Laden klar, wohin es geht. */
+    val videoRecipeSite: String?
+        get() = videoRecipeLink?.let { link -> runCatching { java.net.URL(link).host.removePrefix("www.") }.getOrNull() }
     val askKeepPages: Boolean get() = askKeepPagesField.value
     val isDirty: Boolean get() = dirtyField.value
 
@@ -891,14 +907,19 @@ class EditViewModel(
      * in „Quelle“ und ein neues Rezept ist als Entwurf gesichert; klappt das Laden nicht, bleibt beides.
      * @param raw der Link, auch mit Text drumherum (der erste Link zählt)
      * @param fallbackTitle Titel, falls die Seite keinen liefert, z. B. der Titel aus „Teilen mit…“
+     * @param replacing Stand des Formulars, der wiederhergestellt wird, bevor ein gefundenes Rezept hinzukommt
+     *   (siehe [importVideoRecipeLink]); nur dann, damit bei einem Fehler nichts verloren geht
      */
-    fun importLink(raw: String, fallbackTitle: String? = null) {
+    fun importLink(raw: String, fallbackTitle: String? = null, replacing: String? = null) {
         if (isImporting || isRecognizing) return
         val url = WebAddress.normalize(TextLinks.first(raw) ?: raw.trim())
         if (url == null) {
             message = R.string.link_invalid
             return
         }
+        videoLinkField.value = ""
+        videoBeforeField.value = ""
+        videoAfterField.value = ""
         if (source.isBlank()) source = url
         saveDraft()
         importing = R.string.link_loading
@@ -907,11 +928,13 @@ class EditViewModel(
                 val result = webImporter.import(url)
                 // Nach einer Weiterleitung (z. B. von einem Kurzlink) zählt die Adresse der Seite selbst.
                 if (source.trim() == url && result.url != url) source = result.url
+                if (replacing != null && result is WebImporter.Result.Found) restore(replacing)
                 when (result) {
                     is WebImporter.Result.Found -> applyWebRecipe(result.recipe, result.url, CHECK_LINK, fromFile = false)
                     is WebImporter.Result.TextOnly ->
                         if (!applyPageText(result, fromFile = false)) noRecipe(result.title ?: fallbackTitle, R.string.link_no_recipe)
                     is WebImporter.Result.NoRecipe -> noRecipe(result.title ?: fallbackTitle, R.string.link_no_recipe)
+                    is WebImporter.Result.Video -> applyVideo(result)
                 }
             } catch (e: CancellationException) {
                 throw e
@@ -959,6 +982,8 @@ class EditViewModel(
                     is WebImporter.Result.TextOnly ->
                         if (!applyPageText(result, fromFile = true)) noRecipe(result.title, R.string.file_no_recipe)
                     is WebImporter.Result.NoRecipe -> noRecipe(result.title, R.string.file_no_recipe)
+                    // Eine Datei ist nie ein Video; nur der Vollständigkeit halber.
+                    is WebImporter.Result.Video -> noRecipe(result.video.title, R.string.file_no_recipe)
                 }
             } catch (e: CancellationException) {
                 throw e
@@ -972,6 +997,56 @@ class EditViewModel(
                 saveDraft()
             }
         }
+    }
+
+    /**
+     * YouTube (Vision: „nur als bestmöglicher Versuch“): Das Rezept aus der Beschreibung kommt ins Formular, Titel
+     * und ganze Beschreibung bleiben als übernommener Text erhalten – auch ohne Rezept geht so nichts verloren.
+     * Ein Link zum Rezept auf einer Internetseite wird nur angeboten, geladen wird er erst auf Wunsch.
+     */
+    private fun applyVideo(result: WebImporter.Result.Video) {
+        val before = snapshot()
+        val recipe = result.recipe
+        if (recipe != null) {
+            val parsed = ParsedRecipe(recipe.title, recipe.servings, recipe.servingsUnit, recipe.ingredients, recipe.steps)
+            mergeIntoForm(result.text, parsed, recipe.language)
+            checkHintField.value = CHECK_VIDEO
+        } else {
+            mergeIntoForm(result.text, ParsedRecipe(result.video.title, null, null, emptyList(), emptyList()), TextLanguage.detect(result.text))
+            message = if (result.recipeLink != null) R.string.video_link_only else R.string.video_no_recipe
+        }
+        videoLinkField.value = result.recipeLink.orEmpty()
+        videoBeforeField.value = before
+        videoAfterField.value = snapshot()
+        // Hat die Beschreibung kein Rezept, aber einen Link dazu, bringt dessen Seite meist ein besseres Foto mit.
+        if (!hasPhoto && (recipe != null || result.recipeLink == null)) {
+            result.video.imageUrl?.let { loadPhoto(it, fromFile = false) }
+        }
+    }
+
+    /**
+     * „Aus Link übernehmen“ für den Link aus der Videobeschreibung. Was aus der Beschreibung kam, wird durch das
+     * meist vollständigere Rezept der Seite ersetzt – aber nur, solange im Formular seitdem nichts geändert wurde.
+     */
+    fun importVideoRecipeLink() {
+        val link = videoRecipeLink ?: return
+        if (isImporting || isRecognizing) return
+        val unchanged = videoAfterField.value.isNotEmpty() && snapshot() == videoAfterField.value
+        importLink(link, replacing = videoBeforeField.value.takeIf { unchanged })
+    }
+
+    /** Titel, Portionen, Zutaten und Schritte in einer Zeichenkette, zum Vergleichen und Wiederherstellen. */
+    private fun snapshot(): String =
+        listOf(title, servings, servingsUnit, ingredients, steps).joinToString(SNAPSHOT_SEPARATOR)
+
+    private fun restore(snapshot: String) {
+        val parts = snapshot.split(SNAPSHOT_SEPARATOR)
+        if (parts.size != 5) return
+        title = parts[0]
+        servingsField.value = parts[1]
+        servingsUnitField.value = parts[2]
+        ingredientsField.value = parts[3]
+        stepsField.value = parts[4]
     }
 
     /** „Abbrechen“ beim Laden einer Seite oder Lesen einer Datei; beim Link wird die Verbindung sofort getrennt. */
@@ -1128,6 +1203,9 @@ class EditViewModel(
         const val CHECK_LINK = "link"
         const val CHECK_LINK_TEXT = "linkText"
         const val CHECK_FILE = "file"
+        const val CHECK_VIDEO = "video"
+        /** Trennt die Felder in [snapshot]; kommt in eingegebenem Text nicht vor. */
+        const val SNAPSHOT_SEPARATOR = "\u0000"
         /** Kantenlänge der Vorschaubilder in der Seitenübersicht. */
         const val THUMBNAIL_EDGE = 480
     }
