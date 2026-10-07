@@ -89,4 +89,24 @@ class RecipeFileTest {
     fun zuGrosseDatei() {
         IncomingRecipeFile.readAtMost(ByteArrayInputStream(ByteArray(2_000)), max = 1_000)
     }
+
+    /** Gespeicherte Seite, deren Rezeptdaten nur Titel, Portionen und Zeiten enthalten: Der Text wird eingeordnet. */
+    @Test
+    fun seiteMitRezeptdatenOhneZutaten() = runBlocking {
+        val html = """
+            <html lang="en"><head><title>Braised Beans | Chef Example</title>
+              <script type="application/ld+json">{"@type":"Recipe","name":"Braised Beans","recipeYield":"6","totalTime":"4 hrs"}</script>
+            </head><body><main>
+              <h2>Ingredients</h2><article><ul><li>500 g white beans</li></ul></article>
+              <h2>Directions</h2><ol><li>Simmer the beans.</li></ol>
+            </main></body></html>
+        """.trimIndent()
+        val result = importer.readFile(html.toByteArray())
+        assertTrue(result is WebImporter.Result.TextOnly)
+        result as WebImporter.Result.TextOnly
+        assertEquals("Braised Beans", result.title)
+        assertEquals(6, result.details?.servings)
+        assertEquals(240, result.details?.totalMinutes)
+        assertTrue(result.text.contains("Simmer the beans."))
+    }
 }

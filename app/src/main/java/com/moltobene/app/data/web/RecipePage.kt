@@ -1,5 +1,6 @@
 package com.moltobene.app.data.web
 
+import com.moltobene.app.data.ocr.RecipeTextParser
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -48,7 +49,8 @@ object RecipePage {
         val imageUrl = meta(document, "og:image")?.let { RecipeJsonLdReader.absolute(it, document.location()) }
         val title = pageTitle(document)
 
-        val recipe = (jsonLd(document) ?: microdata(document))?.let { found ->
+        val embedded = jsonLd(document)
+        val recipe = (embedded?.takeIf { it.hasContent } ?: microdata(document) ?: embedded)?.let { found ->
             found.copy(
                 title = found.title ?: title,
                 imageUrls = found.imageUrls.ifEmpty { listOfNotNull(imageUrl) },
@@ -59,14 +61,19 @@ object RecipePage {
         return Content(recipe, recipe?.title ?: title, text, language, imageUrl)
     }
 
-    /** Das erste Rezept in den eingebetteten Daten; eine Seite hat oft mehrere solche Blöcke. */
-    private fun jsonLd(document: Document): WebRecipe? =
-        document.select("script[type]")
+    /**
+     * Das erste Rezept in den eingebetteten Daten; eine Seite hat oft mehrere solche Blöcke. Manche Seiten ergänzen
+     * Zutaten und Zubereitung erst im Browser per Skript – dann zählen wenigstens Titel, Portionen und Zeiten.
+     */
+    private fun jsonLd(document: Document): WebRecipe? {
+        val recipes = document.select("script[type]")
             .asSequence()
             .filter { it.attr("type").contains("ld+json", ignoreCase = true) }
             .take(MAX_SCRIPTS)
             .mapNotNull { RecipeJsonLdReader.read(it.data(), document.location()) }
-            .firstOrNull { it.hasContent }
+            .toList()
+        return recipes.firstOrNull { it.hasContent } ?: recipes.firstOrNull()
+    }
 
     /** Ältere Auszeichnung mit „itemprop“-Angaben direkt im HTML. */
     private fun microdata(document: Document): WebRecipe? {
@@ -142,15 +149,36 @@ object RecipePage {
         }.trim().ifEmpty { null }
     }
 
-    /** Sichtbarer Text des Hauptteils: ohne Menüs, Kopf- und Fußzeilen, Formulare und Skripte. */
+    /**
+     * Sichtbarer Text des Hauptteils: ohne Menüs, Kopf- und Fußzeilen, Formulare und Skripte. Gewählt wird der
+     * engste Bereich, in dem das Rezept mit seiner Überschrift „Zutaten“ steht – „article“, sonst „main“, sonst die
+     * ganze Seite. Manche Baukästen für Internetseiten (z. B. Webflow) setzen „article“ nur um einzelne Textblöcke
+     * wie die Zutatenliste; deren Überschrift und die Zubereitung stehen dann außerhalb.
+     */
     private fun mainText(document: Document): String {
         val copy = document.clone()
         copy.select(
             "script, style, noscript, template, svg, iframe, nav, header, footer, aside, form, button, select, " +
                 "[hidden], [aria-hidden=true], [role=navigation], [role=banner], [role=contentinfo]",
         ).remove()
-        val root = copy.selectFirst("article") ?: copy.selectFirst("main, [role=main]") ?: copy.body()
-        return HtmlText.blockText(root).take(MAX_TEXT)
+        val areas = (copy.select("article").take(MAX_ARTICLES) + listOfNotNull(copy.selectFirst("main, [role=main]"), copy.body()))
+            .distinct()
+        val texts = areas.asSequence().map { HtmlText.blockText(it).take(MAX_TEXT) }
+        return withoutTrailingSections(texts.firstOrNull { looksLikeRecipe(it) } ?: texts.first())
+    }
+
+    /**
+     * Kommentare und weitere Rezepte unter dem Rezept gehören nicht dazu: Der Text endet an ihrer Überschrift,
+     * wenn sie nach den Überschriften für Zutaten und Zubereitung steht.
+     */
+    internal fun withoutTrailingSections(text: String): String {
+        val lines = text.lines()
+        val ingredients = lines.indexOfFirst { RecipeTextParser.isIngredientHeading(it) }
+        if (ingredients < 0) return text
+        val steps = lines.indexOfFirst { RecipeTextParser.isStepsHeading(it) }
+        val end = (maxOf(ingredients, steps) + 1 until lines.size).firstOrNull { TRAILING_SECTION.matches(lines[it].trim()) }
+            ?: return text
+        return lines.subList(0, end).joinToString("\n").trim()
     }
 
     private fun meta(document: Document, property: String): String? =
@@ -159,9 +187,18 @@ object RecipePage {
             ?.attr("content")?.trim()?.ifEmpty { null }
 
     private const val MAX_SCRIPTS = 30
+    private const val MAX_ARTICLES = 10
     private const val MAX_LINES = 200
     /** So viel nimmt auch „Aus Text übernehmen“ an. */
     private const val MAX_TEXT = 50_000
+    /** „Kommentare“, „Comments & Ratings“, „Weitere Rezepte“, „You may also like“ … in den Sprachen der App und der Texterkennung. */
+    private val TRAILING_SECTION = Regex(
+        "^(comments?|kommentare?|commenti|commentaires?|comentarios?|leave a (reply|comment)|schreibe? einen kommentar|" +
+            "(other|more|related|similar) recipes|you (may|might) also like|(weitere|ähnliche|andere|mehr) rezepte|" +
+            "das könnte (dir|ihnen|euch) auch gefallen|altre ricette|ricette (correlate|simili)|autres recettes|" +
+            "recettes similaires|otras recetas|recetas (relacionadas|similares))\\b.{0,30}$",
+        RegexOption.IGNORE_CASE,
+    )
     private val TITLE_SEPARATOR = Regex("\\s+[|–—-]\\s+")
     private val WHITESPACE = Regex("\\s+")
     private val RECIPE_TYPE = Regex("(?i)(https?://)?(www\\.)?schema\\.org/Recipe")

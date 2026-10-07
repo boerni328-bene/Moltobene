@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.19.1] – 2026-10-07 (versionCode 39)
+
+### Behoben
+- **Aus Link übernehmen:** Auf manchen Seiten fand die App kein Rezept, obwohl Zutaten und Zubereitung dort stehen, z. B. bei joshuaweissman.com. Betroffen waren Seiten, die mit bestimmten Baukästen für Internetseiten gestaltet sind. Jetzt kommen die Zutaten (auch in Gruppen wie „Gremolata:“) und die Zubereitung ins Rezept, dazu Titel, Portionen, Zeiten und das Foto der Seite.
+- Kommentare und Hinweise auf weitere Rezepte unter einem Rezept landen nicht mehr in der Zubereitung.
+
 ## [0.19.0] – 2026-10-07 (versionCode 38)
 
 ### Neu

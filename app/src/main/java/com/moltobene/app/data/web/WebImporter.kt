@@ -18,13 +18,17 @@ class WebImporter(private val loader: PageLoader, private val cacheDir: File) {
         /** Die Seite enthält ein Rezept im Standardformat. */
         data class Found(override val url: String, val recipe: WebRecipe) : Result
 
-        /** Kein Rezept im Standardformat, aber Text, der sich wie „Aus Text übernehmen“ einordnen lässt. */
+        /**
+         * Kein Rezept im Standardformat, aber Text, der sich wie „Aus Text übernehmen“ einordnen lässt. [details] sind
+         * eingebettete Rezeptdaten ohne Zutaten und Zubereitung, z. B. mit Portionen und Zeiten.
+         */
         data class TextOnly(
             override val url: String,
             val title: String?,
             val text: String,
             val language: String?,
             val imageUrl: String?,
+            val details: WebRecipe? = null,
         ) : Result
 
         /** Auf der Seite steht kein erkennbares Rezept; nur der Titel der Seite ist bekannt. */
@@ -83,7 +87,14 @@ class WebImporter(private val loader: PageLoader, private val cacheDir: File) {
         val recipe = content.recipe
         return when {
             recipe != null && recipe.hasContent -> Result.Found(url, recipe)
-            looksLikeRecipe(content.text) -> Result.TextOnly(url, content.title, content.text, content.language, content.imageUrl)
+            looksLikeRecipe(content.text) -> Result.TextOnly(
+                url = url,
+                title = content.title,
+                text = content.text,
+                language = recipe?.language ?: content.language,
+                imageUrl = recipe?.imageUrls?.firstOrNull() ?: content.imageUrl,
+                details = recipe,
+            )
             else -> Result.NoRecipe(url, content.title)
         }
     }

@@ -1077,13 +1077,26 @@ class EditViewModel(
 
     /**
      * Seite (oder gespeicherte Seite) ohne Rezept im Standardformat: Ihr Text wird wie bei „Aus Text übernehmen“
-     * eingeordnet. Liefert false, wenn darin weder Zutaten noch Schritte zu finden sind.
+     * eingeordnet. Portionen und Zeiten aus eingebetteten Rezeptdaten gehen vor. Liefert false, wenn darin weder
+     * Zutaten noch Schritte zu finden sind.
      */
     private fun applyPageText(result: WebImporter.Result.TextOnly, fromFile: Boolean): Boolean {
         val language = result.language?.takeIf { it in TextLanguage.SUPPORTED } ?: TextLanguage.detect(result.text)
         val parsed = RecipeTextParser.parse(result.text, language, typed = true)
         if (parsed.ingredients.isEmpty() && parsed.steps.isEmpty()) return false
-        mergeIntoForm(result.text, parsed.copy(title = result.title ?: parsed.title), language)
+        val details = result.details
+        val servingsFromDetails = details?.servings != null
+        mergeIntoForm(
+            result.text,
+            parsed.copy(
+                title = result.title ?: parsed.title,
+                servings = if (servingsFromDetails) details?.servings else parsed.servings,
+                servingsUnit = if (servingsFromDetails) details?.servingsUnit else parsed.servingsUnit,
+            ),
+            language,
+        )
+        if (prepMinutesField.value == 0) prepMinutesField.value = details?.prepMinutes ?: 0
+        if (totalMinutesField.value == 0) totalMinutesField.value = details?.totalMinutes ?: 0
         checkHintField.value = CHECK_LINK_TEXT
         if (!hasPhoto) result.imageUrl?.takeIf { isUsablePhoto(it, fromFile) }?.let { loadPhoto(it, fromFile) }
         return true
