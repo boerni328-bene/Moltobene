@@ -1,0 +1,180 @@
+name: Sprachpaket
+
+# Sprachpaket Deutsch ↔ Englisch für „Rezept übersetzen“ (#60): baut es nachvollziehbar aus den Originalmodellen
+# OPUS-MT (CC-BY 4.0) und prüft, ob der Übersetzer der App Wort für Wort dasselbe Ergebnis liefert wie das Original.
+# Veröffentlicht wird es nur auf ausdrücklichen Wunsch (Run workflow auf main) als eigenes Release, das die App
+# auf Wunsch einmal herunterlädt. Das Paket ist zu groß für das Repository.
+on:
+  push:
+    branches: ["claude/**"]
+    paths:
+      - ".github/sprachpaket/**"
+      - ".github/workflows/sprachpaket.yml"
+      - "app/src/main/java/com/moltobene/app/data/translate/**"
+      - "app/src/test/java/com/moltobene/app/data/translate/**"
+  workflow_dispatch:
+    inputs:
+      veroeffentlichen:
+        description: "Als Release veröffentlichen (nur auf main)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sprachpaket-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Feste Stände der Modelle auf Hugging Face (Commit), damit das Paket immer gleich entsteht.
+  REVISION_EN_DE: 6183067f769a302e3861815543b9f312c71b0ca4
+  REVISION_DE_EN: 1a922f3b32a8e809e17a47d4b32142d8105924e5
+
+# Alle Actions sind auf feste Commit-Kennungen angepinnt (Schutz vor veränderten Versionen).
+jobs:
+  paket:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.paket.outputs.version }}
+      manifest: ${{ steps.paket.outputs.manifest }}
+
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Werkzeuge zum Umwandeln einrichten
+        run: |
+          python3 -m venv "$RUNNER_TEMP/umwandeln"
+          . "$RUNNER_TEMP/umwandeln/bin/activate"
+          # Feste Versionen; torch nur für den Prozessor (ohne Grafikkarte), sonst zieht optimum ein neueres nach.
+          echo "torch==2.4.1+cpu" > "$RUNNER_TEMP/constraints.txt"
+          pip install -q --extra-index-url https://download.pytorch.org/whl/cpu -c "$RUNNER_TEMP/constraints.txt" \
+            "torch==2.4.1+cpu" "transformers==4.44.2" "optimum[exporters]==1.22.0" "onnx==1.16.2" \
+            "onnxruntime==1.19.2" "sentencepiece==0.2.0" "sacremoses==0.1.1" "numpy<2"
+
+      - name: Sprachpaket bauen
+        id: paket
+        run: |
+          . "$RUNNER_TEMP/umwandeln/bin/activate"
+          OUT="$RUNNER_TEMP/sprachpaket"
+          python .github/sprachpaket/build_pack.py "$OUT"
+          python .github/sprachpaket/reference.py tokens "$OUT"
+          VERSION=$(python -c "import json,sys; print(json.load(open(sys.argv[1]))['version'])" "$OUT/pack/sprachpaket.json")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "manifest=$(sha256sum "$OUT/pack/sprachpaket.json" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          echo "OUT=$OUT" >> "$GITHUB_ENV"
+
+      # Die App nimmt nur ein Paket an, dessen Verzeichnis genau diese Prüfsumme hat.
+      - name: Prüfsumme mit der App vergleichen
+        env:
+          MANIFEST: ${{ steps.paket.outputs.manifest }}
+        run: |
+          APP=$(grep -oP 'MANIFEST_SHA256\s*=\s*"\K[0-9a-f]+' app/src/main/java/com/moltobene/app/data/translate/LanguagePack.kt)
+          if [ "$APP" != "$MANIFEST" ]; then
+            echo "::warning::Die App erwartet $APP, das Paket hat $MANIFEST. Vor dem Veröffentlichen in LanguagePack.kt eintragen."
+          else
+            echo "Prüfsumme stimmt mit der App überein: $MANIFEST"
+          fi
+
+      # Vergleichswerte mit derselben Fassung von ONNX Runtime wie in der App (gradle/libs.versions.toml).
+      - name: Vergleichswerte erzeugen
+        run: |
+          ORT=$(grep -oP '^onnxruntime\s*=\s*"\K[^"]+' gradle/libs.versions.toml)
+          python3 -m venv "$RUNNER_TEMP/vergleich"
+          . "$RUNNER_TEMP/vergleich/bin/activate"
+          pip install -q "onnxruntime==$ORT" "sentencepiece==0.2.0" "numpy<3"
+          python .github/sprachpaket/reference.py translate "$OUT"
+
+      - name: Java 17 einrichten
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Gradle einrichten
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+
+      - name: Übersetzer der App mit dem Sprachpaket prüfen
+        run: |
+          export LANGUAGE_PACK_DIR="$OUT/pack"
+          export LANGUAGE_PACK_FIXTURES="$OUT/fixtures.json"
+          export LANGUAGE_PACK_ARCHIVE="$(ls "$OUT"/sprachpaket-de-en-*.zip)"
+          # Ohne Zwischenspeicher: Das Ergebnis hängt vom Paket ab, das Gradle nicht kennt.
+          ./gradlew testDebugUnitTest --tests "com.moltobene.app.data.translate.*" --no-daemon --no-build-cache
+
+      - name: Übersetzungen der App anzeigen
+        if: always()
+        run: |
+          BERICHT=app/build/test-results/testDebugUnitTest/TEST-com.moltobene.app.data.translate.LanguagePackTest.xml
+          if [ -f "$BERICHT" ]; then sed -n '/<system-out>/,/<\/system-out>/p' "$BERICHT"; fi
+
+      - name: Sprachpaket speichern
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sprachpaket-de-en-${{ steps.paket.outputs.version }}
+          path: |
+            ${{ env.OUT }}/sprachpaket-de-en-*.zip
+            ${{ env.OUT }}/pack/sprachpaket.json
+            ${{ env.OUT }}/fixtures.json
+          retention-days: 30
+          compression-level: 0
+
+  veroeffentlichen:
+    # Nur auf ausdrücklichen Wunsch und nur vom Hauptzweig; als eigenes Release, das nie als „neueste Version“ gilt.
+    needs: paket
+    if: github.event_name == 'workflow_dispatch' && inputs.veroeffentlichen && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Prüfsumme mit der App vergleichen
+        env:
+          MANIFEST: ${{ needs.paket.outputs.manifest }}
+        run: |
+          APP=$(grep -oP 'MANIFEST_SHA256\s*=\s*"\K[0-9a-f]+' app/src/main/java/com/moltobene/app/data/translate/LanguagePack.kt)
+          if [ "$APP" != "$MANIFEST" ]; then
+            echo "::error::Die App erwartet $APP, das Paket hat $MANIFEST – so ließe es sich nicht installieren."
+            exit 1
+          fi
+
+      - name: Sprachpaket aus dem Build holen
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: sprachpaket-de-en-${{ needs.paket.outputs.version }}
+          path: dist
+
+      - name: Prüfsumme erzeugen
+        env:
+          VERSION: ${{ needs.paket.outputs.version }}
+        run: |
+          cd dist
+          sha256sum "sprachpaket-de-en-$VERSION.zip" | tee "sprachpaket-de-en-$VERSION.zip.sha256"
+
+      - name: Herkunftsnachweis anlegen
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: dist/sprachpaket-de-en-${{ needs.paket.outputs.version }}.zip
+
+      - name: Release anlegen
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ needs.paket.outputs.version }}
+        run: |
+          TAG="sprachpaket-de-en-$VERSION"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "::error::Release $TAG gibt es schon. Ein geändertes Paket braucht eine neue Version (PACK_VERSION)."
+            exit 1
+          fi
+          gh release create "$TAG" "dist/$TAG.zip" "dist/$TAG.zip.sha256" \
+            --title "Sprachpaket Deutsch ↔ Englisch ($VERSION)" \
+            --notes "Sprachpaket für „Rezept übersetzen“ in Moltobene. Wird in der App unter Einstellungen heruntergeladen, nicht von Hand installieren. Modelle: OPUS-MT der Universität Helsinki (CC BY 4.0), umgewandelt nach ONNX und auf 8 Bit verkleinert." \
+            --latest=false \
+            --target "$GITHUB_SHA"

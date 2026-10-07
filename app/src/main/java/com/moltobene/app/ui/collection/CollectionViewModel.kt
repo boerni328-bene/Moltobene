@@ -6,6 +6,7 @@ import com.moltobene.app.data.AppPreferences
 import com.moltobene.app.data.RecipeRepository
 import com.moltobene.app.data.ocr.PendingRecognition
 import com.moltobene.app.data.photos.PhotoStore
+import com.moltobene.app.data.translate.RecipeTranslations
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -38,6 +39,7 @@ class CollectionViewModel(
     private val photoStore: PhotoStore,
     private val pendingRecognition: PendingRecognition,
     private val preferences: AppPreferences,
+    private val translations: RecipeTranslations,
 ) : ViewModel() {
 
     private val _query = MutableStateFlow("")
@@ -66,6 +68,7 @@ class CollectionViewModel(
         viewModelScope.launch {
             runCatching { repository.cleanUpUnusedPhotos() }
             runCatching { pendingRecognition.deleteLeftovers() }
+            runCatching { translations.deleteUnused(repository.updatedAtById().keys) }
         }
     }
 

@@ -53,6 +53,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                         container.photoStore,
                         container.pendingRecognition,
                         container.preferences,
+                        container.translations,
                     )
                 },
                 snackbarHostState = snackbarHostState,
@@ -73,6 +74,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                         container.repository,
                         container.photoStore,
                         container.recipeSharer,
+                        container.translations,
                     )
                 },
                 snackbarHostState = snackbarHostState,
@@ -82,6 +84,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                     navController.popBackStack()
                     showMessage(message)
                 },
+                onOpenSettings = { navController.navigate(SettingsRoute) },
             )
         }
         composable<EditRoute> {
@@ -115,7 +118,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
         }
         composable<SettingsRoute> {
             SettingsScreen(
-                viewModel = viewModel { SettingsViewModel(container.backupManager, container.preferences) },
+                viewModel = viewModel { SettingsViewModel(container.backupManager, container.preferences, container.languagePack) },
                 snackbarHostState = snackbarHostState,
                 onBack = { navController.popBackStack() },
                 onOpenLicenses = { navController.navigate(LicensesRoute) },

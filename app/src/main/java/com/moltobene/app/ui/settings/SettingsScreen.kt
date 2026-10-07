@@ -1,5 +1,6 @@
 package com.moltobene.app.ui.settings
 
+import android.text.format.Formatter
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -17,8 +19,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -33,18 +37,24 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moltobene.app.BuildConfig
 import com.moltobene.app.R
 import com.moltobene.app.data.backup.BackupManager
 import com.moltobene.app.data.backup.BackupReader
+import com.moltobene.app.data.translate.LanguagePack
+import com.moltobene.app.data.translate.LanguagePackManager
 import com.moltobene.app.ui.theme.Spacing
 import com.moltobene.app.ui.whatsnew.WhatsNew
 import com.moltobene.app.ui.whatsnew.WhatsNewDialog
@@ -66,6 +76,8 @@ fun SettingsScreen(
     val resources = LocalResources.current
     var showWhatsNew by rememberSaveable { mutableStateOf(false) }
     var showPrivacy by rememberSaveable { mutableStateOf(false) }
+    var confirmDeletePack by rememberSaveable { mutableStateOf(false) }
+    val languagePack by viewModel.languagePackState.collectAsStateWithLifecycle()
     val createBackup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
         if (uri != null) viewModel.backup(uri)
     }
@@ -129,6 +141,13 @@ fun SettingsScreen(
                 supportingContent = { Text(stringResource(R.string.restore_text)) },
                 modifier = Modifier.clickable { openBackup.launch(BACKUP_MIME_TYPES) },
             )
+            SectionHeader(stringResource(R.string.settings_section_translation))
+            LanguagePackItem(
+                state = languagePack,
+                onDownload = viewModel::downloadLanguagePack,
+                onCancel = viewModel::cancelLanguagePack,
+                onDelete = { confirmDeletePack = true },
+            )
             SectionHeader(stringResource(R.string.settings_section_about))
             ListItem(
                 headlineContent = { Text(stringResource(R.string.app_name)) },
@@ -151,6 +170,24 @@ fun SettingsScreen(
 
     if (showWhatsNew) WhatsNewDialog(onDismiss = { showWhatsNew = false })
     if (showPrivacy) PrivacyDialog(onDismiss = { showPrivacy = false })
+    if (confirmDeletePack) {
+        AlertDialog(
+            onDismissRequest = { confirmDeletePack = false },
+            title = { Text(stringResource(R.string.language_pack_delete_title)) },
+            text = { Text(stringResource(R.string.language_pack_delete_text)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirmDeletePack = false
+                        viewModel.deleteLanguagePack()
+                    },
+                ) { Text(stringResource(R.string.delete)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmDeletePack = false }) { Text(stringResource(R.string.cancel)) }
+            },
+        )
+    }
 
     when (val current = viewModel.state) {
         is SettingsUiState.Working -> WorkingDialog(stringResource(current.label))
@@ -211,6 +248,66 @@ private fun eventText(event: SettingsEvent): String = when (event) {
         }
     )
     SettingsEvent.RestoreFailed -> stringResource(R.string.restore_error_failed)
+    SettingsEvent.LanguagePackDeleted -> stringResource(R.string.language_pack_deleted)
+}
+
+/** Sprachpaket für „Rezept übersetzen“ (#60): Größe vorab, Fortschritt, Fehler mit dem nächsten Schritt. */
+@Composable
+private fun LanguagePackItem(
+    state: LanguagePackManager.State,
+    onDownload: () -> Unit,
+    onCancel: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    val context = LocalContext.current
+    // Größen im Format des Handys, z. B. „172 MB“.
+    fun size(bytes: Long): String = Formatter.formatShortFileSize(context, bytes)
+    ListItem(
+        headlineContent = { Text(stringResource(R.string.language_pack_title)) },
+        supportingContent = {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                when (state) {
+                    LanguagePackManager.State.Checking, LanguagePackManager.State.Missing -> {
+                        Text(stringResource(R.string.language_pack_text, size(LanguagePack.DOWNLOAD_BYTES), size(LanguagePack.INSTALLED_BYTES)))
+                        if (state == LanguagePackManager.State.Missing) {
+                            OutlinedButton(onClick = onDownload) { Text(stringResource(R.string.language_pack_download)) }
+                        }
+                    }
+                    is LanguagePackManager.State.Downloading -> {
+                        Text(
+                            text = stringResource(R.string.language_pack_downloading),
+                            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                        )
+                        val progress = state.progress
+                        if (progress != null) {
+                            LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
+                        } else {
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                        }
+                        OutlinedButton(onClick = onCancel) { Text(stringResource(R.string.cancel)) }
+                    }
+                    is LanguagePackManager.State.Installed -> {
+                        Text(stringResource(R.string.language_pack_installed, size(state.bytes)))
+                        OutlinedButton(onClick = onDelete) { Text(stringResource(R.string.delete)) }
+                    }
+                    is LanguagePackManager.State.Failed -> {
+                        Text(
+                            text = when (state.problem) {
+                                LanguagePackManager.Problem.NO_CONNECTION -> stringResource(R.string.language_pack_error_connection)
+                                LanguagePackManager.Problem.NO_SPACE ->
+                                    stringResource(R.string.language_pack_error_space, size(LanguagePack.INSTALLED_BYTES))
+                                LanguagePackManager.Problem.DAMAGED -> stringResource(R.string.language_pack_error_damaged)
+                                LanguagePackManager.Problem.UNAVAILABLE -> stringResource(R.string.language_pack_error_unavailable)
+                            },
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                        )
+                        OutlinedButton(onClick = onDownload) { Text(stringResource(R.string.language_pack_retry)) }
+                    }
+                }
+            }
+        },
+    )
 }
 
 @Composable

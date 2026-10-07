@@ -1,6 +1,7 @@
 package com.moltobene.app.ui.licenses
 
 import androidx.annotation.StringRes
+import com.moltobene.app.R
 
 /**
  * Quelloffene Bausteine der App und ihre Lizenzen (Lizenztexte unter assets/licenses/).
@@ -41,6 +42,14 @@ internal val LICENSE_GROUPS = listOf(
         licenseName = "MIT License",
         file = "mit-jsoup.txt",
         components = listOf(Component("jsoup", "Jonathan Hedley")),
+    ),
+    LicenseGroup(
+        licenseName = "Creative Commons Attribution 4.0 International",
+        file = "cc-by-4.0.txt",
+        components = listOf(
+            Component("OPUS-MT opus-mt-en-de, opus-mt-de-en", "Language Technology Research Group, University of Helsinki"),
+        ),
+        note = R.string.license_note_opus_mt,
     ),
     LicenseGroup(
         licenseName = "Third Party Notices",

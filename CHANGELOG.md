@@ -3,6 +3,16 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.21.0] – 2026-10-07 (versionCode 41)
+
+### Neu
+- **Rezepte übersetzen (Deutsch ↔ Englisch):** Bei deutschen und englischen Rezepten steht in der Rezeptansicht unter dem Titel ein Umschalter „DE | EN“. Die Originalsprache ist mit „Original“ markiert, der Screenreader liest den Namen der Sprache vor. Ein Tippen auf die andere Sprache übersetzt Titel, Zutaten und Zubereitung direkt auf dem Handy, ohne Internet. Ein Fortschritt zeigt, wie weit die Übersetzung ist; „Abbrechen“ hält sie an. Notizen werden nie übersetzt.
+- Die Übersetzung ist ein maschineller Vorschlag; ein Hinweis erinnert daran, sie mit dem Original zu vergleichen. Unter einem übersetzten Titel steht der Titel im Original. Zeilen, bei denen die Übersetzung nicht stimmen kann, etwa weil eine Zahl fehlt oder sich ändert, bleiben im Original stehen. Typische Küchenbegriffe wie „icing sugar“ (Puderzucker) oder „Tellerlinsen“ (brown lentils) übersetzt ein eigenes Küchenwörterbuch.
+- Abhaken, aktueller Schritt und Portionen umrechnen funktionieren auch in der Übersetzung, und die Häkchen bleiben beim Umschalten erhalten. Das gespeicherte Rezept bleibt in seiner Originalsprache. Die Übersetzung wird zusätzlich auf dem Handy gemerkt und erscheint beim nächsten Öffnen sofort; ändert sich das Rezept, wird neu übersetzt.
+- **Sprachpaket Deutsch–Englisch:** Für die Übersetzung wird einmal das Sprachpaket gebraucht, unter Einstellungen → Übersetzung. Download etwa 172 MB, auf dem Handy etwa 274 MB, am besten im WLAN. Mit Fortschritt, Abbrechen und Löschen. Die App prüft das Paket beim Herunterladen mit einer festen Prüfsumme. Es kommt nicht in die Sicherung und lässt sich jederzeit neu laden. Fehlt es, zeigt die Rezeptansicht den Weg zu den Einstellungen.
+- Die Datenschutzerklärung nennt jetzt auch den Download des Sprachpakets.
+- Unter „Open-Source-Lizenzen“ stehen die Modelle des Sprachpakets: OPUS-MT der Universität Helsinki, Lizenz CC BY 4.0.
+
 ## [0.20.0] – 2026-10-07 (versionCode 40)
 
 ### Neu

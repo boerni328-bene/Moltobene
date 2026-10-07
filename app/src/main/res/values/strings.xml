@@ -54,6 +54,17 @@
     </plurals>
 
     <!-- Kochen (#56): abhaken, aktueller Schritt, Portionen umrechnen -->
+    <!-- Rezept übersetzen (#60) -->
+    <string name="translation_code_original">%1$s · original</string>
+    <string name="translation_language_original">%1$s, original language</string>
+    <string name="translation_running">Translating … %1$d of %2$d</string>
+    <string name="translation_hint">Machine-translated (original: %1$s). Compare with the original.</string>
+    <string name="translation_original_title">Original: %1$s</string>
+    <string name="translation_needs_pack">Translating needs the language pack German–English, downloaded once (about %1$s).</string>
+    <string name="translation_open_settings">Open settings</string>
+    <string name="translation_error">The translation did not work.</string>
+    <string name="translation_low_memory">There is not enough free memory for the translation right now. Close other apps and try again.</string>
+    <string name="translation_retry">Translate again</string>
     <string name="cooking_reset">Reset check-offs</string>
     <string name="ingredient_checked">checked off</string>
     <string name="ingredient_unchecked">not checked off</string>
@@ -183,9 +194,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Cooking: ingredients can be checked off, and tapping a step marks it as the current step.</item>
-        <item>Adjust servings: − and + adjust the amounts for more or fewer servings, written just like in the recipe, e.g. “1,000 g” or “1½ tsp”. The saved recipe stays unchanged.</item>
-        <item>Check-offs, the current step and servings are kept, even when the device is rotated.</item>
+        <item>Translate recipes: German and English recipes can be translated in the recipe view with “DE | EN”, right on the device and without internet. The original is kept.</item>
+        <item>To do so, download the language pack German–English once under Settings → Translation (about 172 MB, ideally over Wi-Fi).</item>
+        <item>Checking off and adjusting servings also work in the translation.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->
@@ -196,9 +207,10 @@
     <string name="privacy_title">Privacy</string>
     <string-array name="privacy_paragraphs">
         <item>Recipes, photos and notes are stored only on this device. There is no account, no advertising, no tracking and no sharing with third parties.</item>
-        <item>The app only goes online for “Import from link”: it then loads exactly that one page and, if available, its photo. As with any browser, the page learns the device’s internet address (IP address), the time and the preferred language. No cookies are stored and no details about the device are sent.</item>
+        <item>The app only goes online on request: for “Import from link” and when downloading the language pack for translation. For “Import from link” it loads exactly that one page and, if available, its photo. As with any browser, the page learns the device’s internet address (IP address), the time and the preferred language. No cookies are stored and no details about the device are sent.</item>
         <item>Otherwise content only leaves the device when it is shared or backed up. Notes are never shared. The backup file is not encrypted.</item>
-        <item>Text recognition runs entirely on the device, without internet. Android’s automatic cloud backup is turned off.</item>
+        <item>The language pack comes from the project page on GitHub. GitHub learns the device’s internet address (IP address) and the time. No recipes are sent.</item>
+        <item>Text recognition and translation run entirely on the device, without internet. Android’s automatic cloud backup is turned off.</item>
     </string-array>
 
     <!-- Bearbeiten -->
@@ -226,6 +238,21 @@
     <!-- Einstellungen -->
     <string name="settings_title">Settings</string>
     <string name="settings_section_about">About</string>
+    <string name="license_note_opus_mt">Models of the language pack for translation, downloaded only on request. Changed for Moltobene: converted to ONNX and reduced to 8 bit. Source: huggingface.co/Helsinki-NLP</string>
+    <string name="settings_section_translation">Translation</string>
+    <string name="language_pack_title">Language pack German–English</string>
+    <string name="language_pack_text">For translating recipes on the device, without internet. Download once: about %1$s, uses about %2$s on the device. Best over Wi-Fi.</string>
+    <string name="language_pack_download">Download</string>
+    <string name="language_pack_downloading">Downloading language pack …</string>
+    <string name="language_pack_installed">Installed, uses %1$s. Recipes in German or English can be translated in the recipe view.</string>
+    <string name="language_pack_delete_title">Delete language pack?</string>
+    <string name="language_pack_delete_text">Translating is only possible again after the language pack has been downloaded again.</string>
+    <string name="language_pack_deleted">Language pack deleted</string>
+    <string name="language_pack_retry">Try again</string>
+    <string name="language_pack_error_connection">Download failed: no connection. Check the internet connection and try again.</string>
+    <string name="language_pack_error_space">Not enough storage space on the device. Free up about %1$s and try again.</string>
+    <string name="language_pack_error_damaged">The language pack did not arrive completely. Try again.</string>
+    <string name="language_pack_error_unavailable">The language pack is not available right now. Try again later.</string>
     <string name="backup_title">Back up collection</string>
     <string name="backup_text">Saves all recipes and photos in one file. The backup file is not encrypted.</string>
     <string name="backup_file_name">moltobene-backup-%1$s.zip</string>

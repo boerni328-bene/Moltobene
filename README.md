@@ -2,7 +2,7 @@
 
 _Moltobene sammelt Kochrezepte aus allen Quellen an einem Ort, gespeichert nur auf dem eigenen Handy._
 
-Kostenlos, ohne Werbung, ohne Konto und ohne Tracking. Ins Internet geht die App nur, wenn ein Rezept aus einem Link übernommen wird; dafür braucht sie als einzige Berechtigung den Internetzugang.
+Kostenlos, ohne Werbung, ohne Konto und ohne Tracking. Ins Internet geht die App nur auf Wunsch: wenn ein Rezept aus einem Link übernommen oder das Sprachpaket für die Übersetzung heruntergeladen wird. Dafür braucht sie als einzige Berechtigung den Internetzugang.
 
 > **Hinweis zu Version 0.14.0:** Sie enthielt unbemerkt einen Baustein von Microsoft, der nach jeder Texterkennung Nutzungsdaten an Microsoft gesendet hat (in einer Prüfung nachgewiesen, [#49](https://github.com/boerni328-bene/Moltobene/issues/49)), und dafür die Internet-Berechtigung. Ab Version 0.14.1 ist dieser Baustein entfernt; jede neue Version wird beim Bauen darauf geprüft. Bitte auf die neueste Version aktualisieren.
 
@@ -15,11 +15,12 @@ Kostenlos, ohne Werbung, ohne Konto und ohne Tracking. Ins Internet geht die App
 - Rezepte aus Fotos übernehmen: Die Texterkennung liest Titel, Zutaten und Zubereitung aus Fotos von Kochbuch, Zettel oder Bildschirmfoto, auch über mehrere Seiten (Deutsch, Englisch, Italienisch, Französisch, Spanisch)
 - Rezepte aus Text übernehmen: eingefügt aus Nachrichten, E-Mails oder Notizen oder per „Teilen mit…“ aus anderen Apps; Titel, Zutaten und Zubereitung werden automatisch eingeordnet
 - Die Sammlung durchsuchen, mit Vorschaubildern
-- Beim Kochen bleibt der Bildschirm an
+- Mit dem Rezept kochen: Der Bildschirm bleibt an, Zutaten lassen sich abhaken, der aktuelle Schritt markieren und die Portionen umrechnen
+- Rezepte übersetzen (Deutsch ↔ Englisch): direkt auf dem Handy und ohne Internet, nachdem einmal das Sprachpaket heruntergeladen wurde (etwa 172 MB). Das Original bleibt erhalten, Abhaken und Portionen umrechnen gehen auch in der Übersetzung.
 - Einzelne Rezepte teilen: als gut lesbaren Text mit Foto oder als Rezeptdatei im offenen Standard schema.org. Eigene Notizen bleiben dabei privat.
 - Die ganze Sammlung inklusive Fotos als Datei sichern und wiederherstellen, z. B. für den Umzug auf ein neues Handy
 
-Geplant sind unter anderem: eine Kochansicht zum Abhaken und Umrechnen der Portionen sowie Schlagwörter und Favoriten.
+Geplant sind unter anderem Schlagwörter und Favoriten.
 
 ## Installation
 
@@ -48,7 +49,8 @@ Moltobene wird nicht über den Play Store verteilt. Ob eine APK wirklich aus die
 - Die automatische Android-Cloud-Sicherung ist abgeschaltet. Gesichert wird über die eigene Sicherungsdatei.
 - Fotos werden verkleinert und ohne Aufnahmeort gespeichert und geteilt.
 - Die Texterkennung ([PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR) mit [ONNX Runtime](https://onnxruntime.ai), beides quelloffen) ist fest eingebaut und läuft nur auf dem Handy, ohne Internet und ohne Google-Dienste.
-- Ins Internet geht die App nur bei „Aus Link übernehmen“: Dann wird genau diese eine Seite geladen und, falls vorhanden, ihr Foto. Die Seite erfährt dabei – wie bei jedem Browser – die IP-Adresse des Handys, die Uhrzeit und die eingestellte Sprache. Die Verbindung ist immer verschlüsselt, Cookies werden nicht gespeichert, Angaben zum Handy werden nicht mitgeschickt. Dieselbe kurze Datenschutzerklärung steht in der App unter Einstellungen → Info → „Datenschutz“.
+- Ins Internet geht die App nur auf Wunsch, bei „Aus Link übernehmen“ und beim Herunterladen des Sprachpakets. Bei „Aus Link übernehmen“ wird genau diese eine Seite geladen und, falls vorhanden, ihr Foto. Die Seite erfährt dabei – wie bei jedem Browser – die IP-Adresse des Handys, die Uhrzeit und die eingestellte Sprache. Die Verbindung ist immer verschlüsselt, Cookies werden nicht gespeichert, Angaben zum Handy werden nicht mitgeschickt. Dieselbe kurze Datenschutzerklärung steht in der App unter Einstellungen → Info → „Datenschutz“.
+- Das Sprachpaket für die Übersetzung kommt von dieser Projektseite auf GitHub; GitHub erfährt dabei die IP-Adresse des Handys und die Uhrzeit. Rezepte werden nie gesendet: Übersetzt wird vollständig auf dem Handy, mit den quelloffenen Modellen [OPUS-MT](https://huggingface.co/Helsinki-NLP) der Universität Helsinki (CC BY 4.0).
 
 ## Weiteres
 
@@ -59,4 +61,4 @@ Moltobene wird nicht über den Play Store verteilt. Ob eine APK wirklich aus die
 
 _Moltobene collects recipes from every source in one place, stored only on the phone itself._
 
-Free, no ads, no account, no tracking. The app only goes online when a recipe is imported from a link; the internet permission is the only one it needs. Note: version 0.14.0 unintentionally contained a Microsoft component that sent usage data to Microsoft after each text recognition (verified in a test, [#49](https://github.com/boerni328-bene/Moltobene/issues/49)), along with the internet permission. The component was removed in 0.14.1, and every build is now checked for it; please update to the latest version. The app is available in English and German. To install, download `moltobene-<version>.apk` from [Releases](https://github.com/boerni328-bene/Moltobene/releases/latest) and open it on an Android 8.0+ phone. The signing certificate fingerprint and checksums are listed above under “Echtheit prüfen”.
+Free, no ads, no account, no tracking. The app only goes online on request: when a recipe is imported from a link or the language pack for translation is downloaded. The internet permission is the only one it needs. Note: version 0.14.0 unintentionally contained a Microsoft component that sent usage data to Microsoft after each text recognition (verified in a test, [#49](https://github.com/boerni328-bene/Moltobene/issues/49)), along with the internet permission. The component was removed in 0.14.1, and every build is now checked for it; please update to the latest version. The app is available in English and German. To install, download `moltobene-<version>.apk` from [Releases](https://github.com/boerni328-bene/Moltobene/releases/latest) and open it on an Android 8.0+ phone. The signing certificate fingerprint and checksums are listed above under “Echtheit prüfen”.

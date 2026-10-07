@@ -2,6 +2,7 @@ package com.moltobene.app.data.web
 
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
 
 /**
  * Lädt Internetseiten und ihre Fotos für „Aus Link übernehmen“ (#55). Die App geht nur hierüber ins Internet,
@@ -15,6 +16,20 @@ interface PageLoader {
 
     /** Lädt ein Foto nach [target]; zu große Fotos werden nicht geladen. */
     suspend fun loadImage(url: String, target: File)
+}
+
+/**
+ * Lädt große Dateien wie das Sprachpaket für „Rezept übersetzen“ (#60) – nur, wenn es in den Einstellungen
+ * heruntergeladen wird. Gleiche Regeln wie für Seiten (nur https, nichts im eigenen Netz), aber ohne Zeitgrenze
+ * für den ganzen Vorgang; „Abbrechen“ trennt die Verbindung sofort.
+ */
+interface FileDownloader {
+
+    /**
+     * Lädt [url] und gibt den Inhalt Stück für Stück an [read], mit der Größe laut Server (-1, wenn unbekannt).
+     * Mehr als [maxBytes] wird nicht gelesen.
+     */
+    suspend fun <T> download(url: String, maxBytes: Long, read: (input: InputStream, length: Long) -> T): T
 }
 
 /**

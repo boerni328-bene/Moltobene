@@ -11,7 +11,9 @@ import com.moltobene.app.data.AppPreferences
 import com.moltobene.app.data.StorageFull
 import com.moltobene.app.data.backup.BackupManager
 import com.moltobene.app.data.backup.BackupReader
+import com.moltobene.app.data.translate.LanguagePackManager
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 sealed interface SettingsUiState {
@@ -29,12 +31,28 @@ sealed interface SettingsEvent {
     data class RestoreDone(val restored: Int) : SettingsEvent
     data class RestoreProblem(val problem: BackupReader.Problem) : SettingsEvent
     data object RestoreFailed : SettingsEvent
+    data object LanguagePackDeleted : SettingsEvent
 }
 
 class SettingsViewModel(
     private val backupManager: BackupManager,
     private val preferences: AppPreferences,
+    private val languagePack: LanguagePackManager,
 ) : ViewModel() {
+
+    /** Sprachpaket für „Rezept übersetzen“ (#60); der Download läuft weiter, wenn die Einstellungen geschlossen werden. */
+    val languagePackState: StateFlow<LanguagePackManager.State> = languagePack.state
+
+    fun downloadLanguagePack() = languagePack.download()
+
+    fun cancelLanguagePack() = languagePack.cancel()
+
+    fun deleteLanguagePack() {
+        viewModelScope.launch {
+            languagePack.delete()
+            event = SettingsEvent.LanguagePackDeleted
+        }
+    }
 
     /** Letzte geprüfte Sicherung für „Zuletzt gesichert: …“ (#51); null, solange sie lädt oder es keine gibt. */
     var lastBackup by mutableStateOf<AppPreferences.LastBackup?>(null)
@@ -42,6 +60,7 @@ class SettingsViewModel(
 
     init {
         viewModelScope.launch { lastBackup = runCatching { preferences.lastBackup() }.getOrNull() }
+        viewModelScope.launch { languagePack.refresh() }
     }
 
     var state by mutableStateOf<SettingsUiState>(SettingsUiState.Idle)

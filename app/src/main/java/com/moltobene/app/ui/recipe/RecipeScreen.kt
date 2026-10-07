@@ -9,6 +9,7 @@ import android.icu.text.MeasureFormat
 import android.icu.util.Measure
 import android.icu.util.MeasureUnit
 import android.net.Uri
+import android.text.format.Formatter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -41,9 +42,13 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -70,16 +75,20 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.LocaleList
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moltobene.app.R
 import com.moltobene.app.data.AmountScaling
@@ -88,6 +97,8 @@ import com.moltobene.app.data.RecipeText
 import com.moltobene.app.data.ocr.TextLanguage
 import com.moltobene.app.data.share.PreparedShare
 import com.moltobene.app.data.share.ShareLabels
+import com.moltobene.app.data.translate.LanguagePack
+import com.moltobene.app.data.translate.RecipeTranslations
 import com.moltobene.app.ui.components.CenteredMessage
 import com.moltobene.app.ui.components.DraftLabel
 import com.moltobene.app.ui.components.PageViewer
@@ -106,8 +117,10 @@ fun RecipeScreen(
     onBack: () -> Unit,
     onEdit: (String) -> Unit,
     onDeleted: (String) -> Unit,
+    onOpenSettings: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val translation by viewModel.translation.collectAsStateWithLifecycle()
     val checked by viewModel.checkedIngredients.collectAsStateWithLifecycle()
     val currentStep by viewModel.currentStep.collectAsStateWithLifecycle()
     val shownServings by viewModel.shownServings.collectAsStateWithLifecycle()
@@ -119,6 +132,12 @@ fun RecipeScreen(
     val resources = LocalResources.current
 
     KeepScreenOn()
+
+    // Zurück aus den Einstellungen: Ist das Sprachpaket inzwischen da, wird gleich übersetzt.
+    LifecycleResumeEffect(Unit) {
+        viewModel.retryTranslation()
+        onPauseOrDispose {}
+    }
 
     viewModel.shareEvent?.let { event ->
         val chooserTitle = stringResource(R.string.share_recipe)
@@ -229,6 +248,12 @@ fun RecipeScreen(
                     onToggleStep = viewModel::toggleCurrentStep,
                     onServingsChange = viewModel::setServings,
                 ),
+                translation = TranslationActions(
+                    state = translation,
+                    onShowLanguage = viewModel::showLanguage,
+                    onRetry = viewModel::retryTranslation,
+                    onOpenSettings = onOpenSettings,
+                ),
                 snackbarHostState = snackbarHostState,
                 onShowPages = { viewModel.viewer.open(0) },
                 onShowPhoto = { viewModel.photoViewer.open(0) },
@@ -321,11 +346,20 @@ private class CookingState(
     val onServingsChange: (Int?) -> Unit,
 )
 
+/** „Rezept übersetzen“ (#60): Zustand und Aktionen für den Umschalter „DE | EN“. */
+private class TranslationActions(
+    val state: TranslationState,
+    val onShowLanguage: (language: String?, original: String?) -> Unit,
+    val onRetry: () -> Unit,
+    val onOpenSettings: () -> Unit,
+)
+
 @Composable
 private fun RecipeContent(
     recipe: Recipe,
     photo: File?,
     cooking: CookingState,
+    translation: TranslationActions,
     snackbarHostState: SnackbarHostState,
     onShowPages: () -> Unit,
     onShowPhoto: () -> Unit,
@@ -347,18 +381,34 @@ private fun RecipeContent(
             verticalArrangement = Arrangement.spacedBy(Spacing.s),
         ) {
             if (recipe.isDraft) DraftLabel()
+            // Übersetzung (#60): Sie ersetzt nur die Anzeige; Abhaken und Portionen beziehen sich weiter aufs Original.
+            val originalLanguage = remember(recipe) { RecipeTranslations.languageOf(recipe) }
+            val translated = (translation.state as? TranslationState.Shown)?.translation
+            val shownLanguage = translated?.language ?: originalLanguage
+            val textLocale = remember(shownLanguage) { shownLanguage?.let { LocaleList(it) } }
+            val title = translated?.title ?: recipe.title
             Text(
-                text = recipe.title.ifBlank { stringResource(R.string.untitled_recipe) },
+                text = localized(title.ifBlank { stringResource(R.string.untitled_recipe) }, textLocale),
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.semantics { heading() },
             )
+            if (translated != null && recipe.title.isNotBlank() && recipe.title != title) {
+                Text(
+                    text = stringResource(R.string.translation_original_title, recipe.title),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (originalLanguage != null && LanguagePack.targets(originalLanguage).isNotEmpty()) {
+                TranslationControl(original = originalLanguage, actions = translation)
+            }
             val originalServings = recipe.servings?.takeIf { it > 0 }
             val servings = originalServings?.let { cooking.shownServings ?: it }
             if (originalServings != null && servings != null) {
                 ServingsControl(
                     original = originalServings,
                     shown = servings,
-                    unit = recipe.servingsUnit?.takeIf { it.isNotBlank() },
+                    unit = (translated?.servingsUnit ?: recipe.servingsUnit)?.takeIf { it.isNotBlank() },
                     onChange = { cooking.onServingsChange(it.takeIf { value -> value != originalServings }) },
                 )
             }
@@ -368,19 +418,21 @@ private fun RecipeContent(
                 SectionTitle(stringResource(R.string.ingredients))
                 val factor = if (originalServings != null && servings != null) servings.toDouble() / originalServings else 1.0
                 val deviceLanguage = LocalConfiguration.current.locales[0].language
-                // Mengen werden so geschrieben wie im Rezept; ohne Angabe gilt die erkannte Sprache.
-                val language = remember(recipe.language, recipe.ingredients, deviceLanguage) {
-                    recipe.language
+                // Mengen werden so geschrieben wie im Rezept bzw. in der Übersetzung; ohne Angabe gilt die erkannte Sprache.
+                val language = remember(recipe.language, recipe.ingredients, deviceLanguage, translated) {
+                    translated?.language
+                        ?: recipe.language
                         ?: TextLanguage.detect(recipe.ingredients.joinToString("\n") { it.text })
                         ?: deviceLanguage
                 }
-                val lines = remember(recipe.ingredients, factor, language) {
-                    recipe.ingredients.map { AmountScaling.scale(it.text, factor, language) }
+                val texts = translated?.ingredients?.takeIf { it.size == recipe.ingredients.size } ?: recipe.ingredients.map { it.text }
+                val lines = remember(texts, factor, language) {
+                    texts.map { AmountScaling.scale(it, factor, language) }
                 }
                 recipe.ingredients.forEachIndexed { index, ingredient ->
                     if (ingredient.isHeading) {
                         Text(
-                            text = ingredient.text,
+                            text = localized(texts[index], textLocale),
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(top = Spacing.s).semantics { heading() },
@@ -388,6 +440,7 @@ private fun RecipeContent(
                     } else {
                         IngredientRow(
                             parts = lines[index],
+                            locale = textLocale,
                             checked = RecipeViewModel.progressKey(index, ingredient.text) in cooking.checked,
                             onToggle = { cooking.onToggleIngredient(index, ingredient.text) },
                         )
@@ -397,10 +450,11 @@ private fun RecipeContent(
 
             if (recipe.steps.isNotEmpty()) {
                 SectionTitle(stringResource(R.string.instructions))
+                val steps = translated?.steps?.takeIf { it.size == recipe.steps.size } ?: recipe.steps
                 recipe.steps.forEachIndexed { index, step ->
                     StepRow(
                         number = index + 1,
-                        text = step,
+                        text = localized(steps[index], textLocale),
                         current = cooking.currentStep == RecipeViewModel.progressKey(index, step),
                         onClick = { cooking.onToggleStep(index, step) },
                     )
@@ -480,7 +534,7 @@ private fun servingsText(servings: Int, unit: String?): String =
  * Umgerechnete Mengen sind fett, damit sie nicht nur an der Farbe zu erkennen sind.
  */
 @Composable
-private fun IngredientRow(parts: List<AmountScaling.Part>, checked: Boolean, onToggle: () -> Unit) {
+private fun IngredientRow(parts: List<AmountScaling.Part>, locale: LocaleList?, checked: Boolean, onToggle: () -> Unit) {
     val state = stringResource(if (checked) R.string.ingredient_checked else R.string.ingredient_unchecked)
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -494,11 +548,13 @@ private fun IngredientRow(parts: List<AmountScaling.Part>, checked: Boolean, onT
         Checkbox(checked = checked, onCheckedChange = null)
         Text(
             text = buildAnnotatedString {
-                parts.forEach { part ->
-                    if (part.scaled) {
-                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(part.text) }
-                    } else {
-                        append(part.text)
+                withStyle(SpanStyle(localeList = locale)) {
+                    parts.forEach { part ->
+                        if (part.scaled) {
+                            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(part.text) }
+                        } else {
+                            append(part.text)
+                        }
                     }
                 }
             },
@@ -512,7 +568,7 @@ private fun IngredientRow(parts: List<AmountScaling.Part>, checked: Boolean, onT
 
 /** Ein Schritt; antippen markiert ihn als aktuellen Schritt – mit Symbol und Hintergrund, nicht nur über die Farbe. */
 @Composable
-private fun StepRow(number: Int, text: String, current: Boolean, onClick: () -> Unit) {
+private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, onClick: () -> Unit) {
     val currentLabel = stringResource(R.string.step_current)
     val markLabel = stringResource(R.string.step_mark_current)
     val highlight = if (current) {
@@ -546,6 +602,96 @@ private fun StepRow(number: Int, text: String, current: Boolean, onClick: () -> 
 }
 
 private const val MAX_SERVINGS = 99
+
+/** Text in der Sprache des Rezepts: Der Screenreader liest ihn mit der passenden Aussprache vor (#60). */
+private fun localized(text: String, locale: LocaleList?): AnnotatedString =
+    if (locale == null) AnnotatedString(text) else buildAnnotatedString { withStyle(SpanStyle(localeList = locale)) { append(text) } }
+
+/** Name einer Sprache in der Sprache der Oberfläche, z. B. „Englisch“. */
+@Composable
+private fun languageName(code: String): String {
+    val ui = LocalConfiguration.current.locales[0]
+    return Locale.forLanguageTag(code).getDisplayLanguage(ui).replaceFirstChar { it.titlecase(ui) }
+}
+
+/**
+ * Umschalter „DE | EN“ (#60): Abkürzungen statt Flaggen, die Originalsprache ist markiert, der Screenreader liest
+ * den Namen der Sprache. Darunter Fortschritt, Hinweis auf die maschinelle Übersetzung oder was zu tun ist.
+ */
+@Composable
+private fun TranslationControl(original: String, actions: TranslationActions) {
+    val state = actions.state
+    val languages = (listOf(original) + LanguagePack.targets(original)).sorted()
+    val selected = when (state) {
+        TranslationState.Original -> original
+        is TranslationState.Working -> state.language
+        is TranslationState.Shown -> state.translation.language
+        is TranslationState.NeedsPack -> state.language
+        is TranslationState.Failed -> state.language
+    }
+    SingleChoiceSegmentedButtonRow {
+        languages.forEachIndexed { index, code ->
+            val name = languageName(code)
+            val description = if (code == original) stringResource(R.string.translation_language_original, name) else name
+            SegmentedButton(
+                selected = code == selected,
+                onClick = { actions.onShowLanguage(code, original) },
+                shape = SegmentedButtonDefaults.itemShape(index, languages.size),
+                modifier = Modifier.semantics { contentDescription = description },
+            ) {
+                Text(
+                    if (code == original) {
+                        stringResource(R.string.translation_code_original, code.uppercase(Locale.ROOT))
+                    } else {
+                        code.uppercase(Locale.ROOT)
+                    },
+                )
+            }
+        }
+    }
+    when (state) {
+        TranslationState.Original -> Unit
+        is TranslationState.Working -> Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
+                Text(
+                    text = stringResource(R.string.translation_running, state.done, state.total),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+                TextButton(onClick = { actions.onShowLanguage(null, original) }) { Text(stringResource(R.string.cancel)) }
+            }
+            LinearProgressIndicator(
+                progress = { if (state.total > 0) state.done.toFloat() / state.total else 0f },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        is TranslationState.Shown -> Text(
+            text = stringResource(R.string.translation_hint, languageName(original)),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+        )
+        is TranslationState.NeedsPack -> Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            val context = LocalContext.current
+            Text(
+                text = stringResource(R.string.translation_needs_pack, Formatter.formatShortFileSize(context, LanguagePack.DOWNLOAD_BYTES)),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+            )
+            OutlinedButton(onClick = actions.onOpenSettings) { Text(stringResource(R.string.translation_open_settings)) }
+        }
+        is TranslationState.Failed -> Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            Text(
+                text = stringResource(if (state.lowMemory) R.string.translation_low_memory else R.string.translation_error),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+            )
+            OutlinedButton(onClick = actions.onRetry) { Text(stringResource(R.string.translation_retry)) }
+        }
+    }
+}
 
 @Composable
 private fun SectionTitle(text: String) {

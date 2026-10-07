@@ -19,10 +19,11 @@ object WebAddress {
     /**
      * Der Link, wie er geladen wird: immer https, ohne Zählzusätze und ohne Sprungmarke (#…).
      * null, wenn es kein Link zu einer öffentlichen Internetseite ist.
+     * @param maxLength längste erlaubte Länge; Downloads werden auf lange, signierte Links weitergeleitet
      */
-    fun normalize(input: String): String? {
+    fun normalize(input: String, maxLength: Int = MAX_LENGTH): String? {
         val text = input.trim()
-        if (text.isEmpty() || text.length > MAX_LENGTH || text.any { it.isWhitespace() || it.isISOControl() }) return null
+        if (text.isEmpty() || text.length > maxLength || text.any { it.isWhitespace() || it.isISOControl() }) return null
         val url = runCatching { URL(text) }.getOrNull() ?: return null
         val scheme = url.protocol.lowercase()
         if (scheme != "https" && scheme != "http") return null

@@ -10,6 +10,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FilterInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -32,7 +33,7 @@ import javax.net.ssl.SSLException
  * - keine Adressen im eigenen Netz, auch nicht über einen Namen, der dorthin zeigt,
  * - Zeitgrenzen und Größengrenzen; „Abbrechen“ trennt die Verbindung sofort.
  */
-class HttpPageLoader(private val language: () -> String = { Locale.getDefault().toLanguageTag() }) : PageLoader {
+class HttpPageLoader(private val language: () -> String = { Locale.getDefault().toLanguageTag() }) : PageLoader, FileDownloader {
 
     override suspend fun loadPage(url: String): WebPage = withTotalTimeout {
         fetch(url, PAGE_ACCEPT, PAGE_TYPES, PAGE_FETCH) { connection, finalUrl ->
@@ -48,6 +49,13 @@ class HttpPageLoader(private val language: () -> String = { Locale.getDefault().
             connection.inputStream.use { input -> target.outputStream().use { copyAtMost(input, it, MAX_IMAGE_BYTES) } }
         }
     }
+
+    override suspend fun <T> download(url: String, maxBytes: Long, read: (InputStream, Long) -> T): T =
+        fetch(url, DOWNLOAD_ACCEPT, DOWNLOAD_TYPES, emptyMap(), DOWNLOAD_MAX_URL_LENGTH) { connection, _ ->
+            val length = connection.contentLengthLong
+            if (length > maxBytes) throw WebException(Problem.TOO_LARGE)
+            connection.inputStream.use { input -> read(LimitedInputStream(input, maxBytes), length) }
+        }
 
     private suspend fun <T> withTotalTimeout(block: suspend () -> T): T =
         try {
@@ -66,12 +74,13 @@ class HttpPageLoader(private val language: () -> String = { Locale.getDefault().
         accept: String,
         types: List<String>,
         fetchHeaders: Map<String, String>,
+        maxUrlLength: Int = WebAddress.MAX_LENGTH,
         read: (HttpsURLConnection, String) -> T,
     ): T {
-        var url = WebAddress.normalize(start) ?: throw WebException(Problem.NOT_ALLOWED)
+        var url = WebAddress.normalize(start, maxUrlLength) ?: throw WebException(Problem.NOT_ALLOWED)
         repeat(MAX_REDIRECTS + 1) {
             val connection = open(url, accept, fetchHeaders)
-            when (val step = withConnection(connection) { respond(connection, url, types, read) }) {
+            when (val step = withConnection(connection) { respond(connection, url, types, maxUrlLength, read) }) {
                 is Step.Done -> return step.value
                 is Step.Redirect -> url = step.url
             }
@@ -129,6 +138,7 @@ class HttpPageLoader(private val language: () -> String = { Locale.getDefault().
         connection: HttpsURLConnection,
         url: String,
         types: List<String>,
+        maxUrlLength: Int,
         read: (HttpsURLConnection, String) -> T,
     ): Step<T> {
         val code = connection.responseCode
@@ -136,7 +146,7 @@ class HttpPageLoader(private val language: () -> String = { Locale.getDefault().
             code in 300..399 && code != 304 -> {
                 val location = connection.getHeaderField("Location") ?: throw WebException(Problem.SERVER_ERROR)
                 val target = runCatching { URL(URL(url), location).toString() }.getOrNull()
-                Step.Redirect(target?.let(WebAddress::normalize) ?: throw WebException(Problem.NOT_ALLOWED))
+                Step.Redirect(target?.let { WebAddress.normalize(it, maxUrlLength) } ?: throw WebException(Problem.NOT_ALLOWED))
             }
             code == 404 || code == 410 -> throw WebException(Problem.NOT_FOUND)
             code == 401 || code == 403 || code == 429 || code == 451 -> throw WebException(Problem.BLOCKED)
@@ -188,6 +198,11 @@ class HttpPageLoader(private val language: () -> String = { Locale.getDefault().
             "Sec-Fetch-Site" to "cross-site",
         )
 
+        /** GitHub leitet Downloads auf lange, signierte Links weiter. */
+        private const val DOWNLOAD_MAX_URL_LENGTH = 8_000
+        private const val DOWNLOAD_ACCEPT = "application/octet-stream,application/zip;q=0.9"
+        private val DOWNLOAD_TYPES = listOf("application/octet-stream", "application/zip", "application/x-zip-compressed")
+
         private const val PAGE_ACCEPT = "text/html,application/xhtml+xml,application/ld+json;q=0.9,*/*;q=0.5"
         private const val IMAGE_ACCEPT = "image/jpeg,image/png,image/webp,image/*;q=0.8"
         private val PAGE_TYPES = listOf("text/html", "application/xhtml+xml", "application/ld+json", "application/json", "text/plain")
@@ -219,6 +234,28 @@ class HttpPageLoader(private val language: () -> String = { Locale.getDefault().
                 out.write(buffer, 0, read)
             }
             return out.toByteArray()
+        }
+
+        /** Liest höchstens [max] Bytes; danach meldet der Datenstrom [Problem.TOO_LARGE]. */
+        private class LimitedInputStream(input: InputStream, private val max: Long) : FilterInputStream(input) {
+            private var total = 0L
+
+            override fun read(): Int {
+                val value = super.read()
+                if (value >= 0) count(1)
+                return value
+            }
+
+            override fun read(b: ByteArray, off: Int, len: Int): Int {
+                val read = super.read(b, off, len)
+                if (read > 0) count(read)
+                return read
+            }
+
+            private fun count(read: Int) {
+                total += read
+                if (total > max) throw WebException(Problem.TOO_LARGE)
+            }
         }
 
         /** Kopiert alles, aber höchstens [max] Bytes – sonst ist das Foto zu groß. */

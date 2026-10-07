@@ -53,6 +53,17 @@
     </plurals>
 
     <!-- Kochen (#56): abhaken, aktueller Schritt, Portionen umrechnen -->
+    <!-- Rezept übersetzen (#60) -->
+    <string name="translation_code_original">%1$s · Original</string>
+    <string name="translation_language_original">%1$s, Originalsprache</string>
+    <string name="translation_running">Wird übersetzt … %1$d von %2$d</string>
+    <string name="translation_hint">Maschinell übersetzt (Original: %1$s). Mit dem Original vergleichen.</string>
+    <string name="translation_original_title">Original: %1$s</string>
+    <string name="translation_needs_pack">Zum Übersetzen wird einmalig das Sprachpaket Deutsch–Englisch gebraucht (etwa %1$s).</string>
+    <string name="translation_open_settings">Zu den Einstellungen</string>
+    <string name="translation_error">Die Übersetzung hat nicht geklappt.</string>
+    <string name="translation_low_memory">Für die Übersetzung ist gerade zu wenig Speicher frei. Andere Apps schließen und erneut versuchen.</string>
+    <string name="translation_retry">Erneut übersetzen</string>
     <string name="cooking_reset">Abhaken zurücksetzen</string>
     <string name="ingredient_checked">abgehakt</string>
     <string name="ingredient_unchecked">nicht abgehakt</string>
@@ -181,9 +192,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Kochen: Zutaten lassen sich abhaken, ein Tippen auf einen Schritt markiert ihn als aktuellen Schritt.</item>
-        <item>Portionen umrechnen: Mit − und + werden die Mengen für mehr oder weniger Portionen umgerechnet, geschrieben wie im Rezept, z. B. „1.000 g“ oder „1½ TL“. Das gespeicherte Rezept bleibt unverändert.</item>
-        <item>Häkchen, aktueller Schritt und Portionen bleiben erhalten, auch wenn das Handy gedreht wird.</item>
+        <item>Rezepte übersetzen: Deutsche und englische Rezepte lassen sich in der Rezeptansicht mit „DE | EN“ übersetzen, direkt auf dem Handy und ohne Internet. Das Original bleibt erhalten.</item>
+        <item>Dafür einmal das Sprachpaket Deutsch–Englisch unter Einstellungen → Übersetzung herunterladen (etwa 172 MB, am besten im WLAN).</item>
+        <item>Abhaken und Portionen umrechnen funktionieren auch in der Übersetzung.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->
@@ -194,9 +205,10 @@
     <string name="privacy_title">Datenschutz</string>
     <string-array name="privacy_paragraphs">
         <item>Rezepte, Fotos und Notizen liegen nur auf diesem Handy. Es gibt kein Konto, keine Werbung, kein Tracking und keine Weitergabe an Dritte.</item>
-        <item>Ins Internet geht die App nur bei „Aus Link übernehmen“: Dann wird genau diese eine Seite geladen und, falls vorhanden, ihr Foto. Die Seite erfährt dabei – wie bei jedem Browser – die Internetadresse (IP-Adresse) des Handys, die Uhrzeit und die eingestellte Sprache. Cookies werden nicht gespeichert, Angaben zum Handy werden nicht mitgeschickt.</item>
+        <item>Ins Internet geht die App nur auf Wunsch: bei „Aus Link übernehmen“ und beim Herunterladen des Sprachpakets für die Übersetzung. Bei „Aus Link übernehmen“ wird genau diese eine Seite geladen und, falls vorhanden, ihr Foto. Die Seite erfährt dabei – wie bei jedem Browser – die Internetadresse (IP-Adresse) des Handys, die Uhrzeit und die eingestellte Sprache. Cookies werden nicht gespeichert, Angaben zum Handy werden nicht mitgeschickt.</item>
         <item>Sonst verlassen Inhalte das Handy nur, wenn sie selbst geteilt oder gesichert werden. Notizen werden nie geteilt. Die Sicherungsdatei ist nicht verschlüsselt.</item>
-        <item>Die Texterkennung läuft vollständig auf dem Handy, ohne Internet. Die automatische Cloud-Sicherung von Android ist abgeschaltet.</item>
+        <item>Das Sprachpaket kommt von der Projektseite auf GitHub. GitHub erfährt dabei die Internetadresse (IP-Adresse) des Handys und die Uhrzeit. Rezepte werden dabei nicht gesendet.</item>
+        <item>Texterkennung und Übersetzung laufen vollständig auf dem Handy, ohne Internet. Die automatische Cloud-Sicherung von Android ist abgeschaltet.</item>
     </string-array>
 
     <!-- Bearbeiten -->
@@ -224,6 +236,21 @@
     <!-- Einstellungen -->
     <string name="settings_title">Einstellungen</string>
     <string name="settings_section_about">Info</string>
+    <string name="license_note_opus_mt">Modelle des Sprachpakets für die Übersetzung, nur auf Wunsch heruntergeladen. Für Moltobene geändert: nach ONNX umgewandelt und auf 8 Bit verkleinert. Quelle: huggingface.co/Helsinki-NLP</string>
+    <string name="settings_section_translation">Übersetzung</string>
+    <string name="language_pack_title">Sprachpaket Deutsch–Englisch</string>
+    <string name="language_pack_text">Zum Übersetzen von Rezepten auf dem Handy, ohne Internet. Einmal herunterladen: etwa %1$s, belegt etwa %2$s auf dem Handy. Am besten im WLAN.</string>
+    <string name="language_pack_download">Herunterladen</string>
+    <string name="language_pack_downloading">Sprachpaket wird heruntergeladen …</string>
+    <string name="language_pack_installed">Installiert, belegt %1$s. Rezepte auf Deutsch oder Englisch lassen sich in der Rezeptansicht übersetzen.</string>
+    <string name="language_pack_delete_title">Sprachpaket wirklich löschen?</string>
+    <string name="language_pack_delete_text">Übersetzen ist danach erst wieder möglich, wenn das Sprachpaket erneut heruntergeladen wird.</string>
+    <string name="language_pack_deleted">Sprachpaket gelöscht</string>
+    <string name="language_pack_retry">Erneut versuchen</string>
+    <string name="language_pack_error_connection">Herunterladen fehlgeschlagen: keine Verbindung. Internet prüfen und erneut versuchen.</string>
+    <string name="language_pack_error_space">Nicht genug Speicherplatz auf dem Handy. Etwa %1$s freigeben und erneut versuchen.</string>
+    <string name="language_pack_error_damaged">Das Sprachpaket kam nicht vollständig an. Erneut versuchen.</string>
+    <string name="language_pack_error_unavailable">Das Sprachpaket ist gerade nicht erreichbar. Später erneut versuchen.</string>
     <string name="backup_title">Sammlung sichern</string>
     <string name="backup_text">Alle Rezepte und Fotos in einer Datei speichern. Die Sicherungsdatei ist nicht verschlüsselt.</string>
     <string name="backup_file_name">moltobene-sicherung-%1$s.zip</string>

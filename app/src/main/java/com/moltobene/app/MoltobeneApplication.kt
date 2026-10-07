@@ -15,10 +15,20 @@ import com.moltobene.app.data.ocr.TextRecognizer
 import com.moltobene.app.data.photos.PhotoStore
 import com.moltobene.app.data.share.RecipeFileReader
 import com.moltobene.app.data.share.RecipeSharer
+import com.moltobene.app.data.translate.LanguagePackManager
+import com.moltobene.app.data.translate.MarianEngine
+import com.moltobene.app.data.translate.RecipeTranslations
+import com.moltobene.app.data.translate.TranslationEngine
+import com.moltobene.app.data.translate.TranslationStore
+import com.moltobene.app.data.web.FileDownloader
 import com.moltobene.app.data.web.HttpPageLoader
 import com.moltobene.app.data.web.PageLoader
 import com.moltobene.app.data.web.WebImporter
 import com.moltobene.app.ui.edit.SharedInput
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import java.io.File
 
 class MoltobeneApplication : Application() {
     val container: AppContainer by lazy { AppContainer(this) }
@@ -63,13 +73,40 @@ class AppContainer(context: Context) {
     val sharedInput = SharedInput()
     val recipeFileReader: RecipeFileReader by lazy { RecipeFileReader(appContext) }
 
+    private val http = HttpPageLoader()
+
+    /** Läuft so lange wie die App, z. B. für den Download des Sprachpakets. */
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
     /**
      * Einzige Stelle für Internetzugriffe (#55). Der Rundgang auf dem Emulator setzt hier einen Lader mit
      * nachgestellten Seiten ein, damit er nicht vom echten Internet abhängt.
      */
     @VisibleForTesting
-    var pageLoader: PageLoader = HttpPageLoader()
+    var pageLoader: PageLoader = http
+
+    /** Für das Sprachpaket (#60); ebenfalls nur über data/web. */
+    @VisibleForTesting
+    var downloader: FileDownloader = http
+
+    /** Sprachpaket für „Rezept übersetzen“ (#60); nicht in Sicherungen, lässt sich jederzeit neu laden. */
+    val languagePack: LanguagePackManager by lazy {
+        LanguagePackManager(appContext.noBackupFilesDir, { downloader }, appScope)
+    }
+
+    /** Übersetzer aus dem Sprachpaket. Der Rundgang setzt hier einen nachgestellten Übersetzer ein. */
+    @VisibleForTesting
+    var translationEngine: TranslationEngine = MarianEngine { languagePack.directory }
+
+    /** Gespeicherte Übersetzungen (#60): Zwischenspeicher außerhalb der Sicherung, je Rezept und Sprache. */
+    val translations: RecipeTranslations by lazy {
+        RecipeTranslations(TranslationStore(File(appContext.noBackupFilesDir, TRANSLATIONS_DIR))) { translationEngine }
+    }
 
     /** Für „Aus Link übernehmen“; nutzt den jeweils aktuellen [pageLoader]. */
     val webImporter: WebImporter get() = WebImporter(pageLoader, appContext.cacheDir)
+
+    private companion object {
+        const val TRANSLATIONS_DIR = "uebersetzungen"
+    }
 }

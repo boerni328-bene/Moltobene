@@ -202,6 +202,47 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithText("800 g reife Tomaten").assertIsOff()
     }
 
+    /** Rezept übersetzen (#60): Umschalter „DE | EN“, Übersetzung mit Hinweis; Abhaken gilt auch im Original. */
+    @Test
+    fun uebersetzen() {
+        container().translationEngine = SampleTranslation.engine()
+        addSampleRecipes()
+        openRecipe(SampleTranslation.TITLE)
+        waitForText(SampleTranslation.FIRST_INGREDIENT)
+        screenshot("12c-rezept-englisch")
+
+        composeRule.onNodeWithText("DE").performScrollTo().performClick()
+        waitForText(SampleTranslation.FIRST_INGREDIENT_DE)
+        screenshot("12d-rezept-uebersetzt")
+
+        composeRule.onNodeWithText(SampleTranslation.FIRST_INGREDIENT_DE).performScrollTo().performClick()
+        composeRule.onNodeWithText(SampleTranslation.FIRST_INGREDIENT_DE).assertIsOn()
+        val stored = runBlocking { container().repository.getAll().first { it.title == SampleTranslation.TITLE } }
+        assertEquals(SampleTranslation.FIRST_INGREDIENT, stored.ingredients.first().text)
+
+        // Zurück zum Original: Das Häkchen bleibt, die Übersetzung ist gespeichert.
+        composeRule.onNodeWithText(text(R.string.translation_code_original, "EN")).performScrollTo().performClick()
+        waitForText(SampleTranslation.FIRST_INGREDIENT)
+        composeRule.onNodeWithText(SampleTranslation.FIRST_INGREDIENT).assertIsOn()
+    }
+
+    /** Ohne Sprachpaket: Hinweis mit dem Weg zu den Einstellungen (#60). */
+    @Test
+    fun uebersetzenOhneSprachpaket() {
+        container().translationEngine = SampleTranslation.engine(available = false)
+        addSampleRecipes()
+        openRecipe(SampleRecipes.TOMATO_SAUCE)
+        waitForText("800 g reife Tomaten")
+        composeRule.onNodeWithText("EN").performScrollTo().performClick()
+        waitForText(text(R.string.translation_open_settings))
+        screenshot("12e-sprachpaket-fehlt")
+
+        composeRule.onNodeWithText(text(R.string.translation_open_settings)).performScrollTo().performClick()
+        waitForText(text(R.string.language_pack_title))
+        composeRule.onNodeWithText(text(R.string.language_pack_download)).performScrollTo()
+        screenshot("12f-einstellungen-sprachpaket")
+    }
+
     @Test
     fun entwurfOhneFoto() {
         addSampleRecipes()
