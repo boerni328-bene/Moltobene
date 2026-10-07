@@ -192,9 +192,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Rezepte übersetzen: Deutsche und englische Rezepte lassen sich in der Rezeptansicht mit „DE | EN“ übersetzen, direkt auf dem Handy und ohne Internet. Das Original bleibt erhalten.</item>
-        <item>Dafür einmal das Sprachpaket Deutsch–Englisch unter Einstellungen → Übersetzung herunterladen (etwa 172 MB, am besten im WLAN).</item>
-        <item>Abhaken und Portionen umrechnen funktionieren auch in der Übersetzung.</item>
+        <item>Sprache des Rezepts: Beim Bearbeiten lässt sich die Sprache eines Rezepts wählen. Dann passen der Umschalter „DE | EN“ und das Umrechnen der Portionen auch bei kurzen Rezepten.</item>
+        <item>Bei neu eingetippten Rezepten erkennt die App die Sprache jetzt am Text, statt die Sprache des Handys anzunehmen.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->
@@ -216,6 +215,9 @@
     <string name="field_title_missing">Titel fehlt</string>
     <string name="field_servings_unit">Einheit (optional)</string>
     <string name="field_servings_unit_hint">z. B. Stück, Springform 26 cm</string>
+    <string name="field_language">Sprache des Rezepts: %1$s</string>
+    <string name="field_language_title">Sprache des Rezepts</string>
+    <string name="field_language_hint">Wichtig für Portionen umrechnen und Übersetzung. Meist erkennt die App die Sprache selbst.</string>
     <string name="field_ingredients_hint">Eine Zutat pro Zeile, z. B. 200 g Mehl. Zwischenüberschriften enden mit Doppelpunkt, z. B. Für den Teig:</string>
     <string name="field_instructions_hint">Ein Schritt pro Zeile</string>
     <string name="field_source_hint">z. B. Omas Kochbuch oder ein Link</string>

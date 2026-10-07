@@ -3,6 +3,14 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.22.0] – 2026-10-07 (versionCode 42)
+
+### Neu
+- **Sprache des Rezepts wählen:** Beim Bearbeiten steht unter der Quelle das Feld „Sprache des Rezepts“. Zur Wahl stehen „Automatisch erkennen“ sowie Deutsch, English, Italiano, Français und Español, jeweils mit ihrem eigenen Namen. Die Sprache bestimmt, wie Mengen beim Umrechnen der Portionen gelesen werden und ob der Umschalter „DE | EN“ zum Übersetzen erscheint. Das hilft vor allem bei kurzen Rezepten, deren Sprache die App nicht sicher erkennt.
+
+### Geändert
+- Bei neu eingetippten Rezepten erkennt die App die Sprache jetzt am Text. Bisher nahm sie die Sprache des Handys an, sodass z. B. ein englisches Rezept auf einem deutschen Handy als deutsch galt. Lässt sich die Sprache nicht sicher erkennen, bleibt sie offen und wird später erneut am Text erkannt.
+
 ## [0.21.0] – 2026-10-07 (versionCode 41)
 
 ### Neu

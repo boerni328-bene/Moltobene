@@ -48,7 +48,7 @@ fun LanguageMenuButton(language: String?, onLanguageChange: (String?) -> Unit) {
             (listOf<String?>(null) + TextLanguage.SUPPORTED).forEach { code ->
                 val selected = code == language
                 DropdownMenuItem(
-                    text = { Text(code?.let { languageName(it) } ?: stringResource(R.string.ocr_language_auto)) },
+                    text = { Text(code?.let { nativeLanguageName(it) } ?: stringResource(R.string.ocr_language_auto)) },
                     leadingIcon = {
                         if (selected) Icon(Icons.Filled.Check, contentDescription = null)
                     },
@@ -64,7 +64,7 @@ fun LanguageMenuButton(language: String?, onLanguageChange: (String?) -> Unit) {
 }
 
 /** Name einer Sprache in ihr selbst („Italiano“, „Français“), damit jeder seine Sprache findet. */
-private fun languageName(code: String): String {
+internal fun nativeLanguageName(code: String): String {
     val locale = Locale.forLanguageTag(code)
     return locale.getDisplayLanguage(locale).replaceFirstChar { it.titlecase(locale) }
 }

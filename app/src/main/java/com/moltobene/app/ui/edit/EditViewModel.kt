@@ -232,6 +232,14 @@ class EditViewModel(
         get() = notesField.value
         set(value) = change(notesField, value)
 
+    /**
+     * Sprache des Rezepts (#62), z. B. „de“; null heißt: beim Speichern am Text erkennen. Wichtig für Portionen
+     * umrechnen und den Umschalter „DE | EN“.
+     */
+    val language: String? get() = languageField.value
+
+    fun changeLanguage(language: String?) = change(languageField, language?.takeIf { it in TextLanguage.SUPPORTED })
+
     val photoFile: File? get() = photoIdField.value?.let { photoStore.photoFile(it) }
     val hasPhoto: Boolean get() = photoIdField.value != null
     val recognizedText: String get() = recognizedTextField.value
@@ -1360,7 +1368,6 @@ class EditViewModel(
         val start = base ?: Recipe(
             id = id,
             title = "",
-            language = Locale.getDefault().language,
             createdAt = now,
             updatedAt = now,
         )
@@ -1389,7 +1396,8 @@ class EditViewModel(
             photoIds = listOfNotNull(mainPhoto) + furtherPhotos,
             pageIds = storedPageIds() + newPages,
             originalText = recognizedText.trim().ifEmpty { null },
-            language = languageField.value ?: start.language,
+            // Gewählt oder übernommen, sonst am Text erkannt – nicht einfach die Sprache des Handys (#62).
+            language = languageField.value ?: TextLanguage.detect(listOf(title, ingredients, steps).joinToString("\n")),
             prepMinutes = prepMinutesField.value.takeIf { it > 0 } ?: start.prepMinutes,
             totalMinutes = totalMinutesField.value.takeIf { it > 0 } ?: start.totalMinutes,
             updatedAt = now,

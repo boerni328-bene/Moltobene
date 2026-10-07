@@ -284,6 +284,11 @@ jobs:
                       text = (problem.text or problem.get("message") or "").strip().splitlines()
                       print(f"::error::{case.get('classname')}.{case.get('name')}: {text[0] if text else ''}")
                       print("\n".join(text[:25]))
+                      # Ursache und Stellen im eigenen Code stehen oft weiter unten.
+                      extra = [line for line in text[25:] if "Caused by" in line or "com.moltobene" in line]
+                      if extra:
+                          print("...")
+                          print("\n".join(extra[:40]))
           PY
 
       - name: Bildschirmfotos vom Emulator holen

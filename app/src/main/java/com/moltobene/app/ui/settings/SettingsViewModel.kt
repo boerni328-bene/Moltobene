@@ -13,7 +13,9 @@ import com.moltobene.app.data.backup.BackupManager
 import com.moltobene.app.data.backup.BackupReader
 import com.moltobene.app.data.translate.LanguagePackManager
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 sealed interface SettingsUiState {
@@ -40,8 +42,12 @@ class SettingsViewModel(
     private val languagePack: LanguagePackManager,
 ) : ViewModel() {
 
-    /** Sprachpaket für „Rezept übersetzen“ (#60); der Download läuft weiter, wenn die Einstellungen geschlossen werden. */
-    val languagePackState: StateFlow<LanguagePackManager.State> = languagePack.state
+    /**
+     * Sprachpaket für „Rezept übersetzen“ (#60); der Download läuft weiter, wenn die Einstellungen geschlossen werden.
+     * Der Stand ändert sich im Hintergrund; an die Anzeige geht er nur vom Hauptthread aus.
+     */
+    val languagePackState: StateFlow<LanguagePackManager.State> =
+        languagePack.state.stateIn(viewModelScope, SharingStarted.Eagerly, languagePack.state.value)
 
     fun downloadLanguagePack() = languagePack.download()
 

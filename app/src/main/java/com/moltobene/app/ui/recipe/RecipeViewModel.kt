@@ -23,6 +23,7 @@ import com.moltobene.app.ui.components.PageViewerModel
 import com.moltobene.app.ui.navigation.RecipeRoute
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -164,19 +165,23 @@ class RecipeViewModel(
             mutableTranslation.value = TranslationState.NeedsPack(language)
             return
         }
-        mutableTranslation.value = TranslationState.Working(language, 0, RecipeTranslator.workCount(recipe))
-        mutableTranslation.value = try {
-            TranslationState.Shown(
-                translations.translate(recipe, from, language) { done, total ->
-                    mutableTranslation.value = TranslationState.Working(language, done, total)
-                },
-            )
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: RecipeTranslations.LowMemoryException) {
-            TranslationState.Failed(language, lowMemory = true)
-        } catch (e: Exception) {
-            TranslationState.Failed(language, lowMemory = false)
+        val total = RecipeTranslator.workCount(recipe)
+        mutableTranslation.value = TranslationState.Working(language, 0, total)
+        // Der Fortschritt kommt aus dem Hintergrund; an die Anzeige geht er nur vom Hauptthread aus.
+        val progress = MutableStateFlow(0)
+        mutableTranslation.value = coroutineScope {
+            val shown = launch { progress.collect { done -> mutableTranslation.value = TranslationState.Working(language, done, total) } }
+            try {
+                TranslationState.Shown(translations.translate(recipe, from, language) { done, _ -> progress.value = done })
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: RecipeTranslations.LowMemoryException) {
+                TranslationState.Failed(language, lowMemory = true)
+            } catch (e: Exception) {
+                TranslationState.Failed(language, lowMemory = false)
+            } finally {
+                shown.cancel()
+            }
         }
     }
 

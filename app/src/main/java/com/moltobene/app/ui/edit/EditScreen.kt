@@ -24,10 +24,14 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,11 +40,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -48,6 +52,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -61,6 +66,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -70,6 +76,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.moltobene.app.R
 import com.moltobene.app.data.TextLinks
+import com.moltobene.app.data.ocr.TextLanguage
 import com.moltobene.app.data.share.IncomingText
 import com.moltobene.app.data.web.WebAddress
 import com.moltobene.app.ui.components.CenteredMessage
@@ -370,6 +377,8 @@ fun EditScreen(
 
                 SourceSection(viewModel)
 
+                RecipeLanguageField(language = viewModel.language, onChange = viewModel::changeLanguage)
+
                 OutlinedTextField(
                     value = viewModel.notes,
                     onValueChange = { viewModel.notes = it },
@@ -649,6 +658,52 @@ private fun RecognitionSection(
                 }
             }
         }
+    }
+}
+
+/**
+ * Sprache des Rezepts (#62): meist erkennt die App sie selbst; bei kurzen Rezepten hilft die Wahl. Die Sprachen
+ * stehen mit ihrem eigenen Namen in der Liste („English“, „Italiano“), damit jeder seine Sprache findet.
+ */
+@Composable
+private fun RecipeLanguageField(language: String?, onChange: (String?) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    val current = language?.let { nativeLanguageName(it) } ?: stringResource(R.string.ocr_language_auto)
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+        Box {
+            OutlinedButton(onClick = { open = true }, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.field_language, current), modifier = Modifier.weight(1f))
+                Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
+            }
+            DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+                Text(
+                    text = stringResource(R.string.field_language_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier
+                        .padding(horizontal = Spacing.m, vertical = Spacing.s)
+                        .semantics { heading() },
+                )
+                val codes = listOf<String?>(null) + TextLanguage.SUPPORTED + listOfNotNull(language?.takeIf { it !in TextLanguage.SUPPORTED })
+                codes.forEach { code ->
+                    val selected = code == language
+                    DropdownMenuItem(
+                        text = { Text(code?.let { nativeLanguageName(it) } ?: stringResource(R.string.ocr_language_auto)) },
+                        leadingIcon = { if (selected) Icon(Icons.Filled.Check, contentDescription = null) },
+                        onClick = {
+                            open = false
+                            onChange(code)
+                        },
+                        modifier = Modifier.semantics { this.selected = selected },
+                    )
+                }
+            }
+        }
+        Text(
+            text = stringResource(R.string.field_language_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = Spacing.m),
+        )
     }
 }
 

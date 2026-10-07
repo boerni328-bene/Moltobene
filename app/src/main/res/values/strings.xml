@@ -194,9 +194,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Translate recipes: German and English recipes can be translated in the recipe view with “DE | EN”, right on the device and without internet. The original is kept.</item>
-        <item>To do so, download the language pack German–English once under Settings → Translation (about 172 MB, ideally over Wi-Fi).</item>
-        <item>Checking off and adjusting servings also work in the translation.</item>
+        <item>Recipe language: The language of a recipe can be chosen when editing. The “DE | EN” switch and adjusting servings then also work for short recipes.</item>
+        <item>For newly typed recipes, the app now detects the language from the text instead of assuming the device language.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->
@@ -218,6 +217,9 @@
     <string name="field_title_missing">Title missing</string>
     <string name="field_servings_unit">Unit (optional)</string>
     <string name="field_servings_unit_hint">e.g. pieces, 26 cm tin</string>
+    <string name="field_language">Recipe language: %1$s</string>
+    <string name="field_language_title">Recipe language</string>
+    <string name="field_language_hint">Used for adjusting servings and for translation. Usually the app detects the language itself.</string>
     <string name="field_ingredients_hint">One ingredient per line, e.g. 200 g flour. Subheadings end with a colon, e.g. For the dough:</string>
     <string name="field_instructions_hint">One step per line</string>
     <string name="field_source_hint">e.g. Grandma’s cookbook or a link</string>

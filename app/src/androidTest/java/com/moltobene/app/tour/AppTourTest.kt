@@ -243,6 +243,27 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("12f-einstellungen-sprachpaket")
     }
 
+    /** Sprache des Rezepts beim Bearbeiten wählen (#62); danach passt der Umschalter „DE | EN“. */
+    @Test
+    fun spracheWaehlen() {
+        addSampleRecipes()
+        openRecipe(SampleRecipes.POTATO_SALAD)
+        waitForText("1 kg festkochende Kartoffeln")
+        composeRule.onNodeWithContentDescription(text(R.string.edit_recipe)).performClick()
+        waitForField(R.string.field_title)
+
+        composeRule.onNodeWithText(text(R.string.field_language, "Deutsch")).performScrollTo().performClick()
+        waitForText("English")
+        screenshot("13a-sprache-waehlen")
+        composeRule.onNodeWithText("English").performClick()
+        composeRule.onNodeWithText(text(R.string.field_language, "English")).assertIsDisplayed()
+
+        composeRule.onNodeWithText(text(R.string.save)).performClick()
+        waitForText(text(R.string.translation_code_original, "EN"))
+        val stored = runBlocking { container().repository.getAll().first { it.title == SampleRecipes.POTATO_SALAD } }
+        assertEquals("en", stored.language)
+    }
+
     @Test
     fun entwurfOhneFoto() {
         addSampleRecipes()
