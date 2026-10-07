@@ -5,6 +5,8 @@ import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.hasAnySibling
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
@@ -168,6 +170,36 @@ class AppTourTest(private val variant: DisplayVariant) {
         val titles = runBlocking { container().repository.getAll().map { it.title } }
         assertFalse(SampleRecipes.TOMATO_SAUCE in titles)
         assertTrue(SampleRecipes.POTATO_SALAD in titles)
+    }
+
+    /** Kochen (#56): Zutat abhaken, aktueller Schritt, Portionen umrechnen – das gespeicherte Rezept bleibt. */
+    @Test
+    fun kochen() {
+        addSampleRecipes()
+        openRecipe(SampleRecipes.TOMATO_SAUCE)
+        waitForText("800 g reife Tomaten")
+
+        composeRule.onNodeWithText("800 g reife Tomaten").performScrollTo().performClick()
+        composeRule.onNodeWithText("800 g reife Tomaten").assertIsOn()
+        composeRule.onNodeWithText("Tomaten würfeln", substring = true).performScrollTo().performClick()
+        screenshot("12a-kochen-abgehakt")
+
+        // Von 4 auf 8 Portionen: Nur die Anzeige ändert sich, das Häkchen bleibt.
+        repeat(4) {
+            composeRule.onNodeWithContentDescription(text(R.string.servings_more)).performScrollTo().performClick()
+        }
+        waitForText("1600 g reife Tomaten")
+        composeRule.onNodeWithText("1600 g reife Tomaten").assertIsOn()
+        composeRule.onNodeWithText("6 EL Olivenöl").assertIsOff()
+        screenshot("12b-portionen-umgerechnet")
+        val stored = runBlocking { container().repository.getAll().first { it.title == SampleRecipes.TOMATO_SAUCE } }
+        assertEquals("800 g reife Tomaten", stored.ingredients.first().text)
+
+        composeRule.onNodeWithText(text(R.string.servings_reset)).performScrollTo().performClick()
+        waitForText("800 g reife Tomaten")
+        composeRule.onNodeWithContentDescription(text(R.string.more_options)).performClick()
+        composeRule.onNodeWithText(text(R.string.cooking_reset)).performClick()
+        composeRule.onNodeWithText("800 g reife Tomaten").assertIsOff()
     }
 
     @Test

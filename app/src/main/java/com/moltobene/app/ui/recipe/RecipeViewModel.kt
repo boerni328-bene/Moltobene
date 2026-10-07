@@ -40,7 +40,7 @@ sealed interface ShareEvent {
 }
 
 class RecipeViewModel(
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
     private val repository: RecipeRepository,
     private val photoStore: PhotoStore,
     private val sharer: RecipeSharer,
@@ -58,6 +58,42 @@ class RecipeViewModel(
         }
         .catch { emit(RecipeUiState.Error) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RecipeUiState.Loading)
+
+    /**
+     * Beim Kochen (#56): abgehakte Zutaten. Gemerkt werden Stelle und Text, damit nach einer Änderung am Rezept
+     * keine andere Zutat abgehakt erscheint. Liegt im [SavedStateHandle] und übersteht so das Drehen des Handys
+     * und das Beenden der App durch Android.
+     */
+    val checkedIngredients: StateFlow<List<String>> = savedStateHandle.getStateFlow(KEY_CHECKED, arrayListOf<String>())
+
+    /** Der aktuelle Schritt, gemerkt wie die Zutaten; null, wenn keiner markiert ist. */
+    val currentStep: StateFlow<String?> = savedStateHandle.getStateFlow<String?>(KEY_STEP, null)
+
+    /** Angezeigte Portionen; null heißt: wie im Rezept. Das gespeicherte Rezept ändert sich nie. */
+    val shownServings: StateFlow<Int?> = savedStateHandle.getStateFlow<Int?>(KEY_SERVINGS, null)
+
+    fun toggleIngredient(index: Int, text: String) {
+        val key = progressKey(index, text)
+        val checked = ArrayList(checkedIngredients.value)
+        if (!checked.remove(key)) checked += key
+        savedStateHandle[KEY_CHECKED] = checked
+    }
+
+    /** Markiert einen Schritt als aktuellen Schritt; nochmals antippen hebt die Markierung auf. */
+    fun toggleCurrentStep(index: Int, text: String) {
+        val key = progressKey(index, text)
+        savedStateHandle[KEY_STEP] = if (currentStep.value == key) null else key
+    }
+
+    fun setServings(servings: Int?) {
+        savedStateHandle[KEY_SERVINGS] = servings
+    }
+
+    /** „Abhaken zurücksetzen“: keine Zutat abgehakt, kein aktueller Schritt. */
+    fun resetProgress() {
+        savedStateHandle[KEY_CHECKED] = arrayListOf<String>()
+        savedStateHandle[KEY_STEP] = null
+    }
 
     /** „Originalseiten ansehen“ (#38). */
     val viewer = PageViewerModel(viewModelScope) { index ->
@@ -106,5 +142,14 @@ class RecipeViewModel(
             repository.delete(recipeId)
             onDeleted()
         }
+    }
+
+    companion object {
+        private const val KEY_CHECKED = "cooking_checked"
+        private const val KEY_STEP = "cooking_step"
+        private const val KEY_SERVINGS = "cooking_servings"
+
+        /** Kennung einer Zeile beim Kochen: Stelle und Text. */
+        fun progressKey(index: Int, text: String): String = "$index:${text.hashCode()}"
     }
 }

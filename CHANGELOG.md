@@ -3,6 +3,18 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.20.0] – 2026-10-07 (versionCode 40)
+
+### Neu
+- **Zutaten abhaken:** In der Rezeptansicht hat jede Zutat ein Kästchen. Ein Tippen auf die Zeile hakt sie ab: Sie bekommt ein Häkchen und wird durchgestrichen. Der Screenreader sagt „abgehakt“ bzw. „nicht abgehakt“.
+- **Aktueller Schritt:** Ein Tippen auf einen Schritt der Zubereitung markiert ihn als aktuellen Schritt, mit Pfeil und farbigem Hintergrund. So geht die Stelle beim Kochen nicht verloren. Ein weiteres Tippen hebt die Markierung auf.
+- **Portionen umrechnen:** Neben den Portionen stehen − und +. Die Mengen werden für die neue Anzahl umgerechnet, fett hervorgehoben und so geschrieben wie im Rezept: „1.000 g“ wird zu „2.000 g“, „½ TL“ zu „1 TL“, „1 1/2 cups“ zu „3 cups“. Umgerechnet werden Mengen am Anfang einer Zeile und Gewicht oder Volumen in Klammern, z. B. „3 EL (45 g)“. Zahlen mitten im Text wie „Saft von 2 Zitronen“ bleiben, wie sie sind; ein Hinweis sagt das. „Zurücksetzen“ zeigt wieder die Mengen des Rezepts. Das gespeicherte Rezept ändert sich dabei nie.
+- Im Menü oben setzt „Abhaken zurücksetzen“ alle Häkchen und den aktuellen Schritt zurück.
+- Häkchen, aktueller Schritt und Portionen bleiben erhalten, wenn das Handy gedreht wird oder Android die App im Hintergrund beendet.
+
+### Geändert
+- Beim Bearbeiten heißt das Feld neben den Portionen jetzt „Einheit (optional)“ statt „Angabe (optional)“.
+
 ## [0.19.1] – 2026-10-07 (versionCode 39)
 
 ### Behoben

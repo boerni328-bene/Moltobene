@@ -9,6 +9,8 @@ import android.icu.text.MeasureFormat
 import android.icu.util.Measure
 import android.icu.util.MeasureUnit
 import android.net.Uri
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,17 +19,22 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -51,7 +58,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
@@ -59,17 +68,24 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moltobene.app.R
+import com.moltobene.app.data.AmountScaling
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeText
+import com.moltobene.app.data.ocr.TextLanguage
 import com.moltobene.app.data.share.PreparedShare
 import com.moltobene.app.data.share.ShareLabels
 import com.moltobene.app.ui.components.CenteredMessage
@@ -92,6 +108,9 @@ fun RecipeScreen(
     onDeleted: (String) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val checked by viewModel.checkedIngredients.collectAsStateWithLifecycle()
+    val currentStep by viewModel.currentStep.collectAsStateWithLifecycle()
+    val shownServings by viewModel.shownServings.collectAsStateWithLifecycle()
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
@@ -166,6 +185,14 @@ fun RecipeScreen(
                             }
                             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                                 DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.cooking_reset)) },
+                                    enabled = checked.isNotEmpty() || currentStep != null,
+                                    onClick = {
+                                        menuOpen = false
+                                        viewModel.resetProgress()
+                                    },
+                                )
+                                DropdownMenuItem(
                                     text = { Text(stringResource(R.string.share_as_file)) },
                                     enabled = !viewModel.preparingShare,
                                     onClick = {
@@ -194,6 +221,14 @@ fun RecipeScreen(
             current is RecipeUiState.Content -> RecipeContent(
                 recipe = current.recipe,
                 photo = current.photo,
+                cooking = CookingState(
+                    checked = checked.toSet(),
+                    currentStep = currentStep,
+                    shownServings = shownServings,
+                    onToggleIngredient = viewModel::toggleIngredient,
+                    onToggleStep = viewModel::toggleCurrentStep,
+                    onServingsChange = viewModel::setServings,
+                ),
                 snackbarHostState = snackbarHostState,
                 onShowPages = { viewModel.viewer.open(0) },
                 onShowPhoto = { viewModel.photoViewer.open(0) },
@@ -276,10 +311,21 @@ private fun KeepScreenOn() {
     }
 }
 
+/** Was beim Kochen dazukommt (#56): Häkchen, aktueller Schritt und angezeigte Portionen. */
+private class CookingState(
+    val checked: Set<String>,
+    val currentStep: String?,
+    val shownServings: Int?,
+    val onToggleIngredient: (Int, String) -> Unit,
+    val onToggleStep: (Int, String) -> Unit,
+    val onServingsChange: (Int?) -> Unit,
+)
+
 @Composable
 private fun RecipeContent(
     recipe: Recipe,
     photo: File?,
+    cooking: CookingState,
     snackbarHostState: SnackbarHostState,
     onShowPages: () -> Unit,
     onShowPhoto: () -> Unit,
@@ -306,23 +352,32 @@ private fun RecipeContent(
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.semantics { heading() },
             )
-            recipe.servings?.let { servings ->
-                val unit = recipe.servingsUnit?.takeIf { it.isNotBlank() }
-                Text(
-                    text = if (unit == null) {
-                        pluralStringResource(R.plurals.servings_count, servings, servings)
-                    } else {
-                        stringResource(R.string.servings_with_unit, servings, unit)
-                    },
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+            val originalServings = recipe.servings?.takeIf { it > 0 }
+            val servings = originalServings?.let { cooking.shownServings ?: it }
+            if (originalServings != null && servings != null) {
+                ServingsControl(
+                    original = originalServings,
+                    shown = servings,
+                    unit = recipe.servingsUnit?.takeIf { it.isNotBlank() },
+                    onChange = { cooking.onServingsChange(it.takeIf { value -> value != originalServings }) },
                 )
             }
             RecipeTimes(recipe.prepMinutes, recipe.totalMinutes)
 
             if (recipe.ingredients.isNotEmpty()) {
                 SectionTitle(stringResource(R.string.ingredients))
-                recipe.ingredients.forEach { ingredient ->
+                val factor = if (originalServings != null && servings != null) servings.toDouble() / originalServings else 1.0
+                val deviceLanguage = LocalConfiguration.current.locales[0].language
+                // Mengen werden so geschrieben wie im Rezept; ohne Angabe gilt die erkannte Sprache.
+                val language = remember(recipe.language, recipe.ingredients, deviceLanguage) {
+                    recipe.language
+                        ?: TextLanguage.detect(recipe.ingredients.joinToString("\n") { it.text })
+                        ?: deviceLanguage
+                }
+                val lines = remember(recipe.ingredients, factor, language) {
+                    recipe.ingredients.map { AmountScaling.scale(it.text, factor, language) }
+                }
+                recipe.ingredients.forEachIndexed { index, ingredient ->
                     if (ingredient.isHeading) {
                         Text(
                             text = ingredient.text,
@@ -331,10 +386,11 @@ private fun RecipeContent(
                             modifier = Modifier.padding(top = Spacing.s).semantics { heading() },
                         )
                     } else {
-                        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-                            Text("•", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
-                            Text(ingredient.text, style = MaterialTheme.typography.bodyLarge)
-                        }
+                        IngredientRow(
+                            parts = lines[index],
+                            checked = RecipeViewModel.progressKey(index, ingredient.text) in cooking.checked,
+                            onToggle = { cooking.onToggleIngredient(index, ingredient.text) },
+                        )
                     }
                 }
             }
@@ -342,15 +398,12 @@ private fun RecipeContent(
             if (recipe.steps.isNotEmpty()) {
                 SectionTitle(stringResource(R.string.instructions))
                 recipe.steps.forEachIndexed { index, step ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-                        Text(
-                            text = "${index + 1}.",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.widthIn(min = 24.dp),
-                        )
-                        Text(step, style = MaterialTheme.typography.bodyLarge)
-                    }
+                    StepRow(
+                        number = index + 1,
+                        text = step,
+                        current = cooking.currentStep == RecipeViewModel.progressKey(index, step),
+                        onClick = { cooking.onToggleStep(index, step) },
+                    )
                 }
             }
 
@@ -385,6 +438,114 @@ private fun RecipeContent(
         }
     }
 }
+
+/** Portionen mit − und +; umgerechnet wird nur in der Anzeige (#56). */
+@Composable
+private fun ServingsControl(original: Int, shown: Int, unit: String?, onChange: (Int) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = { onChange(shown - 1) }, enabled = shown > 1) {
+            Icon(painterResource(R.drawable.ic_remove), contentDescription = stringResource(R.string.servings_fewer))
+        }
+        Text(
+            text = servingsText(shown, unit),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            // Der Screenreader sagt die neue Zahl an.
+            modifier = Modifier.weight(1f, fill = false).semantics { liveRegion = LiveRegionMode.Polite },
+        )
+        IconButton(onClick = { onChange(shown + 1) }, enabled = shown < MAX_SERVINGS) {
+            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.servings_more))
+        }
+    }
+    if (shown != original) {
+        Text(
+            text = stringResource(R.string.servings_scaled_hint, servingsText(original, unit)),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        TextButton(onClick = { onChange(original) }) { Text(stringResource(R.string.servings_reset)) }
+    }
+}
+
+@Composable
+private fun servingsText(servings: Int, unit: String?): String =
+    if (unit == null) {
+        pluralStringResource(R.plurals.servings_count, servings, servings)
+    } else {
+        stringResource(R.string.servings_with_unit, servings, unit)
+    }
+
+/**
+ * Eine Zutat zum Abhaken: Die ganze Zeile ist antippbar, abgehakt heißt Häkchen und durchgestrichen.
+ * Umgerechnete Mengen sind fett, damit sie nicht nur an der Farbe zu erkennen sind.
+ */
+@Composable
+private fun IngredientRow(parts: List<AmountScaling.Part>, checked: Boolean, onToggle: () -> Unit) {
+    val state = stringResource(if (checked) R.string.ingredient_checked else R.string.ingredient_unchecked)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.s),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .toggleable(value = checked, role = Role.Checkbox, onValueChange = { onToggle() })
+            .semantics { stateDescription = state },
+    ) {
+        Checkbox(checked = checked, onCheckedChange = null)
+        Text(
+            text = buildAnnotatedString {
+                parts.forEach { part ->
+                    if (part.scaled) {
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(part.text) }
+                    } else {
+                        append(part.text)
+                    }
+                }
+            },
+            style = MaterialTheme.typography.bodyLarge.copy(
+                textDecoration = if (checked) TextDecoration.LineThrough else TextDecoration.None,
+            ),
+            color = if (checked) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+        )
+    }
+}
+
+/** Ein Schritt; antippen markiert ihn als aktuellen Schritt – mit Symbol und Hintergrund, nicht nur über die Farbe. */
+@Composable
+private fun StepRow(number: Int, text: String, current: Boolean, onClick: () -> Unit) {
+    val currentLabel = stringResource(R.string.step_current)
+    val markLabel = stringResource(R.string.step_mark_current)
+    val highlight = if (current) {
+        Modifier.background(MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.shapes.medium)
+    } else {
+        Modifier
+    }
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(Spacing.s),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .then(highlight)
+            .clickable(onClickLabel = markLabel, onClick = onClick)
+            .padding(Spacing.s)
+            .semantics(mergeDescendants = true) { if (current) stateDescription = currentLabel },
+    ) {
+        val color = if (current) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface
+        if (current) {
+            Icon(Icons.Filled.PlayArrow, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        }
+        Text(
+            text = "$number.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.widthIn(min = 24.dp),
+        )
+        Text(text, style = MaterialTheme.typography.bodyLarge, color = color)
+    }
+}
+
+private const val MAX_SERVINGS = 99
 
 @Composable
 private fun SectionTitle(text: String) {

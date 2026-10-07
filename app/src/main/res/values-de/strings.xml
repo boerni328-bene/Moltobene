@@ -52,6 +52,17 @@
         <item quantity="other">%d Originalseiten ansehen</item>
     </plurals>
 
+    <!-- Kochen (#56): abhaken, aktueller Schritt, Portionen umrechnen -->
+    <string name="cooking_reset">Abhaken zurücksetzen</string>
+    <string name="ingredient_checked">abgehakt</string>
+    <string name="ingredient_unchecked">nicht abgehakt</string>
+    <string name="step_current">Aktueller Schritt</string>
+    <string name="step_mark_current">Als aktuellen Schritt markieren</string>
+    <string name="servings_fewer">Weniger Portionen</string>
+    <string name="servings_more">Mehr Portionen</string>
+    <string name="servings_scaled_hint">Mengen umgerechnet. Im Rezept: %1$s. Umgerechnet werden nur Mengen am Anfang einer Zeile und in Klammern.</string>
+    <string name="servings_reset">Zurücksetzen</string>
+
     <!-- Teilen -->
     <string name="share_recipe">Rezept teilen</string>
     <string name="share_as_file">Als Rezeptdatei teilen</string>
@@ -170,9 +181,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>YouTube: Ein Link zu einem Kochvideo übernimmt das Rezept aus der Videobeschreibung, mit Titel, Vorschaubild und Link zum Video als Quelle.</item>
-        <item>Verweist die Beschreibung auf das ganze Rezept auf einer Internetseite, lässt es sich mit einem Tippen von dort übernehmen.</item>
-        <item>Rezepte von weiteren Koch-Portalen lassen sich übernehmen, die die App bisher abgewiesen haben.</item>
+        <item>Kochen: Zutaten lassen sich abhaken, ein Tippen auf einen Schritt markiert ihn als aktuellen Schritt.</item>
+        <item>Portionen umrechnen: Mit − und + werden die Mengen für mehr oder weniger Portionen umgerechnet, geschrieben wie im Rezept, z. B. „1.000 g“ oder „1½ TL“. Das gespeicherte Rezept bleibt unverändert.</item>
+        <item>Häkchen, aktueller Schritt und Portionen bleiben erhalten, auch wenn das Handy gedreht wird.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->
@@ -191,7 +202,7 @@
     <!-- Bearbeiten -->
     <string name="field_title">Titel</string>
     <string name="field_title_missing">Titel fehlt</string>
-    <string name="field_servings_unit">Angabe (optional)</string>
+    <string name="field_servings_unit">Einheit (optional)</string>
     <string name="field_servings_unit_hint">z. B. Stück, Springform 26 cm</string>
     <string name="field_ingredients_hint">Eine Zutat pro Zeile, z. B. 200 g Mehl. Zwischenüberschriften enden mit Doppelpunkt, z. B. Für den Teig:</string>
     <string name="field_instructions_hint">Ein Schritt pro Zeile</string>
