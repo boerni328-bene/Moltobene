@@ -8,6 +8,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasAnySibling
 import androidx.compose.ui.test.hasClickAction
@@ -34,6 +35,9 @@ import androidx.test.runner.lifecycle.Stage
 import com.moltobene.app.MainActivity
 import com.moltobene.app.MoltobeneApplication
 import com.moltobene.app.R
+import com.moltobene.app.data.Appearance
+import com.moltobene.app.data.Palette
+import com.moltobene.app.data.ThemeMode
 import com.moltobene.app.data.share.RecipeJsonLd
 import com.moltobene.app.ui.whatsnew.WhatsNew
 import kotlinx.coroutines.runBlocking
@@ -533,6 +537,30 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithText(text(R.string.licenses_title)).performScrollTo().performClick()
         waitForText(text(R.string.licenses_intro))
         screenshot("32-lizenzen")
+    }
+
+    /**
+     * „Darstellung“ in den Einstellungen: Farbwelt und Hell/Dunkel wählen, die ganze App wechselt sofort. Gewählt wird
+     * Hell bzw. Dunkel wie in der Darstellung des Rundgangs, damit das Handy dabei bleibt, wie es ist.
+     */
+    @Test
+    fun darstellungWaehlen() {
+        addSampleRecipes()
+        waitForText(SampleRecipes.POTATO_SALAD)
+        composeRule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        waitForText(text(R.string.settings_section_appearance))
+
+        composeRule.onNodeWithText(text(R.string.palette_terracotta)).performScrollTo().performClick()
+        val mode = if (variant.dark) ThemeMode.DARK else ThemeMode.LIGHT
+        composeRule.onNodeWithText(text(if (variant.dark) R.string.theme_dark else R.string.theme_light)).performScrollTo().performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.appearance.value == Appearance(mode, Palette.TERRACOTTA) }
+        composeRule.onNodeWithText(text(R.string.palette_terracotta)).assertIsSelected()
+        composeRule.onNodeWithText(text(R.string.appearance_mode)).performScrollTo()
+        screenshot("29a-darstellung")
+
+        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+        waitForText(SampleRecipes.POTATO_SALAD)
+        screenshot("29b-sammlung-terrakotta")
     }
 
     // --- Hilfsfunktionen ---

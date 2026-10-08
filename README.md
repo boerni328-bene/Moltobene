@@ -21,6 +21,7 @@ Kostenlos, ohne Werbung, ohne Konto und ohne Tracking. Ins Internet geht die App
 - Rezepte übersetzen (Deutsch ↔ Englisch): direkt auf dem Handy und ohne Internet, nachdem einmal das Sprachpaket heruntergeladen wurde (etwa 172 MB). Das Original bleibt erhalten, Abhaken und Portionen umrechnen gehen auch in der Übersetzung.
 - Einzelne Rezepte teilen: als gut lesbaren Text mit Foto oder als Rezeptdatei im offenen Standard schema.org. Eigene Notizen bleiben dabei privat.
 - Die ganze Sammlung inklusive Fotos als Datei sichern und wiederherstellen, z. B. für den Umzug auf ein neues Handy
+- Darstellung wählen: hell, dunkel oder wie das Handy, in fünf ruhigen Farbwelten (Schiefer, Kobalt, Salbei, Terrakotta, Safran)
 
 Geplant sind unter anderem Schlagwörter und Favoriten.
 

@@ -29,11 +29,15 @@ object RecipeTextParser {
         "^(zutaten|ingredients?|ingredienti|ingredientes|einkaufsliste)\\b.{0,40}$",
         RegexOption.IGNORE_CASE,
     )
-    // „Sie brauchen:“, „You will need:“ – nur als ganze Zeile (höchstens mit „für 4 Personen“), denn ein Satz der
-    // Zubereitung kann genauso beginnen.
+    // „Sie brauchen:“, „You will need:“, auch „Für dieses Rezept brauchst du:“ oder „For this recipe, you will need:“
+    // – nur als ganze Zeile (höchstens mit „für 4 Personen“), denn ein Satz der Zubereitung kann genauso beginnen.
     private val NEEDS_HEADING = Regex(
-        "^(sie brauchen|das brauchen sie|sie benotigen|man braucht|was man braucht|du brauchst|" +
-            "you need|you will need|you'll need|what you need|occorrente|il vous faut|necesitas|necesitaras|se necesita)" +
+        "^((fur|for|per|pour|para)\\s+(dieses|das|this|the|questa|la|cette|esta)\\s+(rezept|recipe|ricetta|recette|receta),?\\s+)?" +
+            "(sie brauchen|das brauchen sie|sie benotigen|man braucht|was man braucht|du brauchst|brauchst du|braucht man|" +
+            "brauchen sie|benotigst du|benotigt man|benotigen sie|" +
+            "you need|you will need|you'll need|what you need|what you'll need|here's what you need|here's what you'll need|" +
+            "occorrente|occorre|occorrono|servono|ti servono|il vous faut|il faut|vous aurez besoin de|" +
+            "necesitas|necesitaras|se necesita|necesitaremos)" +
             "(\\s+(fur|for|per|pour|para)\\s+\\d{1,3}(\\s*-\\s*\\d{1,3})?\\s*\\p{L}*)?$",
         RegexOption.IGNORE_CASE,
     )
@@ -48,6 +52,9 @@ object RecipeTextParser {
     private const val QUANTITY = "(?:\\d+(?:[.,/]\\d+)?|[½¼¾⅓⅔⅛])"
     // (?!\d): Eine Zahl allein ist keine Menge – sonst gälte „47“ als „4“ plus „7“.
     private val STARTS_WITH_QUANTITY = Regex("^$QUANTITY(?!\\d)\\s*(?:-\\s*\\d+)?\\s*\\S")
+    private val SENTENCE_END = Regex("[.!?]$")
+    /** Längste Zutat in getipptem Text; längere Zeilen sind Sätze der Zubereitung. */
+    private const val TYPED_INGREDIENT = 150
     private val BULLET = Regex("^[•·▪◦●○■□\\-–*]\\s+")
     private val NUMBERED_STEP = Regex("^(\\d{1,2})[.)]\\s+(\\S.*)$")
     private val SECOND_QUANTITY = Regex("(?<=\\s)$QUANTITY(?:\\s*-\\s*\\d+)?\\s*(?=\\p{L})")
@@ -137,12 +144,12 @@ object RecipeTextParser {
             }
             ingredientHeading != null -> {
                 val rest = region(ingredientHeading + 1, lines.size)
-                val end = rest.indexOfFirst { it.isNotEmpty() && isStepLike(it) }.let { if (it < 0) rest.size else it }
+                val end = rest.indexOfFirst { it.isNotEmpty() && isStepLike(it, typed) }.let { if (it < 0) rest.size else it }
                 ingredientLines = rest.subList(0, end)
                 stepLines = rest.subList(end, rest.size)
             }
             stepsHeading != null -> {
-                ingredientLines = region(0, stepsHeading).filter { it.isEmpty() || !isStepLike(it) }
+                ingredientLines = region(0, stepsHeading).filter { it.isEmpty() || !isStepLike(it, typed) }
                 stepLines = region(stepsHeading + 1, lines.size)
             }
             else -> {
@@ -155,7 +162,7 @@ object RecipeTextParser {
                     ingredientLines = emptyList()
                     stepLines = rest
                 } else {
-                    val end = (start until rest.size).firstOrNull { rest[it].isNotEmpty() && isStepLike(rest[it]) } ?: rest.size
+                    val end = (start until rest.size).firstOrNull { rest[it].isNotEmpty() && isStepLike(rest[it], typed) } ?: rest.size
                     ingredientLines = rest.subList(start, end)
                     stepLines = rest.subList(0, start) + rest.subList(end, rest.size)
                 }
@@ -339,9 +346,15 @@ object RecipeTextParser {
             AmountText.startsWithAmount(line) ||
             (line.length <= 50 && AmountText.moveTrailingAmountToFront(line) != line)
 
-    private fun isStepLike(line: String): Boolean {
+    /**
+     * @param typed getippter oder kopierter Text (z. B. von einer Internetseite): Seine Zeilen sind vollständig, nicht
+     *   wie bei der Texterkennung umgebrochen. Eine Zeile mit Menge vorn und ohne Satzende ist dort eine Zutat, auch
+     *   wenn sie lang ist: „½ cup (80 grams) all-purpose flour, plus extra for dusting the pasta“.
+     */
+    private fun isStepLike(line: String, typed: Boolean = false): Boolean {
         if (NUMBERED_STEP.matches(line)) return true
         if (isIngredientLike(line) && line.length <= 50) return false
+        if (typed && isIngredientLike(line) && !SENTENCE_END.containsMatchIn(line) && line.length <= TYPED_INGREDIENT) return false
         val words = line.split(' ').size
         return line.length > 50 || (words >= 5 && line.endsWith("."))
     }

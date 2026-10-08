@@ -8,7 +8,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moltobene.app.R
 import com.moltobene.app.data.AppPreferences
+import com.moltobene.app.data.Appearance
+import com.moltobene.app.data.Palette
 import com.moltobene.app.data.StorageFull
+import com.moltobene.app.data.ThemeMode
 import com.moltobene.app.data.backup.BackupManager
 import com.moltobene.app.data.backup.BackupReader
 import com.moltobene.app.data.translate.LanguagePackManager
@@ -57,6 +60,19 @@ class SettingsViewModel(
         viewModelScope.launch {
             languagePack.delete()
             event = SettingsEvent.LanguagePackDeleted
+        }
+    }
+
+    /** Darstellung: Hell/Dunkel und Farbwelt; die ganze App wechselt sofort. */
+    val appearance: StateFlow<Appearance?> = preferences.appearance
+
+    fun setThemeMode(mode: ThemeMode) = updateAppearance { it.copy(mode = mode) }
+
+    fun setPalette(palette: Palette) = updateAppearance { it.copy(palette = palette) }
+
+    private fun updateAppearance(change: (Appearance) -> Appearance) {
+        viewModelScope.launch {
+            runCatching { preferences.setAppearance(change(appearance.value ?: Appearance())) }
         }
     }
 

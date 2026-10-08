@@ -28,6 +28,7 @@ import com.moltobene.app.ui.edit.SharedInput
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import java.io.File
 
 class MoltobeneApplication : Application() {
@@ -47,6 +48,7 @@ class MoltobeneApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        container.loadAppearance()
         // Reste älterer Versionen entfernen, im Hintergrund, damit der Start nicht wartet.
         Thread({ LegacyCleanup.run(filesDir, noBackupFilesDir, cacheDir) }, "aufraeumen").apply {
             priority = Thread.MIN_PRIORITY
@@ -77,6 +79,11 @@ class AppContainer(context: Context) {
 
     /** Läuft so lange wie die App, z. B. für den Download des Sprachpakets. */
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    /** Liest die Darstellung (Hell/Dunkel, Farben) im Hintergrund, sobald die App startet. */
+    fun loadAppearance() {
+        appScope.launch { preferences.loadAppearance() }
+    }
 
     /**
      * Einzige Stelle für Internetzugriffe (#55). Der Rundgang auf dem Emulator setzt hier einen Lader mit

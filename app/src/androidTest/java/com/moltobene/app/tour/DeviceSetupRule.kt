@@ -10,6 +10,7 @@ import androidx.annotation.RequiresApi
 import androidx.test.platform.app.InstrumentationRegistry
 import com.moltobene.app.BuildConfig
 import com.moltobene.app.MoltobeneApplication
+import com.moltobene.app.data.Appearance
 import kotlinx.coroutines.runBlocking
 import org.junit.rules.ExternalResource
 import kotlin.math.abs
@@ -55,5 +56,7 @@ class DeviceSetupRule(private val variant: DisplayVariant) : ExternalResource() 
         container.preferences.setLastSeenVersionCode(BuildConfig.VERSION_CODE)
         // Der Hinweis zum Sichern (#51) beginnt in jedem Durchgang wieder sichtbar.
         container.preferences.setBackupHintHiddenAt(0)
+        // Standard-Darstellung: „Schiefer“ und wie das Handy – Hell/Dunkel kommt dann von der Darstellung des Rundgangs.
+        container.preferences.setAppearance(Appearance())
     }
 }

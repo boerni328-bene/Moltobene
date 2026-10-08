@@ -335,6 +335,59 @@ class RecipeTextParserTest {
         )
     }
 
+    /** „For this recipe, you will need:“ statt „Ingredients“, wie auf manchen Blogs (z. B. pastagrammar.com). */
+    @Test
+    fun einleitungDerZutatenMitVorsatz() {
+        assertTrue(RecipeTextParser.isIngredientHeading("For this recipe, you will need:"))
+        assertTrue(RecipeTextParser.isIngredientHeading("Für dieses Rezept brauchst du:"))
+        assertTrue(RecipeTextParser.isIngredientHeading("Für das Rezept benötigt man:"))
+        assertTrue(RecipeTextParser.isIngredientHeading("Per questa ricetta servono:"))
+        assertTrue(RecipeTextParser.isIngredientHeading("Pour cette recette, il vous faut :"))
+        assertTrue(RecipeTextParser.isIngredientHeading("Para esta receta necesitas:"))
+        assertTrue(RecipeTextParser.isIngredientHeading("Here’s what you’ll need"))
+        // Ein Satz der Zubereitung bleibt ein Satz.
+        assertFalse(RecipeTextParser.isIngredientHeading("Für dieses Rezept braucht man etwas Geduld."))
+
+        val text = """
+            Lemon ricotta pasta
+
+            For this recipe, you will need:
+
+            200 grams spaghetti
+
+            ½ cup (120 grams) whole milk ricotta, at room temperature, plus extra for serving
+
+            2 servings fresh egg pasta (made with 2 eggs and 1 ½ cups, or 200 grams, flour)
+
+            Salt
+
+            Grated Parmigiano cheese, to taste
+
+            Bring a large pot of salted water to a boil and cook the pasta until al dente.
+
+            Toss with the ricotta.
+        """.trimIndent()
+        val recipe = RecipeTextParser.parse(text, "en", typed = true)
+        // Lange Zeilen mit Menge vorn und ohne Satzende sind in getipptem Text Zutaten; „to taste“ bleibt hinten.
+        assertEquals(
+            listOf(
+                "200 grams spaghetti",
+                "½ cup (120 grams) whole milk ricotta, at room temperature, plus extra for serving",
+                "2 servings fresh egg pasta (made with 2 eggs and 1 ½ cups, or 200 grams, flour)",
+                "Salt",
+                "Grated Parmigiano cheese, to taste",
+            ),
+            recipe.ingredients,
+        )
+        assertEquals(
+            listOf("Bring a large pot of salted water to a boil and cook the pasta until al dente.", "Toss with the ricotta."),
+            recipe.steps,
+        )
+        // Bei der Texterkennung sind Zeilen umgebrochen: Dort bleibt eine lange Zeile mit Menge vorn ein Schritt.
+        val photo = RecipeTextParser.parse("Zutaten\n200 g Mehl\n2 Eier mit dem Zucker schaumig schlagen, dann das Mehl\nunterheben und backen.", "de")
+        assertEquals(listOf("200 g Mehl"), photo.ingredients)
+    }
+
     @Test
     fun sieBrauchenNurAlsGanzeZeileUeberschrift() {
         val recipe = RecipeTextParser.parse("Sie brauchen für 4 Personen:\n500 g Kartoffeln\nZubereitung\nSie brauchen dazu einen großen Topf.")

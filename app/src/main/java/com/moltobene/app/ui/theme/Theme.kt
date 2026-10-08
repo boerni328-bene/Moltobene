@@ -2,93 +2,18 @@ package com.moltobene.app.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import com.moltobene.app.data.Palette
 
-// Eigene Palette „Schiefer“ statt der Farben vom Hintergrundbild (Vision: eigene ruhige Farbpalette).
-private val LightColors = lightColorScheme(
-    primary = SlatePrimaryLight,
-    onPrimary = SlateOnPrimaryLight,
-    primaryContainer = SlatePrimaryContainerLight,
-    onPrimaryContainer = SlateOnPrimaryContainerLight,
-    inversePrimary = SlatePrimaryDark,
-    secondary = SlateSecondaryLight,
-    onSecondary = SlateOnSecondaryLight,
-    secondaryContainer = SlateSecondaryContainerLight,
-    onSecondaryContainer = SlateOnSecondaryContainerLight,
-    tertiary = SlateTertiaryLight,
-    onTertiary = SlateOnTertiaryLight,
-    tertiaryContainer = SlateTertiaryContainerLight,
-    onTertiaryContainer = SlateOnTertiaryContainerLight,
-    error = SlateErrorLight,
-    onError = SlateOnErrorLight,
-    errorContainer = SlateErrorContainerLight,
-    onErrorContainer = SlateOnErrorContainerLight,
-    background = SlateBackgroundLight,
-    onBackground = SlateOnBackgroundLight,
-    surface = SlateBackgroundLight,
-    onSurface = SlateOnBackgroundLight,
-    surfaceVariant = SlateSurfaceVariantLight,
-    onSurfaceVariant = SlateOnSurfaceVariantLight,
-    surfaceTint = SlatePrimaryLight,
-    outline = SlateOutlineLight,
-    outlineVariant = SlateOutlineVariantLight,
-    inverseSurface = SlateInverseSurfaceLight,
-    inverseOnSurface = SlateInverseOnSurfaceLight,
-    surfaceBright = SlateBackgroundLight,
-    surfaceDim = SlateSurfaceDimLight,
-    surfaceContainerLowest = SlateSurfaceContainerLowestLight,
-    surfaceContainerLow = SlateSurfaceContainerLowLight,
-    surfaceContainer = SlateSurfaceContainerLight,
-    surfaceContainerHigh = SlateSurfaceContainerHighLight,
-    surfaceContainerHighest = SlateSurfaceContainerHighestLight,
-)
-
-private val DarkColors = darkColorScheme(
-    primary = SlatePrimaryDark,
-    onPrimary = SlateOnPrimaryDark,
-    primaryContainer = SlatePrimaryContainerDark,
-    onPrimaryContainer = SlateOnPrimaryContainerDark,
-    inversePrimary = SlatePrimaryLight,
-    secondary = SlateSecondaryDark,
-    onSecondary = SlateOnSecondaryDark,
-    secondaryContainer = SlateSecondaryContainerDark,
-    onSecondaryContainer = SlateOnSecondaryContainerDark,
-    tertiary = SlateTertiaryDark,
-    onTertiary = SlateOnTertiaryDark,
-    tertiaryContainer = SlateTertiaryContainerDark,
-    onTertiaryContainer = SlateOnTertiaryContainerDark,
-    error = SlateErrorDark,
-    onError = SlateOnErrorDark,
-    errorContainer = SlateErrorContainerDark,
-    onErrorContainer = SlateOnErrorContainerDark,
-    background = SlateBackgroundDark,
-    onBackground = SlateOnBackgroundDark,
-    surface = SlateBackgroundDark,
-    onSurface = SlateOnBackgroundDark,
-    surfaceVariant = SlateSurfaceVariantDark,
-    onSurfaceVariant = SlateOnSurfaceVariantDark,
-    surfaceTint = SlatePrimaryDark,
-    outline = SlateOutlineDark,
-    outlineVariant = SlateOutlineVariantDark,
-    inverseSurface = SlateInverseSurfaceDark,
-    inverseOnSurface = SlateInverseOnSurfaceDark,
-    surfaceBright = SlateSurfaceBrightDark,
-    surfaceDim = SlateBackgroundDark,
-    surfaceContainerLowest = SlateSurfaceContainerLowestDark,
-    surfaceContainerLow = SlateSurfaceContainerLowDark,
-    surfaceContainer = SlateSurfaceContainerDark,
-    surfaceContainerHigh = SlateSurfaceContainerHighDark,
-    surfaceContainerHighest = SlateSurfaceContainerHighestDark,
-)
-
-/** Markenfarben aus dem Logo; nur für den Schriftzug MOLTOBENE (`ui/components/AppTitle`). */
+/**
+ * Markenfarben aus dem Logo; nur für den Schriftzug MOLTOBENE (`ui/components/AppTitle`). Sie bleiben in jeder
+ * Farbwelt gleich, denn sie gehören zum Logo.
+ */
 @Immutable
 data class BrandColors(val blue: Color)
 
@@ -102,14 +27,19 @@ object MoltobeneTheme {
         get() = LocalBrandColors.current
 }
 
+/**
+ * @param darkTheme dunkel oder hell, wie in den Einstellungen gewählt („Wie das Handy“ folgt dem Handy)
+ * @param palette Farbwelt aus den Einstellungen; Standard ist „Schiefer“
+ */
 @Composable
 fun MoltobeneTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    palette: Palette = Palette.SLATE,
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(LocalBrandColors provides BrandColors(if (darkTheme) BrandBlueDark else BrandBlueLight)) {
         MaterialTheme(
-            colorScheme = if (darkTheme) DarkColors else LightColors,
+            colorScheme = colorSchemeOf(palette, darkTheme),
             typography = MoltobeneTypography,
             shapes = MoltobeneShapes,
             content = content

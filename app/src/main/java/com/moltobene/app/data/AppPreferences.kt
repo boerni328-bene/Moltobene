@@ -5,12 +5,42 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.edit
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 
 /** Kleine Merkwerte der App (keine Rezeptdaten). Zugriffe laufen nie auf dem Hauptthread. */
 class AppPreferences(context: Context) {
     private val appContext = context.applicationContext
     private val prefs by lazy { appContext.getSharedPreferences(FILE_NAME, Context.MODE_PRIVATE) }
+
+    private val appearanceState = MutableStateFlow<Appearance?>(null)
+
+    /** Darstellung aus den Einstellungen; null, bis [loadAppearance] sie gelesen hat. */
+    val appearance: StateFlow<Appearance?> = appearanceState.asStateFlow()
+
+    /** Liest die Darstellung; gleich beim Start der App, damit der erste Bildschirm schon in den richtigen Farben kommt. */
+    suspend fun loadAppearance() = withContext(Dispatchers.IO) {
+        val stored = runCatching {
+            Appearance(
+                mode = ThemeMode.fromKey(prefs.getString(KEY_THEME_MODE, null)),
+                palette = Palette.fromKey(prefs.getString(KEY_PALETTE, null)),
+            )
+        }.getOrDefault(Appearance())
+        appearanceState.compareAndSet(null, stored)
+    }
+
+    /** Die App wechselt sofort, gespeichert wird danach. */
+    suspend fun setAppearance(appearance: Appearance) {
+        appearanceState.value = appearance
+        withContext(Dispatchers.IO) {
+            prefs.edit {
+                putString(KEY_THEME_MODE, appearance.mode.key)
+                putString(KEY_PALETTE, appearance.palette.key)
+            }
+        }
+    }
 
     /** versionCode, für den „Neu in Version …“ zuletzt erledigt war; null beim ersten Start. */
     suspend fun lastSeenVersionCode(): Int? = withContext(Dispatchers.IO) {
@@ -77,5 +107,7 @@ class AppPreferences(context: Context) {
         const val KEY_LAST_BACKUP_AT = "last_backup_at"
         const val KEY_LAST_BACKUP_RECIPES = "last_backup_recipes"
         const val KEY_BACKUP_HINT_HIDDEN_AT = "backup_hint_hidden_at"
+        const val KEY_THEME_MODE = "theme_mode"
+        const val KEY_PALETTE = "palette"
     }
 }

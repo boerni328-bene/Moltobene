@@ -201,9 +201,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>YouTube: All links from the video description can be chosen. The recipe can be imported from the chosen page.</item>
-        <item>New field “Video”: the link to the video is saved separately from the source and shown in the recipe view.</item>
-        <item>In dark mode, M and B in the name are closer to the blue of the logo.</item>
+        <item>Choose the appearance: under “Appearance” in Settings, pick “Light”, “Dark” or “Same as device”.</item>
+        <item>Five color themes to choose from: Slate, Cobalt, Sage, Terracotta and Saffron.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->
@@ -251,6 +250,18 @@
     <string name="settings_section_about">About</string>
     <string name="license_note_opus_mt">Models of the language pack for translation, downloaded only on request. Changed for Moltobene: converted to ONNX and reduced to 8 bit. Source: huggingface.co/Helsinki-NLP</string>
     <string name="settings_section_translation">Translation</string>
+    <!-- Einstellungen: Darstellung (Hell/Dunkel und Farbwelt) -->
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="appearance_mode">Light or dark</string>
+    <string name="theme_system">Same as device</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="appearance_palette">Colors</string>
+    <string name="palette_slate">Slate</string>
+    <string name="palette_cobalt">Cobalt</string>
+    <string name="palette_sage">Sage</string>
+    <string name="palette_terracotta">Terracotta</string>
+    <string name="palette_saffron">Saffron</string>
     <string name="language_pack_title">Language pack German–English</string>
     <string name="language_pack_text">For translating recipes on the device, without internet. Download once: about %1$s, uses about %2$s on the device. Best over Wi-Fi.</string>
     <string name="language_pack_download">Download</string>

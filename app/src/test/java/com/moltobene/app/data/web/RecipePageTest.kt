@@ -1,5 +1,6 @@
 package com.moltobene.app.data.web
 
+import com.moltobene.app.data.ocr.RecipeTextParser
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -184,8 +185,54 @@ class RecipePageTest {
         val result = RecipePage.withoutTrailingSections(text)
         assertTrue(result.startsWith("Kommentare (12)"))
         assertTrue(result.endsWith("Linsen weich kochen."))
+        // Auch „3 Kommentare“ oder „Back to blog“ beenden das Rezept.
+        assertEquals("Zutaten\n200 g Linsen", RecipePage.withoutTrailingSections("Zutaten\n200 g Linsen\n3 Kommentare\nLecker!"))
+        assertEquals("Ingredients\n1 egg", RecipePage.withoutTrailingSections("Ingredients\n1 egg\nBack to blog\n1 comment"))
         // Ohne Überschrift „Zutaten“ bleibt alles, wie es ist.
         assertEquals("Kommentare\nSehr gut", RecipePage.withoutTrailingSections("Kommentare\nSehr gut"))
+    }
+
+    /**
+     * Blog ohne Rezept im Standardformat (nur „Article“), die Zutaten eingeleitet mit „For this recipe, you will need:“
+     * statt „Ingredients“, darunter „Back to blog“ und Kommentare – aufgebaut wie pastagrammar.com (Shopify), mit
+     * selbst geschriebenem Rezept.
+     */
+    @Test
+    fun blogMitEinleitungStattUeberschrift() {
+        val content = read(
+            """
+            <html lang="en"><head><title>Lemon Ricotta Pasta | Example Kitchen</title>
+              <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Lemon Ricotta Pasta"}</script>
+            </head><body><main id="MainContent"><article class="article-template">
+              <h1>Lemon Ricotta Pasta</h1>
+              <p>A short story about lemons from the garden.</p>
+              <h2>Lemon Ricotta Pasta Recipe</h2>
+              <p>Makes: 2 servings</p>
+              <p>For this recipe, you will need:</p>
+              <p>200 grams spaghetti</p>
+              <p>½ cup (120 grams) whole milk ricotta, at room temperature, plus extra for serving</p>
+              <p>1 lemon</p>
+              <p>Salt</p>
+              <p>Bring a large pot of salted water to a boil and cook the spaghetti until al dente.</p>
+              <p>Stir the ricotta with lemon zest and juice, then toss with the pasta.</p>
+              <p>Buon appetito!</p>
+              <div><a href="/blogs/recipes">Back to blog</a></div>
+              <h2>1 comment</h2>
+              <article class="comment"><p>Made it twice, so good!</p></article>
+            </article></main></body></html>
+            """,
+        )
+        assertNull(content.recipe)
+        assertTrue(looksLikeRecipe(content.text))
+        assertFalse(content.text.contains("Made it twice"))
+        val recipe = RecipeTextParser.parse(content.text, content.language, typed = true)
+        assertEquals(2, recipe.servings)
+        assertEquals(
+            listOf("200 grams spaghetti", "½ cup (120 grams) whole milk ricotta, at room temperature, plus extra for serving", "1 lemon", "Salt"),
+            recipe.ingredients,
+        )
+        assertEquals("Buon appetito!", recipe.steps.last())
+        assertEquals(3, recipe.steps.size)
     }
 
     @Test

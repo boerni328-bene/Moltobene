@@ -51,6 +51,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moltobene.app.BuildConfig
 import com.moltobene.app.R
+import com.moltobene.app.data.Appearance
 import com.moltobene.app.data.backup.BackupManager
 import com.moltobene.app.data.backup.BackupReader
 import com.moltobene.app.data.translate.LanguagePack
@@ -59,6 +60,7 @@ import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.components.ScreenTitle
 import com.moltobene.app.ui.components.ScreenTitlePadding
 import com.moltobene.app.ui.theme.Spacing
+import com.moltobene.app.ui.theme.applyNightMode
 import com.moltobene.app.ui.whatsnew.WhatsNew
 import com.moltobene.app.ui.whatsnew.WhatsNewDialog
 import java.text.DateFormat
@@ -81,6 +83,8 @@ fun SettingsScreen(
     var showPrivacy by rememberSaveable { mutableStateOf(false) }
     var confirmDeletePack by rememberSaveable { mutableStateOf(false) }
     val languagePack by viewModel.languagePackState.collectAsStateWithLifecycle()
+    val appearance by viewModel.appearance.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     val createBackup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
         if (uri != null) viewModel.backup(uri)
     }
@@ -151,6 +155,15 @@ fun SettingsScreen(
                 onDownload = viewModel::downloadLanguagePack,
                 onCancel = viewModel::cancelLanguagePack,
                 onDelete = { confirmDeletePack = true },
+            )
+            SectionHeader(stringResource(R.string.settings_section_appearance))
+            AppearanceSection(
+                appearance = appearance ?: Appearance(),
+                onMode = { mode ->
+                    viewModel.setThemeMode(mode)
+                    applyNightMode(context, mode)
+                },
+                onPalette = viewModel::setPalette,
             )
             SectionHeader(stringResource(R.string.settings_section_about))
             ListItem(

@@ -3,6 +3,15 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.26.0] – 2026-10-08 (versionCode 47)
+
+### Neu
+- **Darstellung wählbar:** In den Einstellungen gibt es den neuen Abschnitt „Darstellung“. Unter „Hell oder dunkel“ lässt sich „Wie das Handy“ (wie bisher), „Hell“ oder „Dunkel“ wählen, unabhängig von der Einstellung des Handys.
+- **Fünf Farbwelten:** Unter „Farben“ stehen „Schiefer“ (wie bisher), „Kobalt“, „Salbei“, „Terrakotta“ und „Safran“ zur Auswahl, jede hell und dunkel. Alle sind gleich gut lesbar wie „Schiefer“. Die ganze App wechselt sofort. M und B im Schriftzug MOLTOBENE bleiben immer im Blau des Logos.
+
+### Behoben
+- **Rezepte von Blogs ohne Überschrift „Zutaten“:** Manche Seiten leiten die Zutaten mit einem Satz ein, z. B. „For this recipe, you will need:“ (so bei pastagrammar.com), statt „Ingredients“ darüberzuschreiben. Dort meldete „Aus Link übernehmen“ bisher „kein Rezept gefunden“. Jetzt werden solche Einleitungen erkannt, auch auf Deutsch („Für dieses Rezept brauchst du:“), Italienisch, Französisch und Spanisch. Lange Zutatenzeilen mit Erklärung in Klammern bleiben Zutaten, „…, to taste“ bleibt hinten stehen, und „Back to blog“ oder Kommentare unter dem Rezept kommen nicht mehr in die Zubereitung.
+
 ## [0.25.0] – 2026-10-08 (versionCode 46)
 
 ### Neu

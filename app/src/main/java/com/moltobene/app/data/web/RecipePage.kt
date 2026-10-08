@@ -191,9 +191,13 @@ object RecipePage {
     private const val MAX_LINES = 200
     /** So viel nimmt auch „Aus Text übernehmen“ an. */
     private const val MAX_TEXT = 50_000
-    /** „Kommentare“, „Comments & Ratings“, „Weitere Rezepte“, „You may also like“ … in den Sprachen der App und der Texterkennung. */
+    /**
+     * „Kommentare“, „1 comment“, „Comments & Ratings“, „Weitere Rezepte“, „You may also like“, „Back to blog“ … in den
+     * Sprachen der App und der Texterkennung.
+     */
     private val TRAILING_SECTION = Regex(
-        "^(comments?|kommentare?|commenti|commentaires?|comentarios?|leave a (reply|comment)|schreibe? einen kommentar|" +
+        "^(\\d{1,5}\\s+)?(comments?|kommentare?|commenti|commentaires?|comentarios?|leave a (reply|comment)|schreibe? einen kommentar|" +
+            "back to (the )?(blog|recipes)|zurück zu(m|r)? (blog|rezepten|übersicht)|torna al blog|retour au blog|volver al blog|" +
             "(other|more|related|similar) recipes|you (may|might) also like|(weitere|ähnliche|andere|mehr) rezepte|" +
             "das könnte (dir|ihnen|euch) auch gefallen|altre ricette|ricette (correlate|simili)|autres recettes|" +
             "recettes similaires|otras recetas|recetas (relacionadas|similares))\\b.{0,30}$",

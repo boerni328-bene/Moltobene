@@ -1,5 +1,6 @@
 package com.moltobene.app.data.web
 
+import com.moltobene.app.data.ocr.RecipeTextParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -146,11 +147,8 @@ internal object EmbeddedImage {
 }
 
 /**
- * Text einer Seite ohne Rezept im Standardformat wird nur eingeordnet, wenn er eine Überschrift für Zutaten
- * enthält – sonst würden Menüs oder Artikeltexte als Zutaten im Entwurf landen.
+ * Text einer Seite ohne Rezept im Standardformat wird nur eingeordnet, wenn er eine Überschrift für Zutaten enthält
+ * („Zutaten“, „Ingredients“, „For this recipe, you will need:“ …, dieselben Regeln wie bei „Aus Text übernehmen“) –
+ * sonst würden Menüs oder Artikeltexte als Zutaten im Entwurf landen.
  */
-internal fun looksLikeRecipe(text: String): Boolean = INGREDIENTS_HEADING.containsMatchIn(text)
-
-private val INGREDIENTS_HEADING = Regex(
-    "(?im)^\\s*(zutaten|ingredients|ingredienti|ingrédients|ingredientes)\\b.{0,40}$",
-)
+internal fun looksLikeRecipe(text: String): Boolean = text.lineSequence().any { RecipeTextParser.isIngredientHeading(it.trim()) }

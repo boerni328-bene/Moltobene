@@ -78,6 +78,8 @@ object AmountText {
         val match = TRAILING.matchEntire(compact(line).trim()) ?: return line
         val name = match.groupValues[1].trim().trimEnd(',', ';', ':')
         val amount = match.groupValues[2].trim()
+        // „Parmesan, to taste“, „Salz, nach Belieben“: Mit Komma davor gehört das Mengenwort zum Satz.
+        if (match.groupValues[1].trim().endsWith(',') && LEADING_WORD.containsMatchIn(amount)) return line
         if (!LEADING_WORD.containsMatchIn(amount)) {
             val unit = LEADING.find(amount)?.groupValues?.get(2).orEmpty()
             if (unit.isNotEmpty() && fixUnit(unit) == null) return line

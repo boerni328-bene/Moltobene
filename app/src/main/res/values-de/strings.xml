@@ -199,9 +199,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>YouTube: Alle Links aus der Videobeschreibung stehen zur Auswahl. Das Rezept lässt sich von der gewählten Seite übernehmen.</item>
-        <item>Neues Feld „Video“: Der Link zum Video wird getrennt von der Quelle gespeichert und in der Rezeptansicht angezeigt.</item>
-        <item>Im Dunkelmodus sind M und B im Schriftzug näher am Blau des Logos.</item>
+        <item>Darstellung wählbar: In den Einstellungen unter „Darstellung“ lässt sich „Hell“, „Dunkel“ oder „Wie das Handy“ wählen.</item>
+        <item>Fünf Farbwelten zur Auswahl: Schiefer, Kobalt, Salbei, Terrakotta und Safran.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->
@@ -249,6 +248,18 @@
     <string name="settings_section_about">Info</string>
     <string name="license_note_opus_mt">Modelle des Sprachpakets für die Übersetzung, nur auf Wunsch heruntergeladen. Für Moltobene geändert: nach ONNX umgewandelt und auf 8 Bit verkleinert. Quelle: huggingface.co/Helsinki-NLP</string>
     <string name="settings_section_translation">Übersetzung</string>
+    <!-- Einstellungen: Darstellung (Hell/Dunkel und Farbwelt) -->
+    <string name="settings_section_appearance">Darstellung</string>
+    <string name="appearance_mode">Hell oder dunkel</string>
+    <string name="theme_system">Wie das Handy</string>
+    <string name="theme_light">Hell</string>
+    <string name="theme_dark">Dunkel</string>
+    <string name="appearance_palette">Farben</string>
+    <string name="palette_slate">Schiefer</string>
+    <string name="palette_cobalt">Kobalt</string>
+    <string name="palette_sage">Salbei</string>
+    <string name="palette_terracotta">Terrakotta</string>
+    <string name="palette_saffron">Safran</string>
     <string name="language_pack_title">Sprachpaket Deutsch–Englisch</string>
     <string name="language_pack_text">Zum Übersetzen von Rezepten auf dem Handy, ohne Internet. Einmal herunterladen: etwa %1$s, belegt etwa %2$s auf dem Handy. Am besten im WLAN.</string>
     <string name="language_pack_download">Herunterladen</string>

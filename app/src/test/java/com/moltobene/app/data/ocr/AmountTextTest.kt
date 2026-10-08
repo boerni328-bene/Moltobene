@@ -25,6 +25,9 @@ class AmountTextTest {
         assertEquals("1 Pr Oregano getrocknet", AmountText.moveTrailingAmountToFront("Oregano getrocknet 1Pr"))
         assertEquals("500 g Hackfleisch", AmountText.moveTrailingAmountToFront("Hackfleisch ; 500 g"))
         assertEquals("etwas Salz, Pfeffer", AmountText.moveTrailingAmountToFront("Salz, Pfeffer etwas"))
+        // Mit Komma davor ist „nach Belieben“ ein Satzteil wie in einem Rezept von einer Internetseite.
+        assertEquals("Grated Parmigiano cheese, to taste", AmountText.moveTrailingAmountToFront("Grated Parmigiano cheese, to taste"))
+        assertEquals("Salz, nach Belieben", AmountText.moveTrailingAmountToFront("Salz, nach Belieben"))
         assertEquals("2 Eier", AmountText.moveTrailingAmountToFront("Eier 2"))
         // Keine Mengen
         assertEquals("Mehl Type 405", AmountText.moveTrailingAmountToFront("Mehl Type 405"))
