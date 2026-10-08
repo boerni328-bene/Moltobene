@@ -14,6 +14,8 @@ data class Recipe(
     /** Freie Angabe zu den Portionen, z. B. „Stück“ oder „Springform 26 cm“. */
     val servingsUnit: String? = null,
     val source: RecipeSource? = null,
+    /** Link zu einem Video des Rezepts, z. B. auf YouTube (schema.org video), getrennt von der Quelle. */
+    val videoUrl: String? = null,
     val notes: String = "",
     val favorite: Boolean = false,
     val isDraft: Boolean = false,

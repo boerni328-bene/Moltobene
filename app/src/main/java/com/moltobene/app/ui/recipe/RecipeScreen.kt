@@ -97,6 +97,7 @@ import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeText
 import com.moltobene.app.data.ocr.TextLanguage
 import com.moltobene.app.data.share.PreparedShare
+import com.moltobene.app.data.share.RecipeShareText
 import com.moltobene.app.data.share.ShareLabels
 import com.moltobene.app.data.translate.LanguagePack
 import com.moltobene.app.data.translate.RecipeTranslations
@@ -317,6 +318,7 @@ private fun shareLabels(resources: Resources) = ShareLabels(
     },
     source = { resources.getString(R.string.share_source, it) },
     page = { resources.getString(R.string.source_page, it) },
+    video = { resources.getString(R.string.share_video, it) },
 )
 
 /** Öffnet das Android-Teilen-Menü. Andere Apps dürfen nur die übergebene Datei lesen. */
@@ -493,6 +495,16 @@ private fun RecipeContent(
                         source.page?.let { page -> RecipeText.formatPage(page) { resources.getString(R.string.source_page, it) } },
                     ).joinToString(", ")
                     if (text.isNotBlank()) Text(text, style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+
+            // Der Link zum Video, wenn er nicht schon als Quelle dasteht (z. B. bei einem Rezept nur aus dem Video).
+            RecipeShareText.videoLink(recipe)?.let { video ->
+                SectionTitle(stringResource(R.string.video))
+                if (RecipeText.isWebLink(video)) {
+                    SourceLink(url = video, snackbarHostState = snackbarHostState)
+                } else {
+                    Text(video, style = MaterialTheme.typography.bodyLarge)
                 }
             }
 

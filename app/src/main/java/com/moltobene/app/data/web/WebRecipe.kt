@@ -23,6 +23,8 @@ data class WebRecipe(
     val url: String? = null,
     /** Quelle ohne Link, z. B. „Omas Kochbuch, S. 47“ (schema.org isBasedOn), wie Moltobene sie in Rezeptdateien schreibt. */
     val sourceName: String? = null,
+    /** Link zu einem Video des Rezepts (schema.org video), z. B. auf YouTube. */
+    val videoUrl: String? = null,
 ) {
     /** Steht genug da, um daraus einen Entwurf zu machen? */
     val hasContent: Boolean get() = ingredients.isNotEmpty() || steps.isNotEmpty()

@@ -3,6 +3,15 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.25.0] – 2026-10-08 (versionCode 46)
+
+### Neu
+- **Alle Links aus der Videobeschreibung zur Auswahl:** Beim Übernehmen eines YouTube-Videos stehen jetzt alle Links aus der Beschreibung zur Auswahl, der wahrscheinlichste Link zum Rezept oben. Links zu Instagram, Facebook, TikTok, Amazon, anderen Shops und anderen Videos werden weggelassen, dort steht nie das Rezept. Geladen wird erst der angetippte Link. Steht dort kein Rezept, bleibt die Auswahl stehen und ein anderer Link lässt sich versuchen.
+- **Neues Feld „Video“:** Der Link zum YouTube-Video wird getrennt von der Quelle gespeichert. Wird das Rezept von einer Internetseite übernommen, ist diese Seite die Quelle und das Video steht unter „Video“. Das Feld lässt sich beim Bearbeiten auch selbst ausfüllen. In der Rezeptansicht ist der Link antippbar. Er kommt in die Sicherung und wird beim Teilen mitgegeben (Notizen weiterhin nie).
+
+### Geändert
+- Im Dunkelmodus sind M und B im Schriftzug MOLTOBENE jetzt kräftiger blau und näher am Blau des Logos, aber weiterhin gut lesbar.
+
 ## [0.24.0] – 2026-10-08 (versionCode 45)
 
 ### Geändert

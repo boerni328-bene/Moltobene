@@ -81,6 +81,7 @@ private fun RecipeWithDetails.toRecipe() = Recipe(
             page = recipe.sourcePage,
         )
     },
+    videoUrl = recipe.videoUrl,
     notes = recipe.notes,
     favorite = recipe.favorite,
     isDraft = recipe.isDraft,
@@ -108,6 +109,7 @@ private fun Recipe.toRows(): RecipeRows = RecipeRows(
         sourceName = source?.name,
         sourceUrl = source?.url,
         sourcePage = source?.page,
+        videoUrl = videoUrl,
         notes = notes,
         favorite = favorite,
         isDraft = isDraft,

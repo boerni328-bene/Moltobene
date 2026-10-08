@@ -33,6 +33,7 @@
     <string name="instructions">Zubereitung</string>
     <string name="notes">Notizen</string>
     <string name="source">Quelle</string>
+    <string name="video">Video</string>
     <string name="servings">Portionen</string>
     <plurals name="servings_count">
         <item quantity="one">%d Portion</item>
@@ -80,6 +81,7 @@
     <string name="share_recipe">Rezept teilen</string>
     <string name="share_as_file">Als Rezeptdatei teilen</string>
     <string name="share_source">Quelle: %1$s</string>
+    <string name="share_video">Video: %1$s</string>
     <string name="share_error">Das Rezept konnte nicht geteilt werden.</string>
 
     <!-- Texterkennung -->
@@ -115,8 +117,11 @@
     <string name="file_done">Rezept aus der Datei übernommen. Prüfen, ob alles an der richtigen Stelle steht.</string>
     <string name="video_done">Rezept aus der Videobeschreibung übernommen. Mit dem Video vergleichen: In Beschreibungen fehlen oft Mengen oder Schritte.</string>
     <string name="video_no_recipe">In der Videobeschreibung steht kein Rezept. Titel und Link sind gespeichert, die Beschreibung steht unter „Übernommener Text“.</string>
-    <string name="video_link_only">In der Videobeschreibung steht kein Rezept, aber ein Link dazu. Titel und Link des Videos sind gespeichert.</string>
-    <string name="video_recipe_link">Die Videobeschreibung verweist auf ein Rezept bei %1$s.</string>
+    <string name="video_link_only">In der Videobeschreibung steht kein Rezept, nur Links. Titel und Link des Videos sind gespeichert.</string>
+    <plurals name="video_recipe_links">
+        <item quantity="one">Die Videobeschreibung enthält einen Link. Das Rezept lässt sich von dieser Seite übernehmen:</item>
+        <item quantity="other">Die Videobeschreibung enthält %1$d Links. Das Rezept lässt sich von einer dieser Seiten übernehmen:</item>
+    </plurals>
     <string name="file_no_recipe">In der Datei wurde kein Rezept gefunden. Übernommen werden Rezeptdateien, z. B. von Moltobene geteilte, und gespeicherte Rezeptseiten.</string>
     <string name="file_error">Die Datei konnte nicht gelesen werden.</string>
     <string name="file_too_large">Die Datei ist zu groß für ein Rezept (höchstens 10 MB).</string>
@@ -194,9 +199,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>In der Sammlung stehen „Rezept hinzufügen“ (+) und „Rezept übernehmen“ jetzt als Symbole oben neben MOLTOBENE.</item>
-        <item>MOLTOBENE steht oben auf jedem Bildschirm, fett und mit blauem M und B wie im Logo. Darunter steht, wo man gerade ist, z. B. „Einstellungen“.</item>
-        <item>Neues App-Symbol: „MB“ mit den Quellen der Rezepte.</item>
+        <item>YouTube: Alle Links aus der Videobeschreibung stehen zur Auswahl. Das Rezept lässt sich von der gewählten Seite übernehmen.</item>
+        <item>Neues Feld „Video“: Der Link zum Video wird getrennt von der Quelle gespeichert und in der Rezeptansicht angezeigt.</item>
+        <item>Im Dunkelmodus sind M und B im Schriftzug näher am Blau des Logos.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->
@@ -224,6 +229,7 @@
     <string name="field_ingredients_hint">Eine Zutat pro Zeile, z. B. 200 g Mehl. Zwischenüberschriften enden mit Doppelpunkt, z. B. Für den Teig:</string>
     <string name="field_instructions_hint">Ein Schritt pro Zeile</string>
     <string name="field_source_hint">z. B. Omas Kochbuch oder ein Link</string>
+    <string name="field_video_hint">Link zum Video, z. B. auf YouTube</string>
     <string name="field_source_page">Seite</string>
     <string name="source_page">S. %1$s</string>
     <string name="source_suggestions">Vorschläge:</string>

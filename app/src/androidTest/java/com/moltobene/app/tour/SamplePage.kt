@@ -48,12 +48,15 @@ object SamplePage {
     /** Geteilter Link zu einem Video, wie ihn die YouTube-App weitergibt – mit „si=…“ zum Verfolgen der Weitergabe. */
     const val VIDEO_URL = "https://youtu.be/AbCdEfGhIjK?si=rundgang"
     const val VIDEO_WATCH_URL = "https://www.youtube.com/watch?v=AbCdEfGhIjK"
-    const val VIDEO_SITE = "rezepte.example"
+    /** Die Links aus der Beschreibung, wie die Auswahl sie zeigt: ohne „https://“, Startseiten zuletzt. */
+    const val VIDEO_RECIPE_LINK = "rezepte.example/zitronen-risotto"
+    const val VIDEO_BLOG_LINK = "blog.rezepte.example"
     const val VIDEO_INGREDIENT = "1 Bio-Zitrone"
 
     /**
      * Nachgestellte YouTube-Videoseite (selbst geschrieben, nach dem Aufbau echter Videoseiten): In der Beschreibung
-     * stehen nur die Zutaten und ein Link zum ganzen Rezept – der führt zur nachgestellten Rezeptseite oben.
+     * stehen nur die Zutaten, ein Link zum ganzen Rezept – der führt zur nachgestellten Rezeptseite oben –, die
+     * Startseite eines Blogs und Instagram.
      */
     private val VIDEO_HTML = """
         <!doctype html>
@@ -62,7 +65,7 @@ object SamplePage {
           <meta property="og:image" content="https://i.ytimg.com/vi/AbCdEfGhIjK/maxresdefault.jpg">
         </head><body>
           <script>var ytInitialPlayerResponse = null;</script>
-          <script>var ytInitialPlayerResponse = {"playabilityStatus":{"status":"OK"},"videoDetails":{"videoId":"AbCdEfGhIjK","title":"Zitronen-Risotto mit Parmesan 🍋 #shorts","author":"Beispielküche","shortDescription":"Cremig und frisch in einer halben Stunde.\n\n0:00 Intro\n0:20 Kochen\n\nZutaten für 4 Portionen:\n320 g Risottoreis\n1 Bio-Zitrone\n50 g Parmesan\n\nDas ganze Rezept mit allen Schritten: https://rezepte.example/zitronen-risotto\n\nFolge uns auf Instagram: https://instagram.com/beispielkueche\n\n#risotto #rundgang"}};</script>
+          <script>var ytInitialPlayerResponse = {"playabilityStatus":{"status":"OK"},"videoDetails":{"videoId":"AbCdEfGhIjK","title":"Zitronen-Risotto mit Parmesan 🍋 #shorts","author":"Beispielküche","shortDescription":"Cremig und frisch in einer halben Stunde.\n\n0:00 Intro\n0:20 Kochen\n\nZutaten für 4 Portionen:\n320 g Risottoreis\n1 Bio-Zitrone\n50 g Parmesan\n\nMehr von uns: https://blog.rezepte.example/\nDas ganze Rezept mit allen Schritten: https://rezepte.example/zitronen-risotto\n\nFolge uns auf Instagram: https://instagram.com/beispielkueche\n\n#risotto #rundgang"}};</script>
         </body></html>
     """.trimIndent()
 

@@ -7,7 +7,7 @@ import java.net.URL
 
 /**
  * Rezept aus einer Videobeschreibung. Dort steht das Rezept zwischen Werbung, Links, Kapitelmarken und
- * Schlagwörtern – oft nur die Zutaten, manchmal gar nichts, manchmal ein Link zum Rezept auf einer Internetseite.
+ * Schlagwörtern – oft nur die Zutaten, manchmal gar nichts, manchmal Links zum Rezept auf einer Internetseite.
  * Deshalb wird vorsichtiger gelesen als bei „Aus Text übernehmen“: Zutaten nur nach einer Überschrift oder als
  * eindeutige Liste, Schritte nur nach einer Überschrift. Reines Kotlin, per Unit-Test prüfbar.
  */
@@ -55,34 +55,35 @@ object VideoDescription {
     }
 
     /**
-     * Ein Link zum Rezept auf einer Internetseite, z. B. „Das ganze Rezept: https://…/rezept/…“. Nicht: soziale
-     * Netzwerke, Shops, Kurzlinks mit unbekanntem Ziel und Startseiten. null, wenn keiner eindeutig passt.
+     * Alle Links der Beschreibung, die zu einem Rezept führen können – zur Auswahl, der wahrscheinlichste zuerst:
+     * Rezept-Wörter im Link („/rezept/…“), dann davor („Das ganze Rezept: https://…“), Startseiten zuletzt.
+     * Nicht: soziale Netzwerke, Shops, Werbung und andere Videos, denn dort steht nie das Rezept.
      */
-    fun recipeLink(description: String): String? {
+    fun recipeLinks(description: String): List<String> {
         val lines = description.replace("\r", "").lines()
-        var best: String? = null
-        var bestScore = 0
+        val found = mutableListOf<Pair<String, Int>>()
         lines.forEachIndexed { index, line ->
+            // Auch der eigene Blog wird manchmal als „Werbung“ markiert: Mit einem Rezept-Wort zählt die Zeile.
+            if (ADVERTISING.containsMatchIn(line) && !RECIPE_WORD.containsMatchIn(line)) return@forEachIndexed
             for (match in LINK.findAll(line)) {
                 val raw = match.value.trimEnd('.', ',', ')', '!', ';', ':', '»', '“', '"')
                 val url = WebAddress.normalize(if (raw.startsWith("www.", ignoreCase = true)) "https://$raw" else raw) ?: continue
                 val parsed = runCatching { URL(url) }.getOrNull() ?: continue
                 val host = parsed.host.removePrefix("www.")
-                if (EXCLUDED_HOSTS.any { host == it || host.endsWith(".$it") } || host.startsWith("pinterest.") || host.startsWith("amazon.")) continue
-                if (parsed.path.orEmpty().trim('/').isEmpty()) continue
+                if (EXCLUDED_HOSTS.any { host == it || host.endsWith(".$it") } || EXCLUDED_PREFIXES.any { host.startsWith(it) }) continue
+                if (SHOP_NAME.containsMatchIn(host)) continue
                 val around = (line.replace(match.value, " ") + " " + lines.getOrElse(index - 1) { "" })
                 val score = when {
+                    parsed.path.orEmpty().trim('/').isEmpty() && parsed.query == null -> -1
                     RECIPE_WORD.containsMatchIn(host + parsed.path) -> 2
                     RECIPE_WORD.containsMatchIn(around) || RECIPE_CONTEXT.containsMatchIn(around) -> 1
                     else -> 0
                 }
-                if (score > bestScore) {
-                    best = url
-                    bestScore = score
-                }
+                if (found.none { it.first == url }) found += url to score
             }
         }
-        return best
+        // sortedByDescending ist stabil: Bei gleicher Wertung bleibt die Reihenfolge der Beschreibung.
+        return found.sortedByDescending { it.second }.map { it.first }.take(MAX_LINKS)
     }
 
     /**
@@ -164,11 +165,28 @@ object VideoDescription {
     private val RECIPE_WORD = Regex("(rezept|recipe|ricett|recette|receta|recept)", RegexOption.IGNORE_CASE)
     private val RECIPE_CONTEXT = Regex("(zutaten|zubereitung|anleitung|ingredient|procedimento|preparazione|préparation|preparación)", RegexOption.IGNORE_CASE)
 
+    /** Soziale Netzwerke, Video- und Musikdienste, Linksammlungen, Shops und ihre Kurzlinks. */
     private val EXCLUDED_HOSTS = listOf(
-        "youtube.com", "youtu.be", "facebook.com", "fb.com", "instagram.com", "tiktok.com", "twitter.com", "x.com",
-        "threads.net", "snapchat.com", "patreon.com", "linktr.ee", "spotify.com", "apple.com", "amzn.to", "amzlink.to",
-        "bit.ly", "tinyurl.com", "goo.gl", "t.co", "ow.ly", "po.st", "geni.us", "rebrand.ly", "cutt.ly", "shorturl.at",
+        "youtube.com", "youtu.be", "youtube-nocookie.com", "facebook.com", "fb.com", "fb.me", "instagram.com",
+        "tiktok.com", "twitter.com", "x.com", "t.co", "threads.net", "bsky.app", "snapchat.com", "patreon.com",
+        "linktr.ee", "linkin.bio", "beacons.ai", "spotify.com", "apple.com", "twitch.tv", "discord.gg", "discord.com",
+        "whatsapp.com", "wa.me", "t.me", "telegram.me", "linkedin.com", "reddit.com", "vk.com", "steadyhq.com",
+        "paypal.com", "paypal.me", "ko-fi.com", "buymeacoffee.com", "amzn.to", "amzn.eu", "amzlink.to", "geni.us",
+        "etsy.com", "awin1.com", "rstyle.me", "liketk.it", "shopstyle.com", "po.st",
     )
+    private val EXCLUDED_PREFIXES = listOf("pinterest.", "amazon.", "ebay.", "music.youtube.")
+
+    /** Shops am Namen erkannt, z. B. „shop.example.de“ oder „example-store.com“. */
+    private val SHOP_NAME = Regex("(^|[.-])(shop|store|merch)[a-z]*\\.|(shop|store)\\.[a-z]+$", RegexOption.IGNORE_CASE)
+
+    /** Werbung in derselben Zeile: „Meine Pfanne (Werbung): https://…“, „Rabattcode …“. */
+    private val ADVERTISING = Regex(
+        "(werbung|anzeige|affiliate|partnerlink|provision|rabatt|gutschein|discount|promo|sponsor|codice sconto|" +
+            "\\bcode\\b|\\bshop\\b|merch)",
+        RegexOption.IGNORE_CASE,
+    )
+
+    private const val MAX_LINKS = 10
 
     /** Emojis und Bildzeichen, aber nicht „⌀“ (U+2300) oder Pfeile, die in Rezepten vorkommen. */
     private val PICTOGRAPHS = Regex(

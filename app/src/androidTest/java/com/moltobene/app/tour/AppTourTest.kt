@@ -4,10 +4,13 @@ import android.content.Intent
 import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasAnySibling
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
@@ -421,9 +424,10 @@ class AppTourTest(private val variant: DisplayVariant) {
     }
 
     /**
-     * „Aus Link übernehmen“ mit einem YouTube-Video: Die Zutaten kommen aus der Videobeschreibung, der Link zum
-     * ganzen Rezept wird angeboten und erst auf Wunsch geladen. Dessen Rezept ersetzt dann die Zutaten aus der
-     * Beschreibung; als Quelle bleibt das Video – ohne den Zusatz „si=…“.
+     * „Aus Link übernehmen“ mit einem YouTube-Video: Die Zutaten kommen aus der Videobeschreibung, ihre Links stehen
+     * zur Auswahl (der zum ganzen Rezept zuerst, Instagram nicht) und werden erst auf Wunsch geladen. Das Rezept der
+     * gewählten Seite ersetzt dann die Zutaten aus der Beschreibung; die Seite wird zur Quelle, das Video steht unter
+     * „Video“ – ohne den Zusatz „si=…“.
      */
     @Test
     fun ausVideoUebernehmen() {
@@ -439,13 +443,19 @@ class AppTourTest(private val variant: DisplayVariant) {
         // Das Vorschaubild des Videos wird zum Foto, kurz nach dem Rezept.
         waitForText(text(R.string.photo_remove))
         composeRule.onNode(hasText(SamplePage.VIDEO_INGREDIENT, substring = true) and hasSetTextAction()).assertExists()
-        // Das Angebot ganz zeigen: Text und Schaltfläche darunter.
-        val offer = text(R.string.video_recipe_link, SamplePage.VIDEO_SITE)
-        val offerButton = composeRule.onNode(hasText(text(R.string.import_from_link)) and hasAnySibling(hasText(offer)))
-        offerButton.performScrollTo().assertIsDisplayed()
+        // Die Auswahl ganz zeigen: Text und alle Links darunter, der Link zum Rezept zuerst.
+        val offer = activity.resources.getQuantityString(R.plurals.video_recipe_links, 2, 2)
+        val links = composeRule.onAllNodes(hasClickAction() and hasAnySibling(hasText(offer)))
+        links.assertCountEquals(2)
+        links[0].assertTextEquals(SamplePage.VIDEO_RECIPE_LINK)
+        links[1].assertTextEquals(SamplePage.VIDEO_BLOG_LINK)
+        links[1].performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText(offer).performScrollTo()
+        // Bis eine Rezeptseite gewählt ist, ist das Video Quelle und steht schon unter „Video“.
+        composeRule.onAllNodes(hasText(SamplePage.VIDEO_WATCH_URL) and hasSetTextAction()).assertCountEquals(2)
         screenshot("27a-aus-video-uebernommen")
 
-        offerButton.performClick()
+        links[0].performClick()
         waitForText(text(R.string.link_done))
         waitUntilGone(offer)
 
@@ -456,8 +466,14 @@ class AppTourTest(private val variant: DisplayVariant) {
         // Die Zutaten der Rezeptseite ersetzen die aus der Beschreibung, statt sie zu verdoppeln.
         assertEquals(5, recipe.ingredients.size)
         assertEquals(3, recipe.steps.size)
-        assertEquals(SamplePage.VIDEO_WATCH_URL, recipe.source?.url)
+        assertEquals(SamplePage.CLEAN_URL, recipe.source?.url)
+        assertEquals(SamplePage.VIDEO_WATCH_URL, recipe.videoUrl)
         assertEquals(1, recipe.photoIds.size)
+
+        // In der Rezeptansicht stehen Quelle und Video untereinander.
+        composeRule.onNodeWithText(SamplePage.VIDEO_WATCH_URL).performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText(SamplePage.CLEAN_URL).assertExists()
+        screenshot("27b-quelle-und-video")
     }
 
     /**

@@ -21,6 +21,8 @@ data class RecipeEntity(
     val sourceName: String?,
     val sourceUrl: String?,
     val sourcePage: String?,
+    /** Seit Version 3 der Datenbank (0.25.0). */
+    val videoUrl: String?,
     val notes: String,
     val favorite: Boolean,
     val isDraft: Boolean,

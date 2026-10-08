@@ -15,7 +15,7 @@ import java.util.Base64
 
 /*
  * Teilen einzelner Rezepte: als lesbarer Text und als Rezeptdatei im Standard schema.org/Recipe.
- * Notizen werden nie geteilt (Entscheidung des Projektinhabers), die Quelle immer.
+ * Notizen werden nie geteilt (Entscheidung des Projektinhabers), die Quelle und der Link zum Video immer.
  * Reines Kotlin, per Unit-Test prüfbar.
  */
 
@@ -30,6 +30,8 @@ class ShareLabels(
     val source: (String) -> String,
     /** Seitenangabe, z. B. „S. 47“. */
     val page: (String) -> String = { it },
+    /** Zeile mit dem Link zum Video, z. B. „Video: https://…“. */
+    val video: (String) -> String = { it },
 )
 
 object RecipeShareText {
@@ -69,10 +71,17 @@ object RecipeShareText {
             }
         }
 
-        sourceText(recipe.source, labels.page)?.let { blocks += labels.source(it) }
+        listOfNotNull(
+            sourceText(recipe.source, labels.page)?.let(labels.source),
+            videoLink(recipe)?.let(labels.video),
+        ).takeIf { it.isNotEmpty() }?.let { blocks += it.joinToString("\n") }
 
         return blocks.joinToString("\n\n")
     }
+
+    /** Der Link zum Video; fehlt, wenn er leer ist oder derselbe wie die Quelle. */
+    fun videoLink(recipe: Recipe): String? =
+        recipe.videoUrl?.trim()?.takeIf { it.isNotEmpty() && it != recipe.source?.url?.trim() }
 
     /** Lesbare Quelle: der Link, sonst Name und Seite (eine reine Zahl mit [page], z. B. „S. 47“). */
     fun sourceText(source: RecipeSource?, page: (String) -> String = { it }): String? {
@@ -135,6 +144,14 @@ object RecipeJsonLd {
                         put("@type", "CreativeWork")
                         put("name", name)
                     }
+                }
+            }
+            // Auch wenn es dieselbe Adresse wie die Quelle ist: So kommt das Feld „Video“ beim Übernehmen wieder an.
+            recipe.videoUrl?.trim()?.takeIf { it.isNotEmpty() }?.let { link ->
+                putJsonObject("video") {
+                    put("@type", "VideoObject")
+                    put("name", recipe.title.trim().ifEmpty { untitled })
+                    put("url", link)
                 }
             }
             photoJpeg?.let { put("image", "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(it)) }

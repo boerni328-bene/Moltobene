@@ -129,6 +129,7 @@ class RecipeJsonLdReaderTest {
             prepMinutes = 30,
             totalMinutes = 150,
             source = RecipeSource(SourceType.WEB, url = "https://example.org/gulasch"),
+            videoUrl = "https://vimeo.com/123456",
             ingredients = listOf(Ingredient("Für das Fleisch", isHeading = true), Ingredient("1 kg Rindfleisch")),
             steps = listOf("Fleisch anbraten.", "Zwei Stunden schmoren."),
             createdAt = 0,
@@ -143,6 +144,24 @@ class RecipeJsonLdReaderTest {
         assertEquals(150, recipe.totalMinutes)
         assertEquals("https://example.org/gulasch", recipe.url)
         assertEquals("data:image/jpeg;base64,AQID", recipe.imageUrls.single())
+        assertEquals("https://vimeo.com/123456", recipe.videoUrl)
+    }
+
+    /** Video auf einer Rezeptseite: YouTube als einfacher Link zum Video; Videodateien und die Seite selbst nicht. */
+    @Test
+    fun videoZumRezept() {
+        val base = "\"@context\":\"https://schema.org\",\"@type\":\"Recipe\",\"name\":\"Risotto\",\"url\":\"https://example.org/risotto\""
+        assertEquals(
+            "https://www.youtube.com/watch?v=AbCdEfGhIjK",
+            read("{$base,\"video\":{\"@type\":\"VideoObject\",\"contentUrl\":\"https://cdn.example.org/v.mp4\",\"embedUrl\":\"https://www.youtube.com/embed/AbCdEfGhIjK?rel=0\"}}").videoUrl,
+        )
+        assertEquals(
+            "https://www.youtube.com/watch?v=AbCdEfGhIjK",
+            read("{$base,\"video\":[\"https://youtu.be/AbCdEfGhIjK?si=xyz\"]}").videoUrl,
+        )
+        assertNull(read("{$base,\"video\":{\"@type\":\"VideoObject\",\"contentUrl\":\"https://cdn.example.org/v.mp4\"}}").videoUrl)
+        assertNull(read("{$base,\"video\":{\"@type\":\"VideoObject\",\"url\":\"https://example.org/risotto#video\"}}").videoUrl)
+        assertNull(read("{$base,\"video\":{\"@type\":\"VideoObject\",\"url\":\"javascript:alert(1)\"}}").videoUrl)
     }
 
     @Test

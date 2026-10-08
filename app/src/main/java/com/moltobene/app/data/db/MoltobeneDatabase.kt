@@ -13,6 +13,7 @@ import androidx.room.RoomDatabase
  * Versionen:
  *  - 1: erste Version (0.3.0)
  *  - 2: Fotos haben eine Art – Foto des Gerichts oder Originalseite (#38). Vorhandene Fotos bleiben Fotos des Gerichts.
+ *  - 3: Rezepte haben einen Link zu einem Video (0.25.0), getrennt von der Quelle. Vorhandene Rezepte haben keinen.
  */
 @Database(
     entities = [
@@ -23,9 +24,9 @@ import androidx.room.RoomDatabase
         RecipeTagEntity::class,
         RecipeSearchEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2)],
+    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3)],
 )
 abstract class MoltobeneDatabase : RoomDatabase() {
 

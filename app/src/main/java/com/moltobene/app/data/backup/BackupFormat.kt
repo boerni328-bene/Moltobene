@@ -16,6 +16,7 @@ import kotlinx.serialization.json.Json
  *
  * Seit 0.7.0 nennt ein Rezept seine Originalseiten in „pages“. Ältere Sicherungen haben das Feld nicht
  * und bleiben lesbar; ältere App-Versionen übergehen es und übernehmen die Rezepte ohne Originalseiten.
+ * Seit 0.25.0 kann ein Rezept einen Link zu einem Video haben („video“), ebenso mit Standardwert.
  *
  * Regel: Alte Sicherungen müssen immer lesbar bleiben. Neue Felder nur mit Standardwert ergänzen;
  * bei einer inkompatiblen Änderung [CURRENT_FORMAT_VERSION] erhöhen und das alte Format weiter lesen.
@@ -58,6 +59,7 @@ data class BackupRecipe(
     val servings: Int? = null,
     val servingsUnit: String? = null,
     val source: BackupSource? = null,
+    val video: String? = null,
     val notes: String = "",
     val favorite: Boolean = false,
     val draft: Boolean = false,
@@ -100,6 +102,7 @@ fun Recipe.toBackup() = BackupRecipe(
     servings = servings,
     servingsUnit = servingsUnit,
     source = source?.let { BackupSource(type = it.type.key, name = it.name, url = it.url, page = it.page) },
+    video = videoUrl,
     notes = notes,
     favorite = favorite,
     draft = isDraft,
@@ -122,6 +125,7 @@ fun BackupRecipe.toRecipe() = Recipe(
     servings = servings,
     servingsUnit = servingsUnit,
     source = source?.let { RecipeSource(type = SourceType.fromKey(it.type), name = it.name, url = it.url, page = it.page) },
+    videoUrl = video,
     notes = notes,
     favorite = favorite,
     isDraft = draft,

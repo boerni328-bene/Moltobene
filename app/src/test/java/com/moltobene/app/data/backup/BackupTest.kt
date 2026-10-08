@@ -32,6 +32,7 @@ class BackupTest {
         servings = 12,
         servingsUnit = "Stück",
         source = RecipeSource(SourceType.BOOK, name = "Omas Kochbuch", page = "42"),
+        videoUrl = "https://www.youtube.com/watch?v=AbCdEfGhIjK",
         notes = "Mit Sahne servieren.",
         favorite = true,
         ingredients = listOf(Ingredient("Für den Teig", isHeading = true), Ingredient("200 g Mehl", quantity = 200.0, unit = "g")),
@@ -92,8 +93,9 @@ class BackupTest {
         assertTrue(kuchen.ingredients.first().isHeading)
         assertEquals("cake", kuchen.tags.first().predefinedKey)
         assertEquals(SourceType.BOOK, kuchen.source?.type)
-        // Format 1 kennt noch keine Originalseiten.
+        // Format 1 kennt noch keine Originalseiten und keine Videos.
         assertTrue(kuchen.pageIds.isEmpty())
+        assertEquals(null, kuchen.videoUrl)
         // Unbekannte Felder aus neueren Versionen werden ignoriert, fehlende bekommen Standardwerte.
         val suppe = result.recipes.first { it.title == "Suppe" }.toRecipe()
         assertEquals("", suppe.notes)

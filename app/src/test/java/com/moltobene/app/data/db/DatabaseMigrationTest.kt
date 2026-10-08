@@ -76,6 +76,35 @@ class DatabaseMigrationTest {
     }
 
     @Test
+    fun version2WirdOhneVerlustUebernommen() = runBlocking {
+        createDatabase(version = 2) { db ->
+            db.execSQL(
+                "INSERT INTO recipes (id, title, language, sourceType, sourceUrl, notes, favorite, isDraft, createdAt, updatedAt) VALUES " +
+                    "('$KUCHEN', 'Risotto', 'de', 'web', 'https://example.org/risotto', 'Mehr Parmesan.', 0, 0, 1000, 2000)",
+            )
+            db.execSQL("INSERT INTO ingredients (recipeId, position, text, isHeading) VALUES ('$KUCHEN', 0, '320 g Risottoreis', 0)")
+            db.execSQL("INSERT INTO recipe_photos (photoId, recipeId, position, kind) VALUES ('$FOTO_1', '$KUCHEN', 0, 'photo')")
+            db.execSQL("INSERT INTO recipe_photos (photoId, recipeId, position, kind) VALUES ('$SEITE_1', '$KUCHEN', 0, 'page')")
+            db.execSQL("INSERT INTO recipe_search (recipeId, title, ingredients, notes) VALUES ('$KUCHEN', 'Risotto', '320 g Risottoreis', 'Mehr Parmesan.')")
+        }
+
+        withRepository { repository ->
+            val risotto = repository.getRecipe(KUCHEN)!!
+            assertEquals("Risotto", risotto.title)
+            assertEquals("https://example.org/risotto", risotto.source?.url)
+            assertEquals("Mehr Parmesan.", risotto.notes)
+            assertEquals(listOf("320 g Risottoreis"), risotto.ingredients.map { it.text })
+            assertEquals(listOf(FOTO_1), risotto.photoIds)
+            assertEquals(listOf(SEITE_1), risotto.pageIds)
+            // Vorhandene Rezepte haben noch kein Video; eines lässt sich danach speichern.
+            assertNull(risotto.videoUrl)
+            repository.save(risotto.copy(videoUrl = "https://www.youtube.com/watch?v=AbCdEfGhIjK"))
+            assertEquals("https://www.youtube.com/watch?v=AbCdEfGhIjK", repository.getRecipe(KUCHEN)!!.videoUrl)
+            assertEquals(listOf(KUCHEN), repository.observeSummaries("risottoreis").first().map { it.id })
+        }
+    }
+
+    @Test
     fun originalseitenBleibenGetrenntVomFotoDesGerichts() = runBlocking {
         withRepository { repository ->
             repository.save(Recipe(id = KUCHEN, title = "Apfelkuchen", photoIds = listOf(FOTO_1), pageIds = listOf(SEITE_1, SEITE_2), createdAt = 1, updatedAt = 1))

@@ -35,14 +35,15 @@ class WebImporter(private val loader: PageLoader, private val cacheDir: File) {
         data class NoRecipe(override val url: String, val title: String?) : Result
 
         /**
-         * Ein YouTube-Video: [recipe] ist das Rezept aus der Beschreibung, falls darin eines steht. [recipeLink] ist
-         * ein Link zum Rezept auf einer Internetseite, den die Beschreibung nennt – er wird nur auf Wunsch geladen.
+         * Ein YouTube-Video: [recipe] ist das Rezept aus der Beschreibung, falls darin eines steht. [recipeLinks] sind
+         * die Links der Beschreibung, die zum Rezept auf einer Internetseite führen können, der wahrscheinlichste
+         * zuerst – geladen wird nur der gewählte.
          */
         data class Video(
             override val url: String,
             val video: YouTube.Video,
             val recipe: WebRecipe?,
-            val recipeLink: String?,
+            val recipeLinks: List<String>,
         ) : Result {
             /** Titel und vollständige Beschreibung für „Übernommener Text“ – so geht nichts verloren. */
             val text: String get() = listOfNotNull(video.title, video.description.trim().ifEmpty { null }).joinToString("\n\n")
@@ -69,7 +70,7 @@ class WebImporter(private val loader: PageLoader, private val cacheDir: File) {
                 url = YouTube.watchUrl(video.id),
                 video = video,
                 recipe = VideoDescription.recipe(video),
-                recipeLink = VideoDescription.recipeLink(video.description),
+                recipeLinks = VideoDescription.recipeLinks(video.description),
             )
         }
     }

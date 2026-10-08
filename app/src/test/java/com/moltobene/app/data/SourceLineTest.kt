@@ -16,6 +16,21 @@ class SourceLineTest {
     }
 
     @Test
+    fun quelleUndVideo() {
+        val split = SourceLine.split("Risotto\n\nQuelle: https://example.org/risotto\nVideo: https://www.youtube.com/watch?v=AbCdEfGhIjK")
+        assertEquals("Risotto", split.text)
+        assertEquals("https://example.org/risotto", split.source)
+        assertEquals("https://www.youtube.com/watch?v=AbCdEfGhIjK", split.video)
+        // Nur das Video, ohne Quelle.
+        val onlyVideo = SourceLine.split("Risotto\n\nVideo: https://youtu.be/AbCdEfGhIjK")
+        assertEquals("Risotto", onlyVideo.text)
+        assertNull(onlyVideo.source)
+        assertEquals("https://youtu.be/AbCdEfGhIjK", onlyVideo.video)
+        // „Video: …“ ohne Link ist ein normaler Schritt.
+        assertNull(SourceLine.split("Risotto\n\n1. Video: siehe unten").video)
+    }
+
+    @Test
     fun buchMitSeiteAufDeutschUndEnglisch() {
         val de = SourceLine.split("Gulasch\n\nQuelle: Omas Kochbuch, S. 47")
         assertEquals("Omas Kochbuch", de.source)

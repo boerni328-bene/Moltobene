@@ -62,6 +62,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
@@ -591,30 +592,10 @@ private fun RecognitionSection(
             }
         }
 
-        // Ein Link zum Rezept aus der Videobeschreibung wird erst auf Wunsch geladen; die Seite steht vorher da.
-        val videoSite = viewModel.videoRecipeSite
-        if (videoSite != null && !viewModel.isImporting) {
-            Surface(
-                color = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Column(modifier = Modifier.padding(start = Spacing.m, top = Spacing.m, end = Spacing.s, bottom = Spacing.xs)) {
-                    Text(
-                        text = stringResource(R.string.video_recipe_link, videoSite),
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(end = Spacing.s),
-                    )
-                    TextButton(
-                        onClick = viewModel::importVideoRecipeLink,
-                        enabled = enabled,
-                        modifier = Modifier.align(Alignment.End),
-                    ) {
-                        Text(stringResource(R.string.import_from_link))
-                    }
-                }
-            }
+        // Links aus der Videobeschreibung stehen zur Auswahl; geladen wird erst der gewählte.
+        val videoLinks = viewModel.videoRecipeLinks
+        if (videoLinks.isNotEmpty() && !viewModel.isImporting) {
+            VideoLinks(links = videoLinks, enabled = enabled, onChoose = viewModel::importVideoRecipeLink)
         }
 
         val hasText = viewModel.recognizedText.isNotBlank()
@@ -710,7 +691,7 @@ private fun RecipeLanguageField(language: String?, onChange: (String?) -> Unit) 
 
 /**
  * Quelle mit Seite (#40). Nach einer Texterkennung stehen darunter antippbare Vorschläge: zuletzt
- * genutzte Bücher und die erkannte Seitenzahl – ohne zusätzliches Fenster.
+ * genutzte Bücher und die erkannte Seitenzahl – ohne zusätzliches Fenster. Darunter der Link zum Video.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -758,8 +739,55 @@ private fun SourceSection(viewModel: EditViewModel) {
                 }
             }
         }
+        OutlinedTextField(
+            value = viewModel.video,
+            onValueChange = { viewModel.video = it },
+            label = { Text(stringResource(R.string.video)) },
+            supportingText = { Text(stringResource(R.string.field_video_hint)) },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
+
+/**
+ * Links aus der Videobeschreibung, der wahrscheinlichste zuerst. Jeder Link zeigt, wohin er führt
+ * (z. B. „example.org/rezepte/linsensuppe“), und übernimmt beim Antippen das Rezept von dieser Seite.
+ */
+@Composable
+private fun VideoLinks(links: List<String>, enabled: Boolean, onChoose: (String) -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(start = Spacing.s, top = Spacing.m, end = Spacing.s, bottom = Spacing.xs)) {
+            Text(
+                text = pluralStringResource(R.plurals.video_recipe_links, links.size, links.size),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(horizontal = Spacing.s),
+            )
+            links.forEach { link ->
+                TextButton(onClick = { onChoose(link) }, enabled = enabled, modifier = Modifier.fillMaxWidth()) {
+                    Icon(painterResource(R.drawable.ic_link), contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.size(Spacing.s))
+                    Text(
+                        text = linkLabel(link),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** Ein Link ohne „https://“ und „www.“, z. B. „example.org/rezepte/linsensuppe“. */
+private fun linkLabel(link: String): String =
+    link.substringAfter("://").removePrefix("www.").trimEnd('/')
 
 /** Android hat die App während der Erkennung beendet: Die Seiten sind noch da und lassen sich erneut lesen. */
 @OptIn(ExperimentalLayoutApi::class)

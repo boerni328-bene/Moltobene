@@ -68,6 +68,8 @@ object RecipeJsonLdReader {
         val cook = RecipeDuration.minutes(text(item["cookTime"]))
         val total = RecipeDuration.minutes(text(item["totalTime"]))
             ?: if (prep != null || cook != null) (prep ?: 0) + (cook ?: 0) else null
+        val url = listOfNotNull(text(item["url"]), idOf(item["mainEntityOfPage"]))
+            .firstOrNull { it.startsWith("https://", ignoreCase = true) || it.startsWith("http://", ignoreCase = true) }
         return WebRecipe(
             title = HtmlText.inline(text(item["name"]) ?: text(item["headline"])).ifEmpty { null },
             description = HtmlText.inline(text(item["description"])).ifEmpty { null },
@@ -80,11 +82,31 @@ object RecipeJsonLdReader {
             prepMinutes = prep,
             totalMinutes = total,
             language = language(text(item["inLanguage"])),
-            url = listOfNotNull(text(item["url"]), idOf(item["mainEntityOfPage"]))
-                .firstOrNull { it.startsWith("https://", ignoreCase = true) || it.startsWith("http://", ignoreCase = true) },
+            url = url,
             sourceName = HtmlText.inline(text(item["isBasedOn"]))
                 .takeIf { it.isNotEmpty() && !it.startsWith("http", ignoreCase = true) },
+            videoUrl = video(item["video"], listOfNotNull(url, baseUrl), 0),
         )
+    }
+
+    /**
+     * Video zum Rezept (VideoObject, Link oder Liste): ein YouTube-Video als einfacher Link zum Video, sonst
+     * der Link „url“, wie Moltobene ihn in Rezeptdateien schreibt. Links zu Videodateien („contentUrl“) und
+     * Verweise auf die Seite selbst zählen nicht.
+     */
+    private fun video(element: JsonElement?, page: List<String>, depth: Int): String? {
+        if (element == null || depth > 2) return null
+        // Paare aus Link und ob er im Feld „url“ stand.
+        val links = when (element) {
+            is JsonPrimitive -> listOfNotNull(text(element)?.let { it.trim() to true })
+            is JsonObject -> listOf("url", "embedUrl", "contentUrl").mapNotNull { key -> text(element[key])?.let { it.trim() to (key == "url") } }
+            is JsonArray -> return element.take(MAX_ITEMS).firstNotNullOfOrNull { video(it, page, depth + 1) }
+        }
+        links.firstNotNullOfOrNull { (link, _) -> YouTube.videoId(link) }?.let { return YouTube.watchUrl(it) }
+        val samePage = page.map { it.substringBefore('#') }
+        return links.firstOrNull { (link, isUrl) ->
+            isUrl && link.startsWith("https://", ignoreCase = true) && link.none { it.isWhitespace() } && link.substringBefore('#') !in samePage
+        }?.first
     }
 
     /** Text eines Feldes: Text, Zahl, das erste Element einer Liste oder „name“/„text“/„@value“ eines Objekts. */

@@ -116,6 +116,25 @@ jobs:
           path: app/build/reports/lint-results-release.html
           if-no-files-found: ignore
 
+      # Ohne den Bauplan der aktuellen Version im Repository lässt sich der nächste Umbau der Datenbank nicht
+      # mehr schreiben. Neue oder geänderte Baupläne stehen deshalb im Protokoll; auf main fehlt keiner.
+      - name: Baupläne der Datenbank prüfen
+        run: |
+          NEU=$(git ls-files --others --modified --exclude-standard -- app/schemas)
+          if [ -n "$NEU" ]; then
+            for DATEI in $NEU; do
+              echo "::group::$DATEI"
+              cat "$DATEI"
+              echo
+              echo "::endgroup::"
+            done
+            if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+              echo "::error::Neuer Bauplan der Datenbank fehlt im Repository: $NEU"
+              exit 1
+            fi
+            echo "::warning::Neuer Bauplan der Datenbank, bitte nach app/schemas übernehmen: $NEU"
+          fi
+
       - name: Baupläne der Datenbank speichern
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

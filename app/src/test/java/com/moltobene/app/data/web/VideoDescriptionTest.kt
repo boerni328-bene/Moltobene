@@ -197,28 +197,46 @@ class VideoDescriptionTest {
     }
 
     @Test
-    fun linkZumRezept() {
+    fun linksZumRezept() {
         val description = """
             Das ganze Rezept zum Nachlesen: https://www.example.org/rezepte/linsensuppe?utm_source=youtube
             Mein Kochbuch: https://shop.example.org/
             ► Instagram: https://instagram.com/beispielkueche
+            Töpfe (Werbung): https://www.example.com/toepfe
             Töpfe: https://amzn.to/abc123
-            https://bit.ly/rezept-xyz
+            Mehr von mir: https://www.example.org/
+            Über mich: https://www.example.org/ueber-mich
+            https://bit.ly/3xYz
+            Das Video davor: https://www.youtube.com/watch?v=AbCdEfGhIjK
+            Noch einmal: https://www.example.org/rezepte/linsensuppe
         """.trimIndent()
-        // Ohne Zählzusatz; Shop-Startseite, soziale Netzwerke und Kurzlinks mit unbekanntem Ziel zählen nicht.
-        assertEquals("https://www.example.org/rezepte/linsensuppe", VideoDescription.recipeLink(description))
+        // Ohne Zählzusatz und nur einmal; Shops, Werbung, soziale Netzwerke und Videos nicht; Startseiten zuletzt.
+        assertEquals(
+            listOf(
+                "https://www.example.org/rezepte/linsensuppe",
+                "https://www.example.org/ueber-mich",
+                "https://bit.ly/3xYz",
+                "https://www.example.org/",
+            ),
+            VideoDescription.recipeLinks(description),
+        )
 
         // Ohne Rezept-Wort im Link zählt der Hinweis davor.
         assertEquals(
-            "https://blog.example.net/2024/10/linsensuppe",
-            VideoDescription.recipeLink("Zutaten und Zubereitung findet ihr hier:\nhttps://blog.example.net/2024/10/linsensuppe"),
+            listOf("https://blog.example.net/2024/10/linsensuppe", "https://www.example.org/ueber-mich"),
+            VideoDescription.recipeLinks(
+                "Über mich: https://www.example.org/ueber-mich\nZutaten und Zubereitung findet ihr hier:\nhttps://blog.example.net/2024/10/linsensuppe",
+            ),
         )
 
-        // Startseiten, Videos und Seiten ohne Bezug zum Rezept werden nicht angeboten.
-        assertNull(
-            VideoDescription.recipeLink(
-                "Besucht mich: https://www.example.org/\nhttps://www.youtube.com/watch?v=AbCdEfGhIjK\nÜber mich: https://www.example.org/ueber-mich",
-            ),
+        // Der eigene Blog, als Werbung markiert, bleibt; ohne passende Links bleibt die Liste leer.
+        assertEquals(
+            listOf("https://blog.example.net/linsensuppe"),
+            VideoDescription.recipeLinks("Rezept auf meinem Blog (unbezahlte Werbung): https://blog.example.net/linsensuppe"),
+        )
+        assertEquals(
+            emptyList<String>(),
+            VideoDescription.recipeLinks("Instagram: https://www.instagram.com/beispiel\nhttps://www.youtube.com/@beispiel\nhttps://www.amazon.de/dp/B000"),
         )
     }
 

@@ -34,6 +34,7 @@
     <string name="instructions">Instructions</string>
     <string name="notes">Notes</string>
     <string name="source">Source</string>
+    <string name="video">Video</string>
     <string name="servings">Servings</string>
     <plurals name="servings_count">
         <item quantity="one">%d serving</item>
@@ -81,6 +82,7 @@
     <string name="share_recipe">Share recipe</string>
     <string name="share_as_file">Share as recipe file</string>
     <string name="share_source">Source: %1$s</string>
+    <string name="share_video">Video: %1$s</string>
     <string name="share_error">The recipe could not be shared.</string>
 
     <!-- Texterkennung -->
@@ -116,8 +118,11 @@
     <string name="file_done">Recipe imported from the file. Check that everything is in the right place.</string>
     <string name="video_done">Recipe imported from the video description. Compare it with the video: descriptions often lack amounts or steps.</string>
     <string name="video_no_recipe">The video description contains no recipe. Title and link are saved, the description is under “Imported text”.</string>
-    <string name="video_link_only">The video description contains no recipe, only a link to it. Title and link of the video are saved.</string>
-    <string name="video_recipe_link">The video description links to a recipe on %1$s.</string>
+    <string name="video_link_only">The video description contains no recipe, only links. Title and link of the video are saved.</string>
+    <plurals name="video_recipe_links">
+        <item quantity="one">The video description contains a link. The recipe can be imported from this page:</item>
+        <item quantity="other">The video description contains %1$d links. The recipe can be imported from one of these pages:</item>
+    </plurals>
     <string name="file_no_recipe">No recipe was found in the file. Recipe files, e.g. shared from Moltobene, and saved recipe pages can be imported.</string>
     <string name="file_error">The file could not be read.</string>
     <string name="file_too_large">The file is too large for a recipe (10 MB at most).</string>
@@ -196,9 +201,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>In the collection, “Add recipe” (+) and “Import recipe” are now icons at the top next to MOLTOBENE.</item>
-        <item>MOLTOBENE appears at the top of every screen, in bold with a blue M and B as in the logo. Below it, the name of the screen, e.g. “Settings”.</item>
-        <item>New app icon: “MB” with the sources of recipes.</item>
+        <item>YouTube: All links from the video description can be chosen. The recipe can be imported from the chosen page.</item>
+        <item>New field “Video”: the link to the video is saved separately from the source and shown in the recipe view.</item>
+        <item>In dark mode, M and B in the name are closer to the blue of the logo.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->
@@ -226,6 +231,7 @@
     <string name="field_ingredients_hint">One ingredient per line, e.g. 200 g flour. Subheadings end with a colon, e.g. For the dough:</string>
     <string name="field_instructions_hint">One step per line</string>
     <string name="field_source_hint">e.g. Grandma’s cookbook or a link</string>
+    <string name="field_video_hint">Link to the video, e.g. on YouTube</string>
     <string name="field_source_page">Page</string>
     <string name="source_page">p. %1$s</string>
     <string name="source_suggestions">Suggestions:</string>
