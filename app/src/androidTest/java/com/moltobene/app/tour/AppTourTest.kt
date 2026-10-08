@@ -8,6 +8,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.hasAnySibling
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -551,11 +552,11 @@ class AppTourTest(private val variant: DisplayVariant) {
     }
 
     /**
-     * Tippt auf das erste sichtbare Element mit diesem Text. Manche Aktionen gibt es doppelt,
-     * z. B. „Rezept hinzufügen“ in der leeren Sammlung und als Knopf unten rechts.
+     * Tippt auf das erste sichtbare Element mit diesem Text oder dieser Beschreibung. Manche Aktionen gibt es doppelt,
+     * z. B. „Rezept hinzufügen“ in der leeren Sammlung und als Symbol oben in der Leiste.
      */
     private fun clickVisible(value: String) {
-        val nodes = composeRule.onAllNodesWithText(value)
+        val nodes = composeRule.onAllNodes(hasText(value) or hasContentDescription(value))
         val count = nodes.fetchSemanticsNodes().size
         val index = (0 until count).firstOrNull { runCatching { nodes[it].assertIsDisplayed() }.isSuccess }
             ?: throw AssertionError("„$value“ ist auf dem Bildschirm nicht sichtbar.")

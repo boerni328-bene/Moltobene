@@ -52,11 +52,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.moltobene.app.R
+import com.moltobene.app.ui.components.AppTitleWithScreen
 import com.moltobene.app.ui.components.OptionButton
 import com.moltobene.app.ui.theme.Spacing
 
@@ -92,13 +92,10 @@ fun PagesScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text(stringResource(R.string.import_from_photo), modifier = Modifier.semantics { heading() })
-                        Text(
-                            text = pluralStringResource(R.plurals.pages_count, count, count),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
+                    AppTitleWithScreen(
+                        screen = stringResource(R.string.import_from_photo),
+                        detail = pluralStringResource(R.plurals.pages_count, count, count),
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = { confirmDiscard = true }) {

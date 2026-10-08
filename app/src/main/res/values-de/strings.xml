@@ -12,6 +12,8 @@
     <string name="remove">Entfernen</string>
 
     <!-- Sammlung -->
+    <!-- Name des Bildschirms mit Zusatz in der oberen Leiste, z. B. „Aus Foto übernehmen · 3 Seiten“ -->
+    <string name="screen_title_detail">%1$s · %2$s</string>
     <string name="collection_title">Sammlung</string>
     <string name="add_recipe">Rezept hinzufügen</string>
     <string name="search_placeholder">Rezepte suchen</string>
@@ -192,9 +194,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Oben steht jetzt MOLTOBENE, in der Sammlung und im Rezept.</item>
-        <item>Der Umschalter „DE | EN“ sitzt im Rezept oben in der Leiste und bleibt beim Blättern sichtbar. Die Originalsprache ist mit * markiert, z. B. „DE*“.</item>
-        <item>„Teilen“ steht im Rezept jetzt im Menü ⋮.</item>
+        <item>In der Sammlung stehen „Rezept hinzufügen“ (+) und „Rezept übernehmen“ jetzt als Symbole oben neben MOLTOBENE.</item>
+        <item>MOLTOBENE steht oben auf jedem Bildschirm, fett und mit blauem M und B wie im Logo. Darunter steht, wo man gerade ist, z. B. „Einstellungen“.</item>
+        <item>Neues App-Symbol: „MB“ mit den Quellen der Rezepte.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->

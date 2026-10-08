@@ -30,7 +30,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import com.moltobene.app.R
+import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.components.CenteredMessage
+import com.moltobene.app.ui.components.ScreenTitle
+import com.moltobene.app.ui.components.ScreenTitlePadding
 import com.moltobene.app.ui.theme.Spacing
 
 /** Einstellungen → Info → „Open-Source-Lizenzen“. */
@@ -40,7 +43,7 @@ fun LicensesScreen(viewModel: LicensesViewModel, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.licenses_title), modifier = Modifier.semantics { heading() }) },
+                title = { AppTitle(style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
@@ -49,12 +52,15 @@ fun LicensesScreen(viewModel: LicensesViewModel, onBack: () -> Unit) {
             )
         },
     ) { padding ->
-        when (val state = viewModel.state) {
-            LicensesUiState.Loading ->
-                CenteredMessage(text = "", modifier = Modifier.padding(padding)) { CircularProgressIndicator() }
-            LicensesUiState.Error ->
-                CenteredMessage(text = stringResource(R.string.licenses_error), modifier = Modifier.padding(padding))
-            is LicensesUiState.Content -> LicenseList(state, Modifier.padding(padding).fillMaxSize())
+        Column(modifier = Modifier.padding(padding).fillMaxSize()) {
+            ScreenTitle(stringResource(R.string.licenses_title), modifier = Modifier.padding(ScreenTitlePadding))
+            when (val state = viewModel.state) {
+                LicensesUiState.Loading ->
+                    CenteredMessage(text = "", modifier = Modifier.weight(1f)) { CircularProgressIndicator() }
+                LicensesUiState.Error ->
+                    CenteredMessage(text = stringResource(R.string.licenses_error), modifier = Modifier.weight(1f))
+                is LicensesUiState.Content -> LicenseList(state, Modifier.weight(1f).fillMaxWidth())
+            }
         }
     }
 }

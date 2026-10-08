@@ -26,7 +26,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,8 +44,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntSize
 import com.moltobene.app.R
 import com.moltobene.app.ui.theme.Spacing
@@ -135,7 +132,7 @@ fun PageViewer(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(title, modifier = Modifier.semantics { heading() }) },
+                title = { AppTitleWithScreen(screen = title) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
                         Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.close))

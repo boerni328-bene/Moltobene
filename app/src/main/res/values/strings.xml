@@ -13,6 +13,8 @@
     <string name="remove">Remove</string>
 
     <!-- Sammlung -->
+    <!-- Name des Bildschirms mit Zusatz in der oberen Leiste, z. B. „Aus Foto übernehmen · 3 Seiten“ -->
+    <string name="screen_title_detail">%1$s · %2$s</string>
     <string name="collection_title">Collection</string>
     <string name="add_recipe">Add recipe</string>
     <string name="search_placeholder">Search recipes</string>
@@ -194,9 +196,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>MOLTOBENE now appears at the top, in the collection and in the recipe.</item>
-        <item>In the recipe, the “DE | EN” switch sits in the top bar and stays visible while scrolling. The original language is marked with *, e.g. “DE*”.</item>
-        <item>In the recipe, “Share” is now in the ⋮ menu.</item>
+        <item>In the collection, “Add recipe” (+) and “Import recipe” are now icons at the top next to MOLTOBENE.</item>
+        <item>MOLTOBENE appears at the top of every screen, in bold with a blue M and B as in the logo. Below it, the name of the screen, e.g. “Settings”.</item>
+        <item>New app icon: “MB” with the sources of recipes.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->

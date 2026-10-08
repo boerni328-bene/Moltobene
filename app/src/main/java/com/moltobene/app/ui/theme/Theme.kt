@@ -5,6 +5,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 
 // Eigene Palette „Schiefer“ statt der Farben vom Hintergrundbild (Vision: eigene ruhige Farbpalette).
 private val LightColors = lightColorScheme(
@@ -83,15 +88,31 @@ private val DarkColors = darkColorScheme(
     surfaceContainerHighest = SlateSurfaceContainerHighestDark,
 )
 
+/** Markenfarben aus dem Logo; nur für den Schriftzug MOLTOBENE (`ui/components/AppTitle`). */
+@Immutable
+data class BrandColors(val blue: Color)
+
+private val LocalBrandColors = staticCompositionLocalOf { BrandColors(BrandBlueLight) }
+
+/** Zugriff auf die Markenfarben, passend zu Hell- und Dunkelmodus – nie feste Werte im Code. */
+object MoltobeneTheme {
+    val brand: BrandColors
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalBrandColors.current
+}
+
 @Composable
 fun MoltobeneTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    MaterialTheme(
-        colorScheme = if (darkTheme) DarkColors else LightColors,
-        typography = MoltobeneTypography,
-        shapes = MoltobeneShapes,
-        content = content
-    )
+    CompositionLocalProvider(LocalBrandColors provides BrandColors(if (darkTheme) BrandBlueDark else BrandBlueLight)) {
+        MaterialTheme(
+            colorScheme = if (darkTheme) DarkColors else LightColors,
+            typography = MoltobeneTypography,
+            shapes = MoltobeneShapes,
+            content = content
+        )
+    }
 }

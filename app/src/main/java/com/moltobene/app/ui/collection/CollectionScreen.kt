@@ -26,7 +26,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -88,7 +87,7 @@ fun CollectionScreen(
     val backupHint by viewModel.backupHint.collectAsStateWithLifecycle()
     // Beim Zurückkehren neu lesen, z. B. nachdem in den Einstellungen gesichert wurde (#51).
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshBackupHint() }
-    // „Rezept übernehmen“: Auswahl der Erfassungswege, damit unten rechts nur zwei Knöpfe stehen.
+    // „Rezept übernehmen“: Auswahl der Erfassungswege, damit oben ein Symbol genügt.
     var chooseImport by rememberSaveable { mutableStateOf(false) }
     if (chooseImport) {
         ImportChooser(
@@ -117,28 +116,19 @@ fun CollectionScreen(
             TopAppBar(
                 // Der Name der App als Titel (Wunsch des Projektinhabers vom 08.10.2026).
                 title = { AppTitle(style = MaterialTheme.typography.titleLarge, heading = true) },
+                // Hinzufügen und Übernehmen als Symbole oben statt großer Knöpfe unten (Wunsch vom 08.10.2026).
                 actions = {
+                    IconButton(onClick = onAddRecipe) {
+                        Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_recipe))
+                    }
+                    IconButton(onClick = { chooseImport = true }) {
+                        Icon(painterResource(R.drawable.ic_move_to_inbox), contentDescription = stringResource(R.string.import_recipe))
+                    }
                     IconButton(onClick = onOpenSettings) {
                         Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings_title))
                     }
                 },
             )
-        },
-        floatingActionButton = {
-            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(Spacing.m)) {
-                ExtendedFloatingActionButton(
-                    onClick = { chooseImport = true },
-                    icon = { Icon(painterResource(R.drawable.ic_move_to_inbox), contentDescription = null) },
-                    text = { Text(stringResource(R.string.import_recipe)) },
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                )
-                ExtendedFloatingActionButton(
-                    onClick = onAddRecipe,
-                    icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                    text = { Text(stringResource(R.string.add_recipe)) },
-                )
-            }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
@@ -197,8 +187,7 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
 private fun RecipeList(items: List<RecipeListItem>, onOpenRecipe: (String) -> Unit) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        // Platz unten, damit die Knöpfe „Rezept übernehmen“ und „Rezept hinzufügen“ den letzten Eintrag nicht verdecken.
-        contentPadding = PaddingValues(bottom = 176.dp),
+        contentPadding = PaddingValues(bottom = Spacing.m),
     ) {
         items(items, key = { it.id }) { item ->
             RecipeRow(item = item, onClick = { onOpenRecipe(item.id) })

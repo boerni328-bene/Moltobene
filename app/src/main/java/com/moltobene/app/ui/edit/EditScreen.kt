@@ -79,10 +79,12 @@ import com.moltobene.app.data.TextLinks
 import com.moltobene.app.data.ocr.TextLanguage
 import com.moltobene.app.data.share.IncomingText
 import com.moltobene.app.data.web.WebAddress
+import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.components.CenteredMessage
 import com.moltobene.app.ui.components.OptionButton
 import com.moltobene.app.ui.components.PageViewer
 import com.moltobene.app.ui.components.RecipePhotoLarge
+import com.moltobene.app.ui.components.ScreenTitle
 import com.moltobene.app.ui.theme.Spacing
 import kotlinx.coroutines.launch
 
@@ -260,9 +262,7 @@ fun EditScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(stringResource(if (viewModel.isNew) R.string.add_recipe else R.string.edit_recipe))
-                },
+                title = { AppTitle(style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = requestClose) {
                         Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.close))
@@ -297,6 +297,7 @@ fun EditScreen(
                     .padding(Spacing.m),
                 verticalArrangement = Arrangement.spacedBy(Spacing.m),
             ) {
+                ScreenTitle(stringResource(if (viewModel.isNew) R.string.add_recipe else R.string.edit_recipe))
                 PhotoSection(
                     viewModel = viewModel,
                     onChoose = {

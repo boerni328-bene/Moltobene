@@ -69,3 +69,8 @@ val SlateSurfaceContainerLowDark = Color(0xFF1A1D20)
 val SlateSurfaceContainerDark = Color(0xFF1C2126)
 val SlateSurfaceContainerHighDark = Color(0xFF272B2F)
 val SlateSurfaceContainerHighestDark = Color(0xFF32363A)
+
+// Markenfarbe aus dem Logo (Kobaltblau, 08.10.2026): nur für „M“ und „B“ im Schriftzug MOLTOBENE.
+// Im Dunkelmodus heller, damit der Kontrast reicht (hell 6,6 : 1, dunkel 7,8 : 1). Im Code über MoltobeneTheme.brand.
+val BrandBlueLight = Color(0xFF2747D9)
+val BrandBlueDark = Color(0xFF8FA4FF)

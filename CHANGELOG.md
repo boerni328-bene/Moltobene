@@ -3,6 +3,13 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.24.0] – 2026-10-08 (versionCode 45)
+
+### Geändert
+- **Symbole oben statt großer Knöpfe:** In der Sammlung stehen „Rezept hinzufügen“ (+) und „Rezept übernehmen“ jetzt als Symbole oben neben MOLTOBENE, vor den Einstellungen. Die beiden großen Knöpfe unten rechts sind weg, so verdecken sie keine Rezepte mehr. In der leeren Sammlung bleiben die beiden Knöpfe in der Mitte. Der Screenreader liest bei den Symbolen „Rezept hinzufügen“ und „Rezept übernehmen“.
+- **MOLTOBENE auf jedem Bildschirm:** Der Schriftzug steht jetzt oben überall, auch in den Einstellungen, beim Bearbeiten und bei den Open-Source-Lizenzen. Darunter steht groß, wo man gerade ist, z. B. „Einstellungen“ oder „Rezept bearbeiten“. Bei der Seitenübersicht, „Bereich auswählen“ und dem Vollbild steht der Name klein direkt unter MOLTOBENE, damit das Foto möglichst viel Platz hat.
+- **Schriftzug wie im Logo:** MOLTOBENE ist fett, M und B sind blau wie im App-Symbol. Im Dunkelmodus ist das Blau heller, damit es gut lesbar bleibt.
+
 ## [0.23.1] – 2026-10-08 (versionCode 44)
 
 ### Geändert

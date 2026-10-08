@@ -48,7 +48,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -61,6 +60,7 @@ import com.moltobene.app.data.ocr.AreaFrame
 import com.moltobene.app.data.ocr.AreaKind
 import com.moltobene.app.data.ocr.CropArea
 import com.moltobene.app.data.ocr.CropHandle
+import com.moltobene.app.ui.components.AppTitleWithScreen
 import com.moltobene.app.ui.components.CenteredMessage
 import com.moltobene.app.ui.theme.Spacing
 import kotlin.math.min
@@ -93,15 +93,14 @@ fun AreaSelectionScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text(stringResource(R.string.area_title), modifier = Modifier.semantics { heading() })
-                        if (selection.pageCount > 1) {
-                            Text(
-                                text = stringResource(R.string.area_page, selection.page, selection.pageCount),
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        }
-                    }
+                    AppTitleWithScreen(
+                        screen = stringResource(R.string.area_title),
+                        detail = if (selection.pageCount > 1) {
+                            stringResource(R.string.area_page, selection.page, selection.pageCount)
+                        } else {
+                            null
+                        },
+                    )
                 },
                 navigationIcon = {
                     // Zurück zur Seitenübersicht; die Rahmen bleiben, wie sie sind.

@@ -55,6 +55,9 @@ import com.moltobene.app.data.backup.BackupManager
 import com.moltobene.app.data.backup.BackupReader
 import com.moltobene.app.data.translate.LanguagePack
 import com.moltobene.app.data.translate.LanguagePackManager
+import com.moltobene.app.ui.components.AppTitle
+import com.moltobene.app.ui.components.ScreenTitle
+import com.moltobene.app.ui.components.ScreenTitlePadding
 import com.moltobene.app.ui.theme.Spacing
 import com.moltobene.app.ui.whatsnew.WhatsNew
 import com.moltobene.app.ui.whatsnew.WhatsNewDialog
@@ -96,7 +99,7 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.settings_title), modifier = Modifier.semantics { heading() }) },
+                title = { AppTitle(style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
@@ -112,6 +115,7 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
         ) {
+            ScreenTitle(stringResource(R.string.settings_title), modifier = Modifier.padding(ScreenTitlePadding))
             SectionHeader(stringResource(R.string.collection_title))
             ListItem(
                 headlineContent = { Text(stringResource(R.string.backup_title)) },
