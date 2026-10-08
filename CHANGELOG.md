@@ -3,6 +3,17 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.23.0] – 2026-10-08 (versionCode 43)
+
+### Geändert
+- **MOLTOBENE oben:** Die Sammlung heißt oben jetzt MOLTOBENE statt „Sammlung“. Auch in der Rezeptansicht steht MOLTOBENE oben in der Leiste und bleibt beim Blättern stehen. Der Screenreader liest „Moltobene“. Ist bei sehr großer Schrift zu wenig Platz, fällt der Name in der Rezeptansicht weg, statt abgeschnitten zu werden.
+- **Umschalter „DE | EN“ oben in der Leiste:** Er bleibt beim Blättern sichtbar, auch mitten in der Zubereitung. Die Originalsprache ist mit einem Sternchen markiert, z. B. „DE* | EN“. Die gewählte Sprache ist ausgefüllt und fett. Fortschritt und Hinweise zur Übersetzung stehen weiter unter dem Titel.
+- **Teilen im Menü:** In der Rezeptansicht steht „Rezept teilen“ jetzt als erster Eintrag im Menü ⋮, damit oben Platz für MOLTOBENE und den Umschalter ist.
+- Der Hinweis unter einer Übersetzung ist kürzer: „Maschinell übersetzt. Mit dem Original vergleichen.“
+
+### Behoben
+- Im Umschalter brach „DE · Original“ auf zwei Zeilen um, dadurch waren die beiden Hälften unterschiedlich hoch.
+
 ## [0.22.0] – 2026-10-07 (versionCode 42)
 
 ### Neu

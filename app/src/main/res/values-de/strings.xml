@@ -54,10 +54,10 @@
 
     <!-- Kochen (#56): abhaken, aktueller Schritt, Portionen umrechnen -->
     <!-- Rezept übersetzen (#60) -->
-    <string name="translation_code_original">%1$s · Original</string>
+    <string name="translation_code_original">%1$s*</string>
     <string name="translation_language_original">%1$s, Originalsprache</string>
     <string name="translation_running">Wird übersetzt … %1$d von %2$d</string>
-    <string name="translation_hint">Maschinell übersetzt (Original: %1$s). Mit dem Original vergleichen.</string>
+    <string name="translation_hint">Maschinell übersetzt. Mit dem Original vergleichen.</string>
     <string name="translation_original_title">Original: %1$s</string>
     <string name="translation_needs_pack">Zum Übersetzen wird einmalig das Sprachpaket Deutsch–Englisch gebraucht (etwa %1$s).</string>
     <string name="translation_open_settings">Zu den Einstellungen</string>
@@ -192,8 +192,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Sprache des Rezepts: Beim Bearbeiten lässt sich die Sprache eines Rezepts wählen. Dann passen der Umschalter „DE | EN“ und das Umrechnen der Portionen auch bei kurzen Rezepten.</item>
-        <item>Bei neu eingetippten Rezepten erkennt die App die Sprache jetzt am Text, statt die Sprache des Handys anzunehmen.</item>
+        <item>Oben steht jetzt MOLTOBENE, in der Sammlung und im Rezept.</item>
+        <item>Der Umschalter „DE | EN“ sitzt im Rezept oben in der Leiste und bleibt beim Blättern sichtbar. Die Originalsprache ist mit * markiert, z. B. „DE*“.</item>
+        <item>„Teilen“ steht im Rezept jetzt im Menü ⋮.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->

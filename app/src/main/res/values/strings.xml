@@ -55,10 +55,10 @@
 
     <!-- Kochen (#56): abhaken, aktueller Schritt, Portionen umrechnen -->
     <!-- Rezept übersetzen (#60) -->
-    <string name="translation_code_original">%1$s · original</string>
+    <string name="translation_code_original">%1$s*</string>
     <string name="translation_language_original">%1$s, original language</string>
     <string name="translation_running">Translating … %1$d of %2$d</string>
-    <string name="translation_hint">Machine-translated (original: %1$s). Compare with the original.</string>
+    <string name="translation_hint">Machine-translated. Compare with the original.</string>
     <string name="translation_original_title">Original: %1$s</string>
     <string name="translation_needs_pack">Translating needs the language pack German–English, downloaded once (about %1$s).</string>
     <string name="translation_open_settings">Open settings</string>
@@ -194,8 +194,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Recipe language: The language of a recipe can be chosen when editing. The “DE | EN” switch and adjusting servings then also work for short recipes.</item>
-        <item>For newly typed recipes, the app now detects the language from the text instead of assuming the device language.</item>
+        <item>MOLTOBENE now appears at the top, in the collection and in the recipe.</item>
+        <item>In the recipe, the “DE | EN” switch sits in the top bar and stays visible while scrolling. The original language is marked with *, e.g. “DE*”.</item>
+        <item>In the recipe, “Share” is now in the ⋮ menu.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->

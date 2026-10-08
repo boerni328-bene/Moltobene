@@ -11,6 +11,7 @@ import android.icu.util.MeasureUnit
 import android.net.Uri
 import android.text.format.Formatter
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +26,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -46,14 +49,12 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -99,6 +100,7 @@ import com.moltobene.app.data.share.PreparedShare
 import com.moltobene.app.data.share.ShareLabels
 import com.moltobene.app.data.translate.LanguagePack
 import com.moltobene.app.data.translate.RecipeTranslations
+import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.components.CenteredMessage
 import com.moltobene.app.ui.components.DraftLabel
 import com.moltobene.app.ui.components.PageViewer
@@ -181,19 +183,23 @@ fun RecipeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {},
+                // Name der App und Umschalter „DE | EN“ bleiben beim Blättern oben stehen (Wunsch vom 08.10.2026).
+                title = { AppTitle(style = MaterialTheme.typography.titleMedium) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
-                    if (state is RecipeUiState.Content && !deleting) {
-                        IconButton(
-                            onClick = { viewModel.share(asFile = false, labels = shareLabels(resources)) },
-                            enabled = !viewModel.preparingShare,
-                        ) {
-                            Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.share_recipe))
+                    val content = state as? RecipeUiState.Content
+                    if (content != null && !deleting) {
+                        val original = remember(content.recipe) { RecipeTranslations.languageOf(content.recipe) }
+                        if (original != null && LanguagePack.targets(original).isNotEmpty()) {
+                            LanguageSwitch(
+                                original = original,
+                                selected = translation.selectedLanguage(original),
+                                onSelect = { viewModel.showLanguage(it, original) },
+                            )
                         }
                         IconButton(onClick = { onEdit(viewModel.recipeId) }) {
                             Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.edit_recipe))
@@ -204,11 +210,12 @@ fun RecipeScreen(
                             }
                             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                                 DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.cooking_reset)) },
-                                    enabled = checked.isNotEmpty() || currentStep != null,
+                                    text = { Text(stringResource(R.string.share_recipe)) },
+                                    leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
+                                    enabled = !viewModel.preparingShare,
                                     onClick = {
                                         menuOpen = false
-                                        viewModel.resetProgress()
+                                        viewModel.share(asFile = false, labels = shareLabels(resources))
                                     },
                                 )
                                 DropdownMenuItem(
@@ -217,6 +224,14 @@ fun RecipeScreen(
                                     onClick = {
                                         menuOpen = false
                                         viewModel.share(asFile = true, labels = shareLabels(resources))
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.cooking_reset)) },
+                                    enabled = checked.isNotEmpty() || currentStep != null,
+                                    onClick = {
+                                        menuOpen = false
+                                        viewModel.resetProgress()
                                     },
                                 )
                                 DropdownMenuItem(
@@ -400,7 +415,7 @@ private fun RecipeContent(
                 )
             }
             if (originalLanguage != null && LanguagePack.targets(originalLanguage).isNotEmpty()) {
-                TranslationControl(original = originalLanguage, actions = translation)
+                TranslationStatus(original = originalLanguage, actions = translation)
             }
             val originalServings = recipe.servings?.takeIf { it > 0 }
             val servings = originalServings?.let { cooking.shownServings ?: it }
@@ -614,41 +629,70 @@ private fun languageName(code: String): String {
     return Locale.forLanguageTag(code).getDisplayLanguage(ui).replaceFirstChar { it.titlecase(ui) }
 }
 
+/** Die gezeigte bzw. gewünschte Sprache: das Original, eine Übersetzung oder eine, die gerade entsteht. */
+private fun TranslationState.selectedLanguage(original: String): String = when (this) {
+    TranslationState.Original -> original
+    is TranslationState.Working -> language
+    is TranslationState.Shown -> translation.language
+    is TranslationState.NeedsPack -> language
+    is TranslationState.Failed -> language
+}
+
 /**
- * Umschalter „DE | EN“ (#60): Abkürzungen statt Flaggen, die Originalsprache ist markiert, der Screenreader liest
- * den Namen der Sprache. Darunter Fortschritt, Hinweis auf die maschinelle Übersetzung oder was zu tun ist.
+ * Umschalter „DE | EN“ oben in der Leiste (#60): Abkürzungen statt Flaggen, die Originalsprache mit Sternchen markiert,
+ * z. B. „DE*“ (Wunsch vom 08.10.2026). Die gewählte Sprache ist ausgefüllt und fett, nicht nur farbig; der Screenreader liest
+ * den Namen der Sprache. Schmal gehalten, damit daneben „MOLTOBENE“, Bearbeiten und ⋮ Platz haben.
  */
 @Composable
-private fun TranslationControl(original: String, actions: TranslationActions) {
-    val state = actions.state
+private fun LanguageSwitch(original: String, selected: String, onSelect: (String) -> Unit) {
     val languages = (listOf(original) + LanguagePack.targets(original)).sorted()
-    val selected = when (state) {
-        TranslationState.Original -> original
-        is TranslationState.Working -> state.language
-        is TranslationState.Shown -> state.translation.language
-        is TranslationState.NeedsPack -> state.language
-        is TranslationState.Failed -> state.language
-    }
-    SingleChoiceSegmentedButtonRow {
-        languages.forEachIndexed { index, code ->
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.selectableGroup(),
+    ) {
+        languages.forEach { code ->
+            val isSelected = code == selected
             val name = languageName(code)
             val description = if (code == original) stringResource(R.string.translation_language_original, name) else name
-            SegmentedButton(
-                selected = code == selected,
-                onClick = { actions.onShowLanguage(code, original) },
-                shape = SegmentedButtonDefaults.itemShape(index, languages.size),
-                modifier = Modifier.semantics { contentDescription = description },
+            val shape = MaterialTheme.shapes.small
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .minimumInteractiveComponentSize()
+                    .clip(shape)
+                    .selectable(selected = isSelected, role = Role.RadioButton, onClick = { onSelect(code) })
+                    .semantics { contentDescription = description }
+                    .widthIn(min = 40.dp)
+                    .then(
+                        if (isSelected) {
+                            Modifier.background(MaterialTheme.colorScheme.secondaryContainer, shape)
+                        } else {
+                            Modifier.border(1.dp, MaterialTheme.colorScheme.outline, shape)
+                        },
+                    )
+                    .padding(horizontal = Spacing.s, vertical = Spacing.xs),
             ) {
                 Text(
-                    if (code == original) {
+                    text = if (code == original) {
                         stringResource(R.string.translation_code_original, code.uppercase(Locale.ROOT))
                     } else {
                         code.uppercase(Locale.ROOT)
                     },
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                    color = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
                 )
             }
         }
     }
+}
+
+/** Unter dem Titel: Fortschritt, Hinweis auf die maschinelle Übersetzung oder was zu tun ist (#60). */
+@Composable
+private fun TranslationStatus(original: String, actions: TranslationActions) {
+    val state = actions.state
     when (state) {
         TranslationState.Original -> Unit
         is TranslationState.Working -> Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
@@ -667,7 +711,7 @@ private fun TranslationControl(original: String, actions: TranslationActions) {
             )
         }
         is TranslationState.Shown -> Text(
-            text = stringResource(R.string.translation_hint, languageName(original)),
+            text = stringResource(R.string.translation_hint),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },

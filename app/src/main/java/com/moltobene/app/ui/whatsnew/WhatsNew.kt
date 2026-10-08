@@ -7,10 +7,10 @@ package com.moltobene.app.ui.whatsnew
  */
 object WhatsNew {
     /** versionCode der Version, zu der die Texte gehören. */
-    const val VERSION_CODE = 42
+    const val VERSION_CODE = 43
 
     /** Wird im Titel angezeigt. */
-    const val VERSION_NAME = "0.22.0"
+    const val VERSION_NAME = "0.23.0"
 
     /**
      * @param lastSeenVersionCode zuletzt erledigte Version; null, wenn die App das noch nie gemerkt hat
