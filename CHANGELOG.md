@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.23.1] – 2026-10-08 (versionCode 44)
+
+### Geändert
+- **Neues App-Symbol:** ein weißes „MB“ mit Lächeln auf Kobaltblau, rundherum kleine Zeichen für die Quellen der Rezepte: Kochbuch, Foto, Kamera, Internet, Video und Datei. Ab Android 13 passt sich das Symbol auf Wunsch den Farben des Handys an („Designbasierte Symbole“).
+
 ## [0.23.0] – 2026-10-08 (versionCode 43)
 
 ### Geändert

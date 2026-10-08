@@ -101,6 +101,7 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 - **Farbpalette „Schiefer“** (ruhiges Blaugrau, vom Projektinhaber gewählt): Hauptfarbe hell `#3E5A6E`, dunkel `#A9C6DB`; Hintergrund hell `#F7F8F9`, dunkel `#121518`. Die vollständige Palette steht in `ui/theme/Color.kt`, die Fensterfarben in `res/values(-night)/colors.xml` – beide müssen zueinander passen. Keine Farben vom Hintergrundbild (dynamische Farben).
 - Farben im Code **nur** über `MaterialTheme.colorScheme`, Schriftgrößen nur über `MaterialTheme.typography`, Ecken über `MaterialTheme.shapes`, Abstände über `Spacing` – nie feste Werte.
 - Schrift: Standardschrift von Android, Material-3-Größenskala.
+- **App-Symbol:** Logo des Projektinhabers vom 08.10.2026 (Variante F3a): weißes „MB“ mit Lächeln auf Kobaltblau `#2747D9`, rundherum die Quellen der Rezepte. Vorlagen unter `docs/logo/`, im App-Code `drawable/ic_launcher_foreground.xml` und `ic_launcher_background` in `values/colors.xml`. Die Farben in der App bleiben „Schiefer“.
 - Oben in der Sammlung und in der Rezeptansicht steht der Name der App als „MOLTOBENE“ (`ui/components/AppTitle`, vom Projektinhaber am 08.10.2026 gewünscht); in der Rezeptansicht daneben der Umschalter „DE | EN“ (Originalsprache mit Sternchen, z. B. „DE*“), Bearbeiten und ⋮ – „Teilen“ steht dort im Menü.
 - Hell- und Dunkelmodus gleichwertig; Kontraste mindestens WCAG AA.
 - Tippflächen mindestens 48 dp; Informationen nie nur über Farbe.

@@ -1,3 +1,5 @@
+<img src="docs/logo/moltobene-icon-512.png" alt="Logo von Moltobene: ein weißes „MB“ mit Lächeln auf Blau, rundherum Kochbuch, Foto, Kamera, Internet, Video und Datei" width="128" align="right">
+
 # Moltobene
 
 _Moltobene sammelt Kochrezepte aus allen Quellen an einem Ort, gespeichert nur auf dem eigenen Handy._

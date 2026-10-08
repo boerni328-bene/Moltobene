@@ -2,5 +2,6 @@
 <resources>
     <!-- Palette „Schiefer“; muss zu ui/theme/Color.kt passen. -->
     <color name="window_background">#FFF7F8F9</color>
-    <color name="ic_launcher_background">#FF3E5A6E</color>
+    <!-- Hintergrund des App-Symbols: Kobaltblau aus dem Logo (08.10.2026); die Farben in der App bleiben „Schiefer“. -->
+    <color name="ic_launcher_background">#FF2747D9</color>
 </resources>

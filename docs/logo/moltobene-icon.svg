@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<title>Moltobene</title>
+<rect width="512" height="512" rx="116" fill="#2747D9"/>
+<path transform="translate(256 74) scale(1.25)" d="M0 -9 Q-9 -14 -18 -11 V12 Q-9 9 0 14 Q9 9 18 12 V-11 Q9 -14 0 -9 Z M0 -9 V14" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(413.6 165) scale(1.25)" d="M-14 -12 H14 A3 3 0 0 1 17 -9 V9 A3 3 0 0 1 14 12 H-14 A3 3 0 0 1 -17 9 V-9 A3 3 0 0 1 -14 -12 Z" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(413.6 165) scale(1.25)" d="M-10 -3 Q-7 -8 -4 -3 T2 -3 T8 -3 M-10 5 H6" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(413.6 347) scale(1.25)" d="M-13 -9 H13 A5 5 0 0 1 18 -4 V10 A5 5 0 0 1 13 15 H-13 A5 5 0 0 1 -18 10 V-4 A5 5 0 0 1 -13 -9 Z" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(413.6 347) scale(1.25)" d="M-8 -9 L-5 -14 H5 L8 -9" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(413.6 347) scale(1.25)" d="M-7 3 A7 7 0 1 1 7 3 A7 7 0 1 1 -7 3 Z" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(256 438) scale(1.25)" d="M-15 0 A15 15 0 1 1 15 0 A15 15 0 1 1 -15 0 Z" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(256 438) scale(1.25)" d="M-6 0 A6 15 0 1 1 6 0 A6 15 0 1 1 -6 0 Z" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(256 438) scale(1.25)" d="M-15 0 H15" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(98.4 347) scale(1.25)" d="M-10 -13 H10 A8 8 0 0 1 18 -5 V5 A8 8 0 0 1 10 13 H-10 A8 8 0 0 1 -18 5 V-5 A8 8 0 0 1 -10 -13 Z" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(98.4 347) scale(1.25)" d="M-5 -6 L7 0 L-5 6 Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(98.4 165) scale(1.25)" d="M-12 -16 H4 L12 -8 V16 H-12 Z M4 -16 V-8 H12 M-6 1 H6 M-6 8 H6" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(256 116) rotate(0)" d="M-8 -4 L0 4 L8 -4" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(377 186) rotate(60)" d="M-8 -4 L0 4 L8 -4" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(377 326) rotate(120)" d="M-8 -4 L0 4 L8 -4" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(256 396) rotate(180)" d="M-8 -4 L0 4 L8 -4" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(135 326) rotate(240)" d="M-8 -4 L0 4 L8 -4" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(135 186) rotate(300)" d="M-8 -4 L0 4 L8 -4" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(256 256) scale(1.15) translate(-256 -256)" d="M185 278 V192 L225 236 L265 192 V278" fill="none" stroke="#FFFFFF" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(256 256) scale(1.15) translate(-256 -256)" d="M265 192 H299 A21 21 0 0 1 299 234 H265 M265 234 H305 A22 22 0 0 1 305 278 H265" fill="none" stroke="#FFFFFF" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+<path transform="translate(256 256) scale(1.15) translate(-256 -256)" d="M214 310 Q256 336 298 310" fill="none" stroke="#FFFFFF" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
