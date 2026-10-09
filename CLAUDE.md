@@ -6,7 +6,7 @@ Festgelegt vom Projektinhaber am 29.09.2026 (siehe `docs/besprechungen/2026-09-2
 
 **Kernsatz** (wörtlich gleich in README, GitHub und Releases): _Moltobene sammelt Kochrezepte aus allen Quellen an einem Ort, gespeichert nur auf dem eigenen Handy._
 
-**Für wen:** Alle, die gern kochen. Öffentlich und kostenlos, verteilt über GitHub Releases.
+**Für wen:** Alle, die gern kochen. Öffentlich und kostenlos, verteilt über GitHub Releases. Eine freiwillige Spende ist möglich (Link nur im README, im Store-Eintrag und unter Einstellungen → Info; die App bittet nie aktiv darum, keine Bezahlversion, kein Abo; entschieden am 09.10.2026, siehe `docs/marktberichte/2026-10-09-marktbericht.md`). Lizenz: GPL-3.0 (#72).
 
 ### Kernfunktionen
 
