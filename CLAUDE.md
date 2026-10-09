@@ -189,7 +189,7 @@ Umfangreiche Versionen werden auf einem Arbeitszweig entwickelt und dort über �
 
 ## Spezialisten-Team und Prüfrunden
 
-- Auf Benutzerebene gibt es neun nur lesende Spezialisten (Subagents): `design`, `funktionalitaet`, `sicherheit`, `kreativitaet`, `konnektivitaet`, `performance`, `texte`, `uebersetzungen` und `marketing` (Marktforschung und Marketing: Konkurrenz-Apps, Vermarktung, Vertriebswege, Preis; seit 09.10.2026, Etikett „Marketing“).
+- Auf Benutzerebene gibt es zehn nur lesende Spezialisten (Subagents): `design`, `funktionalitaet`, `sicherheit`, `kreativitaet`, `konnektivitaet`, `performance`, `texte`, `uebersetzungen`, `marketing` (Marktforschung und Marketing: Konkurrenz-Apps, Vermarktung, Vertriebswege, Preis; seit 09.10.2026, Etikett „Marketing“) und `sprache` (Sprachausgabe und Spracheingabe, offline; Vorlage unter `docs/spezialisten/sprache.md`, am PC mit `/agents` anlegen; seit 09.10.2026, Etikett „Sprache“).
 - `/pruefrunde` ruft alle nacheinander auf und legt ihre Vorschläge als GitHub-Issues an (Etikett des Spezialisten + `Priorität: hoch|mittel|niedrig`).
 - **Vor jeder Erhöhung der ersten Stelle der Versionsnummer** (z. B. 1.x → 2.0.0) wird **automatisch eine /pruefrunde** durchgeführt, bevor die neue Version veröffentlicht wird.
 - **Umgesetzt wird nur, was der Projektinhaber freigibt.** Issues aus Prüfrunden sind Vorschläge, keine Aufträge.
