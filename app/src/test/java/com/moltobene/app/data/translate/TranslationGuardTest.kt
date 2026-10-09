@@ -78,4 +78,17 @@ class TranslationGuardTest {
         assertEquals("1 packet active dry yeast", KitchenGlossary.apply("1 packet active dry yeast", "en-de"))
         assertEquals("2 cups bread flour", KitchenGlossary.apply("2 cups bread flour", "en-de"))
     }
+
+    /** Brüche dürfen anders geschrieben sein, wenn die Menge gleich bleibt (Rezept „½ cup (80 grams) flour“). */
+    @Test
+    fun bruecheInAndererSchreibweise() {
+        assertTrue(TranslationGuard.accept("½ cup (80 grams) all-purpose flour", "1/2 Tasse (80 Gramm) Weizenmehl"))
+        assertTrue(TranslationGuard.accept("½ cup (80 grams) flour", "0,5 Tasse (80 Gramm) Mehl"))
+        assertTrue(TranslationGuard.accept("1 1/2 cups milk", "1½ Tassen Milch"))
+        assertTrue(TranslationGuard.accept("1,5 l Milch", "1.5 l milk"))
+        assertTrue(TranslationGuard.accept("¾ cup sugar", "3/4 Tasse Zucker"))
+        assertFalse(TranslationGuard.accept("½ cup flour", "1/4 Tasse Mehl"))
+        assertFalse(TranslationGuard.accept("½ cup (80 grams) flour", "½ Tasse Mehl"))
+        assertFalse(TranslationGuard.accept("3 eggs", "2 Eier"))
+    }
 }

@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.27.1] – 2026-10-09 (versionCode 49)
+
+### Behoben
+- **Übersetzung ließ Zutatenzeilen mit Brüchen im Original:** Eine Zeile wie „½ cup (80 grams) all-purpose flour, plus extra for dusting the pasta“ blieb englisch, weil die Übersetzung „½“ als „1/2“ oder „0,5“ schrieb und die Mengenprüfung das für eine Änderung hielt. Brüche in anderer Schreibweise („½“, „1/2“, „0,5“, „1½“, „1 1/2“) gelten jetzt als dieselbe Menge; echte Abweichungen (z. B. ¼ statt ½) werden weiterhin abgelehnt. Bereits übersetzte Rezepte werden einmal neu übersetzt, wenn die Übersetzung das nächste Mal angezeigt wird.
+
 ## [0.27.0] – 2026-10-09 (versionCode 48)
 
 ### Neu

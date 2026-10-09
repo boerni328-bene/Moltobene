@@ -35,7 +35,7 @@ data class TranslatedRecipe(
 object RecipeTranslator {
 
     /** Erhöhen, wenn sich Wörterbuch, Schutzregeln oder Paket ändern: Dann wird neu übersetzt. */
-    const val VERSION = 2
+    const val VERSION = 3
 
     /** Fingerabdruck von allem, was übersetzt wird, samt Ziel- und Ausgangssprache. */
     fun sourceHash(recipe: Recipe, from: String, to: String): String {

@@ -23,9 +23,28 @@ object TranslationGuard {
     /** Die Übersetzung, wenn sie die Regeln erfüllt, sonst das Original. */
     fun choose(original: String, translated: String): String = if (accept(original, translated)) translated.trim() else original
 
+    /**
+     * Die Zahlen eines Textes als Werte: „1,5“ = „1.5“ = „1½“ = „1 1/2“, „½“ = „1/2“ = „0,5“ – das Modell schreibt
+     * Brüche oft anders als die Vorlage, die Menge bleibt aber dieselbe.
+     */
     internal fun numbers(text: String): List<String> =
-        NUMBER.findAll(text).map { it.value.replace(',', '.') }.sorted().toList()
+        NUMBER.findAll(text).map { value(it.value) }.sorted().toList()
 
+    private fun value(token: String): String {
+        val number = parse(token) ?: return token
+        return "%.3f".format(java.util.Locale.ROOT, number).trimEnd('0').trimEnd('.')
+    }
+
+    /** „1½“, „1 1/2“, „1/2“, „½“, „1,5“ → Zahl; null, wenn es keine ist. */
+    private fun parse(token: String): Double? {
+        MIXED.matchEntire(token)?.let { m ->
+            val bottom = m.groupValues[3].toDouble()
+            if (bottom == 0.0) return null
+            return m.groupValues[1].ifEmpty { "0" }.toDouble() + m.groupValues[2].toDouble() / bottom
+        }
+        WITH_GLYPH.matchEntire(token)?.let { m -> return m.groupValues[1].ifEmpty { "0" }.toDouble() + GLYPHS.getValue(m.groupValues[2][0]) }
+        return token.replace(',', '.').toDoubleOrNull()
+    }
     /** Dasselbe Wort viermal hintereinander oder eine Folge von drei Wörtern dreimal. */
     internal fun repeats(text: String): Boolean {
         val words = text.lowercase().split(WORD_SEPARATOR).filter { it.isNotEmpty() }
@@ -38,7 +57,14 @@ object TranslationGuard {
     private const val MAX_LENGTH_EXTRA = 20
     private const val SAME_WORD_LIMIT = 4
     private const val SAME_TRIPLE_LIMIT = 3
-    private val NUMBER = Regex("\\d+(?:[.,]\\d+)*|[½¼¾⅓⅔⅛⅜⅝⅞]")
+    private const val GLYPH_CLASS = "½¼¾⅓⅔⅛⅜⅝⅞"
+    private val NUMBER = Regex("\\d+[ \\u00A0]\\d+/\\d+|\\d+/\\d+|\\d*[$GLYPH_CLASS]|\\d+(?:[.,]\\d+)*")
+    private val MIXED = Regex("(\\d*)[ \\u00A0]?(\\d+)/(\\d+)")
+    private val WITH_GLYPH = Regex("(\\d*)([$GLYPH_CLASS])")
+    private val GLYPHS = mapOf(
+        '½' to 0.5, '¼' to 0.25, '¾' to 0.75, '⅓' to 1.0 / 3, '⅔' to 2.0 / 3,
+        '⅛' to 0.125, '⅜' to 0.375, '⅝' to 0.625, '⅞' to 0.875,
+    )
     private val WORD_SEPARATOR = Regex("[^\\p{L}\\d]+")
 }
 
