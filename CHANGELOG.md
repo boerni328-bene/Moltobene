@@ -3,6 +3,19 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.27.0] – 2026-10-09 (versionCode 48)
+
+### Neu
+- **Bildschirm in der Rezeptansicht:** In den Einstellungen gibt es den neuen Abschnitt „Kochen“. Dort lässt sich wählen, ob der Bildschirm in der Rezeptansicht anbleibt (wie bisher), 15 oder 30 Minuten nach dem letzten Tippen ausgeht oder sich wie das Handy verhält. Jede Berührung, auch beim Blättern, lässt die Zeit neu beginnen. Die App braucht dafür keine neue Berechtigung.
+- **Backform als Rezeptmenge:** Angaben wie „Springform Ø 26 cm“, „Für eine 26er Springform“, „Blech 30 x 40 cm“ oder “One 9-inch cake” werden jetzt richtig gelesen, aus Internetseiten, Rezeptdateien, Text und Fotos. Größen wie „26 cm“ zählen nicht mehr als Portionen (bisher wurden daraus z. B. 26 Portionen). Ist etwas unklar, bleiben die Portionen leer, statt geraten zu werden. Eine Backform ohne Anzahl steht trotzdem beim Rezept und wird beim Teilen mitgegeben. Zwischen − und + steht jetzt z. B. „Springform (Ø 26 cm): 2“.
+- **Lizenz:** Moltobene ist jetzt ausdrücklich freie Software unter der GNU General Public License v3.0 (GPL-3.0). Sie steht unter Einstellungen → Info → „Open-Source-Lizenzen“ an erster Stelle.
+
+### Geändert
+- **Sinnvoll gerundet beim Umrechnen:** Beim Ändern der Portionen werden Stückangaben auf ½ gerundet (unter 1 auf ¼), Gramm und Milliliter ab 100 auf 5, ab 10 auf ganze Gramm und darunter auf 0,5. Statt „3,75 Eier“ steht also „≈ 4 Eier“. Gerundete Mengen beginnen mit „≈“, der Screenreader liest „etwa …, umgerechnet“. Stückzahlen stehen als Bruch da, z. B. „1½ Zwiebeln“. Löffel, Tassen, Liter und Kilo werden weiterhin genau umgerechnet. Das gespeicherte Rezept bleibt wie immer unverändert.
+- **Packungen in Klammern werden mitgerechnet:** „21 g Frischhefe (½ Würfel)“ wird beim Verdoppeln zu „42 g Frischhefe (1 Würfel)“. Würfel, Päckchen und Packungen werden nur als Anzahl umgerechnet, nie in Gramm.
+- **Übersetzung kennt mehr Küchenwörter:** Begriffe zum Backen wie Backform, Kastenform, Blech, Teigkugel, Nudelholz, Küchenmaschine, Gehzeit, Umluft und Ober-/Unterhitze werden jetzt richtig übersetzt, ins Englische mit amerikanischen Wörtern wie “powdered sugar”, “heavy cream” und “green onions”. Aufgenommen wurde nur, was in Probesätzen nachweislich besser wurde. Bereits übersetzte Rezepte werden dafür einmal neu übersetzt, wenn die Übersetzung das nächste Mal angezeigt wird.
+- Kleine Textkorrekturen, z. B. lautet der Hinweis im Feld „Portionen“ jetzt „z. B. Stück, Springform Ø 26 cm“.
+
 ## [0.26.0] – 2026-10-08 (versionCode 47)
 
 ### Neu

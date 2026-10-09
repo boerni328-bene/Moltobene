@@ -20,7 +20,15 @@ class AppPreferences(context: Context) {
     /** Darstellung aus den Einstellungen; null, bis [loadAppearance] sie gelesen hat. */
     val appearance: StateFlow<Appearance?> = appearanceState.asStateFlow()
 
-    /** Liest die Darstellung; gleich beim Start der App, damit der erste Bildschirm schon in den richtigen Farben kommt. */
+    private val screenOnState = MutableStateFlow<ScreenOn?>(null)
+
+    /** „Bildschirm in der Rezeptansicht“ (#68); null, bis [loadAppearance] sie gelesen hat (dann gilt „Bleibt an“). */
+    val screenOn: StateFlow<ScreenOn?> = screenOnState.asStateFlow()
+
+    /**
+     * Liest die Darstellung und die Bildschirm-Einstellung; gleich beim Start der App, damit der erste Bildschirm schon
+     * in den richtigen Farben kommt.
+     */
     suspend fun loadAppearance() = withContext(Dispatchers.IO) {
         val stored = runCatching {
             Appearance(
@@ -29,6 +37,14 @@ class AppPreferences(context: Context) {
             )
         }.getOrDefault(Appearance())
         appearanceState.compareAndSet(null, stored)
+        val screen = runCatching { ScreenOn.fromKey(prefs.getString(KEY_SCREEN_ON, null)) }.getOrDefault(ScreenOn.STAYS_ON)
+        screenOnState.compareAndSet(null, screen)
+    }
+
+    /** Gilt sofort, gespeichert wird danach. */
+    suspend fun setScreenOn(screenOn: ScreenOn) {
+        screenOnState.value = screenOn
+        withContext(Dispatchers.IO) { prefs.edit { putString(KEY_SCREEN_ON, screenOn.key) } }
     }
 
     /** Die App wechselt sofort, gespeichert wird danach. */
@@ -109,5 +125,6 @@ class AppPreferences(context: Context) {
         const val KEY_BACKUP_HINT_HIDDEN_AT = "backup_hint_hidden_at"
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_PALETTE = "palette"
+        const val KEY_SCREEN_ON = "screen_on"
     }
 }

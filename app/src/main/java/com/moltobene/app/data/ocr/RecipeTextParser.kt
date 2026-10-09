@@ -1,5 +1,6 @@
 package com.moltobene.app.data.ocr
 
+import com.moltobene.app.data.RecipeYield
 import java.text.Normalizer
 
 /**
@@ -69,22 +70,51 @@ object RecipeTextParser {
         RegexOption.IGNORE_CASE,
     )
 
-    private const val PERSON_WORDS =
-        "personen|portionen|pers\\.?|people|persons|servings?|portions?|persone|porzioni|personnes|parts|personas|porciones|raciones"
     private const val PIECE_WORDS = "stück|stücke|stk\\.?|pieces?|pezzi|pièces|piezas"
-    private val SERVINGS_PATTERNS = listOf(
-        // Eine eigene Zeile mit Zahl und eigener Einheit: „Für 1 Zopf“, „Für 1 Springform (26 cm)“, „For 12 muffins“.
-        Regex(
-            "^\\s*(?:für|fuer|for|per|pour|para)\\s+(\\d{1,3})\\s+(\\p{L}[\\p{L}-]{1,30}(?:\\s*\\([^)]{1,20}\\))?)\\s*[:.]?\\s*$",
-            RegexOption.IGNORE_CASE,
-        ),
-        Regex("\\b(?:für|fuer|for|per|pour|para)\\s+(\\d{1,3})(?:\\s*-\\s*\\d{1,3})?\\s*($PERSON_WORDS|$PIECE_WORDS)?\\b", RegexOption.IGNORE_CASE),
-        Regex("\\b(?:serves|makes|ergibt|reicht für|dosi per|rend|rinde)\\s*:?\\s*(\\d{1,3})\\s*($PIECE_WORDS)?", RegexOption.IGNORE_CASE),
-        // Nur eine eigene Zeile wie „12 Stück“ – „1 Stk. Zwiebel“ ist eine Zutat.
-        Regex("^(\\d{1,3})\\s+($PERSON_WORDS|$PIECE_WORDS)\\s*$", RegexOption.IGNORE_CASE),
-        Regex("\\b(?:$PERSON_WORDS)\\s*:\\s*(\\d{1,3})", RegexOption.IGNORE_CASE),
+
+    /**
+     * Eine Zeile, die mit der Rezeptmenge beginnt: „Für 1 Springform (Ø 26 cm)“, „Zutaten für eine 26er Springform“,
+     * „Teig für 4 Pizzen à 250 g“, „Serves 4“, „Makes: 12 muffins“. Gelesen wird der Rest mit [RecipeYield].
+     */
+    private val YIELD_LINE = Regex(
+        "^(?:(?:zutaten|ingredients?|ingredienti|ingrédients|ingredientes|teig|dough|impasto|pâte|masa)\\s+)?" +
+            "(?:für|fuer|for|per|pour|para|serves|makes|ergibt|reicht für|dosi per|rend|rinde|yields?)\\s*:?\\s+(.+?)\\s*[:.]?$",
+        RegexOption.IGNORE_CASE,
     )
-    private val PERSONS = Regex("^($PERSON_WORDS)$", RegexOption.IGNORE_CASE)
+
+    /** Mitten in der Zeile nur mit Zahl: „Lasagne für 6 Personen“ – aber nicht „per 5 minuti“. */
+    private val COUNT_ANYWHERE = Regex(
+        "\\b(?:für|fuer|for|per|pour|para|serves|makes|ergibt|reicht für|dosi per|rend|rinde)\\s*:?\\s*(\\d{1,3})(?:\\s*-\\s*\\d{1,3})?" +
+            "(?!\\s*(?:min|minute|minuten|minutes|minuti|minutos|std|stunde|stunden|hours?|ore|heures?|horas?|sek|sekunden|seconds|grad|degrees|°|cm|g\\b|kg))" +
+            "\\s*(?:(${RecipeYield.PERSON_WORDS})|($PIECE_WORDS))?\\b",
+        RegexOption.IGNORE_CASE,
+    )
+
+    /** Eine eigene Zeile wie „12 Stück“, „4 Portionen“ oder „6 Teigkugeln (je 250 g)“ – „1 Stk. Zwiebel“ ist eine Zutat. */
+    private val OWN_LINE = Regex(
+        "^\\d{1,3}\\s+(?:(?:${RecipeYield.PERSON_WORDS}|$PIECE_WORDS)\\s*$|" +
+            "(?:teiglinge?|teigkugeln?|dough balls?|pizzen|pizzas?|pizze|panetti|pâtons|bollos)\\b.*$)",
+        RegexOption.IGNORE_CASE,
+    )
+
+    /** „Portionen: 4“ */
+    private val PERSONS_COLON = Regex("\\b(?:${RecipeYield.PERSON_WORDS})\\s*:\\s*(\\d{1,3})", RegexOption.IGNORE_CASE)
+
+    /**
+     * Eine Backform für sich, mit Größe: „Springform Ø 26 cm“, „Blech 30 x 40 cm“, „9x13 inch pan“ – nicht ein Satz wie
+     * „In eine Springform (Ø 26 cm) füllen.“
+     */
+    private val PAN_LINE = Regex(
+        "^(?:(?:eine?|one|a|an|un|una|une)\\s+)?(?:[\\d\\s x×\"-]+(?:inch|in|cm)?\\s+|\\d{2}er\\s+)?" +
+            "(?:springform|backform|tarteform|kuchenform|tortenform|auflaufform|blech|backblech|pan|tin|cake pan|sheet pan|" +
+            "baking sheet|tortiera|teglia|stampo|moule|plaque|molde|bandeja)\\b[^.!?]*$",
+        RegexOption.IGNORE_CASE,
+    )
+
+    /** Längste Zeile, die noch eine Rezeptmenge für sich ist; längere sind Zutaten oder Sätze. */
+    private const val MAX_SERVINGS_LINE = 50
+    private const val SHORT_LINE_WORDS = 6
+    private const val SENTENCE_WORDS = 4
     private val DURATION_UNITS = Regex(
         "^(min\\.?|minute|minuten|minutes|minuti|minutos|std\\.?|stunde|stunden|hours?|ore|heures?|horas?|sek\\.?|sekunden|seconds|grad|degrees)\\b",
         RegexOption.IGNORE_CASE,
@@ -232,22 +262,47 @@ object RecipeTextParser {
     }
 
     /** Portionen und – wenn sie in einer eigenen Zeile stehen – diese Zeile, damit sie keine Zutat wird. */
-    private class Servings(val count: Int, val unit: String?, val line: Int?)
+    private class Servings(val count: Int?, val unit: String?, val line: Int?)
 
     /** Portionen: aus einer eigenen Zeile oder aus der Überschrift „Zutaten für 4 Personen“. */
     private fun findServings(lines: List<String>, content: List<Int>, ingredientHeading: Int?, stepsHeading: Int?): Servings? {
         for (index in content) {
             val line = lines[index]
             val isHeading = index == ingredientHeading
-            if (!isHeading && (line.length > 40 || index == stepsHeading)) continue
-            val match = SERVINGS_PATTERNS.firstNotNullOfOrNull { it.find(line) } ?: continue
-            val count = match.groupValues[1].toIntOrNull()?.takeIf { it in 1..999 } ?: continue
-            // Personen und Portionen sind keine eigene Einheit; Zeitangaben („Für 10 Minuten“) sind keine Portionen.
-            val unit = match.groupValues.getOrNull(2)?.trim()?.takeIf { it.isNotEmpty() && !PERSONS.matches(it) }
-            if (unit != null && DURATION_UNITS.containsMatchIn(unit)) continue
-            return Servings(count, unit, if (isHeading) null else index)
+            if (!isHeading && (line.length > MAX_SERVINGS_LINE || index == stepsHeading)) continue
+            val found = servingsOf(line.trim()) ?: continue
+            // Ein Satz wie „Für 4 Pizzen den Teig teilen.“ nennt die Menge, bleibt aber ein Schritt.
+            return Servings(found.count, found.unit, if (isHeading || isSentence(line.trim())) null else index)
         }
         return null
+    }
+
+    /** Die Rezeptmenge in einer Zeile (#63), gelesen von der gemeinsamen Lese-Stelle [RecipeYield]; sonst null. */
+    internal fun servingsOf(line: String): RecipeYield.Servings? {
+        // In einem Satz wie „Für 4 Pizzen den Teig teilen.“ zählt höchstens die Zahl, der Rest ist keine Einheit.
+        if (!isSentence(line)) YIELD_LINE.matchEntire(line)?.let { match ->
+            // „Für 10 Minuten“ ist eine Zeit, „Für die Füllung:“ eine Zwischenüberschrift: Die Zeile ist dann keine Menge.
+            return RecipeYield.parse(match.groupValues[1])?.takeIf { isYield(it) }
+        }
+        COUNT_ANYWHERE.find(line)?.let { match ->
+            val count = match.groupValues[1].toIntOrNull()?.takeIf { it in 1..999 }
+            if (count != null) return RecipeYield.Servings(count, match.groupValues[3].ifEmpty { null })
+        }
+        if (OWN_LINE.matches(line)) RecipeYield.parse(line)?.takeIf { isYield(it) }?.let { return it }
+        PERSONS_COLON.find(line)?.groupValues?.get(1)?.toIntOrNull()?.takeIf { it in 1..999 }?.let { return RecipeYield.Servings(it, null) }
+        if (PAN_LINE.matches(line) && RecipeYield.hasSize(line) && line.split(' ').size <= SHORT_LINE_WORDS) {
+            RecipeYield.parse(line)?.takeIf { isYield(it) }?.let { return it }
+        }
+        return null
+    }
+
+    private fun isSentence(line: String): Boolean = line.endsWith(".") && line.split(' ').size > SENTENCE_WORDS
+
+    /** Eine Zeit ist keine Menge; ohne Zahl zählt nur eine Backform mit Größe („für die Springform Ø 26 cm“). */
+    private fun isYield(servings: RecipeYield.Servings): Boolean {
+        val unit = servings.unit
+        if (unit != null && DURATION_UNITS.containsMatchIn(unit)) return false
+        return servings.count != null || (unit != null && RecipeYield.hasSize(unit))
     }
 
     private val EMPTY = ParsedRecipe(null, null, null, emptyList(), emptyList())

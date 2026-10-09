@@ -1,5 +1,6 @@
 package com.moltobene.app.data.web
 
+import com.moltobene.app.data.RecipeYield
 import com.moltobene.app.data.ocr.RecipeTextParser
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document

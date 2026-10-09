@@ -3,6 +3,7 @@ package com.moltobene.app.data.web
 import com.moltobene.app.data.Ingredient
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeSource
+import com.moltobene.app.data.RecipeYield
 import com.moltobene.app.data.SourceType
 import com.moltobene.app.data.share.RecipeJsonLd
 import org.junit.Assert.assertEquals

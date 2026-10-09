@@ -11,6 +11,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.moltobene.app.BuildConfig
 import com.moltobene.app.MoltobeneApplication
 import com.moltobene.app.data.Appearance
+import com.moltobene.app.data.ScreenOn
 import kotlinx.coroutines.runBlocking
 import org.junit.rules.ExternalResource
 import kotlin.math.abs
@@ -58,5 +59,6 @@ class DeviceSetupRule(private val variant: DisplayVariant) : ExternalResource() 
         container.preferences.setBackupHintHiddenAt(0)
         // Standard-Darstellung: „Schiefer“ und wie das Handy – Hell/Dunkel kommt dann von der Darstellung des Rundgangs.
         container.preferences.setAppearance(Appearance())
+        container.preferences.setScreenOn(ScreenOn.STAYS_ON)
     }
 }

@@ -9,6 +9,7 @@ import android.icu.text.MeasureFormat
 import android.icu.util.Measure
 import android.icu.util.MeasureUnit
 import android.net.Uri
+import android.os.SystemClock
 import android.text.format.Formatter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -67,6 +68,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
@@ -76,11 +79,13 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -95,6 +100,8 @@ import com.moltobene.app.R
 import com.moltobene.app.data.AmountScaling
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeText
+import com.moltobene.app.data.ScreenOn
+import com.moltobene.app.data.ScreenOnTimer
 import com.moltobene.app.data.ocr.TextLanguage
 import com.moltobene.app.data.share.PreparedShare
 import com.moltobene.app.data.share.RecipeShareText
@@ -108,7 +115,10 @@ import com.moltobene.app.ui.components.PageViewer
 import com.moltobene.app.ui.components.RecipePhoto
 import com.moltobene.app.ui.components.RecipePhotoLarge
 import com.moltobene.app.ui.theme.Spacing
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.File
 import java.util.Locale
 
@@ -116,6 +126,7 @@ import java.util.Locale
 @Composable
 fun RecipeScreen(
     viewModel: RecipeViewModel,
+    screenOn: ScreenOn,
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onEdit: (String) -> Unit,
@@ -134,7 +145,8 @@ fun RecipeScreen(
     val context = LocalContext.current
     val resources = LocalResources.current
 
-    KeepScreenOn()
+    // Jede Berührung startet die Frist für den Bildschirm neu (#68).
+    val onTouch = keepScreenOn(screenOn)
 
     // Zurück aus den Einstellungen: Ist das Sprachpaket inzwischen da, wird gleich übersetzt.
     LifecycleResumeEffect(Unit) {
@@ -156,32 +168,38 @@ fun RecipeScreen(
     val pageCount = (state as? RecipeUiState.Content)?.recipe?.pageIds?.size ?: 0
     viewModel.viewer.page?.let { page ->
         if (pageCount > 0) {
-            PageViewer(
-                page = page.coerceAtMost(pageCount - 1),
-                pageCount = pageCount,
-                bitmap = viewModel.viewer.bitmap,
-                failed = viewModel.viewer.failed,
-                onPageChange = { if (it in 0 until pageCount) viewModel.viewer.open(it) },
-                onClose = viewModel.viewer::close,
-            )
+            Box(modifier = Modifier.observeTouches(onTouch)) {
+                PageViewer(
+                    page = page.coerceAtMost(pageCount - 1),
+                    pageCount = pageCount,
+                    bitmap = viewModel.viewer.bitmap,
+                    failed = viewModel.viewer.failed,
+                    onPageChange = { if (it in 0 until pageCount) viewModel.viewer.open(it) },
+                    onClose = viewModel.viewer::close,
+                )
+            }
             return
         }
     }
     viewModel.photoViewer.page?.let {
-        PageViewer(
-            page = 0,
-            pageCount = 1,
-            bitmap = viewModel.photoViewer.bitmap,
-            failed = viewModel.photoViewer.failed,
-            onPageChange = {},
-            onClose = viewModel.photoViewer::close,
-            title = stringResource(R.string.photo),
-            errorText = stringResource(R.string.photo_load_error),
-        )
+        Box(modifier = Modifier.observeTouches(onTouch)) {
+            PageViewer(
+                page = 0,
+                pageCount = 1,
+                bitmap = viewModel.photoViewer.bitmap,
+                failed = viewModel.photoViewer.failed,
+                onPageChange = {},
+                onClose = viewModel.photoViewer::close,
+                title = stringResource(R.string.photo),
+                errorText = stringResource(R.string.photo_load_error),
+            )
+        }
         return
     }
 
     Scaffold(
+        // Jede Berührung, auch beim Blättern, startet die Frist für den Bildschirm neu (#68); sie wird nur beobachtet.
+        modifier = Modifier.observeTouches(onTouch),
         topBar = {
             TopAppBar(
                 // Name der App und Umschalter „DE | EN“ bleiben beim Blättern oben stehen (Wunsch vom 08.10.2026).
@@ -343,13 +361,46 @@ private fun openShareMenu(context: Context, share: PreparedShare, chooserTitle: 
     }
 }
 
-/** Beim Kochen soll der Bildschirm nicht ausgehen. */
+/** Beobachtet jede Berührung, auch beim Blättern, ohne sie abzufangen. */
+private fun Modifier.observeTouches(onTouch: () -> Unit): Modifier = pointerInput(onTouch) {
+    awaitPointerEventScope {
+        while (true) {
+            awaitPointerEvent(PointerEventPass.Initial)
+            onTouch()
+        }
+    }
+}
+
+/**
+ * Beim Kochen bleibt der Bildschirm an – so lange, wie unter „Bildschirm in der Rezeptansicht“ gewählt (#68). Nur über
+ * „Bildschirm anlassen“ der Ansicht, ohne Berechtigung und ohne Hintergrunddienst. Gibt zurück, was bei jeder Berührung
+ * aufgerufen wird: Sie startet die Frist neu und schaltet nach dem Ausgehen wieder an.
+ */
 @Composable
-private fun KeepScreenOn() {
+private fun keepScreenOn(setting: ScreenOn): () -> Unit {
     val view = LocalView.current
+    val timer = remember(setting) { ScreenOnTimer(setting) { SystemClock.uptimeMillis() } }
+    val touches = remember { Channel<Unit>(Channel.CONFLATED) }
+    LaunchedEffect(view, timer) {
+        while (true) {
+            val remaining = timer.remainingMillis()
+            view.keepScreenOn = remaining == null || remaining > 0
+            when {
+                remaining == null -> awaitCancellation()
+                remaining > 0 -> withTimeoutOrNull(remaining) { touches.receive() }
+                else -> touches.receive()
+            }
+        }
+    }
     DisposableEffect(view) {
-        view.keepScreenOn = true
         onDispose { view.keepScreenOn = false }
+    }
+    return remember(timer) {
+        val onTouch: () -> Unit = {
+            timer.touch()
+            touches.trySend(Unit)
+        }
+        onTouch
     }
 }
 
@@ -421,12 +472,20 @@ private fun RecipeContent(
             }
             val originalServings = recipe.servings?.takeIf { it > 0 }
             val servings = originalServings?.let { cooking.shownServings ?: it }
+            val servingsUnit = (translated?.servingsUnit ?: recipe.servingsUnit)?.takeIf { it.isNotBlank() }
             if (originalServings != null && servings != null) {
                 ServingsControl(
                     original = originalServings,
                     shown = servings,
-                    unit = (translated?.servingsUnit ?: recipe.servingsUnit)?.takeIf { it.isNotBlank() },
+                    unit = servingsUnit,
                     onChange = { cooking.onServingsChange(it.takeIf { value -> value != originalServings }) },
+                )
+            } else if (servingsUnit != null) {
+                // Eine Backform ohne Anzahl (#63), z. B. „Springform Ø 26 cm“.
+                Text(
+                    text = localized(servingsUnit, textLocale),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             RecipeTimes(recipe.prepMinutes, recipe.totalMinutes)
@@ -528,7 +587,7 @@ private fun ServingsControl(original: Int, shown: Int, unit: String?, onChange: 
             Icon(painterResource(R.drawable.ic_remove), contentDescription = stringResource(R.string.servings_fewer))
         }
         Text(
-            text = servingsText(shown, unit),
+            text = servingsControlText(shown, unit),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             // Der Screenreader sagt die neue Zahl an.
@@ -548,6 +607,16 @@ private fun ServingsControl(original: Int, shown: Int, unit: String?, onChange: 
     }
 }
 
+/** Zwischen − und +: „4 Portionen“ oder mit eigener Einheit „Springform (Ø 26 cm): 2“ statt „2 Springform“ (#63). */
+@Composable
+private fun servingsControlText(servings: Int, unit: String?): String =
+    if (unit == null) {
+        pluralStringResource(R.plurals.servings_count, servings, servings)
+    } else {
+        stringResource(R.string.servings_unit_count, unit, servings)
+    }
+
+/** Als Satzteil, z. B. im Hinweis „Im Rezept: 1 Springform (Ø 26 cm)“. */
 @Composable
 private fun servingsText(servings: Int, unit: String?): String =
     if (unit == null) {
@@ -563,6 +632,18 @@ private fun servingsText(servings: Int, unit: String?): String =
 @Composable
 private fun IngredientRow(parts: List<AmountScaling.Part>, locale: LocaleList?, checked: Boolean, onToggle: () -> Unit) {
     val state = stringResource(if (checked) R.string.ingredient_checked else R.string.ingredient_unchecked)
+    val resources = LocalResources.current
+    // Der Screenreader liest „etwa 335 g Mehl, umgerechnet“ (#65); die Zutat behält dabei die Sprache des Rezepts.
+    val spoken = remember(parts, locale, resources) {
+        if (parts.none { it.scaled }) return@remember null
+        val line = AmountScaling.spoken(parts) { resources.getString(R.string.amount_about, it) }
+        val full = resources.getString(R.string.ingredient_adjusted, line)
+        buildAnnotatedString {
+            append(full)
+            val start = full.indexOf(line)
+            if (start >= 0) addStyle(SpanStyle(localeList = locale), start, start + line.length)
+        }
+    }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.s),
@@ -573,23 +654,25 @@ private fun IngredientRow(parts: List<AmountScaling.Part>, locale: LocaleList?, 
             .semantics { stateDescription = state },
     ) {
         Checkbox(checked = checked, onCheckedChange = null)
-        Text(
-            text = buildAnnotatedString {
-                withStyle(SpanStyle(localeList = locale)) {
-                    parts.forEach { part ->
-                        if (part.scaled) {
-                            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(part.text) }
-                        } else {
-                            append(part.text)
+        Box(modifier = if (spoken != null) Modifier.clearAndSetSemantics { text = spoken } else Modifier) {
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(SpanStyle(localeList = locale)) {
+                        parts.forEach { part ->
+                            if (part.scaled) {
+                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(part.text) }
+                            } else {
+                                append(part.text)
+                            }
                         }
                     }
-                }
-            },
-            style = MaterialTheme.typography.bodyLarge.copy(
-                textDecoration = if (checked) TextDecoration.LineThrough else TextDecoration.None,
-            ),
-            color = if (checked) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
-        )
+                },
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    textDecoration = if (checked) TextDecoration.LineThrough else TextDecoration.None,
+                ),
+                color = if (checked) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+            )
+        }
     }
 }
 

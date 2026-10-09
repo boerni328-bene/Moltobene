@@ -80,7 +80,7 @@ class AppContainer(context: Context) {
     /** Läuft so lange wie die App, z. B. für den Download des Sprachpakets. */
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    /** Liest die Darstellung (Hell/Dunkel, Farben) im Hintergrund, sobald die App startet. */
+    /** Liest die Darstellung (Hell/Dunkel, Farben) und die Bildschirm-Einstellung im Hintergrund, sobald die App startet. */
     fun loadAppearance() {
         appScope.launch { preferences.loadAppearance() }
     }

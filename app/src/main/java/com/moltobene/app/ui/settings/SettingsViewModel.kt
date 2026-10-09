@@ -10,6 +10,7 @@ import com.moltobene.app.R
 import com.moltobene.app.data.AppPreferences
 import com.moltobene.app.data.Appearance
 import com.moltobene.app.data.Palette
+import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.StorageFull
 import com.moltobene.app.data.ThemeMode
 import com.moltobene.app.data.backup.BackupManager
@@ -74,6 +75,13 @@ class SettingsViewModel(
         viewModelScope.launch {
             runCatching { preferences.setAppearance(change(appearance.value ?: Appearance())) }
         }
+    }
+
+    /** „Bildschirm in der Rezeptansicht“ (#68); gilt sofort. */
+    val screenOn: StateFlow<ScreenOn?> = preferences.screenOn
+
+    fun setScreenOn(screenOn: ScreenOn) {
+        viewModelScope.launch { runCatching { preferences.setScreenOn(screenOn) } }
     }
 
     /** Letzte geprüfte Sicherung für „Zuletzt gesichert: …“ (#51); null, solange sie lädt oder es keine gibt. */

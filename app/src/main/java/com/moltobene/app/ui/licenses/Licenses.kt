@@ -4,7 +4,8 @@ import androidx.annotation.StringRes
 import com.moltobene.app.R
 
 /**
- * Quelloffene Bausteine der App und ihre Lizenzen (Lizenztexte unter assets/licenses/).
+ * Die Lizenz von Moltobene (GPL-3.0, #72) und die quelloffenen Bausteine der App mit ihren Lizenzen (Lizenztexte unter
+ * assets/licenses/).
  * Kommt ein Baustein hinzu, gehört er hier in die Liste. Namen von Bausteinen, Urhebern und
  * Lizenzen sind Eigennamen und werden nicht übersetzt.
  */
@@ -19,6 +20,13 @@ internal data class LicenseGroup(
 internal data class Component(val name: String, val holder: String)
 
 internal val LICENSE_GROUPS = listOf(
+    // Moltobene selbst (#72).
+    LicenseGroup(
+        licenseName = "GNU General Public License v3.0",
+        file = "gpl-3.0.txt",
+        components = listOf(Component("Moltobene", "boerni328-bene")),
+        note = R.string.license_note_moltobene,
+    ),
     LicenseGroup(
         licenseName = "Apache License 2.0",
         file = "apache-2.0.txt",

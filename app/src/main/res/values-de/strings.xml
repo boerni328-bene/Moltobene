@@ -40,6 +40,7 @@
         <item quantity="other">%d Portionen</item>
     </plurals>
     <string name="servings_with_unit">%1$d %2$s</string>
+    <string name="servings_unit_count">%1$s: %2$d</string>
     <string name="edit_recipe">Rezept bearbeiten</string>
     <string name="delete_recipe">Rezept löschen</string>
     <string name="delete_confirm_title">Rezept wirklich löschen?</string>
@@ -70,6 +71,9 @@
     <string name="cooking_reset">Abhaken zurücksetzen</string>
     <string name="ingredient_checked">abgehakt</string>
     <string name="ingredient_unchecked">nicht abgehakt</string>
+    <!-- Screenreader: umgerechnete Zutat; „≈“ wird als „etwa“ vorgelesen (#65). -->
+    <string name="ingredient_adjusted">%1$s, umgerechnet</string>
+    <string name="amount_about">etwa %1$s</string>
     <string name="step_current">Aktueller Schritt</string>
     <string name="step_mark_current">Als aktuellen Schritt markieren</string>
     <string name="servings_fewer">Weniger Portionen</string>
@@ -191,7 +195,7 @@
 
     <!-- Lizenzen -->
     <string name="licenses_title">Open-Source-Lizenzen</string>
-    <string name="licenses_intro">Moltobene baut auf den folgenden quelloffenen Bausteinen auf. Vielen Dank an ihre Urheber.</string>
+    <string name="licenses_intro">Moltobene steht unter der GPL-3.0 und baut auf den folgenden quelloffenen Bausteinen auf. Vielen Dank an ihre Urheber.</string>
     <string name="license_text_show">Lizenztext anzeigen</string>
     <string name="license_text_hide">Lizenztext ausblenden</string>
     <string name="licenses_error">Die Lizenztexte konnten nicht geladen werden.</string>
@@ -199,8 +203,10 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Darstellung wählbar: In den Einstellungen unter „Darstellung“ lässt sich „Hell“, „Dunkel“ oder „Wie das Handy“ wählen.</item>
-        <item>Fünf Farbwelten zur Auswahl: Schiefer, Kobalt, Salbei, Terrakotta und Safran.</item>
+        <item>„Kochen“ in den Einstellungen: Der Bildschirm in der Rezeptansicht bleibt an, geht 15 oder 30 Minuten nach dem letzten Tippen aus oder verhält sich wie das Handy.</item>
+        <item>Sinnvoll gerundet beim Umrechnen, z. B. „≈ 4 Eier“ statt „3,75 Eier“. Würfel und Päckchen in Klammern werden mitgerechnet.</item>
+        <item>Backformen wie „Springform Ø 26 cm“ werden richtig gelesen und angezeigt.</item>
+        <item>Die Übersetzung kennt mehr Wörter zum Backen und für Teige.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->
@@ -221,7 +227,7 @@
     <string name="field_title">Titel</string>
     <string name="field_title_missing">Titel fehlt</string>
     <string name="field_servings_unit">Einheit (optional)</string>
-    <string name="field_servings_unit_hint">z. B. Stück, Springform 26 cm</string>
+    <string name="field_servings_unit_hint">z. B. Stück, Springform Ø 26 cm</string>
     <string name="field_language">Sprache des Rezepts: %1$s</string>
     <string name="field_language_title">Sprache des Rezepts</string>
     <string name="field_language_hint">Wichtig für Portionen umrechnen und Übersetzung. Meist erkennt die App die Sprache selbst.</string>
@@ -246,8 +252,18 @@
     <!-- Einstellungen -->
     <string name="settings_title">Einstellungen</string>
     <string name="settings_section_about">Info</string>
+    <string name="license_note_moltobene">Moltobene selbst ist freie Software und darf unter den Bedingungen dieser Lizenz genutzt, weitergegeben und verändert werden, ohne jede Gewährleistung. Quelltext: github.com/boerni328-bene/Moltobene</string>
     <string name="license_note_opus_mt">Modelle des Sprachpakets für die Übersetzung, nur auf Wunsch heruntergeladen. Für Moltobene geändert: nach ONNX umgewandelt und auf 8 Bit verkleinert. Quelle: huggingface.co/Helsinki-NLP</string>
     <string name="settings_section_translation">Übersetzung</string>
+    <!-- Einstellungen: Kochen (#68) -->
+    <string name="settings_section_cooking">Kochen</string>
+    <string name="screen_on_title">Bildschirm in der Rezeptansicht</string>
+    <string name="screen_on_stays">Bleibt an</string>
+    <plurals name="screen_on_off_after">
+        <item quantity="one">Geht %1$d Minute nach dem letzten Tippen aus</item>
+        <item quantity="other">Geht %1$d Minuten nach dem letzten Tippen aus</item>
+    </plurals>
+    <string name="screen_on_device">Wie das Handy</string>
     <!-- Einstellungen: Darstellung (Hell/Dunkel und Farbwelt) -->
     <string name="settings_section_appearance">Darstellung</string>
     <string name="appearance_mode">Hell oder dunkel</string>

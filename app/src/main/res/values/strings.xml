@@ -41,6 +41,7 @@
         <item quantity="other">%d servings</item>
     </plurals>
     <string name="servings_with_unit">%1$d %2$s</string>
+    <string name="servings_unit_count">%1$s: %2$d</string>
     <string name="edit_recipe">Edit recipe</string>
     <string name="delete_recipe">Delete recipe</string>
     <string name="delete_confirm_title">Delete recipe?</string>
@@ -71,11 +72,14 @@
     <string name="cooking_reset">Reset check-offs</string>
     <string name="ingredient_checked">checked off</string>
     <string name="ingredient_unchecked">not checked off</string>
+    <!-- Screenreader: umgerechnete Zutat; „≈“ wird als „about“ vorgelesen (#65). -->
+    <string name="ingredient_adjusted">%1$s, adjusted</string>
+    <string name="amount_about">about %1$s</string>
     <string name="step_current">Current step</string>
     <string name="step_mark_current">Mark as current step</string>
     <string name="servings_fewer">Fewer servings</string>
     <string name="servings_more">More servings</string>
-    <string name="servings_scaled_hint">Amounts adjusted. In the recipe: %1$s. Only amounts at the start of a line and in brackets are adjusted.</string>
+    <string name="servings_scaled_hint">Amounts adjusted. In the recipe: %1$s. Only amounts at the start of a line and in parentheses are adjusted.</string>
     <string name="servings_reset">Reset</string>
 
     <!-- Teilen -->
@@ -192,7 +196,7 @@
 
     <!-- Lizenzen -->
     <string name="licenses_title">Open-source licenses</string>
-    <string name="licenses_intro">Moltobene is built on the following open-source components. Many thanks to their authors.</string>
+    <string name="licenses_intro">Moltobene is licensed under the GPL-3.0 and is built on the following open-source components. Many thanks to their authors.</string>
     <string name="license_text_show">Show license text</string>
     <string name="license_text_hide">Hide license text</string>
     <string name="licenses_error">The license texts could not be loaded.</string>
@@ -201,8 +205,10 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Choose the appearance: under “Appearance” in Settings, pick “Light”, “Dark” or “Same as device”.</item>
-        <item>Five color themes to choose from: Slate, Cobalt, Sage, Terracotta and Saffron.</item>
+        <item>“Cooking” in Settings: the screen in recipe view stays on, turns off 15 or 30 minutes after the last tap, or behaves the same as the device.</item>
+        <item>Sensible rounding when adjusting servings, e.g. “≈ 4 eggs” instead of “3.75 eggs”. Cubes and packets in parentheses are adjusted too.</item>
+        <item>Pans like “springform pan Ø 26 cm” are now read and shown correctly.</item>
+        <item>Translation knows more baking and dough terms.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->
@@ -223,7 +229,7 @@
     <string name="field_title">Title</string>
     <string name="field_title_missing">Title missing</string>
     <string name="field_servings_unit">Unit (optional)</string>
-    <string name="field_servings_unit_hint">e.g. pieces, 26 cm tin</string>
+    <string name="field_servings_unit_hint">e.g. pieces, Ø 26 cm pan</string>
     <string name="field_language">Recipe language: %1$s</string>
     <string name="field_language_title">Recipe language</string>
     <string name="field_language_hint">Used for adjusting servings and for translation. Usually the app detects the language itself.</string>
@@ -248,8 +254,18 @@
     <!-- Einstellungen -->
     <string name="settings_title">Settings</string>
     <string name="settings_section_about">About</string>
+    <string name="license_note_moltobene">Moltobene itself is free software and may be used, shared and changed under the terms of this license, without any warranty. Source code: github.com/boerni328-bene/Moltobene</string>
     <string name="license_note_opus_mt">Models of the language pack for translation, downloaded only on request. Changed for Moltobene: converted to ONNX and reduced to 8 bit. Source: huggingface.co/Helsinki-NLP</string>
     <string name="settings_section_translation">Translation</string>
+    <!-- Einstellungen: Kochen (#68) -->
+    <string name="settings_section_cooking">Cooking</string>
+    <string name="screen_on_title">Screen in recipe view</string>
+    <string name="screen_on_stays">Stays on</string>
+    <plurals name="screen_on_off_after">
+        <item quantity="one">Turns off %1$d minute after last tap</item>
+        <item quantity="other">Turns off %1$d minutes after last tap</item>
+    </plurals>
+    <string name="screen_on_device">Same as device</string>
     <!-- Einstellungen: Darstellung (Hell/Dunkel und Farbwelt) -->
     <string name="settings_section_appearance">Appearance</string>
     <string name="appearance_mode">Light or dark</string>

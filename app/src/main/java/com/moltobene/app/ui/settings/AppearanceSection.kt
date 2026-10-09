@@ -128,7 +128,7 @@ private fun PaletteChoice(palette: Palette, dark: Boolean, selected: Boolean, on
 }
 
 @Composable
-private fun GroupLabel(text: String) {
+internal fun GroupLabel(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelLarge,

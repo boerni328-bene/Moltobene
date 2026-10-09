@@ -88,6 +88,18 @@ class RecipeShareTest {
         assertFalse(Json.parseToJsonElement(RecipeJsonLd.build(recipe, "Ohne Titel", null)).jsonObject.containsKey("video"))
     }
 
+    /** Eine Backform ohne Anzahl (#63) wird mitgeteilt und kommt beim Übernehmen wieder an. */
+    @Test
+    fun backformOhneAnzahlWirdGeteilt() {
+        val cake = recipe.copy(servings = null, servingsUnit = "Springform Ø 26 cm")
+        assertTrue(RecipeShareText.format(cake, labels).startsWith("Pfannkuchen\nSpringform Ø 26 cm\n\n"))
+        val file = RecipeJsonLd.build(cake, "Ohne Titel", null)
+        assertEquals("Springform Ø 26 cm", Json.parseToJsonElement(file).jsonObject.getValue("recipeYield").jsonPrimitive.content)
+        val back = RecipeJsonLdReader.read(file)
+        assertNull(back?.servings)
+        assertEquals("Springform Ø 26 cm", back?.servingsUnit)
+    }
+
     @Test
     fun textOhneTitelUndMitPortionsangabe() {
         val text = RecipeShareText.format(

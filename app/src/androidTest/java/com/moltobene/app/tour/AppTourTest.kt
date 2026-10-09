@@ -2,6 +2,8 @@ package com.moltobene.app.tour
 
 import android.content.Intent
 import android.os.Build
+import android.view.View
+import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertCountEquals
@@ -19,6 +21,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -37,6 +40,7 @@ import com.moltobene.app.MoltobeneApplication
 import com.moltobene.app.R
 import com.moltobene.app.data.Appearance
 import com.moltobene.app.data.Palette
+import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.ThemeMode
 import com.moltobene.app.data.share.RecipeJsonLd
 import com.moltobene.app.ui.whatsnew.WhatsNew
@@ -193,13 +197,14 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithText("Tomaten würfeln", substring = true).performScrollTo().performClick()
         screenshot("12a-kochen-abgehakt")
 
-        // Von 4 auf 8 Portionen: Nur die Anzeige ändert sich, das Häkchen bleibt.
-        repeat(4) {
-            composeRule.onNodeWithContentDescription(text(R.string.servings_more)).performScrollTo().performClick()
-        }
-        waitForText("1600 g reife Tomaten")
-        composeRule.onNodeWithText("1600 g reife Tomaten").assertIsOn()
-        composeRule.onNodeWithText("6 EL Olivenöl").assertIsOff()
+        // Von 4 auf 5 Portionen: Nur die Anzeige ändert sich, das Häkchen bleibt. Stück werden auf ½ gerundet und
+        // bekommen „≈“, der Screenreader liest „etwa …, umgerechnet“ (#65).
+        composeRule.onNodeWithContentDescription(text(R.string.servings_more)).performScrollTo().performClick()
+        val tomatoes = text(R.string.ingredient_adjusted, "1000 g reife Tomaten")
+        waitForText(tomatoes)
+        composeRule.onNodeWithText(tomatoes).assertIsOn()
+        composeRule.onNodeWithText(text(R.string.ingredient_adjusted, text(R.string.amount_about, "1½") + " Zwiebel"))
+            .assertIsOff()
         screenshot("12b-portionen-umgerechnet")
         val stored = runBlocking { container().repository.getAll().first { it.title == SampleRecipes.TOMATO_SAUCE } }
         assertEquals("800 g reife Tomaten", stored.ingredients.first().text)
@@ -563,6 +568,44 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("29b-sammlung-terrakotta")
     }
 
+    /**
+     * „Kochen“ in den Einstellungen (#68): „Bildschirm in der Rezeptansicht“ wählen. Mit Frist bleibt der Bildschirm
+     * in der Rezeptansicht an, mit „Wie das Handy“ nicht. Die Frist selbst prüft `ScreenOnTest` mit nachgestellter Uhr.
+     */
+    @Test
+    fun bildschirmInDerRezeptansicht() {
+        addSampleRecipes()
+        waitForText(SampleRecipes.POTATO_SALAD)
+        composeRule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        waitForText(text(R.string.settings_section_cooking))
+
+        val fifteen = activity.resources.getQuantityString(R.plurals.screen_on_off_after, 15, 15)
+        composeRule.onNodeWithText(fifteen).performScrollTo().performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.screenOn.value == ScreenOn.OFF_AFTER_15 }
+        composeRule.onNodeWithText(fifteen).assertIsSelected()
+        composeRule.onNodeWithText(text(R.string.settings_section_cooking)).performScrollTo()
+        screenshot("29c-bildschirm-in-der-rezeptansicht")
+
+        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+        openRecipe(SampleRecipes.TOMATO_SAUCE)
+        waitForText("800 g reife Tomaten")
+        composeRule.waitUntil(TIMEOUT_MILLIS) { screenKeptOn() }
+
+        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        // „Wie das Handy“ steht auch unter „Hell oder dunkel“; der Abschnitt „Kochen“ kommt zuerst.
+        composeRule.onAllNodesWithText(text(R.string.screen_on_device)).onFirst().performScrollTo().performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.screenOn.value == ScreenOn.DEVICE }
+        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+        // Die Sammlung steht noch beim Rezept von eben (bei großer Schrift ist der Anfang der Liste nicht mehr geladen).
+        composeRule.waitUntil(TIMEOUT_MILLIS) { composeRule.onAllNodes(hasScrollToNodeAction()).fetchSemanticsNodes().isNotEmpty() }
+        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(SampleRecipes.TOMATO_SAUCE))
+        composeRule.onNodeWithText(SampleRecipes.TOMATO_SAUCE).performSemanticsAction(SemanticsActions.OnClick)
+        waitForText("800 g reife Tomaten")
+        composeRule.waitForIdle()
+        assertFalse(screenKeptOn())
+    }
+
     // --- Hilfsfunktionen ---
 
     private val activity get() = composeRule.activity
@@ -577,6 +620,16 @@ class AppTourTest(private val variant: DisplayVariant) {
     }
 
     private fun container() = (activity.application as MoltobeneApplication).container
+
+    /** Hält gerade eine Ansicht der App den Bildschirm an („Bildschirm anlassen“)? */
+    private fun screenKeptOn(): Boolean {
+        var on = false
+        InstrumentationRegistry.getInstrumentation().runOnMainSync { on = activity.window.decorView.keepsScreenOn() }
+        return on
+    }
+
+    private fun View.keepsScreenOn(): Boolean =
+        keepScreenOn || (this is ViewGroup && (0 until childCount).any { getChildAt(it).keepsScreenOn() })
 
     /** Schließt Fenster der App, die ein Schritt zusätzlich geöffnet hat (z. B. über „Öffnen mit…“). */
     private fun closeOtherWindows() = InstrumentationRegistry.getInstrumentation().runOnMainSync {

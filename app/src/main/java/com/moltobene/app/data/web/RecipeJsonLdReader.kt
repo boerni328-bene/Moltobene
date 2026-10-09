@@ -1,5 +1,6 @@
 package com.moltobene.app.data.web
 
+import com.moltobene.app.data.RecipeYield
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement

@@ -66,6 +66,14 @@ object KitchenGlossary {
             Regex("(?<![\\p{L}])${Regex.escape(term)}(?![\\p{L}])", RegexOption.IGNORE_CASE) to replacement
         }
 
+    // Mehltypen werden nie gleichgesetzt (#64): Type 405, Tipo 00 oder „all-purpose“ haben keine genauen
+    // Gegenstücke. „all-purpose flour“ wird deshalb nur „Weizenmehl“, nie eine Type.
+    // Ins Englische mit amerikanischen Wörtern (#64): „powdered sugar“, „heavy cream“, „green onions“, „pan“.
+    // Back- und Teigbegriffe wie in den festen Begriffen von CLAUDE.md, aber nur, wo das Modell sie nachweislich falsch
+    // übersetzt (Vergleich mit und ohne Wörterbuch in `LanguagePackTest`, .github/workflows/sprachpaket.yml). Hefen,
+    // „Vorteig“, „Teigkugel“, „Päckchen“, „Gugelhupfform“ und „final dough“ fehlen absichtlich: Eingesetzt verdrehte
+    // das Modell sie („instant yet“, „preference“, „Teichkugeln“, „fret pan“, „Hauptsteig“), ohne Wörterbuch übersetzt
+    // es sie richtig oder wenigstens verständlich.
     private val ENTRIES = mapOf(
         "en-de" to entries(
             "icing sugar" to "Puderzucker",
@@ -83,6 +91,7 @@ object KitchenGlossary {
             "tomato paste" to "Tomatenmark",
             "tomato purée" to "Tomatenmark",
             "heavy cream" to "Schlagsahne",
+            "heavy whipping cream" to "Schlagsahne",
             "double cream" to "Schlagsahne",
             "whipping cream" to "Schlagsahne",
             "kosher salt" to "grobes Salz",
@@ -95,22 +104,59 @@ object KitchenGlossary {
             "loaf tin" to "Kastenform",
             "loaf pan" to "Kastenform",
             "springform pan" to "Springform",
+            "cake pan" to "Backform",
+            "baking pan" to "Backform",
+            "tart pan" to "Tarteform",
+            "Bundt pan" to "Gugelhupfform",
+            "muffin pan" to "Muffinblech",
+            "muffin tin" to "Muffinblech",
+            "sheet pan" to "Backblech",
+            "parchment paper" to "Backpapier",
+            "convection oven" to "Umluftofen",
+            "fan oven" to "Umluftofen",
+            "instant yeast" to "Trockenhefe",
+            "instant dry yeast" to "Trockenhefe",
+            "rapid-rise yeast" to "Trockenhefe",
+            "sourdough starter" to "Sauerteig",
+            "preferment" to "Vorteig",
+            "pre-ferment" to "Vorteig",
+            "rising time" to "Gehzeit",
+            "proofing time" to "Gehzeit",
+            "dough hook" to "Knethaken",
+            "stand mixer" to "Küchenmaschine",
+            "rolling pin" to "Nudelholz",
             "zest of" to "Abrieb von",
         ),
         "de-en" to entries(
             "Tellerlinsen" to "brown lentils",
-            "Ober-/Unterhitze" to "top and bottom heat",
-            "Umluft" to "fan oven",
+            "Ober-/Unterhitze" to "conventional oven",
+            "Ober- und Unterhitze" to "conventional oven",
+            "Umluft" to "convection oven",
             "Springform" to "springform pan",
+            "Kastenform" to "loaf pan",
+            "Tarteform" to "tart pan",
+            "Muffinblech" to "muffin pan",
+            "Muffinform" to "muffin pan",
+            "Backform" to "baking pan",
+            "Backblech" to "baking sheet",
+            "Blech" to "baking sheet",
             "Speisestärke" to "cornstarch",
-            "Puderzucker" to "icing sugar",
+            "Puderzucker" to "powdered sugar",
             "Backpulver" to "baking powder",
             "Natron" to "baking soda",
             "Schmand" to "sour cream",
-            "Schlagsahne" to "whipping cream",
-            "Frühlingszwiebeln" to "spring onions",
+            "Schlagsahne" to "heavy cream",
+            "Frühlingszwiebeln" to "green onions",
+            "Lauchzwiebeln" to "green onions",
             "Tomatenmark" to "tomato paste",
-            "Lauchzwiebeln" to "spring onions",
+            "Sauerteig" to "sourdough starter",
+            "Hauptteig" to "final dough",
+            "Teigkugeln" to "dough balls",
+            "Teigkugel" to "dough ball",
+            "Gehzeit" to "rising time",
+            "Knethaken" to "dough hook",
+            "Küchenmaschine" to "stand mixer",
+            "Nudelholz" to "rolling pin",
             "Bund" to "bunch",
         ),
     )

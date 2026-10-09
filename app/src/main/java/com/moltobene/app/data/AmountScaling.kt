@@ -1,5 +1,6 @@
 package com.moltobene.app.data
 
+import com.moltobene.app.data.RecipeUnits.Kind
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.roundToLong
@@ -8,15 +9,25 @@ import kotlin.math.roundToLong
  * Portionen umrechnen (#56): liest Mengen in einer Zutatenzeile so, wie das Rezept sie schreibt, und rechnet sie
  * mit einem Faktor um. Umgerechnet werden nur
  * - die Menge am Anfang der Zeile („1,5 l Milch“, „1 1/2 cups“, „½ TL“, „2–3 Eier“) und
- * - Mengen mit Gewicht oder Volumen in Klammern („3 EL (45 g)“, „(etwa 3 lb / 1,4 kg)“).
+ * - Mengen mit Gewicht, Volumen oder Packung in Klammern („3 EL (45 g)“, „(etwa 3 lb / 1,4 kg)“, „(½ Würfel)“).
+ *
+ * Gerundet wird je nach Einheit (#65, [RecipeUnits]): Stück und Packungen auf ½ (unter 1 auf ¼), Gramm und Milliliter
+ * ab 100 auf 5, ab 10 auf 1, darunter auf 0,5; alles andere bleibt genau. Gerundete Mengen beginnen mit „≈“.
+ * Packungen werden nur als Anzahl umgerechnet, nie in Gramm.
  *
  * Zahlen mitten im Text („Saft von 2 Zitronen“, „Springform (26 cm)“, „Mehl Type 405“) bleiben, wie sie sind.
  * Die gespeicherte Zeile ändert sich nie; das Ergebnis dient nur der Anzeige. Reines Kotlin, per Unit-Test prüfbar.
  */
 object AmountScaling {
 
-    /** Ein Stück der Zeile; [scaled] markiert umgerechnete Mengen, damit die Anzeige sie hervorheben kann. */
-    data class Part(val text: String, val scaled: Boolean)
+    /** Zeichen vor gerundeten Mengen. */
+    const val APPROXIMATE = "≈ "
+
+    /**
+     * Ein Stück der Zeile; [scaled] markiert umgerechnete Mengen, damit die Anzeige sie hervorheben kann,
+     * [approximate] die gerundeten, deren Text mit [APPROXIMATE] beginnt (bei „2½-4“ nur die erste Zahl).
+     */
+    data class Part(val text: String, val scaled: Boolean, val approximate: Boolean = false)
 
     /**
      * @param factor neue Portionen geteilt durch die Portionen des Rezepts
@@ -24,31 +35,48 @@ object AmountScaling {
      */
     fun scale(line: String, factor: Double, language: String?): List<Part> {
         if (factor == 1.0 || factor <= 0.0 || line.isBlank()) return listOf(Part(line, false))
-        val replacements = mutableListOf<Pair<IntRange, String>>()
+        val replacements = mutableListOf<Replacement>()
         LEADING.find(line)?.let { match ->
             val rest = line.substring(match.range.last + 1).trimStart()
             // „30 % Fett“ oder „180 °C“ sind keine Mengen.
             if (rest.startsWith("%") || rest.startsWith("°")) return@let
-            listOfNotNull(match.groups[2], match.groups[4]).forEach { group ->
-                scaleNumber(group.value, factor, language)?.let { replacements += group.range to it }
+            // Ohne bekannte Einheit zählt die Zutat selbst („3 Eier“, „1 Springform“) – wie Stück.
+            val kind = UNIT.find(rest)?.let { RecipeUnits.kindOf(it.value) } ?: Kind.PIECES
+            val numbers = listOfNotNull(match.groups[2], match.groups[4]).mapNotNull { group ->
+                scaleNumber(group.value, factor, language, kind)?.let { group.range to it }
+            }
+            // Bei einem Bereich steht „≈“ nur vor der ersten Zahl.
+            val approximate = numbers.any { it.second.approximate }
+            numbers.forEachIndexed { index, (range, scaled) ->
+                replacements += Replacement(range, scaled.text, approximate && index == 0)
             }
         }
         BRACKETS.findAll(line).forEach { bracket ->
             AMOUNT_IN_BRACKETS.findAll(bracket.value).forEach { amount ->
                 val number = amount.groups[1] ?: return@forEach
+                val kind = RecipeUnits.kindOf(amount.groupValues[2]) ?: Kind.OTHER
                 val start = bracket.range.first + number.range.first
                 val range = start until start + number.value.length
-                if (replacements.none { it.first.first <= range.last && range.first <= it.first.last }) {
-                    scaleNumber(number.value, factor, language)?.let { replacements += range to it }
+                if (replacements.none { it.range.first <= range.last && range.first <= it.range.last }) {
+                    scaleNumber(number.value, factor, language, kind)?.let { scaled ->
+                        // „(etwa 1 Würfel)“: Steht „etwa“ schon da, kommt kein „≈“ dazu.
+                        val about = ABOUT_BEFORE.containsMatchIn(bracket.value.substring(0, number.range.first))
+                        replacements += Replacement(range, scaled.text, scaled.approximate && !about)
+                    }
                 }
             }
         }
         if (replacements.isEmpty()) return listOf(Part(line, false))
         val parts = mutableListOf<Part>()
         var position = 0
-        replacements.sortedBy { it.first.first }.forEach { (range, text) ->
+        replacements.sortedBy { it.range.first }.forEach { replacement ->
+            val range = replacement.range
             if (range.first > position) parts += Part(line.substring(position, range.first), false)
-            parts += Part(text, true)
+            parts += if (replacement.approximate) {
+                Part(APPROXIMATE + replacement.text, scaled = true, approximate = true)
+            } else {
+                Part(replacement.text, scaled = true)
+            }
             position = range.last + 1
         }
         if (position < line.length) parts += Part(line.substring(position), false)
@@ -59,12 +87,46 @@ object AmountScaling {
     fun scaleText(line: String, factor: Double, language: String?): String =
         scale(line, factor, language).joinToString("") { it.text }
 
+    /**
+     * Die Zeile für den Screenreader: „≈ 335 g Mehl“ wird mit [about] (z. B. „etwa %1$s“ aus strings.xml) zu
+     * „etwa 335 g Mehl“, denn „≈“ liest nicht jeder Screenreader verständlich vor.
+     */
+    fun spoken(parts: List<Part>, about: (String) -> String): String =
+        parts.joinToString("") { if (it.approximate) about(it.text.removePrefix(APPROXIMATE)) else it.text }
+
+    private class Replacement(val range: IntRange, val text: String, val approximate: Boolean)
+
+    private class Scaled(val text: String, val approximate: Boolean)
+
     /** Wie eine Zahl im Rezept geschrieben war – damit das Ergebnis genauso aussieht. */
     private class Number(val value: Double, val fraction: Boolean, val grouping: Boolean, val decimalSeparator: Char?)
 
-    private fun scaleNumber(text: String, factor: Double, language: String?): String? {
+    private fun scaleNumber(text: String, factor: Double, language: String?, kind: Kind): Scaled? {
         val number = parse(text, language) ?: return null
-        return format(number.value * factor, number, language)
+        val exact = number.value * factor
+        val rounded = round(exact, kind)
+        // Stück schreiben Rezepte als Bruch („1½ Zwiebeln“, „¼ Würfel“) – außer das Rezept schreibt Dezimalzahlen.
+        val style = if (kind == Kind.PIECES && number.decimalSeparator == null && !number.grouping) {
+            Number(number.value, fraction = true, grouping = false, decimalSeparator = null)
+        } else {
+            number
+        }
+        return Scaled(format(rounded, style, language), approximate = abs(rounded - exact) >= INTEGER_TOLERANCE)
+    }
+
+    /** Auf übliche Kochmengen runden; nie auf 0, dann bleibt die genaue Menge. */
+    private fun round(value: Double, kind: Kind): Double {
+        val step = when (kind) {
+            Kind.PIECES -> if (value < 1) QUARTER else HALF
+            Kind.GRAMS -> when {
+                value >= 100 -> 5.0
+                value >= 10 -> 1.0
+                else -> HALF
+            }
+            Kind.OTHER -> return value
+        }
+        val rounded = Math.round(value / step) * step
+        return if (rounded > 0) rounded else value
     }
 
     /** Liest „1.000“, „1,5“, „1 1/2“, „1½“, „½“ oder „3/4“; null, wenn es keine Zahl ist. */
@@ -135,6 +197,8 @@ object AmountScaling {
     }
 
     private const val INTEGER_TOLERANCE = 0.005
+    private const val HALF = 0.5
+    private const val QUARTER = 0.25
     private const val FRACTION_TOLERANCE = 0.01
     private const val FRACTION_LIMIT = 20.0
 
@@ -164,9 +228,30 @@ object AmountScaling {
 
     private val BRACKETS = Regex("\\([^()]*\\)")
 
-    /** Gewicht und Volumen; Längen wie „26 cm“ oder „1 inch“ werden nicht umgerechnet. */
+    /** Die Einheit nach der Menge: „g“, „EL“, „Würfel“, „c.à.s.“. */
+    private val UNIT = Regex("^\\p{L}[\\p{L}.]*")
+
+    /** Steht davor schon „etwa“, „ca.“ oder “about”? */
+    private val ABOUT_BEFORE = Regex(
+        "(?:ca\\.|circa|etwa|ungefähr|about|approx\\.?|approximately|around|environ|aproximadamente|~)\\s*$",
+        RegexOption.IGNORE_CASE,
+    )
+
+    /** Einheiten in Klammern, längere zuerst („Stk.“ vor „Stk“, „Dosen“ vor „Do.“). */
+    private val BRACKET_UNITS = (
+        listOf("kg", "mg", "gr", "g", "ml", "cl", "dl", "l", "oz", "lbs", "lb", "cups", "cup", "tbsp", "tsp", "el", "tl", "gramm", "liter") +
+            RecipeUnits.PIECES
+        )
+        .distinctBy { it.lowercase() }
+        .sortedByDescending { it.length }
+        .joinToString("|") { Regex.escape(it) }
+
+    /**
+     * Gewicht, Volumen und Packungen („½ Würfel“, „1 Päckchen“, “1 packet”); Längen wie „26 cm“ oder „1 inch“ werden
+     * nicht umgerechnet.
+     */
     private val AMOUNT_IN_BRACKETS = Regex(
-        "(?<![\\p{L}\\d.,/])($NUMBER)$SPACE?(kg|mg|gr|g|ml|cl|dl|l|oz|lbs|lb|cups|cup|tbsp|tsp|el|tl|gramm|liter)(?![\\p{L}])",
+        "(?<![\\p{L}\\d.,/])($NUMBER)$SPACE?($BRACKET_UNITS)(?![\\p{L}])",
         RegexOption.IGNORE_CASE,
     )
 }

@@ -79,9 +79,10 @@ class LanguagePackTest {
                     if (output != row.outputIds) differences += "$direction Übersetzung: ${row.line} → $output statt ${row.outputIds}"
                     val text = translator.decode(row.outputIds)
                     if (text != row.text) differences += "$direction Text: ${row.line} → „$text“ statt „${row.text}“"
-                    // So, wie die App es zeigt: mit Küchenwörterbuch und Schutzregeln.
+                    // So, wie die App es zeigt: mit Küchenwörterbuch und Schutzregeln – zum Vergleich auch ohne Wörterbuch.
                     val shown = TranslationGuard.choose(row.line, translator.translate(KitchenGlossary.apply(row.line, direction)))
-                    println("$direction: ${row.line}  →  $shown")
+                    val plain = TranslationGuard.choose(row.line, row.text)
+                    println("$direction: ${row.line}  →  $shown" + if (plain != shown) "   [ohne Wörterbuch: $plain]" else "")
                 }
             }
         }

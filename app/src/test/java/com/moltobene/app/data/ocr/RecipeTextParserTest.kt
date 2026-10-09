@@ -51,6 +51,31 @@ class RecipeTextParserTest {
         assertEquals(4 to null, servings("Für 4 Personen"))
         assertEquals(12 to "Stück", servings("Für 12 Stück"))
         assertEquals(null to null, servings("Für 10 Minuten"))
+        // Backformen und Teigkugeln (#63): Größen sind nie eine Anzahl, „eine“ zählt als 1.
+        assertEquals(1 to "Springform (Ø 26 cm)", servings("Für eine Springform (Ø 26 cm)"))
+        assertEquals(1 to "Springform (Ø 26 cm)", servings("Zutaten für eine Springform (Ø 26 cm)"))
+        assertEquals(1 to "26er Springform", servings("Für eine 26er Springform"))
+        assertEquals(4 to "Pizzen à 250 g", servings("Teig für 4 Pizzen à 250 g"))
+        assertEquals(6 to "Teigkugeln (je 250 g)", servings("6 Teigkugeln (je 250 g)"))
+        assertEquals(null to "Springform Ø 26 cm", servings("Springform Ø 26 cm"))
+        assertEquals(null to "Blech 30 x 40 cm", servings("Blech 30 x 40 cm"))
+        assertEquals(1 to "9-inch cake", servings("Makes one 9-inch cake"))
+        assertEquals(6 to null, servings("Lasagne für 6 Personen"))
+        assertEquals(null to null, servings("Für die Füllung:"))
+    }
+
+    /** Ein Satz mit Backform ist ein Schritt, keine Rezeptmenge. */
+    @Test
+    fun backformImSatzBleibtSchritt() {
+        val recipe = RecipeTextParser.parse("Kuchen\nZutaten\n200 g Mehl\nZubereitung\nIn eine Springform (Ø 26 cm) füllen.", "de")
+        assertNull(recipe.servings)
+        assertNull(recipe.servingsUnit)
+        assertEquals(listOf("In eine Springform (Ø 26 cm) füllen."), recipe.steps)
+        // Die Zahl darf zählen, der Satz bleibt aber ein Schritt und wird keine Einheit.
+        val pizza = RecipeTextParser.parse("Pizza\nZutaten\n500 g Mehl\nZubereitung\nFür 4 Pizzen den Teig teilen.", "de")
+        assertEquals(4, pizza.servings)
+        assertNull(pizza.servingsUnit)
+        assertEquals(listOf("Für 4 Pizzen den Teig teilen."), pizza.steps)
     }
 
     @Test

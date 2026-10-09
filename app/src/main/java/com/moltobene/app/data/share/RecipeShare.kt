@@ -45,9 +45,10 @@ object RecipeShareText {
 
         blocks += buildString {
             append(recipe.title.trim().ifEmpty { labels.untitled })
-            recipe.servings?.let { count ->
-                append('\n').append(labels.servings(count, recipe.servingsUnit?.trim()?.takeIf { it.isNotEmpty() }))
-            }
+            val unit = recipe.servingsUnit?.trim()?.takeIf { it.isNotEmpty() }
+            val count = recipe.servings
+            // Eine Backform ohne Anzahl (#63) steht für sich, z. B. „Springform Ø 26 cm“.
+            if (count != null) append('\n').append(labels.servings(count, unit)) else if (unit != null) append('\n').append(unit)
         }
 
         if (recipe.ingredients.isNotEmpty()) {
@@ -113,9 +114,10 @@ object RecipeJsonLd {
             put("@type", "Recipe")
             put("name", recipe.title.trim().ifEmpty { untitled })
             recipe.language?.takeIf { it.isNotBlank() }?.let { put("inLanguage", it) }
-            recipe.servings?.let { count ->
-                val unit = recipe.servingsUnit?.trim()?.takeIf { it.isNotEmpty() }
-                put("recipeYield", if (unit == null) "$count" else "$count $unit")
+            val unit = recipe.servingsUnit?.trim()?.takeIf { it.isNotEmpty() }
+            when (val count = recipe.servings) {
+                null -> unit?.let { put("recipeYield", it) }
+                else -> put("recipeYield", if (unit == null) "$count" else "$count $unit")
             }
             recipe.prepMinutes?.takeIf { it > 0 }?.let { put("prepTime", isoDuration(it)) }
             recipe.totalMinutes?.takeIf { it > 0 }?.let { put("totalTime", isoDuration(it)) }

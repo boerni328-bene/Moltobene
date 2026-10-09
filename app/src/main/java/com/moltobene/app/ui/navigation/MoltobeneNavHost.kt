@@ -3,15 +3,18 @@ package com.moltobene.app.ui.navigation
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.moltobene.app.MoltobeneApplication
+import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.ui.collection.CollectionScreen
 import com.moltobene.app.ui.collection.CollectionViewModel
 import com.moltobene.app.ui.edit.EditScreen
@@ -67,6 +70,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
             )
         }
         composable<RecipeRoute> {
+            val screenOn by container.preferences.screenOn.collectAsStateWithLifecycle()
             RecipeScreen(
                 viewModel = viewModel {
                     RecipeViewModel(
@@ -77,6 +81,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                         container.translations,
                     )
                 },
+                screenOn = screenOn ?: ScreenOn.STAYS_ON,
                 snackbarHostState = snackbarHostState,
                 onBack = { navController.popBackStack() },
                 onEdit = { id -> navController.navigate(EditRoute(id)) },

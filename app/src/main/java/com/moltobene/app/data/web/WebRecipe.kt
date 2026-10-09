@@ -43,37 +43,6 @@ data class WebRecipe(
     ).joinToString("\n\n")
 }
 
-/** Portionen aus einer Angabe wie „4 Portionen“, „Für 6 Personen“, „12 Stück“ oder „1 Springform (26 cm)“. */
-object RecipeYield {
-
-    data class Servings(val count: Int, val unit: String?)
-
-    fun parse(text: String?): Servings? {
-        val value = text?.trim()?.takeIf { it.isNotEmpty() } ?: return null
-        val match = NUMBER.find(value) ?: return null
-        val count = match.value.toIntOrNull()?.takeIf { it in 1..MAX } ?: return null
-        // Was nach der Zahl (und einem Bereich wie „4-6“) steht, ist die Einheit – außer es sind Portionen.
-        val rest = value.substring(match.range.last + 1)
-            .replace(RANGE_REST, "")
-            .trim()
-            .trim(',', '.', ':', ';')
-            .trim()
-        val unit = rest.takeIf { it.isNotEmpty() && !SERVINGS_WORDS.containsMatchIn(it) && rest.length <= 40 }
-        return Servings(count, unit)
-    }
-
-    private const val MAX = 999
-    private val NUMBER = Regex("\\d{1,3}")
-    private val RANGE_REST = Regex("^\\s*[-–]\\s*\\d{1,3}")
-
-    /** Wörter für Portionen und Personen in den Sprachen der Texterkennung – dann gibt es keine eigene Einheit. */
-    private val SERVINGS_WORDS = Regex(
-        "^(portion|portionen|person|personen|pers\\.?|serving|servings|serves|people|persons|portions|" +
-            "porzione|porzioni|persona|persone|personne|personnes|couverts|ración|raciones|porción|porciones|personas)\\b",
-        RegexOption.IGNORE_CASE,
-    )
-}
-
 /** Dauern aus Rezeptangaben: ISO 8601 („PT1H30M“, „P0DT0H20M“) oder einfache Angaben wie „30 Min.“. */
 object RecipeDuration {
 

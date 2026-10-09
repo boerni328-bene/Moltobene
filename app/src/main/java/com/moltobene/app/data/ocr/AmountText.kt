@@ -1,5 +1,7 @@
 package com.moltobene.app.data.ocr
 
+import com.moltobene.app.data.RecipeUnits
+
 /**
  * Mengenangaben in erkanntem Text: erkennt sie am Anfang und am Ende einer Zutat und korrigiert
  * typische Lesefehler bei Einheiten („500 q“ → „500 g“, „2 Sik.“ → „2 Stk.“, „1Pr“ → „1 Pr“).
@@ -14,19 +16,8 @@ object AmountText {
 
     private const val NUMBER = "(?:\\d+(?:[.,/]\\d+)?|[½¼¾⅓⅔⅛])"
 
-    /** Bekannte Einheiten (Deutsch, Englisch, Italienisch, Französisch, Spanisch). */
-    private val UNITS = listOf(
-        "g", "kg", "mg", "ml", "cl", "dl", "l", "gr", "gr.", "Gramm", "Liter",
-        "EL", "TL", "Esslöffel", "Teelöffel", "Msp.", "Pr", "Pr.", "Prise", "Prisen", "Stk.", "Stk", "Stück", "Stange", "Stangen",
-        "Do.", "Dose", "Dosen", "Pck.", "Pkg.", "Päckchen", "Bund", "Becher", "Tasse", "Tassen", "Glas", "Zehe", "Zehen",
-        "Scheibe", "Scheiben", "Würfel", "Blatt", "Blätter", "Zweig", "Zweige", "Handvoll",
-        "cup", "cups", "tbsp", "tbsp.", "tsp", "tsp.", "tablespoon", "tablespoons", "teaspoon", "teaspoons",
-        "oz", "lb", "lbs", "pinch", "can", "cans", "clove", "cloves", "slice", "slices",
-        "cucchiaio", "cucchiai", "cucchiaino", "cucchiaini", "bicchiere", "pizzico", "spicchio", "spicchi",
-        "cuillère", "cuillères", "c.à.s.", "c.à.c.", "càs", "càc", "pincée", "gousse", "gousses",
-        "cucharada", "cucharadas", "cucharadita", "cucharaditas", "cda", "cda.", "cdas", "cdas.", "cdta", "cdta.", "cdtas", "cdtas.",
-        "pizca", "taza", "tazas", "diente", "dientes", "lata", "latas",
-    )
+    /** Bekannte Einheiten (Deutsch, Englisch, Italienisch, Französisch, Spanisch), gemeinsam mit dem Umrechnen. */
+    private val UNITS = RecipeUnits.ALL
 
     /** „c. à s.“ → „c.à.s.“: französische Löffelangaben ohne Leerzeichen, damit sie als eine Einheit gelten. */
     private val SPACED_SPOON = Regex("(?<!\\p{L})c\\.\\s*à\\s*([sc])\\.", RegexOption.IGNORE_CASE)
