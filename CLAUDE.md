@@ -17,7 +17,7 @@ Festgelegt vom Projektinhaber am 29.09.2026 (siehe `docs/besprechungen/2026-09-2
    3. YouTube (Videobeschreibung; nur als bestmöglicher Versuch ohne Zusage) sowie Dateien oder andere Rezept-Apps.
    Weitere Erfassungswege sind erwünscht und werden von den Spezialisten vorgeschlagen.
 3. **Sammlung finden und ordnen:** suchen, sortieren, einordnen.
-4. **Mit dem Rezept kochen:** Bildschirm bleibt an, aus Armlänge lesbar, Zutaten und Schritte abhakbar, Portionen umrechnen, eigene Notizen zum Rezept.
+4. **Mit dem Rezept kochen:** Bildschirm bleibt an (in den Einstellungen änderbar), aus Armlänge lesbar, Zutaten und Schritte abhakbar, Portionen umrechnen (auch nach einer Zutat oder Backform), eigene Notizen zum Rezept. Dazu ein **Teigrechner** für Pizza, Brot, Pasta und Kuchen, jede Teigart mit eigenen Angaben (z. B. Vorteig wie Biga oder Poolish, verschiedene Hefen); das Ergebnis wird ein Rezept. (Ergänzt am 08.10.2026, siehe `docs/besprechungen/2026-10-08-teige-pizza-pasta-kuchen.md`.)
 5. **Teilen, sichern und umziehen:** einzelne Rezepte teilen; die ganze Sammlung inklusive Fotos als Datei sichern, wiederherstellen und auf ein neues Handy umziehen.
 
 ### Bewusst nicht
@@ -171,7 +171,7 @@ Umfangreiche Versionen werden auf einem Arbeitszweig entwickelt und dort über �
 
 ## Spezialisten-Team und Prüfrunden
 
-- Auf Benutzerebene gibt es acht nur lesende Spezialisten (Subagents): `design`, `funktionalitaet`, `sicherheit`, `kreativitaet`, `konnektivitaet`, `performance`, `texte`, `uebersetzungen`.
+- Auf Benutzerebene gibt es neun nur lesende Spezialisten (Subagents): `design`, `funktionalitaet`, `sicherheit`, `kreativitaet`, `konnektivitaet`, `performance`, `texte`, `uebersetzungen` und `marketing` (Marktforschung und Marketing: Konkurrenz-Apps, Vermarktung, Vertriebswege, Preis; seit 09.10.2026, Etikett „Marketing“).
 - `/pruefrunde` ruft alle nacheinander auf und legt ihre Vorschläge als GitHub-Issues an (Etikett des Spezialisten + `Priorität: hoch|mittel|niedrig`).
 - **Vor jeder Erhöhung der ersten Stelle der Versionsnummer** (z. B. 1.x → 2.0.0) wird **automatisch eine /pruefrunde** durchgeführt, bevor die neue Version veröffentlicht wird.
 - **Umgesetzt wird nur, was der Projektinhaber freigibt.** Issues aus Prüfrunden sind Vorschläge, keine Aufträge.
