@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.27.2] – 2026-10-10 (versionCode 50)
+
+### Geändert
+- Keine sichtbaren Änderungen an der App. Zwei Prüfwerkzeuge, mit denen die App vor jeder Veröffentlichung automatisch getestet wird, sind auf dem neuesten Stand. Sie sind nicht Teil der App, die auf dem Handy installiert wird.
+
 ## [0.27.1] – 2026-10-09 (versionCode 49)
 
 ### Behoben
