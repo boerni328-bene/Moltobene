@@ -234,8 +234,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>„Umrechnen …“ nach Backform: Rund oder eckig, in cm oder Zoll. Die Mengen wachsen mit der Fläche der Form, z. B. von Ø 26 cm auf Ø 28 cm etwa um 16 %.</item>
-        <item>Die Backform im Rezept wird vorausgefüllt, wenn sie eindeutig dasteht. Die Backzeit rechnet die App nie um.</item>
+        <item>Teigrechner für Pizza und Brot (Rechner-Symbol oben in der Sammlung): Mengen für Teigkugeln oder Laibe, auf Wunsch mit Biga, Poolish oder Sauerteig.</item>
+        <item>Das Ergebnis lässt sich als Rezept speichern und wie jedes Rezept umrechnen und teilen.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->
@@ -368,4 +368,55 @@
     <string name="restore_error_damaged">Die Sicherungsdatei ist beschädigt.</string>
     <string name="restore_error_too_large">Die Sicherungsdatei ist zu groß.</string>
     <string name="restore_error_failed">Die Sicherung konnte nicht wiederhergestellt werden. Die Sammlung ist unverändert.</string>
+
+    <!-- Teigrechner (#69) -->
+    <string name="dough_title">Teigrechner</string>
+    <string name="dough_type_pizza">Pizza</string>
+    <string name="dough_type_bread">Brot</string>
+    <string name="dough_section_dough">Teig</string>
+    <string name="dough_count_ball">Anzahl Teigkugeln</string>
+    <string name="dough_count_loaf">Anzahl Laibe</string>
+    <string name="dough_piece_ball">Gewicht je Teigkugel (g)</string>
+    <string name="dough_piece_loaf">Gewicht je Laib (g)</string>
+    <string name="dough_water">Wasseranteil (% vom Mehl)</string>
+    <string name="dough_salt">Salz (% vom Mehl)</string>
+    <string name="dough_oil">Öl (% vom Mehl)</string>
+    <string name="dough_section_yeast">Hefe</string>
+    <string name="dough_yeast_fresh">Frischhefe</string>
+    <string name="dough_yeast_instant">Trockenhefe (Instant)</string>
+    <string name="dough_yeast_active">Aktive Trockenhefe</string>
+    <string name="dough_yeast_amount">Hefe (% vom Mehl)</string>
+    <string name="dough_section_preferment">Vorteig</string>
+    <string name="dough_explain_preferment">Vorteig: Ein Teil von Mehl, Wasser und Hefe wird vorher angesetzt. Das gibt mehr Geschmack und einen lockereren Teig.</string>
+    <string name="dough_pre_none">Ohne</string>
+    <string name="dough_pre_sourdough">Sauerteig</string>
+    <string name="dough_explain_biga">Biga: Fester Vorteig mit wenig Wasser.</string>
+    <string name="dough_explain_poolish">Poolish: Flüssiger Vorteig mit gleich viel Wasser wie Mehl.</string>
+    <string name="dough_explain_sourdough">Sauerteig: Mehl und Wasser, ohne zugesetzte Hefe vergoren. Im Hauptteig kann trotzdem Hefe dazukommen.</string>
+    <string name="dough_preferment_flour">Mehl im Vorteig (% vom gesamten Mehl)</string>
+    <string name="dough_preferment_water">Wasser im Vorteig (% von dessen Mehl)</string>
+    <string name="dough_section_result">Ergebnis</string>
+    <string name="dough_total">Teig gesamt: %1$s g</string>
+    <string name="dough_yeast_item">%1$s g %2$s</string>
+    <string name="dough_yeast_equal">Gleichwertige Hefemenge: %1$s</string>
+    <string name="dough_invalid">Rot markierte Eingaben prüfen.</string>
+    <string name="dough_hint">Rohen Teig nicht essen. Rohes Mehl kann Keime enthalten.</string>
+    <string name="dough_save">Als Rezept speichern</string>
+    <string name="dough_reset">Zurücksetzen</string>
+    <string name="dough_saved">Als Entwurf gespeichert. Zubereitung ergänzen.</string>
+    <string name="dough_error_number">Zahl eingeben.</string>
+    <string name="dough_error_range">Zwischen %1$s und %2$s.</string>
+    <string name="dough_error_preferment">Der Vorteig braucht Wasser im Wert von %1$s %% des Mehlgewichts, der Teig hat aber nur %2$s %%. Mehl oder Wasser im Vorteig verringern oder den Wasseranteil erhöhen.</string>
+    <string name="dough_recipe_title_pizza">Pizzateig</string>
+    <string name="dough_recipe_title_pizza_with">Pizzateig mit %1$s</string>
+    <string name="dough_recipe_title_bread">Brotteig</string>
+    <string name="dough_recipe_title_bread_with">Brotteig mit %1$s</string>
+    <string name="dough_heading_preferment">Für den Vorteig (%1$s)</string>
+    <string name="dough_heading_main">Für den Hauptteig</string>
+    <string name="dough_ingredient_flour">Mehl</string>
+    <string name="dough_ingredient_water">Wasser</string>
+    <string name="dough_ingredient_salt">Salz</string>
+    <string name="dough_ingredient_oil">Öl</string>
+    <string name="dough_unit_balls">Teigkugeln (je %1$s g)</string>
+    <string name="dough_unit_loaves">Laibe (je %1$s g)</string>
 </resources>

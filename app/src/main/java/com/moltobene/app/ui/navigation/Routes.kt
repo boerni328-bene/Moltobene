@@ -31,3 +31,6 @@ object SettingsRoute
 
 @Serializable
 object LicensesRoute
+
+@Serializable
+object DoughRoute

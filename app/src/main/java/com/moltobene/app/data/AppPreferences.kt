@@ -1,5 +1,8 @@
 package com.moltobene.app.data
 
+import com.moltobene.app.data.dough.DoughMemory
+import com.moltobene.app.data.dough.DoughType
+import com.moltobene.app.data.dough.LeavenedInput
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -104,6 +107,15 @@ class AppPreferences(context: Context) {
         prefs.edit { putInt(KEY_BACKUP_HINT_HIDDEN_AT, unsaved) }
     }
 
+    /** Zuletzt benutzte Werte des Teigrechners je Teigart (#69); geprüft wird beim Lesen in [DoughMemory]. */
+    suspend fun doughValues(type: DoughType): LeavenedInput = withContext(Dispatchers.IO) {
+        DoughMemory.decode(type, prefs.getString(KEY_DOUGH_PREFIX + type.key, null))
+    }
+
+    suspend fun setDoughValues(input: LeavenedInput) = withContext(Dispatchers.IO) {
+        prefs.edit { putString(KEY_DOUGH_PREFIX + input.type.key, DoughMemory.encode(input)) }
+    }
+
     /** true, wenn die App frisch installiert und noch nie aktualisiert wurde. */
     suspend fun isFreshInstall(): Boolean = withContext(Dispatchers.IO) {
         val manager = appContext.packageManager
@@ -126,5 +138,6 @@ class AppPreferences(context: Context) {
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_PALETTE = "palette"
         const val KEY_SCREEN_ON = "screen_on"
+        const val KEY_DOUGH_PREFIX = "dough_values_"
     }
 }

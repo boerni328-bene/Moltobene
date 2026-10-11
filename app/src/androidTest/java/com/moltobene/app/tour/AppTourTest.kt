@@ -298,6 +298,29 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText("200 g Mehl")
     }
 
+    /** Teigrechner (#69): von der Sammlung öffnen, Biga wählen, als Entwurf speichern. */
+    @Test
+    fun teigrechner() {
+        composeRule.onNodeWithContentDescription(text(R.string.dough_title)).performClick()
+        waitForText(text(R.string.dough_section_result))
+        waitForText("4 " + text(R.string.dough_unit_balls, "250"))
+        screenshot("14a-teigrechner")
+
+        composeRule.onNodeWithText(text(R.string.dough_pre_biga)).performScrollTo().performClick()
+        waitForText(text(R.string.dough_explain_biga))
+        composeRule.onNodeWithText(text(R.string.dough_save)).performScrollTo()
+        screenshot("14b-teigrechner-biga")
+
+        composeRule.onNodeWithText(text(R.string.dough_save)).performClick()
+        composeRule.waitUntil(10_000) {
+            runBlocking { container().repository.getAll().any { it.isDraft && it.ingredients.any { line -> line.isHeading } } }
+        }
+        val draft = runBlocking { container().repository.getAll().first { it.isDraft } }
+        assertEquals(com.moltobene.app.data.SourceType.OWN, draft.source?.type)
+        waitForText(text(R.string.dough_saved))
+        screenshot("14c-teigrechner-entwurf")
+    }
+
     /** Rezept übersetzen (#60): Umschalter „DE | EN“, Übersetzung mit Hinweis; Abhaken gilt auch im Original. */
     @Test
     fun uebersetzen() {

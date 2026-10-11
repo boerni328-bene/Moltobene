@@ -80,6 +80,7 @@ fun CollectionScreen(
     onAddFromText: () -> Unit,
     onAddFromLink: () -> Unit,
     onAddFromFile: () -> Unit,
+    onOpenDough: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -123,6 +124,9 @@ fun CollectionScreen(
                     }
                     IconButton(onClick = { chooseImport = true }) {
                         Icon(painterResource(R.drawable.ic_move_to_inbox), contentDescription = stringResource(R.string.import_recipe))
+                    }
+                    IconButton(onClick = onOpenDough) {
+                        Icon(painterResource(R.drawable.ic_calculate), contentDescription = stringResource(R.string.dough_title))
                     }
                     IconButton(onClick = onOpenSettings) {
                         Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings_title))

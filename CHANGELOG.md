@@ -3,6 +3,14 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.30.0] – 2026-10-11 (versionCode 57)
+
+### Neu
+- **Teigrechner für Pizza und Brot:** Neues Rechner-Symbol oben in der Sammlung. Anzahl und Gewicht der Teigkugeln bzw. Laibe, Wasseranteil, Salz, Öl und Hefe eingeben, auf Wunsch mit Vorteig (Biga, Poolish oder Sauerteig). Die App rechnet aus, wie viel Mehl, Wasser, Salz und Hefe nötig sind, getrennt nach Vorteig und Hauptteig.
+- Frischhefe, Trockenhefe (Instant) und aktive Trockenhefe sind wählbar; die gleichwertige Menge der anderen Hefearten steht dabei.
+- „Als Rezept speichern“ legt einen Entwurf an, der sich wie jedes Rezept umrechnen, teilen und ergänzen lässt. Die Zubereitung wird dort dazugeschrieben. Die zuletzt benutzten Werte merkt sich der Rechner auf dem Handy.
+- Unmögliche Eingaben werden am Feld erklärt, etwa wenn der Vorteig mehr Wasser bräuchte, als der ganze Teig haben soll.
+
 ## [0.29.0] – 2026-10-11 (versionCode 56)
 
 ### Neu
