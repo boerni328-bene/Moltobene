@@ -17,6 +17,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -97,6 +99,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moltobene.app.R
+import com.moltobene.app.data.Adjustment
 import com.moltobene.app.data.AmountScaling
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeText
@@ -119,6 +122,8 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.math.abs
+import kotlin.math.roundToInt
 import java.io.File
 import java.util.Locale
 
@@ -137,7 +142,7 @@ fun RecipeScreen(
     val translation by viewModel.translation.collectAsStateWithLifecycle()
     val checked by viewModel.checkedIngredients.collectAsStateWithLifecycle()
     val currentStep by viewModel.currentStep.collectAsStateWithLifecycle()
-    val shownServings by viewModel.shownServings.collectAsStateWithLifecycle()
+    val adjustment by viewModel.adjustment.collectAsStateWithLifecycle()
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
@@ -277,10 +282,10 @@ fun RecipeScreen(
                 cooking = CookingState(
                     checked = checked.toSet(),
                     currentStep = currentStep,
-                    shownServings = shownServings,
+                    adjustment = adjustment,
                     onToggleIngredient = viewModel::toggleIngredient,
                     onToggleStep = viewModel::toggleCurrentStep,
-                    onServingsChange = viewModel::setServings,
+                    onAdjust = viewModel::setAdjustment,
                 ),
                 translation = TranslationActions(
                     state = translation,
@@ -404,14 +409,14 @@ private fun keepScreenOn(setting: ScreenOn): () -> Unit {
     }
 }
 
-/** Was beim Kochen dazukommt (#56): Häkchen, aktueller Schritt und angezeigte Portionen. */
+/** Was beim Kochen dazukommt (#56): Häkchen, aktueller Schritt und Umrechnen (#66). */
 private class CookingState(
     val checked: Set<String>,
     val currentStep: String?,
-    val shownServings: Int?,
+    val adjustment: Adjustment?,
     val onToggleIngredient: (Int, String) -> Unit,
     val onToggleStep: (Int, String) -> Unit,
-    val onServingsChange: (Int?) -> Unit,
+    val onAdjust: (Adjustment?) -> Unit,
 )
 
 /** „Rezept übersetzen“ (#60): Zustand und Aktionen für den Umschalter „DE | EN“. */
@@ -471,14 +476,48 @@ private fun RecipeContent(
                 TranslationStatus(original = originalLanguage, actions = translation)
             }
             val originalServings = recipe.servings?.takeIf { it > 0 }
-            val servings = originalServings?.let { cooking.shownServings ?: it }
             val servingsUnit = (translated?.servingsUnit ?: recipe.servingsUnit)?.takeIf { it.isNotBlank() }
-            if (originalServings != null && servings != null) {
+
+            // Umrechnen (#66): Gerechnet wird mit dem Original, auch wenn die Übersetzung gezeigt wird (#60).
+            val deviceLanguage = LocalConfiguration.current.locales[0].language
+            val originalTexts = remember(recipe.ingredients) { recipe.ingredients.map { it.text } }
+            val recipeLanguage = remember(recipe.language, originalTexts, deviceLanguage) {
+                recipe.language ?: TextLanguage.detect(originalTexts.joinToString("\n")) ?: deviceLanguage
+            }
+            val factor = remember(cooking.adjustment, originalServings, originalTexts, recipeLanguage) {
+                Adjustment.factor(cooking.adjustment, originalServings, originalTexts, recipeLanguage)
+            }
+            // Mengen werden so geschrieben wie im Rezept bzw. in der Übersetzung; ohne Angabe gilt die erkannte Sprache.
+            val language = translated?.language ?: recipeLanguage
+            val texts = translated?.ingredients?.takeIf { it.size == recipe.ingredients.size } ?: originalTexts
+            // Die Zutat, nach der umgerechnet wird, zeigt genau die eingetippte Menge.
+            val exactIndex = (cooking.adjustment as? Adjustment.ByIngredient)?.index?.takeIf { factor != 1.0 }
+            val lines = remember(texts, factor, language, exactIndex) {
+                texts.mapIndexed { index, text -> AmountScaling.scale(text, factor, language, exactLeading = index == exactIndex) }
+            }
+            // Zur Wahl für „Nach Zutat“ stehen nur Zeilen mit einer lesbaren Menge am Anfang.
+            val choices = remember(recipe.ingredients, texts, recipeLanguage, language) {
+                recipe.ingredients.mapIndexedNotNull { index, ingredient ->
+                    if (ingredient.isHeading) return@mapIndexedNotNull null
+                    val amount = AmountScaling.leadingAmount(ingredient.text, recipeLanguage) ?: return@mapIndexedNotNull null
+                    AdjustChoice(
+                        index = index,
+                        line = ingredient.text,
+                        shown = texts[index],
+                        amount = amount.value,
+                        unit = AmountScaling.leadingAmount(texts[index], language)?.unit ?: amount.unit,
+                    )
+                }
+            }
+
+            if (originalServings != null) {
+                val exact = originalServings * factor
+                val shown = exact.roundToInt().coerceIn(1, Adjustment.MAX_SERVINGS)
                 ServingsControl(
-                    original = originalServings,
-                    shown = servings,
+                    shown = shown,
+                    approximate = abs(exact - shown) >= SERVINGS_TOLERANCE,
                     unit = servingsUnit,
-                    onChange = { cooking.onServingsChange(it.takeIf { value -> value != originalServings }) },
+                    onChange = { cooking.onAdjust(if (it == originalServings) null else Adjustment.Servings(it)) },
                 )
             } else if (servingsUnit != null) {
                 // Eine Backform ohne Anzahl (#63), z. B. „Springform Ø 26 cm“.
@@ -488,23 +527,43 @@ private fun RecipeContent(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            var adjusting by rememberSaveable { mutableStateOf(false) }
+            if (originalServings != null || choices.isNotEmpty()) {
+                AdjustActions(
+                    adjusted = factor != 1.0,
+                    hint = when (val current = cooking.adjustment) {
+                        is Adjustment.ByIngredient -> stringResource(
+                            R.string.adjust_ingredient_hint,
+                            lines.getOrNull(current.index)?.joinToString("") { it.text }.orEmpty(),
+                            texts.getOrNull(current.index).orEmpty(),
+                        )
+                        else -> originalServings?.let { stringResource(R.string.servings_scaled_hint, servingsText(it, servingsUnit)) }
+                    },
+                    onAdjust = { adjusting = true },
+                    onReset = { cooking.onAdjust(null) },
+                )
+            }
+            if (adjusting) {
+                AdjustDialog(
+                    servings = originalServings?.let { (it * factor).roundToInt().coerceIn(1, Adjustment.MAX_SERVINGS) },
+                    servingsUnit = servingsUnit,
+                    choices = choices,
+                    decimalSeparator = if (recipeLanguage == "en") '.' else ',',
+                    onServings = {
+                        adjusting = false
+                        cooking.onAdjust(if (it == originalServings) null else Adjustment.Servings(it))
+                    },
+                    onIngredient = { choice, amount ->
+                        adjusting = false
+                        cooking.onAdjust(Adjustment.byIngredient(choice.index, choice.line, amount))
+                    },
+                    onDismiss = { adjusting = false },
+                )
+            }
             RecipeTimes(recipe.prepMinutes, recipe.totalMinutes)
 
             if (recipe.ingredients.isNotEmpty()) {
                 SectionTitle(stringResource(R.string.ingredients))
-                val factor = if (originalServings != null && servings != null) servings.toDouble() / originalServings else 1.0
-                val deviceLanguage = LocalConfiguration.current.locales[0].language
-                // Mengen werden so geschrieben wie im Rezept bzw. in der Übersetzung; ohne Angabe gilt die erkannte Sprache.
-                val language = remember(recipe.language, recipe.ingredients, deviceLanguage, translated) {
-                    translated?.language
-                        ?: recipe.language
-                        ?: TextLanguage.detect(recipe.ingredients.joinToString("\n") { it.text })
-                        ?: deviceLanguage
-                }
-                val texts = translated?.ingredients?.takeIf { it.size == recipe.ingredients.size } ?: recipe.ingredients.map { it.text }
-                val lines = remember(texts, factor, language) {
-                    texts.map { AmountScaling.scale(it, factor, language) }
-                }
                 recipe.ingredients.forEachIndexed { index, ingredient ->
                     if (ingredient.isHeading) {
                         Text(
@@ -579,31 +638,47 @@ private fun RecipeContent(
     }
 }
 
-/** Portionen mit − und +; umgerechnet wird nur in der Anzeige (#56). */
+/**
+ * Portionen mit − und +; umgerechnet wird nur in der Anzeige (#56). Nach einer Zutat umgerechnet (#66) können es
+ * krumme Portionen sein: Dann steht „etwa“ davor, und − und + gehen von der gerundeten Zahl aus.
+ */
 @Composable
-private fun ServingsControl(original: Int, shown: Int, unit: String?, onChange: (Int) -> Unit) {
+private fun ServingsControl(shown: Int, approximate: Boolean, unit: String?, onChange: (Int) -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = { onChange(shown - 1) }, enabled = shown > 1) {
             Icon(painterResource(R.drawable.ic_remove), contentDescription = stringResource(R.string.servings_fewer))
         }
+        val text = servingsControlText(shown, unit)
         Text(
-            text = servingsControlText(shown, unit),
+            text = if (approximate) stringResource(R.string.amount_about, text) else text,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             // Der Screenreader sagt die neue Zahl an.
             modifier = Modifier.weight(1f, fill = false).semantics { liveRegion = LiveRegionMode.Polite },
         )
-        IconButton(onClick = { onChange(shown + 1) }, enabled = shown < MAX_SERVINGS) {
+        IconButton(onClick = { onChange(shown + 1) }, enabled = shown < Adjustment.MAX_SERVINGS) {
             Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.servings_more))
         }
     }
-    if (shown != original) {
+}
+
+/**
+ * „Umrechnen …“ (#66) und, wenn umgerechnet ist, der Hinweis mit „Zurücksetzen“. Bei großer Schrift dürfen die beiden
+ * Schaltflächen untereinander stehen.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun AdjustActions(adjusted: Boolean, hint: String?, onAdjust: () -> Unit, onReset: () -> Unit) {
+    if (adjusted && hint != null) {
         Text(
-            text = stringResource(R.string.servings_scaled_hint, servingsText(original, unit)),
+            text = hint + " " + stringResource(R.string.adjust_hint_rules),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        TextButton(onClick = { onChange(original) }) { Text(stringResource(R.string.servings_reset)) }
+    }
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+        TextButton(onClick = onAdjust) { Text(stringResource(R.string.adjust_action)) }
+        if (adjusted) TextButton(onClick = onReset) { Text(stringResource(R.string.servings_reset)) }
     }
 }
 
@@ -711,7 +786,8 @@ private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, onClic
     }
 }
 
-private const val MAX_SERVINGS = 99
+/** Ab dieser Abweichung von einer ganzen Zahl steht „etwa“ vor den Portionen. */
+private const val SERVINGS_TOLERANCE = 0.01
 
 /** Text in der Sprache des Rezepts: Der Screenreader liest ihn mit der passenden Aussprache vor (#60). */
 private fun localized(text: String, locale: LocaleList?): AnnotatedString =

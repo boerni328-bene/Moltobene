@@ -79,8 +79,21 @@
     <string name="step_mark_current">Mark as current step</string>
     <string name="servings_fewer">Fewer servings</string>
     <string name="servings_more">More servings</string>
-    <string name="servings_scaled_hint">Amounts adjusted. In the recipe: %1$s. Only amounts at the start of a line and in parentheses are adjusted.</string>
+    <string name="servings_scaled_hint">Amounts adjusted. In the recipe: %1$s.</string>
     <string name="servings_reset">Reset</string>
+    <!-- Adjust by servings or by an ingredient (#66) -->
+    <string name="adjust_action">Adjust …</string>
+    <string name="adjust_title">Adjust</string>
+    <string name="adjust_by_servings">By servings</string>
+    <string name="adjust_by_ingredient">By ingredient</string>
+    <string name="adjust_choose_ingredient">Amounts follow this ingredient:</string>
+    <string name="adjust_servings_label">Servings</string>
+    <string name="adjust_amount_label">New amount</string>
+    <string name="adjust_confirm">Adjust</string>
+    <string name="adjust_servings_invalid">Possible: %1$d to %2$d.</string>
+    <string name="adjust_amount_invalid">Possible: more than 0 and up to 100 times the amount in the recipe.</string>
+    <string name="adjust_ingredient_hint">Amounts adjusted for %1$s. In the recipe: %2$s.</string>
+    <string name="adjust_hint_rules">Only amounts at the start of a line and in parentheses are adjusted. Times and temperatures stay as they are.</string>
 
     <!-- Teilen -->
     <string name="share_recipe">Share recipe</string>
@@ -205,10 +218,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>“Cooking” in Settings: the screen in recipe view stays on, turns off 15 or 30 minutes after the last tap, or behaves the same as the device.</item>
-        <item>Sensible rounding when adjusting servings, e.g. “≈ 4 eggs” instead of “3.75 eggs”. Cubes and packets in parentheses are adjusted too.</item>
-        <item>Pans like “springform pan Ø 26 cm” are now read and shown correctly.</item>
-        <item>Translation knows more baking and dough terms.</item>
+        <item>“Adjust …” below the servings: by servings or by an ingredient, e.g. “only 300 g flour”. This also works for recipes without servings.</item>
+        <item>Servings go up to 999, and a recipe “for 1 pan” can be halved.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->

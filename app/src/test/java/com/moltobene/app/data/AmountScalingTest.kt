@@ -151,4 +151,26 @@ class AmountScalingTest {
         assertEquals("etwa 2½-4 Eier", AmountScaling.spoken(AmountScaling.scale("2-3 Eier", 1.25, "de"), about))
         assertEquals("1600 g Tomaten", AmountScaling.spoken(AmountScaling.scale("800 g Tomaten", 2.0, "de"), about))
     }
+
+    @Test
+    fun mengeAmZeilenanfangFuerNachZutat() {
+        assertEquals(AmountScaling.Leading(500.0, "g"), AmountScaling.leadingAmount("500 g Mehl", "de"))
+        assertEquals(AmountScaling.Leading(3.0, null), AmountScaling.leadingAmount("3 Eier", "de"))
+        assertEquals(AmountScaling.Leading(1000.0, "g"), AmountScaling.leadingAmount("1.000 g Mehl", "de"))
+        assertEquals(AmountScaling.Leading(1.5, "l"), AmountScaling.leadingAmount("1,5 l Milch", "de"))
+        assertEquals(null, AmountScaling.leadingAmount("2-3 Eier", "de"))
+        assertEquals(null, AmountScaling.leadingAmount("65 % Wasser", "de"))
+        assertEquals(null, AmountScaling.leadingAmount("Salz und Pfeffer", "de"))
+        assertEquals(350.0, AmountScaling.parseInput("350")!!, 0.0)
+        assertEquals(1.5, AmountScaling.parseInput(" 1,5 ")!!, 0.0)
+        assertEquals(null, AmountScaling.parseInput("0"))
+        assertEquals(null, AmountScaling.parseInput("abc"))
+        assertEquals(null, AmountScaling.parseInput(""))
+    }
+
+    @Test
+    fun zutatNachDerUmgerechnetWirdZeigtGenauDieEingetippteMenge() {
+        assertEquals("350 g Mehl", AmountScaling.scaleText("200 g Mehl", 1.75, "de", exactLeading = true))
+        assertEquals("≈ 175 g Zucker", AmountScaling.scaleText("101 g Zucker", 1.75, "de"))
+    }
 }

@@ -78,8 +78,21 @@
     <string name="step_mark_current">Als aktuellen Schritt markieren</string>
     <string name="servings_fewer">Weniger Portionen</string>
     <string name="servings_more">Mehr Portionen</string>
-    <string name="servings_scaled_hint">Mengen umgerechnet. Im Rezept: %1$s. Umgerechnet werden nur Mengen am Anfang einer Zeile und in Klammern.</string>
+    <string name="servings_scaled_hint">Mengen umgerechnet. Im Rezept: %1$s.</string>
     <string name="servings_reset">Zurücksetzen</string>
+    <!-- Umrechnen nach Portionen oder nach einer Zutat (#66) -->
+    <string name="adjust_action">Umrechnen …</string>
+    <string name="adjust_title">Umrechnen</string>
+    <string name="adjust_by_servings">Nach Portionen</string>
+    <string name="adjust_by_ingredient">Nach Zutat</string>
+    <string name="adjust_choose_ingredient">Die Mengen richten sich nach dieser Zutat:</string>
+    <string name="adjust_servings_label">Portionen</string>
+    <string name="adjust_amount_label">Neue Menge</string>
+    <string name="adjust_confirm">Umrechnen</string>
+    <string name="adjust_servings_invalid">Möglich sind %1$d bis %2$d.</string>
+    <string name="adjust_amount_invalid">Möglich ist eine Menge über 0 bis zum Hundertfachen der Menge im Rezept.</string>
+    <string name="adjust_ingredient_hint">Mengen umgerechnet für %1$s. Im Rezept: %2$s.</string>
+    <string name="adjust_hint_rules">Umgerechnet werden nur Mengen am Anfang einer Zeile und in Klammern. Zeiten und Temperaturen bleiben, wie sie sind.</string>
 
     <!-- Teilen -->
     <string name="share_recipe">Rezept teilen</string>
@@ -203,10 +216,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>„Kochen“ in den Einstellungen: Der Bildschirm in der Rezeptansicht bleibt an, geht 15 oder 30 Minuten nach dem letzten Tippen aus oder verhält sich wie das Handy.</item>
-        <item>Sinnvoll gerundet beim Umrechnen, z. B. „≈ 4 Eier“ statt „3,75 Eier“. Würfel und Päckchen in Klammern werden mitgerechnet.</item>
-        <item>Backformen wie „Springform Ø 26 cm“ werden richtig gelesen und angezeigt.</item>
-        <item>Die Übersetzung kennt mehr Wörter zum Backen und für Teige.</item>
+        <item>„Umrechnen …“ unter den Portionen: nach Portionen oder nach einer Zutat, z. B. „nur 300 g Mehl da“. Das geht auch bei Rezepten ohne Portionsangabe.</item>
+        <item>Portionen gehen bis 999, und ein Rezept „für 1 Springform“ lässt sich halbieren.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->

@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.moltobene.app.data.Adjustment
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeRepository
 import com.moltobene.app.data.ocr.CropArea
@@ -96,8 +97,13 @@ class RecipeViewModel(
     /** Der aktuelle Schritt, gemerkt wie die Zutaten; null, wenn keiner markiert ist. */
     val currentStep: StateFlow<String?> = savedStateHandle.getStateFlow<String?>(KEY_STEP, null)
 
-    /** Angezeigte Portionen; null heißt: wie im Rezept. Das gespeicherte Rezept ändert sich nie. */
-    val shownServings: StateFlow<Int?> = savedStateHandle.getStateFlow<Int?>(KEY_SERVINGS, null)
+    /**
+     * „Umrechnen …“ (#66): nach Portionen oder nach einer Zutat; null heißt: wie im Rezept. Das gespeicherte Rezept
+     * ändert sich nie. Liegt im [SavedStateHandle] wie die Häkchen.
+     */
+    val adjustment: StateFlow<Adjustment?> = savedStateHandle.getStateFlow<String?>(KEY_ADJUSTMENT, null)
+        .map { Adjustment.decode(it) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, Adjustment.decode(savedStateHandle.get<String>(KEY_ADJUSTMENT)))
 
     fun toggleIngredient(index: Int, text: String) {
         val key = progressKey(index, text)
@@ -112,8 +118,8 @@ class RecipeViewModel(
         savedStateHandle[KEY_STEP] = if (currentStep.value == key) null else key
     }
 
-    fun setServings(servings: Int?) {
-        savedStateHandle[KEY_SERVINGS] = servings
+    fun setAdjustment(adjustment: Adjustment?) {
+        savedStateHandle[KEY_ADJUSTMENT] = adjustment?.let { Adjustment.encode(it) }
     }
 
     /** „Abhaken zurücksetzen“: keine Zutat abgehakt, kein aktueller Schritt. */
@@ -238,7 +244,7 @@ class RecipeViewModel(
     companion object {
         private const val KEY_CHECKED = "cooking_checked"
         private const val KEY_STEP = "cooking_step"
-        private const val KEY_SERVINGS = "cooking_servings"
+        private const val KEY_ADJUSTMENT = "cooking_adjustment"
         private const val KEY_LANGUAGE = "translation_language"
 
         /** Kennung einer Zeile beim Kochen: Stelle und Text. */

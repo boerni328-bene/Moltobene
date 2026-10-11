@@ -3,6 +3,13 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.28.0] – 2026-10-11 (versionCode 51)
+
+### Neu
+- **Umrechnen …:** Unter den Portionen steht „Umrechnen …“. Ein Fenster bietet „Nach Portionen“ und „Nach Zutat“. Bei „Nach Zutat“ wird eine Zutat gewählt und die Menge eingetippt, die vorhanden ist, z. B. 300 g statt 200 g Mehl; alle anderen Mengen rechnen mit. Das geht auch bei Rezepten ohne Portionsangabe, etwa vielen Kuchen. Die Zutat, nach der gerechnet wird, zeigt genau die eingetippte Menge. Eingaben wie 0 oder unsinnig große Werte werden abgelehnt.
+- Portionen lassen sich bis 999 umrechnen (bisher 99). Wird nach einer Zutat umgerechnet, stehen bei krummen Portionen „etwa“ und die gerundete Zahl.
+- „Zurücksetzen“ zeigt wieder die Mengen des Rezepts. Das gespeicherte Rezept ändert sich nie.
+
 ## [0.27.2] – 2026-10-10 (versionCode 50)
 
 ### Geändert

@@ -29,11 +29,33 @@ object AmountScaling {
      */
     data class Part(val text: String, val scaled: Boolean, val approximate: Boolean = false)
 
+    /** Die Menge am Anfang einer Zutatenzeile (#66), z. B. 500 und „g“ für „500 g Mehl“; [unit] null bei „3 Eier“. */
+    data class Leading(val value: Double, val unit: String?)
+
+    /**
+     * Die Menge am Anfang der Zeile für „Nach Zutat umrechnen“ (#66): nur eine einzelne Zahl, kein Bereich wie „2–3“;
+     * „30 % Fett“ oder „180 °C“ zählen nicht. null, wenn die Zeile keine solche Menge hat.
+     */
+    fun leadingAmount(line: String, language: String?): Leading? {
+        val match = LEADING.find(line) ?: return null
+        if (match.groups[4] != null) return null
+        val rest = line.substring(match.range.last + 1).trimStart()
+        if (rest.startsWith("%") || rest.startsWith("°")) return null
+        val value = parse(match.groupValues[2], language)?.value?.takeIf { it > 0 && it.isFinite() } ?: return null
+        val unit = UNIT.find(rest)?.value?.takeIf { RecipeUnits.kindOf(it) != null }
+        return Leading(value, unit)
+    }
+
+    /** Eine eingetippte Menge (#66): „350“, „1,5“, „1.5“, „1 1/2“ oder „½“; null, wenn es keine Zahl über 0 ist. */
+    fun parseInput(text: String): Double? = parse(text.trim(), null)?.value?.takeIf { it > 0 && it.isFinite() }
+
     /**
      * @param factor neue Portionen geteilt durch die Portionen des Rezepts
      * @param language Sprache des Rezepts („de“, „en“ …); bestimmt, ob „1.000“ tausend oder eins ist
+     * @param exactLeading die Menge am Zeilenanfang nicht runden – für die Zutat, nach der umgerechnet wird (#66):
+     *   Dort steht genau die eingetippte Menge.
      */
-    fun scale(line: String, factor: Double, language: String?): List<Part> {
+    fun scale(line: String, factor: Double, language: String?, exactLeading: Boolean = false): List<Part> {
         if (factor == 1.0 || factor <= 0.0 || line.isBlank()) return listOf(Part(line, false))
         val replacements = mutableListOf<Replacement>()
         LEADING.find(line)?.let { match ->
@@ -41,7 +63,7 @@ object AmountScaling {
             // „30 % Fett“ oder „180 °C“ sind keine Mengen.
             if (rest.startsWith("%") || rest.startsWith("°")) return@let
             // Ohne bekannte Einheit zählt die Zutat selbst („3 Eier“, „1 Springform“) – wie Stück.
-            val kind = UNIT.find(rest)?.let { RecipeUnits.kindOf(it.value) } ?: Kind.PIECES
+            val kind = if (exactLeading) Kind.OTHER else UNIT.find(rest)?.let { RecipeUnits.kindOf(it.value) } ?: Kind.PIECES
             val numbers = listOfNotNull(match.groups[2], match.groups[4]).mapNotNull { group ->
                 scaleNumber(group.value, factor, language, kind)?.let { group.range to it }
             }
@@ -84,8 +106,8 @@ object AmountScaling {
     }
 
     /** Die umgerechnete Zeile als Text. */
-    fun scaleText(line: String, factor: Double, language: String?): String =
-        scale(line, factor, language).joinToString("") { it.text }
+    fun scaleText(line: String, factor: Double, language: String?, exactLeading: Boolean = false): String =
+        scale(line, factor, language, exactLeading).joinToString("") { it.text }
 
     /**
      * Die Zeile für den Screenreader: „≈ 335 g Mehl“ wird mit [about] (z. B. „etwa %1$s“ aus strings.xml) zu

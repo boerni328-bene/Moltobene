@@ -22,11 +22,13 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import androidx.core.view.WindowCompat
@@ -214,6 +216,42 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithContentDescription(text(R.string.more_options)).performClick()
         composeRule.onNodeWithText(text(R.string.cooking_reset)).performClick()
         composeRule.onNodeWithText("800 g reife Tomaten").assertIsOff()
+    }
+
+    /**
+     * Umrechnen nach einer Zutat (#66): Beim „Lemon drizzle cake“ nur 300 g statt 200 g Mehl – alle Mengen rechnen mit,
+     * die gewählte Zutat zeigt genau die eingetippte Menge, das gespeicherte Rezept bleibt.
+     */
+    @Test
+    fun umrechnenNachZutat() {
+        addSampleRecipes()
+        openRecipe("Lemon drizzle cake")
+        waitForText("200 g soft butter")
+        composeRule.onNodeWithText(text(R.string.adjust_action)).performScrollTo().performClick()
+        waitForText(text(R.string.adjust_by_ingredient))
+        screenshot("12g-umrechnen-fenster")
+        composeRule.onNodeWithText(text(R.string.adjust_by_ingredient)).performClick()
+        waitForText("200 g self-raising flour")
+        // Die Zeile steht auch im Rezept hinter dem Fenster; das Fenster ist der letzte Treffer.
+        composeRule.onAllNodesWithText("200 g self-raising flour").onLast().performClick()
+        waitForField(R.string.adjust_amount_label)
+        // 0 wird abgelehnt.
+        field(R.string.adjust_amount_label).performTextClearance()
+        field(R.string.adjust_amount_label).performTextInput("0")
+        waitForText(text(R.string.adjust_amount_invalid))
+        screenshot("12h-umrechnen-menge-ungueltig")
+        field(R.string.adjust_amount_label).performTextClearance()
+        field(R.string.adjust_amount_label).performTextInput("300")
+        composeRule.onNodeWithText(text(R.string.adjust_confirm)).performClick()
+
+        waitForText("300 g self-raising flour", substring = true)
+        composeRule.onAllNodesWithText("300 g self-raising flour", substring = true).onFirst().performScrollTo()
+        screenshot("12i-umgerechnet-nach-zutat")
+        val stored = runBlocking { container().repository.getAll().first { it.title == "Lemon drizzle cake" } }
+        assertEquals("200 g self-raising flour", stored.ingredients[3].text)
+
+        composeRule.onNodeWithText(text(R.string.servings_reset)).performScrollTo().performClick()
+        waitForText("200 g self-raising flour")
     }
 
     /** Rezept übersetzen (#60): Umschalter „DE | EN“, Übersetzung mit Hinweis; Abhaken gilt auch im Original. */
@@ -660,8 +698,8 @@ class AppTourTest(private val variant: DisplayVariant) {
         nodes[index].performClick()
     }
 
-    private fun waitForText(value: String) = composeRule.waitUntil(TIMEOUT_MILLIS) {
-        composeRule.onAllNodesWithText(value).fetchSemanticsNodes().isNotEmpty()
+    private fun waitForText(value: String, substring: Boolean = false) = composeRule.waitUntil(TIMEOUT_MILLIS) {
+        composeRule.onAllNodesWithText(value, substring = substring).fetchSemanticsNodes().isNotEmpty()
     }
 
     private fun waitForDescription(value: String) = composeRule.waitUntil(TIMEOUT_MILLIS) {
