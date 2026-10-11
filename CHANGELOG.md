@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.28.2] – 2026-10-11 (versionCode 53)
+
+### Geändert
+- Keine sichtbaren Änderungen an der App. Für die Qualitätsprüfung gibt es einen neuen Prüflauf auf GitHub (von Hand zu starten): ein virtuelles Android-8-Handy mit wenig Arbeitsspeicher, eine Testsammlung mit 1.000 Rezepten mit Fotos und Messungen von Start, Blättern und Suchen. Dazu läuft eine Prüf-Fassung, die so verkleinert ist wie die veröffentlichte App, auf Abstürze.
+
 ## [0.28.1] – 2026-10-11 (versionCode 52)
 
 ### Behoben

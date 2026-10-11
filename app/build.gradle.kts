@@ -17,8 +17,8 @@ android {
         applicationId = "com.moltobene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 52
-        versionName = "0.28.1"
+        versionCode = 53
+        versionName = "0.28.2"
 
         // Rundgang durch die App auf dem Emulator (app/src/androidTest).
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -72,6 +72,18 @@ android {
         debug {
             // Nur für die Debug-Version (Rundgang auf dem Emulator): Die Texterkennung läuft dort ohne
             // Übersetzung der Handy-Prozessorbefehle. Die veröffentlichte App bleibt bei den Handy-Prozessoren.
+            ndk {
+                abiFilters += "x86_64"
+            }
+        }
+        // Prüf-Fassung (#52): wie die veröffentlichte (R8, verkleinert), aber mit Debug-Schlüssel und zusätzlich für den
+        // Emulator; nur für den Prüflauf auf GitHub, wird nie veröffentlicht.
+        create("pruef") {
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += "release"
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             ndk {
                 abiFilters += "x86_64"
             }

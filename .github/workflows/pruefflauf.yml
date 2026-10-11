@@ -1,0 +1,161 @@
+name: Prüflauf
+
+# Prüflauf wie beim Nutzer (#52), nur auf Wunsch („Run workflow“):
+# 1. Android 8 (API 26) mit wenig Arbeitsspeicher, eine Sammlung mit 1.000 Rezepten mit Fotos.
+# 2. Gemessen werden Laden und Suchen, Kaltstart, Blättern (Ruckeln) und Speicher.
+# 3. Danach läuft die Prüf-Fassung (R8, verkleinert wie die veröffentlichte APK) auf demselben Handy: Start und
+#    ein Zufallstest, danach darf im Absturzprotokoll nichts stehen.
+# Grenzwerte sind zunächst nur Warnungen. Baut nur Debug- und Prüf-Fassungen und sieht keine Secrets.
+on:
+  workflow_dispatch:
+    inputs:
+      systemabbild:
+        description: "Systemabbild des virtuellen Handys"
+        default: "system-images;android-26;google_apis;x86_64"
+      arbeitsspeicher:
+        description: "Arbeitsspeicher des virtuellen Handys in MB"
+        default: "1536"
+
+permissions:
+  contents: read
+
+jobs:
+  pruefung:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      SYSTEMABBILD: ${{ inputs.systemabbild }}
+      RAM: ${{ inputs.arbeitsspeicher }}
+      PAKET: com.moltobene.app
+
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Java 17 einrichten
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Gradle einrichten
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+
+      - name: Virtualisierung für den Emulator freigeben
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Emulator einrichten und im Hintergrund starten
+        run: |
+          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+          export ANDROID_AVD_HOME="$HOME/.android/avd"
+          echo "ANDROID_AVD_HOME=$ANDROID_AVD_HOME" >> "$GITHUB_ENV"
+          mkdir -p "$ANDROID_AVD_HOME"
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          AVDMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager"
+          yes | "$SDKMANAGER" --licenses > /dev/null || true
+          "$SDKMANAGER" --install emulator platform-tools "$SYSTEMABBILD" > /dev/null
+          echo no | "$AVDMANAGER" create avd --name pruefhandy --package "$SYSTEMABBILD" --force
+          CONFIG="$ANDROID_AVD_HOME/pruefhandy.avd/config.ini"
+          sed -i '/^hw\.lcd\./d; /^hw\.keyboard/d; /^hw\.ramSize/d; /^skin\./d; /^hw\.cpu\.ncore/d' "$CONFIG"
+          # Wie ein günstiges Handy: 720 x 1520, wenig Arbeitsspeicher, zwei Prozessorkerne.
+          printf '%s\n' hw.lcd.width=720 hw.lcd.height=1520 hw.lcd.density=320 hw.keyboard=yes "hw.ramSize=$RAM" hw.cpu.ncore=2 >> "$CONFIG"
+          nohup "$ANDROID_HOME/emulator/emulator" -avd pruefhandy -no-window -no-audio -no-boot-anim -no-snapshot \
+            -gpu swiftshader_indirect -camera-back none -camera-front none > emulator.log 2>&1 &
+
+      - name: Fassungen bauen
+        run: ./gradlew assembleDebug assembleDebugAndroidTest assemblePruef --no-daemon
+
+      - name: Warten, bis der Emulator bereit ist
+        run: |
+          adb wait-for-device
+          timeout 600 bash -c 'until [ "$(adb shell getprop sys.boot_completed | tr -d "\r")" = "1" ]; do sleep 5; done'
+          adb shell settings put global window_animation_scale 0
+          adb shell settings put global transition_animation_scale 0
+          adb shell settings put global animator_duration_scale 0
+          adb shell settings put system screen_off_timeout 1800000
+          adb shell svc power stayon true
+          adb shell wm dismiss-keyguard
+          echo "android=$(adb shell getprop ro.build.version.release | tr -d '\r')" | tee -a ergebnis.txt
+
+      - name: Testsammlung mit 1.000 Rezepten anlegen, Laden und Suchen messen
+        run: |
+          APK=$(ls app/build/outputs/apk/debug/*-debug.apk | head -1)
+          TESTAPK=$(ls app/build/outputs/apk/androidTest/debug/*.apk | head -1)
+          adb install -r -t "$APK" > /dev/null
+          adb install -r -t "$TESTAPK" > /dev/null
+          adb logcat -c
+          adb shell am instrument -w -e class com.moltobene.app.perf.PerformanceTest \
+            "$PAKET.test/androidx.test.runner.AndroidJUnitRunner" | tee instrument.txt
+          adb logcat -d -s PRUEF:I | grep -oP 'PRUEF: \K.*' | tee -a ergebnis.txt
+          grep -q "OK (1 test)" instrument.txt
+
+      - name: Kaltstart, Blättern und Speicher messen
+        run: |
+          echo "--- Kaltstart (ms) mit 1.000 Rezepten" | tee -a ergebnis.txt
+          for i in 1 2 3 4 5; do
+            adb shell am force-stop "$PAKET"
+            sleep 2
+            adb shell am start -W -n "$PAKET/.MainActivity" | grep -oP 'TotalTime: \K\d+' | tee -a kaltstart.txt
+            sleep 4
+          done
+          sort -n kaltstart.txt | sed -n 3p | sed 's/^/kaltstart_median_ms=/' | tee -a ergebnis.txt
+          # Blättern: zwanzigmal nach unten und zurück, dann das Ruckeln aus dem Grafikprotokoll.
+          adb shell dumpsys gfxinfo "$PAKET" reset > /dev/null
+          for i in $(seq 1 20); do
+            adb shell input swipe 360 1200 360 400 120
+            adb shell input swipe 360 400 360 1200 120
+          done
+          sleep 2
+          adb shell dumpsys gfxinfo "$PAKET" | grep -E "Total frames rendered|Janky frames|50th percentile|90th percentile|95th percentile|99th percentile" | tee -a ergebnis.txt
+          adb shell dumpsys meminfo "$PAKET" | grep -E "TOTAL PSS|TOTAL:" | head -2 | tee -a ergebnis.txt
+          adb shell dumpsys meminfo | grep -iE "Total RAM|Free RAM|Lost RAM" | tee -a ergebnis.txt
+
+      - name: Prüf-Fassung (wie veröffentlicht, mit R8) starten und Zufallstest
+        run: |
+          adb uninstall "$PAKET" > /dev/null || true
+          APK=$(ls app/build/outputs/apk/pruef/*.apk | head -1)
+          ls -l "$APK"
+          adb install -r "$APK" > /dev/null
+          adb logcat -b crash -c
+          adb shell am start -W -n "$PAKET/.MainActivity" | tee -a ergebnis.txt
+          sleep 5
+          adb shell monkey -p "$PAKET" --throttle 250 --pct-syskeys 0 -s 7 -v 400 | tail -5 | tee -a ergebnis.txt
+          adb logcat -b crash -d > absturz.txt
+          if grep -q "FATAL EXCEPTION" absturz.txt; then
+            echo "::error::Die Prüf-Fassung (R8) ist abgestürzt, siehe absturz.txt"
+            cat absturz.txt
+            exit 1
+          fi
+          echo "pruef_fassung=ohne Absturz" | tee -a ergebnis.txt
+
+      - name: Grenzwerte als Warnung prüfen
+        if: always()
+        run: |
+          [ -f ergebnis.txt ] || exit 0
+          warn() { echo "::warning::$1"; }
+          v() { grep -oP "^$1=\K\d+" ergebnis.txt | head -1; }
+          [ "$(v kaltstart_median_ms)" -gt 4000 ] 2>/dev/null && warn "Kaltstart über 4 s: $(v kaltstart_median_ms) ms"
+          [ "$(v liste_laden_ms)" -gt 1500 ] 2>/dev/null && warn "Liste laden über 1,5 s: $(v liste_laden_ms) ms"
+          [ "$(v suche_ohne_treffer_ms)" -gt 500 ] 2>/dev/null && warn "Suche über 0,5 s: $(v suche_ohne_treffer_ms) ms"
+          {
+            echo "## Prüflauf (Android 8, ${RAM} MB, 1.000 Rezepte)"
+            echo '```'
+            cat ergebnis.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Ergebnisse speichern
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pruefflauf
+          path: |
+            ergebnis.txt
+            kaltstart.txt
+            instrument.txt
+            absturz.txt
+            emulator.log
+          if-no-files-found: ignore
