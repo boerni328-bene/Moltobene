@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.28.3] – 2026-10-11 (versionCode 54)
+
+### Geändert
+- Keine sichtbaren Änderungen an der App. Der Prüflauf auf GitHub stolpert nicht mehr über das Leeren des Protokolls auf Android 8.
+
 ## [0.28.2] – 2026-10-11 (versionCode 53)
 
 ### Geändert

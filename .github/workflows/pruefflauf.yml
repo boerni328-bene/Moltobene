@@ -86,7 +86,7 @@ jobs:
           TESTAPK=$(ls app/build/outputs/apk/androidTest/debug/*.apk | head -1)
           adb install -r -t "$APK" > /dev/null
           adb install -r -t "$TESTAPK" > /dev/null
-          adb logcat -c
+          adb logcat -c || true
           adb shell am instrument -w -e class com.moltobene.app.perf.PerformanceTest \
             "$PAKET.test/androidx.test.runner.AndroidJUnitRunner" | tee instrument.txt
           adb logcat -d -s PRUEF:I | grep -oP 'PRUEF: \K.*' | tee -a ergebnis.txt
@@ -119,7 +119,7 @@ jobs:
           APK=$(ls app/build/outputs/apk/pruef/*.apk | head -1)
           ls -l "$APK"
           adb install -r "$APK" > /dev/null
-          adb logcat -b crash -c
+          adb logcat -b crash -c || true
           adb shell am start -W -n "$PAKET/.MainActivity" | tee -a ergebnis.txt
           sleep 5
           adb shell monkey -p "$PAKET" --throttle 250 --pct-syskeys 0 -s 7 -v 400 | tail -5 | tee -a ergebnis.txt
