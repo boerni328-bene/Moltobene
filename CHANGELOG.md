@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.29.0] – 2026-10-11 (versionCode 56)
+
+### Neu
+- **Backform umrechnen:** „Umrechnen …“ hat jetzt „Nach Backform“. Zur Wahl stehen rund mit Durchmesser oder eckig mit Länge × Breite, in cm oder Zoll. Die Mengen richten sich nach der Fläche der Form: Von Ø 26 cm auf Ø 28 cm sind es etwa 16 % mehr, nicht 8 %. Steht die Backform im Rezept eindeutig da, etwa „Springform (Ø 26 cm)“ oder „26er Springform“, ist sie vorausgefüllt; sonst wird sie eingetippt. Die App rät nie still. Bei Zoll steht die Form zusätzlich in Zoll, z. B. „Ø 23 cm (9 Zoll)“.
+- Der Hinweis nennt beide Formen und sagt ehrlich: „Die Backzeit kann sich ändern – früher prüfen, ob der Kuchen durch ist.“ Backzeit und Temperatur rechnet die App nie um. Das gespeicherte Rezept ändert sich nicht.
+
 ## [0.28.4] – 2026-10-11 (versionCode 55)
 
 ### Geändert

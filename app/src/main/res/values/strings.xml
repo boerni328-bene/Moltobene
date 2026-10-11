@@ -94,6 +94,24 @@
     <string name="adjust_amount_invalid">Possible: more than 0 and up to 100 times the amount in the recipe.</string>
     <string name="adjust_ingredient_hint">Amounts adjusted for %1$s. In the recipe: %2$s.</string>
     <string name="adjust_hint_rules">Only amounts at the start of a line and in parentheses are adjusted. Times and temperatures stay as they are.</string>
+    <string name="adjust_by_pan">By pan size</string>
+    <string name="adjust_pan_round">Round</string>
+    <string name="adjust_pan_rectangle">Rectangular</string>
+    <string name="adjust_pan_in_recipe">Pan in the recipe</string>
+    <string name="adjust_pan_own">Your pan</string>
+    <string name="adjust_pan_diameter">Diameter</string>
+    <string name="adjust_pan_length">Length</string>
+    <string name="adjust_pan_width">Width</string>
+    <string name="adjust_pan_unit_cm">cm</string>
+    <string name="adjust_pan_unit_inch">inch</string>
+    <string name="adjust_pan_invalid">Possible: %1$d to %2$d cm, and the areas may differ by 10 times at most.</string>
+    <string name="adjust_pan_hint">Amounts adjusted for %1$s. In the recipe: %2$s.</string>
+    <string name="adjust_pan_baking">Baking time may change – check earlier whether the cake is done. Only amounts at the start of a line and in parentheses are adjusted.</string>
+    <string name="pan_round">Ø %1$s cm</string>
+    <string name="pan_rectangle">%1$s × %2$s cm</string>
+    <string name="pan_size_pair">%1$s × %2$s</string>
+    <string name="pan_inch">%1$s inch</string>
+    <string name="pan_with_inch">%1$s (%2$s)</string>
 
     <!-- Teilen -->
     <string name="share_recipe">Share recipe</string>
@@ -218,8 +236,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>“Adjust …” below the servings: by servings or by an ingredient, e.g. “only 300 g flour”. This also works for recipes without servings.</item>
-        <item>Servings go up to 999, and a recipe “for 1 pan” can be halved.</item>
+        <item>“Adjust …” by pan size: round or rectangular, in cm or inches. Amounts grow with the area of the pan, e.g. about 16 % more from Ø 26 cm to Ø 28 cm.</item>
+        <item>The pan in the recipe is filled in when it is clearly stated. The app never adjusts the baking time.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->

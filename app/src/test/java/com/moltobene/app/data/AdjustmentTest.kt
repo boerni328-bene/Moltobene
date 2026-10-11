@@ -57,6 +57,22 @@ class AdjustmentTest {
     }
 
     @Test
+    fun nachBackform() {
+        val pan = Adjustment.ByPan(Pan.round(26.0), Pan.round(28.0), inch = false)
+        assertEquals(1.1598, Adjustment.factor(pan, 1, cake, "de"), 0.0001)
+        // Auch ohne Portionsangabe.
+        assertEquals(1.1598, Adjustment.factor(pan, null, cake, "de"), 0.0001)
+        assertEquals(pan, Adjustment.decode(Adjustment.encode(pan)))
+        val rect = Adjustment.ByPan(Pan.round(22.5), Pan.rectangle(20.0, 30.5), inch = true)
+        assertEquals(rect, Adjustment.decode(Adjustment.encode(rect)))
+        // Gemerkte Werte außerhalb der Grenzen oder unlesbar werden nicht angewendet.
+        assertNull(Adjustment.decode("pan:R:1.0:1.0:R:28.0:28.0:0"))
+        assertNull(Adjustment.decode("pan:R:26.0:26.0:R:NaN:NaN:0"))
+        assertNull(Adjustment.decode("pan:X:26.0:26.0:R:28.0:28.0:0"))
+        assertNull(Adjustment.decode("pan:R:26.0"))
+    }
+
+    @Test
     fun merkenUndWiederherstellen() {
         val servings = Adjustment.Servings(6)
         assertEquals(servings, Adjustment.decode(Adjustment.encode(servings)))

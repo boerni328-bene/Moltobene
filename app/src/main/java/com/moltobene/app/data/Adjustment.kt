@@ -16,6 +16,9 @@ sealed interface Adjustment {
      */
     data class ByIngredient(val index: Int, val lineHash: Int, val amount: Double) : Adjustment
 
+    /** Für die Backform [to] statt [from] im Rezept (#67); [inch], wenn die Maße in Zoll eingegeben wurden (nur für die Anzeige). */
+    data class ByPan(val from: Pan, val to: Pan, val inch: Boolean) : Adjustment
+
     companion object {
         /** Wie im Formular: höchstens 999 Portionen. */
         const val MAX_SERVINGS = 999
@@ -30,6 +33,7 @@ sealed interface Adjustment {
         fun encode(adjustment: Adjustment): String = when (adjustment) {
             is Servings -> "$SERVINGS:${adjustment.servings}"
             is ByIngredient -> "$INGREDIENT:${adjustment.index}:${adjustment.lineHash}:${adjustment.amount}"
+            is ByPan -> listOf(PAN, adjustment.from.encode(), adjustment.to.encode(), if (adjustment.inch) "1" else "0").joinToString(":")
         }
 
         /** Gegenstück zu [encode]; null bei fehlender oder ungültiger Angabe. */
@@ -42,6 +46,11 @@ sealed interface Adjustment {
                     val hash = parts.getOrNull(2)?.toIntOrNull() ?: return null
                     val amount = parts.getOrNull(3)?.toDoubleOrNull()?.takeIf { it > 0 && it.isFinite() } ?: return null
                     ByIngredient(index, hash, amount)
+                }
+                PAN -> {
+                    val from = decodePan(parts.getOrNull(1), parts.getOrNull(2), parts.getOrNull(3)) ?: return null
+                    val to = decodePan(parts.getOrNull(4), parts.getOrNull(5), parts.getOrNull(6)) ?: return null
+                    if (PanScaling.factor(from, to) == null) null else ByPan(from, to, parts.getOrNull(7) == "1")
                 }
                 else -> null
             }
@@ -59,6 +68,7 @@ sealed interface Adjustment {
                 val original = servings?.takeIf { it > 0 }
                 if (original == null) 1.0 else adjustment.servings.coerceIn(1, MAX_SERVINGS).toDouble() / original
             }
+            is ByPan -> PanScaling.factor(adjustment.from, adjustment.to) ?: 1.0
             is ByIngredient -> {
                 val original = ingredients.getOrNull(adjustment.index)
                     ?.takeIf { it.hashCode() == adjustment.lineHash }
@@ -76,5 +86,18 @@ sealed interface Adjustment {
 
         private const val SERVINGS = "servings"
         private const val INGREDIENT = "ingredient"
+        private const val PAN = "pan"
+
+        private fun Pan.encode(): String = "${if (round) "R" else "E"}:$a:$b"
+
+        private fun decodePan(kind: String?, a: String?, b: String?): Pan? {
+            val first = a?.toDoubleOrNull() ?: return null
+            val second = b?.toDoubleOrNull() ?: return null
+            return when (kind) {
+                "R" -> Pan.round(first)
+                "E" -> Pan.rectangle(first, second)
+                else -> null
+            }
+        }
     }
 }

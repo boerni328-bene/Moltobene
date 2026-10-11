@@ -254,6 +254,50 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText("200 g self-raising flour")
     }
 
+    /**
+     * Umrechnen nach Backform (#67): „Springform (Ø 26 cm)“ aus der Rezeptmenge wird vorausgefüllt, die eigene Form hat
+     * 28 cm – die Mengen wachsen mit der Fläche (etwa das 1,16-Fache), die Anzahl der Formen bleibt.
+     */
+    @Test
+    fun umrechnenNachBackform() {
+        addSampleRecipes()
+        runBlocking {
+            container().repository.save(
+                com.moltobene.app.data.Recipe(
+                    id = com.moltobene.app.data.RecipeIds.newId(),
+                    title = "Apfelkuchen",
+                    language = "de",
+                    servings = 1,
+                    servingsUnit = "Springform (Ø 26 cm)",
+                    ingredients = listOf("200 g Mehl", "3 Eier", "150 g Zucker").map { com.moltobene.app.data.Ingredient(it) },
+                    steps = listOf("Alles verrühren und backen."),
+                    createdAt = System.currentTimeMillis(),
+                    updatedAt = System.currentTimeMillis(),
+                ),
+            )
+        }
+        openRecipe("Apfelkuchen")
+        waitForText("200 g Mehl")
+        composeRule.onNodeWithText(text(R.string.adjust_action)).performScrollTo().performClick()
+        waitForText(text(R.string.adjust_by_pan))
+        composeRule.onNodeWithText(text(R.string.adjust_by_pan)).performClick()
+        waitForText(text(R.string.adjust_pan_own))
+        // Die Form im Rezept ist vorausgefüllt; die eigene Form kommt dazu.
+        composeRule.onAllNodes(hasSetTextAction()).onLast().performTextInput("28")
+        screenshot("12j-umrechnen-backform")
+        composeRule.onNodeWithText(text(R.string.adjust_confirm)).performClick()
+
+        waitForText(text(R.string.adjust_pan_hint, "Ø 28 cm", "Ø 26 cm"), substring = true)
+        waitForText("230 g Mehl", substring = true)
+        composeRule.onAllNodesWithText("230 g Mehl", substring = true).onFirst().performScrollTo()
+        screenshot("12k-umgerechnet-nach-backform")
+        val stored = runBlocking { container().repository.getAll().first { it.title == "Apfelkuchen" } }
+        assertEquals("200 g Mehl", stored.ingredients.first().text)
+
+        composeRule.onNodeWithText(text(R.string.servings_reset)).performScrollTo().performClick()
+        waitForText("200 g Mehl")
+    }
+
     /** Rezept übersetzen (#60): Umschalter „DE | EN“, Übersetzung mit Hinweis; Abhaken gilt auch im Original. */
     @Test
     fun uebersetzen() {

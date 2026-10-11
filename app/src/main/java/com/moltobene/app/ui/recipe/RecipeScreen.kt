@@ -101,6 +101,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moltobene.app.R
 import com.moltobene.app.data.Adjustment
 import com.moltobene.app.data.AmountScaling
+import com.moltobene.app.data.Pan
+import com.moltobene.app.data.PanScaling
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeText
 import com.moltobene.app.data.ScreenOn
@@ -511,7 +513,8 @@ private fun RecipeContent(
             }
 
             if (originalServings != null) {
-                val exact = originalServings * factor
+                // Nach Backform bleibt es bei der Anzahl der Formen; nur die Mengen ändern sich (#67).
+                val exact = if (cooking.adjustment is Adjustment.ByPan) originalServings.toDouble() else originalServings * factor
                 val shown = exact.roundToInt().coerceIn(1, Adjustment.MAX_SERVINGS)
                 ServingsControl(
                     shown = shown,
@@ -528,7 +531,7 @@ private fun RecipeContent(
                 )
             }
             var adjusting by rememberSaveable { mutableStateOf(false) }
-            if (originalServings != null || choices.isNotEmpty()) {
+            run {
                 AdjustActions(
                     adjusted = factor != 1.0,
                     hint = when (val current = cooking.adjustment) {
@@ -537,8 +540,14 @@ private fun RecipeContent(
                             lines.getOrNull(current.index)?.joinToString("") { it.text }.orEmpty(),
                             texts.getOrNull(current.index).orEmpty(),
                         )
+                        is Adjustment.ByPan -> stringResource(
+                            R.string.adjust_pan_hint,
+                            panLabel(current.to, current.inch),
+                            panLabel(current.from, current.inch),
+                        )
                         else -> originalServings?.let { stringResource(R.string.servings_scaled_hint, servingsText(it, servingsUnit)) }
                     },
+                    bakingNote = cooking.adjustment is Adjustment.ByPan,
                     onAdjust = { adjusting = true },
                     onReset = { cooking.onAdjust(null) },
                 )
@@ -549,6 +558,7 @@ private fun RecipeContent(
                     servingsUnit = servingsUnit,
                     choices = choices,
                     decimalSeparator = if (recipeLanguage == "en") '.' else ',',
+                    recipePan = remember(recipe.servingsUnit) { PanScaling.parse(recipe.servingsUnit) },
                     onServings = {
                         adjusting = false
                         cooking.onAdjust(if (it == originalServings) null else Adjustment.Servings(it))
@@ -556,6 +566,10 @@ private fun RecipeContent(
                     onIngredient = { choice, amount ->
                         adjusting = false
                         cooking.onAdjust(Adjustment.byIngredient(choice.index, choice.line, amount))
+                    },
+                    onPan = { from, to, inch ->
+                        adjusting = false
+                        cooking.onAdjust(Adjustment.ByPan(from, to, inch))
                     },
                     onDismiss = { adjusting = false },
                 )
@@ -668,10 +682,10 @@ private fun ServingsControl(shown: Int, approximate: Boolean, unit: String?, onC
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun AdjustActions(adjusted: Boolean, hint: String?, onAdjust: () -> Unit, onReset: () -> Unit) {
+private fun AdjustActions(adjusted: Boolean, hint: String?, bakingNote: Boolean, onAdjust: () -> Unit, onReset: () -> Unit) {
     if (adjusted && hint != null) {
         Text(
-            text = hint + " " + stringResource(R.string.adjust_hint_rules),
+            text = hint + " " + stringResource(if (bakingNote) R.string.adjust_pan_baking else R.string.adjust_hint_rules),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -968,4 +982,19 @@ private fun formatDuration(minutes: Int, locale: Locale): String {
         if (rest > 0 || hours == 0) add(Measure(rest, MeasureUnit.MINUTE))
     }
     return MeasureFormat.getInstance(locale, MeasureFormat.FormatWidth.SHORT).formatMeasures(*parts.toTypedArray())
+}
+
+/** Eine Backform als Text, z. B. „Ø 28 cm“ oder „30 × 40 cm“, bei Eingabe in Zoll mit „(9 Zoll)“ (#67). */
+@Composable
+private fun panLabel(pan: Pan, inch: Boolean): String {
+    fun cm(value: Double) = if (abs(value - value.roundToInt()) < 0.05) value.roundToInt().toString() else "%.1f".format(java.util.Locale.ROOT, value)
+    fun inches(value: Double) = (value / PanScaling.CM_PER_INCH).let { if (abs(it - it.roundToInt()) < 0.05) it.roundToInt().toString() else "%.1f".format(java.util.Locale.ROOT, it) }
+    val base = if (pan.round) {
+        stringResource(R.string.pan_round, cm(pan.a))
+    } else {
+        stringResource(R.string.pan_rectangle, cm(pan.a), cm(pan.b))
+    }
+    if (!inch) return base
+    val size = if (pan.round) inches(pan.a) else stringResource(R.string.pan_size_pair, inches(pan.a), inches(pan.b))
+    return stringResource(R.string.pan_with_inch, base, stringResource(R.string.pan_inch, size))
 }

@@ -93,6 +93,24 @@
     <string name="adjust_amount_invalid">Möglich ist eine Menge über 0 bis zum Hundertfachen der Menge im Rezept.</string>
     <string name="adjust_ingredient_hint">Mengen umgerechnet für %1$s. Im Rezept: %2$s.</string>
     <string name="adjust_hint_rules">Umgerechnet werden nur Mengen am Anfang einer Zeile und in Klammern. Zeiten und Temperaturen bleiben, wie sie sind.</string>
+    <string name="adjust_by_pan">Nach Backform</string>
+    <string name="adjust_pan_round">Rund</string>
+    <string name="adjust_pan_rectangle">Eckig</string>
+    <string name="adjust_pan_in_recipe">Backform im Rezept</string>
+    <string name="adjust_pan_own">Eigene Backform</string>
+    <string name="adjust_pan_diameter">Durchmesser</string>
+    <string name="adjust_pan_length">Länge</string>
+    <string name="adjust_pan_width">Breite</string>
+    <string name="adjust_pan_unit_cm">cm</string>
+    <string name="adjust_pan_unit_inch">Zoll</string>
+    <string name="adjust_pan_invalid">Möglich sind %1$d bis %2$d cm, und die Flächen dürfen höchstens um das Zehnfache abweichen.</string>
+    <string name="adjust_pan_hint">Mengen für %1$s umgerechnet. Im Rezept: %2$s.</string>
+    <string name="adjust_pan_baking">Die Backzeit kann sich ändern – früher prüfen, ob der Kuchen durch ist. Umgerechnet werden nur Mengen am Anfang einer Zeile und in Klammern.</string>
+    <string name="pan_round">Ø %1$s cm</string>
+    <string name="pan_rectangle">%1$s × %2$s cm</string>
+    <string name="pan_size_pair">%1$s × %2$s</string>
+    <string name="pan_inch">%1$s Zoll</string>
+    <string name="pan_with_inch">%1$s (%2$s)</string>
 
     <!-- Teilen -->
     <string name="share_recipe">Rezept teilen</string>
@@ -216,8 +234,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>„Umrechnen …“ unter den Portionen: nach Portionen oder nach einer Zutat, z. B. „nur 300 g Mehl da“. Das geht auch bei Rezepten ohne Portionsangabe.</item>
-        <item>Portionen gehen bis 999, und ein Rezept „für 1 Springform“ lässt sich halbieren.</item>
+        <item>„Umrechnen …“ nach Backform: Rund oder eckig, in cm oder Zoll. Die Mengen wachsen mit der Fläche der Form, z. B. von Ø 26 cm auf Ø 28 cm etwa um 16 %.</item>
+        <item>Die Backform im Rezept wird vorausgefüllt, wenn sie eindeutig dasteht. Die Backzeit rechnet die App nie um.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->
