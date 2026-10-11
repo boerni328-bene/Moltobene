@@ -176,7 +176,7 @@
     <string name="keep_pages">Keep</string>
     <string name="area_title">Select area</string>
     <string name="area_page">Page %1$d of %2$d</string>
-    <string name="area_hint">Only what lies inside the frames is read. Corners and edges can be dragged. For two columns, add an area and mark the ingredients and instructions separately.</string>
+    <string name="area_hint">Only what lies inside the frame is read. Corners and edges can be dragged.</string>
     <string name="area_kind_label">The frame contains:</string>
     <string name="area_kind_all">Everything</string>
     <string name="area_add">Add area</string>
@@ -191,10 +191,10 @@
         <item quantity="one">%1$d page</item>
         <item quantity="other">%1$d pages</item>
     </plurals>
-    <string name="pages_hint">All pages are read together. After each photo the camera opens again; “Back” ends the series. Choose an area only if needed, e.g. for two columns.</string>
+    <string name="pages_hint">All pages are read together. Select an area only to leave something out, e.g. an ad on a screenshot.</string>
     <string name="page_label">Page %1$d</string>
-    <string name="page_area_chosen">Area chosen</string>
-    <string name="page_choose_area">Choose area of page %1$d</string>
+    <string name="page_area_chosen">Area selected</string>
+    <string name="page_choose_area">Select area of page %1$d</string>
     <string name="page_remove_number">Remove page %1$d</string>
     <string name="pages_adding">Adding page …</string>
     <string name="pages_take_more">Take another page</string>

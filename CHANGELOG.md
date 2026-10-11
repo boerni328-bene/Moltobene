@@ -3,6 +3,15 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.28.1] – 2026-10-11 (versionCode 52)
+
+### Behoben
+- **Foto übernehmen bei großer Schrift:** In „Bereich auswählen“ behält das Foto jetzt mindestens die halbe Bildschirmhöhe, die ganze Seite lässt sich scrollen, und die Knöpfe stehen untereinander. In der Seitenübersicht brechen die Knopftexte nicht mehr mitten im Wort um. In „Aus Text übernehmen“ steht das Eingabefeld vor dem langen Hinweis und ist gleich zu sehen.
+
+### Geändert
+- Die Hinweise bei „Aus Foto übernehmen“ sind aktuell: Alle Seiten werden zusammen gelesen, einen Bereich braucht es nur, um etwas auszulassen, z. B. Werbung auf einem Bildschirmfoto. Der Hinweis auf zwei Spalten entfällt, weil die Texterkennung sie seit Version 0.14.0 selbst trennt.
+- Einheitlich „Bereich auswählen“ statt „wählen“.
+
 ## [0.28.0] – 2026-10-11 (versionCode 51)
 
 ### Neu

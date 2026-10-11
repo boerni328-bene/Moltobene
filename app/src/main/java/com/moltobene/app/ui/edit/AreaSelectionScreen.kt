@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -45,6 +48,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -62,6 +66,7 @@ import com.moltobene.app.data.ocr.CropArea
 import com.moltobene.app.data.ocr.CropHandle
 import com.moltobene.app.ui.components.AppTitleWithScreen
 import com.moltobene.app.ui.components.CenteredMessage
+import com.moltobene.app.ui.components.isLargeText
 import com.moltobene.app.ui.theme.Spacing
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -112,8 +117,13 @@ fun AreaSelectionScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
-        Column(modifier = Modifier.padding(padding).fillMaxSize()) {
-            val frameModifier = Modifier.weight(1f).fillMaxWidth()
+        // Bei großer Schrift scrollt die ganze Seite, und das Foto behält die halbe Bildschirmhöhe (#53); sonst füllt es
+        // den Platz über Hinweis und Knöpfen.
+        val large = isLargeText()
+        val photoHeight = (LocalConfiguration.current.screenHeightDp * PHOTO_SHARE).dp
+        val bodyModifier = if (large) Modifier.verticalScroll(rememberScrollState()) else Modifier
+        Column(modifier = Modifier.padding(padding).fillMaxSize().then(bodyModifier)) {
+            val frameModifier = if (large) Modifier.fillMaxWidth().height(photoHeight) else Modifier.weight(1f).fillMaxWidth()
             when {
                 failed -> CenteredMessage(text = stringResource(R.string.area_load_error), modifier = frameModifier)
                 preview == null -> CenteredMessage(text = "", modifier = frameModifier) { CircularProgressIndicator() }
@@ -168,21 +178,26 @@ fun AreaSelectionScreen(
                     }
                 }
             }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = Spacing.m, end = Spacing.m, bottom = Spacing.m),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.s),
-            ) {
+            val buttons = @Composable { buttonModifier: Modifier ->
                 OutlinedButton(
                     onClick = onWholePage,
                     enabled = preview != null && !selection.isWholePage,
-                    modifier = Modifier.weight(1f),
+                    modifier = buttonModifier,
                 ) {
                     Text(stringResource(R.string.area_whole_page), textAlign = TextAlign.Center)
                 }
-                Button(onClick = onDone, modifier = Modifier.weight(1f)) {
+                Button(onClick = onDone, modifier = buttonModifier) {
                     Text(stringResource(R.string.area_done), textAlign = TextAlign.Center)
+                }
+            }
+            val buttonBar = Modifier.fillMaxWidth().padding(start = Spacing.m, end = Spacing.m, bottom = Spacing.m)
+            if (large) {
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.s), modifier = buttonBar) {
+                    buttons(Modifier.fillMaxWidth())
+                }
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s), modifier = buttonBar) {
+                    buttons(Modifier.weight(1f))
                 }
             }
         }
@@ -335,6 +350,9 @@ private fun CropFrame(
         }
     }
 }
+
+/** Anteil der Bildschirmhöhe, den das Foto bei großer Schrift mindestens bekommt. */
+private const val PHOTO_SHARE = 0.5f
 
 /** Abdunklung außerhalb der Rahmen. */
 private const val SCRIM_ALPHA = 0.55f

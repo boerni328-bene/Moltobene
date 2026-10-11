@@ -175,7 +175,7 @@
     <string name="keep_pages">Behalten</string>
     <string name="area_title">Bereich auswählen</string>
     <string name="area_page">Seite %1$d von %2$d</string>
-    <string name="area_hint">Gelesen wird nur, was in den Rahmen liegt. Ecken und Ränder lassen sich verschieben. Bei zwei Spalten einen Bereich hinzufügen und Zutaten und Zubereitung getrennt markieren.</string>
+    <string name="area_hint">Gelesen wird nur, was im Rahmen liegt. Ecken und Ränder lassen sich verschieben.</string>
     <string name="area_kind_label">Im Rahmen steht:</string>
     <string name="area_kind_all">Alles</string>
     <string name="area_add">Bereich hinzufügen</string>
@@ -190,10 +190,10 @@
         <item quantity="one">%1$d Seite</item>
         <item quantity="other">%1$d Seiten</item>
     </plurals>
-    <string name="pages_hint">Alle Seiten werden zusammen gelesen. Nach jedem Foto öffnet sich die Kamera wieder; „Zurück“ beendet die Fotoserie. Einen Bereich nur bei Bedarf wählen, z. B. bei zwei Spalten.</string>
+    <string name="pages_hint">Alle Seiten werden zusammen gelesen. Einen Bereich nur auswählen, um etwas auszulassen, z. B. Werbung auf einem Bildschirmfoto.</string>
     <string name="page_label">Seite %1$d</string>
-    <string name="page_area_chosen">Bereich gewählt</string>
-    <string name="page_choose_area">Bereich von Seite %1$d wählen</string>
+    <string name="page_area_chosen">Bereich ausgewählt</string>
+    <string name="page_choose_area">Bereich von Seite %1$d auswählen</string>
     <string name="page_remove_number">Seite %1$d entfernen</string>
     <string name="pages_adding">Seite wird hinzugefügt …</string>
     <string name="pages_take_more">Weitere Seite fotografieren</string>

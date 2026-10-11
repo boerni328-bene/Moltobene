@@ -366,6 +366,8 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.area_title))
         screenshot("19-bereich-waehlen")
 
+        // Nur bei großer Schrift scrollt die Seite; sonst steht der Knopf unten und braucht kein Scrollen.
+        runCatching { composeRule.onNodeWithText(text(R.string.area_done)).performScrollTo() }
         composeRule.onNodeWithText(text(R.string.area_done)).performClick()
         waitForText(text(R.string.area_recognize))
         composeRule.onNodeWithContentDescription(text(R.string.cancel)).performClick()

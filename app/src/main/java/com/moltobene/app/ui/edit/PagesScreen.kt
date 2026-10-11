@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import com.moltobene.app.R
 import com.moltobene.app.ui.components.AppTitleWithScreen
 import com.moltobene.app.ui.components.OptionButton
+import com.moltobene.app.ui.components.isLargeText
 import com.moltobene.app.ui.theme.Spacing
 
 /**
@@ -107,23 +108,30 @@ fun PagesScreen(
         },
         // Die beiden wichtigsten Schritte bleiben immer sichtbar, auch mit großer Schrift: nächste Seite oder lesen.
         bottomBar = {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(Spacing.s),
-                modifier = Modifier
-                    .navigationBarsPadding()
-                    .padding(Spacing.m),
-            ) {
+            // Bei großer Schrift untereinander, damit kein Wort mitten im Wort umbricht (#53).
+            val large = isLargeText()
+            val buttons = @Composable { buttonModifier: Modifier ->
                 OutlinedButton(
                     onClick = onTakePage,
                     enabled = overview.canAddMore && !adding,
-                    modifier = Modifier.weight(1f),
+                    modifier = buttonModifier,
                 ) {
                     Icon(painterResource(R.drawable.ic_photo_camera), contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.size(Spacing.s))
                     Text(stringResource(R.string.pages_take_more), textAlign = TextAlign.Center)
                 }
-                Button(onClick = onRecognize, enabled = !adding, modifier = Modifier.weight(1f)) {
+                Button(onClick = onRecognize, enabled = !adding, modifier = buttonModifier) {
                     Text(stringResource(R.string.area_recognize), textAlign = TextAlign.Center)
+                }
+            }
+            val barModifier = Modifier.navigationBarsPadding().padding(Spacing.m)
+            if (large) {
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.s), modifier = barModifier) {
+                    buttons(Modifier.fillMaxWidth())
+                }
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s), modifier = barModifier) {
+                    buttons(Modifier.weight(1f))
                 }
             }
         },

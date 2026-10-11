@@ -83,6 +83,7 @@ import com.moltobene.app.data.web.WebAddress
 import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.components.CenteredMessage
 import com.moltobene.app.ui.components.OptionButton
+import com.moltobene.app.ui.components.isLargeText
 import com.moltobene.app.ui.components.PageViewer
 import com.moltobene.app.ui.components.RecipePhotoLarge
 import com.moltobene.app.ui.components.ScreenTitle
@@ -871,16 +872,20 @@ private fun TextImportDialog(onImport: (String) -> Unit, onDismiss: () -> Unit) 
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(Spacing.s),
             ) {
-                Text(stringResource(R.string.import_text_hint))
+                // Bei großer Schrift steht das Eingabefeld vor dem langen Hinweis, damit es gleich zu sehen ist (#53).
+                val hint = @Composable { Text(stringResource(R.string.import_text_hint)) }
+                val large = isLargeText()
+                if (!large) hint()
                 OutlinedTextField(
                     value = text,
                     onValueChange = { text = it.take(IncomingText.MAX_CHARS) },
                     label = { Text(stringResource(R.string.import_text_field)) },
-                    minLines = 5,
+                    minLines = if (large) 3 else 5,
                     maxLines = 12,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     modifier = Modifier.fillMaxWidth(),
                 )
+                if (large) hint()
                 OptionButton(R.drawable.ic_content_paste, R.string.paste_from_clipboard, onClick = {
                     scope.launch {
                         val pasted = clipboard.getClipEntry()?.clipData
