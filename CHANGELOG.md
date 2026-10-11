@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.28.4] – 2026-10-11 (versionCode 55)
+
+### Geändert
+- Keine sichtbaren Änderungen an der App. Der Prüflauf auf GitHub liest die Messwerte der Testsammlung jetzt richtig aus dem Protokoll des Handys.
+
 ## [0.28.3] – 2026-10-11 (versionCode 54)
 
 ### Geändert

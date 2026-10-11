@@ -89,7 +89,8 @@ jobs:
           adb logcat -c || true
           adb shell am instrument -w -e class com.moltobene.app.perf.PerformanceTest \
             "$PAKET.test/androidx.test.runner.AndroidJUnitRunner" | tee instrument.txt
-          adb logcat -d -s PRUEF:I | grep -oP 'PRUEF: \K.*' | tee -a ergebnis.txt
+          adb logcat -d -s PRUEF:I > pruef-log.txt
+          grep -oE '[a-z_]+=[0-9]+' pruef-log.txt | tee -a ergebnis.txt
           grep -q "OK (1 test)" instrument.txt
 
       - name: Kaltstart, Blättern und Speicher messen
@@ -157,5 +158,6 @@ jobs:
             kaltstart.txt
             instrument.txt
             absturz.txt
+            pruef-log.txt
             emulator.log
           if-no-files-found: ignore
