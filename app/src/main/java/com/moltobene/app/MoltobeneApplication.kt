@@ -15,6 +15,8 @@ import com.moltobene.app.data.ocr.TextRecognizer
 import com.moltobene.app.data.photos.PhotoStore
 import com.moltobene.app.data.share.RecipeFileReader
 import com.moltobene.app.data.share.RecipeSharer
+import com.moltobene.app.data.speech.AndroidSpeechOutput
+import com.moltobene.app.data.speech.SpeechOutput
 import com.moltobene.app.data.translate.LanguagePackManager
 import com.moltobene.app.data.translate.MarianEngine
 import com.moltobene.app.data.translate.RecipeTranslations
@@ -74,6 +76,9 @@ class AppContainer(context: Context) {
     val pendingRecognition: PendingRecognition by lazy { PendingRecognition(appContext, photoStore) }
     val sharedInput = SharedInput()
     val recipeFileReader: RecipeFileReader by lazy { RecipeFileReader(appContext) }
+
+    /** Vorlesen (#79); der Rundgang ersetzt es durch eine nachgestellte Fassung. */
+    var speech: SpeechOutput = AndroidSpeechOutput(appContext)
 
     private val http = HttpPageLoader()
 

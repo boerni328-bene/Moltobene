@@ -6,6 +6,7 @@ Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 ## [0.34.0] – 2026-10-12 (versionCode 61)
 
 ### Neu
+- **Kochleiste im Rezept:** Unten stehen „Zurück“, „Vorlesen“, „Weiter“ und „Zutaten“. „Weiter“ und „Zurück“ gehen durch die Schritte und scrollen den aktuellen Schritt ins Bild; nach dem letzten Schritt erscheint „Letzter Schritt“. „Vorlesen“ liest den aktuellen Schritt vor, nochmals antippen („Anhalten“) beendet es; „Zutaten“ liest die noch nicht abgehakten Zutaten in den angezeigten Mengen vor. Gelesen wird nur auf Antippen, mit der Sprachausgabe des Handys und nur mit Stimmen, die ohne Internet funktionieren, in der Sprache des gezeigten Rezepttextes. Fehlt eine solche Stimme, erklärt eine Meldung ehrlich, was fehlt, und führt zu den Einstellungen des Handys. Das Vorlesen hält an, wenn die Ansicht verlassen wird, der Bildschirm ausgeht oder ein Anruf kommt. Mengen und Einheiten werden ausgeschrieben („2 EL“ als „2 Esslöffel“, „≈“ als „etwa“). Dafür braucht die App keine Berechtigung.
 - **Startseite: „Was koche ich heute?“** Die Kachel schlägt ein Rezept aus der eigenen Sammlung vor, Favoriten werden bevorzugt, Entwürfe nie. „Kochen“ öffnet das Rezept, „Anderes Rezept“ zeigt ein anderes. Ohne Rezepte führt die Kachel zu „Rezept hinzufügen“.
 - **Startseite: „Zuletzt geöffnet“:** Die bis zu fünf zuletzt geöffneten Rezepte, das neueste zuerst. Die Liste bleibt nur auf dem Handy, sie ist nicht in der Sicherung und wird nie geteilt.
 

@@ -23,6 +23,7 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
+import androidx.compose.ui.test.onNode
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -266,6 +267,60 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithContentDescription(text(R.string.more_options)).performClick()
         composeRule.onNodeWithText(text(R.string.cooking_reset)).performClick()
         composeRule.onNodeWithText("800 g reife Tomaten").assertIsOff()
+    }
+
+    /**
+     * Kochleiste und Vorlesen (#79): „Weiter“ markiert Schritt 1, „Vorlesen“ liest ihn (mit nachgestellter Stimme),
+     * „Anhalten“ beendet das Vorlesen, nach dem letzten Schritt kommt „Letzter Schritt“, „Zutaten“ liest die
+     * Zutaten. Ohne Stimme erscheint eine ehrliche Meldung mit dem Weg in die Einstellungen.
+     */
+    @Test
+    fun kochleiste() {
+        val speech = SampleSpeech()
+        container().speech = speech
+        addSampleRecipes()
+        openRecipe(SampleRecipes.TOMATO_SAUCE)
+        waitForText("800 g reife Tomaten")
+        screenshot("12m-kochleiste")
+
+        composeRule.onNodeWithText(text(R.string.cook_bar_next)).performClick()
+        composeRule.onNodeWithText(text(R.string.cook_bar_read)).performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { speech.spoken.isNotEmpty() }
+        val first = speech.spoken.first()
+        assertEquals("Schritt 1.", first.first())
+        assertTrue(first.any { it.contains("Zwiebel und Knoblauch") })
+        waitForText(text(R.string.cook_bar_stop))
+        screenshot("12n-kochleiste-vorlesen")
+        composeRule.onNodeWithText(text(R.string.cook_bar_stop)).performClick()
+        waitForText(text(R.string.cook_bar_read))
+
+        // Schritt 2 und 3, danach keine Schleife.
+        composeRule.onNodeWithText(text(R.string.cook_bar_next)).performClick()
+        composeRule.onNodeWithText(text(R.string.cook_bar_next)).performClick()
+        composeRule.onNodeWithText(text(R.string.cook_bar_next)).performClick()
+        waitForText(text(R.string.cook_last_step))
+        screenshot("12o-kochleiste-letzter-schritt")
+        composeRule.onNodeWithText(text(R.string.cook_bar_previous)).performClick()
+
+        speech.spoken.clear()
+        // „Zutaten“ steht auch als Überschrift im Rezept; gemeint ist der Knopf.
+        composeRule.onNode(hasText(text(R.string.cook_bar_ingredients)) and hasClickAction()).performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { speech.spoken.isNotEmpty() }
+        assertTrue(speech.spoken.first().any { it.contains("800 Gramm reife Tomaten") })
+        composeRule.onNodeWithText(text(R.string.cook_bar_stop)).performClick()
+    }
+
+    /** Ohne Stimme (#79): ehrliche Meldung statt falscher Stimme, mit dem Weg in die Einstellungen. */
+    @Test
+    fun vorlesenOhneStimme() {
+        container().speech = SampleSpeech(noVoice = true)
+        addSampleRecipes()
+        openRecipe(SampleRecipes.TOMATO_SAUCE)
+        waitForText("800 g reife Tomaten")
+        composeRule.onNodeWithText(text(R.string.cook_bar_next)).performClick()
+        composeRule.onNodeWithText(text(R.string.cook_bar_read)).performClick()
+        waitForText(text(R.string.settings_title))
+        screenshot("12p-vorlesen-ohne-stimme")
     }
 
     /**

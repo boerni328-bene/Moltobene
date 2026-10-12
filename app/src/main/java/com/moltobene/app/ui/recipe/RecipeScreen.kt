@@ -12,7 +12,23 @@ import android.net.Uri
 import android.os.SystemClock
 import android.text.format.Formatter
 import androidx.compose.foundation.background
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.material3.Button
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import com.moltobene.app.data.speech.SpeechOutput
+import com.moltobene.app.data.speech.SpeechState
+import com.moltobene.app.data.speech.SpokenText
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.layout.Arrangement
@@ -138,6 +154,7 @@ import java.util.Locale
 fun RecipeScreen(
     viewModel: RecipeViewModel,
     screenOn: ScreenOn,
+    speech: SpeechOutput,
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onEdit: (String) -> Unit,
@@ -158,6 +175,27 @@ fun RecipeScreen(
 
     // Jede Berührung startet die Frist für den Bildschirm neu (#68).
     val onTouch = keepScreenOn(screenOn)
+
+    // Vorlesen (#79): hält an, wenn die Ansicht den Vordergrund verlässt (auch Bildschirm aus), und wird beim Verlassen frei.
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { speech.stop() }
+    DisposableEffect(speech) { onDispose { speech.release() } }
+    val speechState by speech.state.collectAsStateWithLifecycle()
+    (speechState as? SpeechState.NoVoice)?.let { problem ->
+        val message = stringResource(R.string.speech_no_voice, languageName(problem.language))
+        val action = stringResource(R.string.settings_title)
+        LaunchedEffect(problem) {
+            val result = snackbarHostState.showSnackbar(message, actionLabel = action, duration = SnackbarDuration.Long)
+            if (result == SnackbarResult.ActionPerformed) openSpeechSettings(context)
+            speech.stop()
+        }
+    }
+    if (speechState is SpeechState.Unavailable) {
+        val message = stringResource(R.string.speech_unavailable)
+        LaunchedEffect(speechState) {
+            snackbarHostState.showSnackbar(message)
+            speech.stop()
+        }
+    }
 
     // Zurück aus den Einstellungen: Ist das Sprachpaket inzwischen da, wird gleich übersetzt.
     LifecycleResumeEffect(Unit) {
@@ -306,6 +344,8 @@ fun RecipeScreen(
                     onToggleIngredient = viewModel::toggleIngredient,
                     onToggleStep = viewModel::toggleCurrentStep,
                     onAdjust = viewModel::setAdjustment,
+                    onPreviousStep = viewModel::previousStep,
+                    onNextStep = viewModel::nextStep,
                 ),
                 translation = TranslationActions(
                     state = translation,
@@ -313,6 +353,7 @@ fun RecipeScreen(
                     onRetry = viewModel::retryTranslation,
                     onOpenSettings = onOpenSettings,
                 ),
+                speech = speech,
                 snackbarHostState = snackbarHostState,
                 onShowPages = { viewModel.viewer.open(0) },
                 onShowPhoto = { viewModel.photoViewer.open(0) },
@@ -348,6 +389,21 @@ fun RecipeScreen(
 }
 
 /** Texte für den geteilten Rezepttext, in der Sprache der Oberfläche. */
+/** Öffnet die Einstellungen der Sprachausgabe des Handys, sonst die allgemeinen Einstellungen. */
+private fun openSpeechSettings(context: Context) {
+    val intents = listOf(Intent("com.android.settings.TTS_SETTINGS"), Intent(android.provider.Settings.ACTION_SETTINGS))
+    for (intent in intents) {
+        try {
+            context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            return
+        } catch (e: ActivityNotFoundException) {
+            // Nächster Versuch.
+        } catch (e: SecurityException) {
+            // Nächster Versuch.
+        }
+    }
+}
+
 private fun shareLabels(resources: Resources) = ShareLabels(
     untitled = resources.getString(R.string.untitled_recipe),
     ingredients = resources.getString(R.string.ingredients),
@@ -437,6 +493,8 @@ private class CookingState(
     val onToggleIngredient: (Int, String) -> Unit,
     val onToggleStep: (Int, String) -> Unit,
     val onAdjust: (Adjustment?) -> Unit,
+    val onPreviousStep: () -> StepMove,
+    val onNextStep: () -> StepMove,
 )
 
 /** „Rezept übersetzen“ (#60): Zustand und Aktionen für den Umschalter „DE | EN“. */
@@ -453,6 +511,7 @@ private fun RecipeContent(
     photo: File?,
     cooking: CookingState,
     translation: TranslationActions,
+    speech: SpeechOutput,
     snackbarHostState: SnackbarHostState,
     onShowPages: () -> Unit,
     onShowPhoto: () -> Unit,
@@ -460,232 +519,294 @@ private fun RecipeContent(
 ) {
     // Das Foto läuft oben bündig unter die Leiste; unten sind die Ecken weich.
     val photoShape = MaterialTheme.shapes.extraLarge.copy(topStart = CornerSize(0.dp), topEnd = CornerSize(0.dp))
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-    ) {
-        if (photo != null) {
-            RecipePhotoLarge(file = photo, onOpen = onShowPhoto, modifier = Modifier.fillMaxWidth().clip(photoShape))
-        } else {
-            RecipePhoto(file = null, placeholderIconSize = 40.dp, modifier = Modifier.fillMaxWidth().height(120.dp).clip(photoShape))
-        }
+    // Übersetzung (#60): Sie ersetzt nur die Anzeige; Abhaken und Portionen beziehen sich weiter aufs Original.
+    val originalLanguage = remember(recipe) { RecipeTranslations.languageOf(recipe) }
+    val translated = (translation.state as? TranslationState.Shown)?.translation
+    val shownLanguage = translated?.language ?: originalLanguage
+    val textLocale = remember(shownLanguage) { shownLanguage?.let { LocaleList(it) } }
+    val title = translated?.title ?: recipe.title
+    val originalServings = recipe.servings?.takeIf { it > 0 }
+    val servingsUnit = (translated?.servingsUnit ?: recipe.servingsUnit)?.takeIf { it.isNotBlank() }
 
-        Column(
-            modifier = Modifier.padding(Spacing.m),
-            verticalArrangement = Arrangement.spacedBy(Spacing.s),
-        ) {
-            if (recipe.isDraft) DraftLabel()
-            // Übersetzung (#60): Sie ersetzt nur die Anzeige; Abhaken und Portionen beziehen sich weiter aufs Original.
-            val originalLanguage = remember(recipe) { RecipeTranslations.languageOf(recipe) }
-            val translated = (translation.state as? TranslationState.Shown)?.translation
-            val shownLanguage = translated?.language ?: originalLanguage
-            val textLocale = remember(shownLanguage) { shownLanguage?.let { LocaleList(it) } }
-            val title = translated?.title ?: recipe.title
-            Text(
-                text = localized(title.ifBlank { stringResource(R.string.untitled_recipe) }, textLocale),
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.semantics { heading() },
+    // Umrechnen (#66): Gerechnet wird mit dem Original, auch wenn die Übersetzung gezeigt wird (#60).
+    val deviceLanguage = LocalConfiguration.current.locales[0].language
+    val originalTexts = remember(recipe.ingredients) { recipe.ingredients.map { it.text } }
+    val recipeLanguage = remember(recipe.language, originalTexts, deviceLanguage) {
+        recipe.language ?: TextLanguage.detect(originalTexts.joinToString("\n")) ?: deviceLanguage
+    }
+    val factor = remember(cooking.adjustment, originalServings, originalTexts, recipeLanguage) {
+        Adjustment.factor(cooking.adjustment, originalServings, originalTexts, recipeLanguage)
+    }
+    // Mengen werden so geschrieben wie im Rezept bzw. in der Übersetzung; ohne Angabe gilt die erkannte Sprache.
+    val language = translated?.language ?: recipeLanguage
+    val texts = translated?.ingredients?.takeIf { it.size == recipe.ingredients.size } ?: originalTexts
+    // Die Zutat, nach der umgerechnet wird, zeigt genau die eingetippte Menge.
+    val exactIndex = (cooking.adjustment as? Adjustment.ByIngredient)?.index?.takeIf { factor != 1.0 }
+    val lines = remember(texts, factor, language, exactIndex) {
+        texts.mapIndexed { index, text -> AmountScaling.scale(text, factor, language, exactLeading = index == exactIndex) }
+    }
+    // Zur Wahl für „Nach Zutat“ stehen nur Zeilen mit einer lesbaren Menge am Anfang.
+    val choices = remember(recipe.ingredients, texts, recipeLanguage, language) {
+        recipe.ingredients.mapIndexedNotNull { index, ingredient ->
+            if (ingredient.isHeading) return@mapIndexedNotNull null
+            val amount = AmountScaling.leadingAmount(ingredient.text, recipeLanguage) ?: return@mapIndexedNotNull null
+            AdjustChoice(
+                index = index,
+                line = ingredient.text,
+                shown = texts[index],
+                amount = amount.value,
+                unit = AmountScaling.leadingAmount(texts[index], language)?.unit ?: amount.unit,
             )
-            if (translated != null && recipe.title.isNotBlank() && recipe.title != title) {
-                Text(
-                    text = stringResource(R.string.translation_original_title, recipe.title),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            if (originalLanguage != null && LanguagePack.targets(originalLanguage).isNotEmpty()) {
-                TranslationStatus(original = originalLanguage, actions = translation)
-            }
-            val originalServings = recipe.servings?.takeIf { it > 0 }
-            val servingsUnit = (translated?.servingsUnit ?: recipe.servingsUnit)?.takeIf { it.isNotBlank() }
+        }
+    }
 
-            // Umrechnen (#66): Gerechnet wird mit dem Original, auch wenn die Übersetzung gezeigt wird (#60).
-            val deviceLanguage = LocalConfiguration.current.locales[0].language
-            val originalTexts = remember(recipe.ingredients) { recipe.ingredients.map { it.text } }
-            val recipeLanguage = remember(recipe.language, originalTexts, deviceLanguage) {
-                recipe.language ?: TextLanguage.detect(originalTexts.joinToString("\n")) ?: deviceLanguage
+    // Vorlesen und Kochleiste (#79): gelesen wird, was angezeigt wird, in der Sprache des angezeigten Textes.
+    val stepTexts = translated?.steps?.takeIf { it.size == recipe.steps.size } ?: recipe.steps
+    val currentIndex = recipe.steps.indices.firstOrNull { RecipeViewModel.progressKey(it, recipe.steps[it]) == cooking.currentStep }
+    val speechLanguage = (translated?.language ?: shownLanguage ?: recipeLanguage).take(2)
+    val speechState by speech.state.collectAsStateWithLifecycle()
+    val speaking = speechState is SpeechState.Speaking
+    val scope = rememberCoroutineScope()
+    val lastStepMessage = stringResource(R.string.cook_last_step)
+    val allCheckedMessage = stringResource(R.string.cook_all_checked)
+    fun readStep(index: Int) {
+        val sentences = SpokenText.sentences(stepTexts[index], speechLanguage)
+        speech.speak(speechLanguage, listOf(SpokenText.stepLabel(speechLanguage, index + 1)) + sentences)
+    }
+    fun move(result: StepMove) {
+        when (result) {
+            is StepMove.To -> if (speaking) readStep(result.index)
+            StepMove.AtEnd -> scope.launch { snackbarHostState.showSnackbar(lastStepMessage) }
+            StepMove.None -> Unit
+        }
+    }
+    fun readIngredients() {
+        val open = recipe.ingredients.indices.filter { index ->
+            val ingredient = recipe.ingredients[index]
+            !ingredient.isHeading && RecipeViewModel.progressKey(index, ingredient.text) !in cooking.checked
+        }
+        if (open.isEmpty()) {
+            scope.launch { snackbarHostState.showSnackbar(allCheckedMessage) }
+            return
+        }
+        val about = SpokenText.about(speechLanguage)
+        val sentences = recipe.ingredients.indices.flatMap { index ->
+            if (index in open) {
+                SpokenText.sentences(AmountScaling.spoken(lines[index]) { "$about ${it.trim()}" }, speechLanguage)
+            } else if (recipe.ingredients[index].isHeading) {
+                SpokenText.sentences(texts[index], speechLanguage)
+            } else {
+                emptyList()
             }
-            val factor = remember(cooking.adjustment, originalServings, originalTexts, recipeLanguage) {
-                Adjustment.factor(cooking.adjustment, originalServings, originalTexts, recipeLanguage)
+        }
+        speech.speak(speechLanguage, sentences)
+    }
+
+    Column(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
+        ) {
+            if (photo != null) {
+                RecipePhotoLarge(file = photo, onOpen = onShowPhoto, modifier = Modifier.fillMaxWidth().clip(photoShape))
+            } else {
+                RecipePhoto(file = null, placeholderIconSize = 40.dp, modifier = Modifier.fillMaxWidth().height(120.dp).clip(photoShape))
             }
-            // Mengen werden so geschrieben wie im Rezept bzw. in der Übersetzung; ohne Angabe gilt die erkannte Sprache.
-            val language = translated?.language ?: recipeLanguage
-            val texts = translated?.ingredients?.takeIf { it.size == recipe.ingredients.size } ?: originalTexts
-            // Die Zutat, nach der umgerechnet wird, zeigt genau die eingetippte Menge.
-            val exactIndex = (cooking.adjustment as? Adjustment.ByIngredient)?.index?.takeIf { factor != 1.0 }
-            val lines = remember(texts, factor, language, exactIndex) {
-                texts.mapIndexed { index, text -> AmountScaling.scale(text, factor, language, exactLeading = index == exactIndex) }
-            }
-            // Zur Wahl für „Nach Zutat“ stehen nur Zeilen mit einer lesbaren Menge am Anfang.
-            val choices = remember(recipe.ingredients, texts, recipeLanguage, language) {
-                recipe.ingredients.mapIndexedNotNull { index, ingredient ->
-                    if (ingredient.isHeading) return@mapIndexedNotNull null
-                    val amount = AmountScaling.leadingAmount(ingredient.text, recipeLanguage) ?: return@mapIndexedNotNull null
-                    AdjustChoice(
-                        index = index,
-                        line = ingredient.text,
-                        shown = texts[index],
-                        amount = amount.value,
-                        unit = AmountScaling.leadingAmount(texts[index], language)?.unit ?: amount.unit,
+
+            Column(
+                modifier = Modifier.padding(Spacing.m),
+                verticalArrangement = Arrangement.spacedBy(Spacing.s),
+            ) {
+                if (recipe.isDraft) DraftLabel()
+                Text(
+                    text = localized(title.ifBlank { stringResource(R.string.untitled_recipe) }, textLocale),
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.semantics { heading() },
+                )
+                if (translated != null && recipe.title.isNotBlank() && recipe.title != title) {
+                    Text(
+                        text = stringResource(R.string.translation_original_title, recipe.title),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-            }
-
-            var adjusting by rememberSaveable { mutableStateOf(false) }
-            Surface(
-                color = MaterialTheme.colorScheme.surfaceContainer,
-                shape = MaterialTheme.shapes.large,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Column(modifier = Modifier.padding(horizontal = Spacing.s, vertical = Spacing.xs)) {
-            AdjustRow(onAdjust = { adjusting = true }) {
-            if (originalServings != null) {
-                // Nach Backform bleibt es bei der Anzahl der Formen; nur die Mengen ändern sich (#67).
-                val exact = if (cooking.adjustment is Adjustment.ByPan) originalServings.toDouble() else originalServings * factor
-                val shown = exact.roundToInt().coerceIn(1, Adjustment.MAX_SERVINGS)
-                ServingsControl(
-                    shown = shown,
-                    approximate = abs(exact - shown) >= SERVINGS_TOLERANCE,
-                    unit = servingsUnit,
-                    onChange = { cooking.onAdjust(if (it == originalServings) null else Adjustment.Servings(it)) },
-                )
-            } else if (servingsUnit != null) {
-                // Eine Backform ohne Anzahl (#63), z. B. „Springform Ø 26 cm“.
-                Text(
-                    text = localized(servingsUnit, textLocale),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            }
-            run {
-                AdjustActions(
-                    adjusted = factor != 1.0,
-                    hint = when (val current = cooking.adjustment) {
-                        is Adjustment.ByIngredient -> stringResource(
-                            R.string.adjust_ingredient_hint,
-                            lines.getOrNull(current.index)?.joinToString("") { it.text }.orEmpty(),
-                            texts.getOrNull(current.index).orEmpty(),
-                        )
-                        is Adjustment.ByPan -> stringResource(
-                            R.string.adjust_pan_hint,
-                            panLabel(current.to, current.inch),
-                            panLabel(current.from, current.inch),
-                        )
-                        else -> originalServings?.let { stringResource(R.string.servings_scaled_hint, servingsText(it, servingsUnit)) }
-                    },
-                    bakingNote = cooking.adjustment is Adjustment.ByPan,
-                    onAdjust = { adjusting = true },
-                    onReset = { cooking.onAdjust(null) },
-                )
-            }
+                if (originalLanguage != null && LanguagePack.targets(originalLanguage).isNotEmpty()) {
+                    TranslationStatus(original = originalLanguage, actions = translation)
                 }
-            }
-            if (adjusting) {
-                AdjustDialog(
-                    servings = originalServings?.let { (it * factor).roundToInt().coerceIn(1, Adjustment.MAX_SERVINGS) },
-                    servingsUnit = servingsUnit,
-                    choices = choices,
-                    decimalSeparator = if (recipeLanguage == "en") '.' else ',',
-                    recipePan = remember(recipe.servingsUnit) { PanScaling.parse(recipe.servingsUnit) },
-                    onServings = {
-                        adjusting = false
-                        cooking.onAdjust(if (it == originalServings) null else Adjustment.Servings(it))
-                    },
-                    onIngredient = { choice, amount ->
-                        adjusting = false
-                        cooking.onAdjust(Adjustment.byIngredient(choice.index, choice.line, amount))
-                    },
-                    onPan = { from, to, inch ->
-                        adjusting = false
-                        cooking.onAdjust(Adjustment.ByPan(from, to, inch))
-                    },
-                    onDismiss = { adjusting = false },
-                )
-            }
-            RecipeTimes(recipe.prepMinutes, recipe.totalMinutes)
 
-            if (recipe.ingredients.isNotEmpty()) {
-                SectionTitle(stringResource(R.string.ingredients))
+                var adjusting by rememberSaveable { mutableStateOf(false) }
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceContainer,
                     shape = MaterialTheme.shapes.large,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Column(modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.xs)) {
-                recipe.ingredients.forEachIndexed { index, ingredient ->
-                    if (ingredient.isHeading) {
-                        Text(
-                            text = localized(texts[index], textLocale),
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(top = Spacing.s).semantics { heading() },
-                        )
-                    } else {
-                        IngredientRow(
-                            parts = lines[index],
-                            locale = textLocale,
-                            checked = RecipeViewModel.progressKey(index, ingredient.text) in cooking.checked,
-                            onToggle = { cooking.onToggleIngredient(index, ingredient.text) },
-                        )
-                    }
-                }
-            }
-                    }
-                }
-
-            if (recipe.steps.isNotEmpty()) {
-                SectionTitle(stringResource(R.string.instructions))
-                val steps = translated?.steps?.takeIf { it.size == recipe.steps.size } ?: recipe.steps
-                recipe.steps.forEachIndexed { index, step ->
-                    StepRow(
-                        number = index + 1,
-                        text = localized(steps[index], textLocale),
-                        current = cooking.currentStep == RecipeViewModel.progressKey(index, step),
-                        onClick = { cooking.onToggleStep(index, step) },
+                    Column(modifier = Modifier.padding(horizontal = Spacing.s, vertical = Spacing.xs)) {
+                AdjustRow(onAdjust = { adjusting = true }) {
+                if (originalServings != null) {
+                    // Nach Backform bleibt es bei der Anzahl der Formen; nur die Mengen ändern sich (#67).
+                    val exact = if (cooking.adjustment is Adjustment.ByPan) originalServings.toDouble() else originalServings * factor
+                    val shown = exact.roundToInt().coerceIn(1, Adjustment.MAX_SERVINGS)
+                    ServingsControl(
+                        shown = shown,
+                        approximate = abs(exact - shown) >= SERVINGS_TOLERANCE,
+                        unit = servingsUnit,
+                        onChange = { cooking.onAdjust(if (it == originalServings) null else Adjustment.Servings(it)) },
+                    )
+                } else if (servingsUnit != null) {
+                    // Eine Backform ohne Anzahl (#63), z. B. „Springform Ø 26 cm“.
+                    Text(
+                        text = localized(servingsUnit, textLocale),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-            }
+                }
+                run {
+                    AdjustActions(
+                        adjusted = factor != 1.0,
+                        hint = when (val current = cooking.adjustment) {
+                            is Adjustment.ByIngredient -> stringResource(
+                                R.string.adjust_ingredient_hint,
+                                lines.getOrNull(current.index)?.joinToString("") { it.text }.orEmpty(),
+                                texts.getOrNull(current.index).orEmpty(),
+                            )
+                            is Adjustment.ByPan -> stringResource(
+                                R.string.adjust_pan_hint,
+                                panLabel(current.to, current.inch),
+                                panLabel(current.from, current.inch),
+                            )
+                            else -> originalServings?.let { stringResource(R.string.servings_scaled_hint, servingsText(it, servingsUnit)) }
+                        },
+                        bakingNote = cooking.adjustment is Adjustment.ByPan,
+                        onAdjust = { adjusting = true },
+                        onReset = { cooking.onAdjust(null) },
+                    )
+                }
+                    }
+                }
+                if (adjusting) {
+                    AdjustDialog(
+                        servings = originalServings?.let { (it * factor).roundToInt().coerceIn(1, Adjustment.MAX_SERVINGS) },
+                        servingsUnit = servingsUnit,
+                        choices = choices,
+                        decimalSeparator = if (recipeLanguage == "en") '.' else ',',
+                        recipePan = remember(recipe.servingsUnit) { PanScaling.parse(recipe.servingsUnit) },
+                        onServings = {
+                            adjusting = false
+                            cooking.onAdjust(if (it == originalServings) null else Adjustment.Servings(it))
+                        },
+                        onIngredient = { choice, amount ->
+                            adjusting = false
+                            cooking.onAdjust(Adjustment.byIngredient(choice.index, choice.line, amount))
+                        },
+                        onPan = { from, to, inch ->
+                            adjusting = false
+                            cooking.onAdjust(Adjustment.ByPan(from, to, inch))
+                        },
+                        onDismiss = { adjusting = false },
+                    )
+                }
+                RecipeTimes(recipe.prepMinutes, recipe.totalMinutes)
 
-            if (recipe.notes.isNotBlank()) {
-                SectionTitle(stringResource(R.string.notes))
-                Text(recipe.notes, style = MaterialTheme.typography.bodyLarge)
-            }
+                if (recipe.ingredients.isNotEmpty()) {
+                    SectionTitle(stringResource(R.string.ingredients))
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = MaterialTheme.shapes.large,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column(modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.xs)) {
+                    recipe.ingredients.forEachIndexed { index, ingredient ->
+                        if (ingredient.isHeading) {
+                            Text(
+                                text = localized(texts[index], textLocale),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(top = Spacing.s).semantics { heading() },
+                            )
+                        } else {
+                            IngredientRow(
+                                parts = lines[index],
+                                locale = textLocale,
+                                checked = RecipeViewModel.progressKey(index, ingredient.text) in cooking.checked,
+                                onToggle = { cooking.onToggleIngredient(index, ingredient.text) },
+                            )
+                        }
+                    }
+                }
+                        }
+                    }
 
-            recipe.source?.let { source ->
-                SectionTitle(stringResource(R.string.source))
-                val url = source.url
-                if (url != null && RecipeText.isWebLink(url)) {
-                    SourceLink(url = url, snackbarHostState = snackbarHostState)
-                } else {
-                    val resources = LocalResources.current
-                    val text = listOfNotNull(
-                        source.name,
-                        source.page?.let { page -> RecipeText.formatPage(page) { resources.getString(R.string.source_page, it) } },
-                    ).joinToString(", ")
-                    if (text.isNotBlank()) Text(text, style = MaterialTheme.typography.bodyLarge)
+                if (recipe.steps.isNotEmpty()) {
+                    SectionTitle(stringResource(R.string.instructions))
+                    val steps = translated?.steps?.takeIf { it.size == recipe.steps.size } ?: recipe.steps
+                    recipe.steps.forEachIndexed { index, step ->
+                        StepRow(
+                            number = index + 1,
+                            text = localized(steps[index], textLocale),
+                            current = cooking.currentStep == RecipeViewModel.progressKey(index, step),
+                            onClick = { cooking.onToggleStep(index, step) },
+                        )
+                    }
+                }
+
+                if (recipe.notes.isNotBlank()) {
+                    SectionTitle(stringResource(R.string.notes))
+                    Text(recipe.notes, style = MaterialTheme.typography.bodyLarge)
+                }
+
+                recipe.source?.let { source ->
+                    SectionTitle(stringResource(R.string.source))
+                    val url = source.url
+                    if (url != null && RecipeText.isWebLink(url)) {
+                        SourceLink(url = url, snackbarHostState = snackbarHostState)
+                    } else {
+                        val resources = LocalResources.current
+                        val text = listOfNotNull(
+                            source.name,
+                            source.page?.let { page -> RecipeText.formatPage(page) { resources.getString(R.string.source_page, it) } },
+                        ).joinToString(", ")
+                        if (text.isNotBlank()) Text(text, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+
+                // Der Link zum Video, wenn er nicht schon als Quelle dasteht (z. B. bei einem Rezept nur aus dem Video).
+                RecipeShareText.videoLink(recipe)?.let { video ->
+                    SectionTitle(stringResource(R.string.video))
+                    if (RecipeText.isWebLink(video)) {
+                        SourceLink(url = video, snackbarHostState = snackbarHostState)
+                    } else {
+                        Text(video, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+
+                // Originalseiten (#38), z. B. die Kochbuchseite oder ein handgeschriebenes Rezept zum Nachlesen.
+                if (recipe.pageIds.isNotEmpty()) {
+                    OutlinedButton(onClick = onShowPages, modifier = Modifier.padding(top = Spacing.m)) {
+                        Icon(painterResource(R.drawable.ic_document_scanner), contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.size(Spacing.s))
+                        Text(pluralStringResource(R.plurals.original_pages_show, recipe.pageIds.size, recipe.pageIds.size))
+                    }
                 }
             }
-
-            // Der Link zum Video, wenn er nicht schon als Quelle dasteht (z. B. bei einem Rezept nur aus dem Video).
-            RecipeShareText.videoLink(recipe)?.let { video ->
-                SectionTitle(stringResource(R.string.video))
-                if (RecipeText.isWebLink(video)) {
-                    SourceLink(url = video, snackbarHostState = snackbarHostState)
-                } else {
-                    Text(video, style = MaterialTheme.typography.bodyLarge)
-                }
-            }
-
-            // Originalseiten (#38), z. B. die Kochbuchseite oder ein handgeschriebenes Rezept zum Nachlesen.
-            if (recipe.pageIds.isNotEmpty()) {
-                OutlinedButton(onClick = onShowPages, modifier = Modifier.padding(top = Spacing.m)) {
-                    Icon(painterResource(R.drawable.ic_document_scanner), contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.size(Spacing.s))
-                    Text(pluralStringResource(R.plurals.original_pages_show, recipe.pageIds.size, recipe.pageIds.size))
-                }
-            }
+        }
+        if (recipe.steps.isNotEmpty() || recipe.ingredients.any { !it.isHeading }) {
+            CookingBar(
+                hasSteps = recipe.steps.isNotEmpty(),
+                hasIngredients = recipe.ingredients.any { !it.isHeading },
+                speaking = speaking,
+                onPrevious = { move(cooking.onPreviousStep()) },
+                onRead = {
+                    if (speaking) {
+                        speech.stop()
+                    } else {
+                        // Ohne Markierung beginnt das Vorlesen beim ersten Schritt.
+                        val index = currentIndex ?: (cooking.onNextStep() as? StepMove.To)?.index
+                        if (index != null) readStep(index)
+                    }
+                },
+                onNext = { move(cooking.onNextStep()) },
+                onIngredients = { if (speaking) speech.stop() else readIngredients() },
+            )
         }
     }
 }
@@ -803,8 +924,12 @@ private fun IngredientRow(parts: List<AmountScaling.Part>, locale: LocaleList?, 
 }
 
 /** Ein Schritt; antippen markiert ihn als aktuellen Schritt – mit Symbol und Hintergrund, nicht nur über die Farbe. */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, onClick: () -> Unit) {
+    // „Weiter“ und „Zurück“ (#79) scrollen den aktuellen Schritt in den sichtbaren Bereich.
+    val requester = remember { BringIntoViewRequester() }
+    LaunchedEffect(current) { if (current) requester.bringIntoView() }
     val currentLabel = stringResource(R.string.step_current)
     val markLabel = stringResource(R.string.step_mark_current)
     val highlight = if (current) {
@@ -816,6 +941,7 @@ private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, onClic
         horizontalArrangement = Arrangement.spacedBy(Spacing.s),
         modifier = Modifier
             .fillMaxWidth()
+            .bringIntoViewRequester(requester)
             .heightIn(min = 48.dp)
             .clip(MaterialTheme.shapes.medium)
             .then(highlight)
@@ -834,6 +960,73 @@ private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, onClic
             modifier = Modifier.widthIn(min = 24.dp),
         )
         Text(text, style = MaterialTheme.typography.bodyLarge, color = color)
+    }
+}
+
+/**
+ * Kochleiste (#79): „Zurück“, „Vorlesen“ (beim Vorlesen „Anhalten“), „Weiter“ und „Zutaten“ vorlesen. Mindestens 64 dp
+ * hoch; bei großer Schrift in zwei Reihen. Das Vorlesen startet nur auf Antippen.
+ */
+@Composable
+private fun CookingBar(
+    hasSteps: Boolean,
+    hasIngredients: Boolean,
+    speaking: Boolean,
+    onPrevious: () -> Unit,
+    onRead: () -> Unit,
+    onNext: () -> Unit,
+    onIngredients: () -> Unit,
+) {
+    val previous = stringResource(R.string.cook_bar_previous)
+    val previousDescription = stringResource(R.string.cook_bar_previous_description)
+    val read = stringResource(if (speaking) R.string.cook_bar_stop else R.string.cook_bar_read)
+    val readDescription = stringResource(if (speaking) R.string.cook_bar_stop_description else R.string.cook_bar_read_description)
+    val next = stringResource(R.string.cook_bar_next)
+    val nextDescription = stringResource(R.string.cook_bar_next_description)
+    val ingredients = stringResource(R.string.cook_bar_ingredients)
+    val ingredientsDescription = stringResource(R.string.cook_bar_ingredients_description)
+    val stacked = LocalDensity.current.fontScale > 1.3f
+    Surface(color = MaterialTheme.colorScheme.surfaceContainer, tonalElevation = 3.dp, modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(horizontal = Spacing.s, vertical = Spacing.s),
+            verticalArrangement = Arrangement.spacedBy(Spacing.s),
+        ) {
+            if (stacked) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                    BarButton(previous, previousDescription, hasSteps, onPrevious)
+                    BarButton(next, nextDescription, hasSteps, onNext)
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                    BarButton(read, readDescription, hasSteps, onRead, primary = true)
+                    BarButton(ingredients, ingredientsDescription, hasIngredients, onIngredients)
+                }
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                    BarButton(previous, previousDescription, hasSteps, onPrevious)
+                    BarButton(read, readDescription, hasSteps, onRead, primary = true)
+                    BarButton(next, nextDescription, hasSteps, onNext)
+                    BarButton(ingredients, ingredientsDescription, hasIngredients, onIngredients)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RowScope.BarButton(text: String, description: String, enabled: Boolean, onClick: () -> Unit, primary: Boolean = false) {
+    val modifier = Modifier
+        .weight(1f)
+        .heightIn(min = 64.dp)
+        .semantics { contentDescription = description }
+    val padding = PaddingValues(horizontal = Spacing.xs, vertical = Spacing.xs)
+    if (primary) {
+        Button(onClick = onClick, enabled = enabled, modifier = modifier, contentPadding = padding) {
+            Text(text, textAlign = TextAlign.Center)
+        }
+    } else {
+        FilledTonalButton(onClick = onClick, enabled = enabled, modifier = modifier, contentPadding = padding) {
+            Text(text, textAlign = TextAlign.Center)
+        }
     }
 }
 

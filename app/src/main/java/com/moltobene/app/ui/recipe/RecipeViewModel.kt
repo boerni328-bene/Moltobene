@@ -16,6 +16,7 @@ import com.moltobene.app.data.photos.PhotoStore
 import com.moltobene.app.data.share.PreparedShare
 import com.moltobene.app.data.share.RecipeSharer
 import com.moltobene.app.data.share.ShareLabels
+import com.moltobene.app.data.speech.StepNavigation
 import com.moltobene.app.data.translate.LanguagePack
 import com.moltobene.app.data.translate.RecipeTranslations
 import com.moltobene.app.data.translate.RecipeTranslator
@@ -59,6 +60,17 @@ sealed interface TranslationState {
     data class NeedsPack(val language: String) : TranslationState
 
     data class Failed(val language: String, val lowMemory: Boolean) : TranslationState
+}
+
+/** Ergebnis von „Weiter“ und „Zurück“ (#79). */
+sealed interface StepMove {
+    data class To(val index: Int) : StepMove
+
+    /** Schon der letzte Schritt. */
+    data object AtEnd : StepMove
+
+    /** Das Rezept hat keine Schritte. */
+    data object None : StepMove
 }
 
 sealed interface ShareEvent {
@@ -116,6 +128,30 @@ class RecipeViewModel(
     fun toggleCurrentStep(index: Int, text: String) {
         val key = progressKey(index, text)
         savedStateHandle[KEY_STEP] = if (currentStep.value == key) null else key
+    }
+
+    /** „Weiter“ in der Kochleiste (#79); ohne Markierung der erste Schritt, nach dem letzten [StepMove.AtEnd]. */
+    fun nextStep(): StepMove = moveStep(forward = true)
+
+    /** „Zurück“ in der Kochleiste (#79); beim ersten Schritt bleibt es dabei. */
+    fun previousStep(): StepMove = moveStep(forward = false)
+
+    private fun moveStep(forward: Boolean): StepMove {
+        val steps = (state.value as? RecipeUiState.Content)?.recipe?.steps.orEmpty()
+        if (steps.isEmpty()) return StepMove.None
+        val key = currentStep.value
+        val current = steps.indices.firstOrNull { progressKey(it, steps[it]) == key }
+        val target = (if (forward) StepNavigation.next(current, steps.size) else StepNavigation.previous(current, steps.size))
+            ?: return StepMove.AtEnd
+        savedStateHandle[KEY_STEP] = progressKey(target, steps[target])
+        return StepMove.To(target)
+    }
+
+    /** Der markierte Schritt (Stelle), falls er noch zum Rezept passt. */
+    fun currentStepIndex(): Int? {
+        val steps = (state.value as? RecipeUiState.Content)?.recipe?.steps.orEmpty()
+        val key = currentStep.value ?: return null
+        return steps.indices.firstOrNull { progressKey(it, steps[it]) == key }
     }
 
     fun setAdjustment(adjustment: Adjustment?) {

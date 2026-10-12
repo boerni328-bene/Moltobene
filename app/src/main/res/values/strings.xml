@@ -236,6 +236,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Cooking bar in the recipe: “Previous”, “Read aloud”, “Next” and “Ingredients” move through the steps and read them aloud on tap, with voices that work without internet.</item>
         <item>Home screen: “What to cook today?” suggests a recipe from the collection (favorites preferred); “Another recipe” picks a different one.</item>
         <item>Home screen: “Recently opened” shows the last recipes opened. This list stays on the device only.</item>
     </string-array>
@@ -310,6 +311,21 @@
     <string name="home_today_cook">Cook</string>
     <string name="home_today_another">Another recipe</string>
     <string name="home_recent_title">Recently opened</string>
+    <!-- Cooking bar and reading aloud (#79) -->
+    <string name="cook_bar_previous">Previous</string>
+    <string name="cook_bar_previous_description">Previous step</string>
+    <string name="cook_bar_next">Next</string>
+    <string name="cook_bar_next_description">Next step</string>
+    <string name="cook_bar_read">Read aloud</string>
+    <string name="cook_bar_read_description">Read current step aloud</string>
+    <string name="cook_bar_stop">Stop</string>
+    <string name="cook_bar_stop_description">Stop reading aloud</string>
+    <string name="cook_bar_ingredients">Ingredients</string>
+    <string name="cook_bar_ingredients_description">Read ingredients aloud</string>
+    <string name="cook_last_step">Last step</string>
+    <string name="cook_all_checked">All ingredients are checked off</string>
+    <string name="speech_no_voice">No voice for %1$s that works without internet. One can be downloaded in the device Settings under text-to-speech.</string>
+    <string name="speech_unavailable">Reading aloud is not available on this device. No text-to-speech is set up.</string>
     <!-- Einstellungen: Darstellung (Hell/Dunkel und Farbwelt) -->
     <string name="settings_section_appearance">Appearance</string>
     <string name="appearance_mode">Light or dark</string>
