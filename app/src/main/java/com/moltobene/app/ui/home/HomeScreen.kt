@@ -42,6 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moltobene.app.R
@@ -142,6 +143,18 @@ fun HomeScreen(
                 subtitle = count?.let { pluralStringResource(R.plurals.home_recipes_count, it, it) },
                 onClick = onOpenCollection,
             )
+            HomeTile(
+                icon = R.drawable.ic_calculate,
+                title = stringResource(R.string.dough_title),
+                subtitle = stringResource(R.string.home_dough_text),
+                onClick = onOpenDough,
+            )
+            HomeTile(
+                icon = R.drawable.ic_restaurant,
+                title = stringResource(R.string.basics_title),
+                subtitle = stringResource(R.string.home_basics_text),
+                onClick = onOpenBasics,
+            )
             if (count == 0) {
                 // Noch keine Rezepte: statt eines Vorschlags der Weg zum ersten Rezept.
                 HomeTile(
@@ -162,18 +175,6 @@ fun HomeScreen(
             if (recent.isNotEmpty()) {
                 RecentTile(items = recent, onOpenRecipe = onOpenRecipe)
             }
-            HomeTile(
-                icon = R.drawable.ic_restaurant,
-                title = stringResource(R.string.basics_title),
-                subtitle = stringResource(R.string.home_basics_text),
-                onClick = onOpenBasics,
-            )
-            HomeTile(
-                icon = R.drawable.ic_calculate,
-                title = stringResource(R.string.dough_title),
-                subtitle = stringResource(R.string.home_dough_text),
-                onClick = onOpenDough,
-            )
             // Platz unter der letzten Kachel, damit der Knopf „Hinzufügen“ nichts verdeckt.
             Spacer(Modifier.size(72.dp))
         }
@@ -205,29 +206,33 @@ private fun HomeTile(@DrawableRes icon: Int, title: String, subtitle: String?, o
     }
 }
 
-/** „Was koche ich heute?“: ein Rezept aus der eigenen Sammlung, zum Kochen oder zum Wechseln. */
+/**
+ * „Was koche ich heute?“ (#81): eine schmale Kachel mit dem vorgeschlagenen Rezept. Tippen öffnet das Rezept, der Knopf
+ * rechts zeigt ein anderes. Sie ist nur so hoch wie eine Zeile, damit die Startseite ruhig bleibt.
+ */
 @Composable
 private fun SuggestionTile(item: RecipeListItem, onCook: () -> Unit, onAnother: () -> Unit) {
+    val title = item.title.ifBlank { stringResource(R.string.untitled_recipe) }
     Card(
+        onClick = onCook,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         ),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
     ) {
-        Column(modifier = Modifier.padding(vertical = Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
-            Text(
-                stringResource(R.string.home_today_title),
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(horizontal = Spacing.m).semantics { heading() },
-            )
-            RecipeRow(item = item, onClick = onCook)
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(Spacing.s, Alignment.End),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m),
-            ) {
-                TextButton(onClick = onAnother) { Text(stringResource(R.string.home_today_another)) }
-                Button(onClick = onCook) { Text(stringResource(R.string.home_today_cook)) }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.m),
+            modifier = Modifier.fillMaxWidth().padding(start = Spacing.m, top = Spacing.xs, bottom = Spacing.xs, end = Spacing.xs),
+        ) {
+            Icon(painterResource(R.drawable.ic_restaurant), contentDescription = null, modifier = Modifier.size(32.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(stringResource(R.string.home_today_title), style = MaterialTheme.typography.titleMedium)
+                Text(title, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            IconButton(onClick = onAnother) {
+                Icon(painterResource(R.drawable.ic_refresh), contentDescription = stringResource(R.string.home_today_another))
             }
         }
     }

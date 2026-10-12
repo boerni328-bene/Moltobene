@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.37.1] – 2026-10-12 (versionCode 65)
+
+### Geändert
+- **Startseite neu geordnet:** Die Kacheln stehen jetzt in der Reihenfolge „Rezepte“, „Teigrechner“, „Grundrezepte“, „Was koche ich heute?“ und „Zuletzt geöffnet“.
+- **„Was koche ich heute?“ schmaler:** Die Kachel ist nur noch eine Zeile hoch und zeigt den Titel des vorgeschlagenen Rezepts. Tippen auf die Kachel öffnet das Rezept, der Knopf mit dem Pfeil rechts zeigt ein anderes.
+
 ## [0.37.0] – 2026-10-12 (versionCode 64)
 
 ### Neu

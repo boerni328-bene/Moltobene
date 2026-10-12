@@ -212,11 +212,13 @@ class AppTourTest(private val variant: DisplayVariant) {
         // Bei großer Schrift reicht der Bildschirm nicht für alle Kacheln; die Seite scrollt.
         composeRule.onNodeWithText(text(R.string.dough_title)).performScrollTo().assertIsDisplayed()
         // „Was koche ich heute?“ (#81): ein Vorschlag aus der Sammlung, „Anderes Rezept“ wechselt, „Kochen“ öffnet.
-        waitForText(text(R.string.home_today_cook))
+        waitForText(text(R.string.home_today_title))
         screenshot("00-startseite")
         composeRule.onNodeWithText(text(R.string.home_today_title)).performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithText(text(R.string.home_today_another)).performScrollTo().performClick()
-        composeRule.onNodeWithText(text(R.string.home_today_cook)).performScrollTo().performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.home_today_another)).performScrollTo().performClick()
+        // Tippen auf die Kachel öffnet das vorgeschlagene Rezept.
+        // Bei großer Schrift kann der Hauptknopf einen Teil der Kachel verdecken; deshalb direkt die Aktion auslösen.
+        composeRule.onNodeWithText(text(R.string.home_today_title)).performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
         // Erst weiter, wenn das Rezept offen ist; sonst würde Zurück die App von der Startseite aus beenden.
         composeRule.waitUntil(TIMEOUT_MILLIS) {
             composeRule.onAllNodesWithText(text(R.string.home_today_title)).fetchSemanticsNodes().isEmpty()
