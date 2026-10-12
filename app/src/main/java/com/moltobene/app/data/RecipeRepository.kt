@@ -52,6 +52,15 @@ class RecipeRepository(
         return row?.toSummary()
     }
 
+    /** Schlagwörter je Rezept (Kennung des Rezepts → Schlagwörter) für den Filter der Sammlung (#57). */
+    fun observeTagsByRecipe(): Flow<Map<String, List<Tag>>> = dao.observeTagLinks().map { links ->
+        links.groupBy({ it.recipeId }, { Tag(name = it.name, predefinedKey = it.predefinedKey) })
+    }
+
+    /** Titel der Rezepte, deren Quelle den Namen [sourceName] hat. */
+    suspend fun titlesBySource(sourceName: String): List<RecipeTitle> =
+        dao.getTitlesBySourceName(sourceName).map { RecipeTitle(it.id, it.title) }
+
     fun observeRecipe(id: String): Flow<Recipe?> = dao.observeDetails(id).map { it?.toRecipe() }
 
     suspend fun getRecipe(id: String): Recipe? = dao.getDetails(id)?.toRecipe()

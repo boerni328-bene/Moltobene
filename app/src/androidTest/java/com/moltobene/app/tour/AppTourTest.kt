@@ -44,6 +44,7 @@ import com.moltobene.app.data.Appearance
 import com.moltobene.app.data.Palette
 import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.StartScreen
+import com.moltobene.app.data.basics.BasicRecipes
 import com.moltobene.app.data.ThemeMode
 import com.moltobene.app.data.share.RecipeJsonLd
 import com.moltobene.app.ui.whatsnew.WhatsNew
@@ -205,7 +206,8 @@ class AppTourTest(private val variant: DisplayVariant) {
         val recipes = activity.resources.getQuantityString(R.plurals.home_recipes_count, count, count)
         waitForText(recipes)
         composeRule.onNodeWithText(text(R.string.home_recipes_title)).assertIsDisplayed()
-        composeRule.onNodeWithText(text(R.string.dough_title)).assertIsDisplayed()
+        // Bei großer Schrift reicht der Bildschirm nicht für alle Kacheln; die Seite scrollt.
+        composeRule.onNodeWithText(text(R.string.dough_title)).performScrollTo().assertIsDisplayed()
         // „Was koche ich heute?“ (#81): ein Vorschlag aus der Sammlung, „Anderes Rezept“ wechselt, „Kochen“ öffnet.
         waitForText(text(R.string.home_today_cook))
         screenshot("00-startseite")
@@ -224,7 +226,8 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("00b-startseite-zuletzt")
 
         // „Rezepte“ öffnet die Sammlung, Zurück führt wieder zur Startseite.
-        composeRule.onNodeWithText(text(R.string.home_recipes_title)).performClick()
+        // Die Startseite steht noch bei „Zuletzt geöffnet“; bei großer Schrift muss die Kachel erst ins Bild.
+        composeRule.onNodeWithText(text(R.string.home_recipes_title)).performScrollTo().performClick()
         waitForText(SampleRecipes.POTATO_SALAD)
         pressBack()
         waitForText(recipes)
@@ -555,6 +558,95 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.translation_code_original, "EN"))
         val stored = runBlocking { container().repository.getAll().first { it.title == SampleRecipes.POTATO_SALAD } }
         assertEquals("en", stored.language)
+    }
+
+    /**
+     * Schlagwörter (#57): im Bearbeiten ein mitgeliefertes wählen und ein eigenes hinzufügen, in der Rezeptansicht
+     * sehen, in der Sammlung danach filtern (bei Schrift 200 % über die Liste „Schlagwort: Alle“).
+     */
+    @Test
+    fun schlagwoerter() {
+        addSampleRecipes()
+        openRecipe(SampleRecipes.TOMATO_SAUCE)
+        waitForText("800 g reife Tomaten")
+        composeRule.onNodeWithContentDescription(text(R.string.edit_recipe)).performClick()
+        waitForField(R.string.field_title)
+
+        composeRule.onNodeWithText(text(R.string.tag_sauce)).performScrollTo().performClick()
+        input(R.string.tags_custom, "Omas Klassiker")
+        composeRule.onNode(hasText(text(R.string.tags_add)) and hasClickAction()).performScrollTo().performClick()
+        composeRule.onNodeWithText("Omas Klassiker").performScrollTo().assertIsDisplayed()
+        screenshot("15a-schlagwoerter-bearbeiten")
+        composeRule.onNodeWithText(text(R.string.save)).performClick()
+
+        waitForText("Omas Klassiker")
+        composeRule.onNodeWithText(text(R.string.tag_sauce)).assertIsDisplayed()
+        val stored = runBlocking { container().repository.getAll().first { it.title == SampleRecipes.TOMATO_SAUCE } }
+        assertEquals(listOf("sauce", "Omas Klassiker"), stored.tags.map { it.name })
+        assertEquals(listOf("sauce", null), stored.tags.map { it.predefinedKey })
+        screenshot("15b-schlagwoerter-rezept")
+
+        pressBack()
+        val sauces = text(R.string.tag_filter_chip, text(R.string.tag_sauce), 1)
+        val large = variant == DisplayVariant.LARGE_TEXT
+        // Die Sammlung kann bei großer Schrift nicht alles zugleich zeigen; Rezepte werden darum gezielt angesteuert.
+        waitForText(if (large) text(R.string.tag_filter_all) else sauces)
+        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(SampleRecipes.POTATO_SALAD))
+        if (large) {
+            composeRule.onNodeWithText(text(R.string.tag_filter_all)).performScrollTo().performClick()
+            waitForText(sauces)
+            composeRule.onNodeWithText(sauces).performClick()
+            composeRule.onNodeWithText(text(R.string.close)).performClick()
+        } else {
+            composeRule.onNodeWithText(sauces).performScrollTo().performClick()
+        }
+        waitUntilGone(SampleRecipes.POTATO_SALAD)
+        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(SampleRecipes.TOMATO_SAUCE))
+        composeRule.onNodeWithText(SampleRecipes.TOMATO_SAUCE).assertIsDisplayed()
+        screenshot("15c-filter-schlagwort")
+    }
+
+    /**
+     * Grundrezepte (#82): von der Startseite aus ein Grundrezept ansehen, als normales Rezept übernehmen (Quelle
+     * „Moltobene“, mit Schlagwörtern) und beim zweiten Mal den Hinweis „Schon in der Sammlung“ sehen.
+     */
+    @Test
+    fun grundrezepte() {
+        addSampleRecipes()
+        waitForText(SampleRecipes.POTATO_SALAD)
+        pressBack()
+        waitForText(text(R.string.home_recipes_title))
+        composeRule.onNodeWithText(text(R.string.basics_title)).performScrollTo().performClick()
+        waitForText(text(R.string.basics_intro))
+
+        val first = runBlocking { container().basicRecipes.load() }.first()
+        val title = BasicRecipes.text(first, variant.language).title
+        composeRule.onNodeWithText(title).performScrollTo().performClick()
+        waitForText(text(R.string.instructions))
+        screenshot("16a-grundrezepte")
+
+        adoptFirstBasic()
+        waitForText(text(R.string.basics_added, title))
+        screenshot("16b-grundrezept-uebernommen")
+        val stored = runBlocking { container().repository.getAll().filter { it.title == title } }
+        assertEquals(1, stored.size)
+        assertEquals("Moltobene", stored.single().source?.name)
+        assertEquals(variant.language, stored.single().language)
+        assertTrue(stored.single().tags.any { it.name == "basics" })
+
+        adoptFirstBasic()
+        waitForText(text(R.string.basics_duplicate_title))
+        screenshot("16c-grundrezept-duplikat")
+        composeRule.onNodeWithText(text(R.string.basics_adopt_anyway)).performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) {
+            runBlocking { container().repository.getAll().count { it.title == title } } == 2
+        }
+    }
+
+    private fun adoptFirstBasic() {
+        // Direkt auslösen statt antippen: Der Hinweis nach dem Übernehmen liegt kurz über dem Knopf.
+        composeRule.onAllNodesWithText(text(R.string.basics_adopt)).onFirst().performScrollTo()
+            .performSemanticsAction(SemanticsActions.OnClick)
     }
 
     @Test

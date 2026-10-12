@@ -22,6 +22,8 @@ import com.moltobene.app.MoltobeneApplication
 import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.StartScreen
 import com.moltobene.app.ui.collection.CollectionScreen
+import com.moltobene.app.ui.basics.BasicsViewModel
+import com.moltobene.app.ui.basics.BasicsScreen
 import com.moltobene.app.ui.collection.CollectionViewModel
 import com.moltobene.app.R
 import com.moltobene.app.ui.dough.DoughScreen
@@ -79,6 +81,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                     snackbarHostState = snackbarHostState,
                     onOpenCollection = { navController.navigate(CollectionRoute) },
                     onOpenDough = { navController.navigate(DoughRoute) },
+                    onOpenBasics = { navController.navigate(BasicsRoute) },
                     onOpenRecipe = { id -> navController.navigate(RecipeRoute(id)) },
                     onAddRecipe = { navController.navigate(EditRoute()) },
                     onAddFromPhoto = { navController.navigate(EditRoute(fromPhoto = true)) },
@@ -165,6 +168,14 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                     }
                     showMessage(message)
                 },
+            )
+        }
+        composable<BasicsRoute> {
+            BasicsScreen(
+                viewModel = viewModel { BasicsViewModel(container.basicRecipes, container.repository) },
+                snackbarHostState = snackbarHostState,
+                onBack = { navController.popBackStack() },
+                onOpenRecipe = { id -> navController.navigate(RecipeRoute(id)) },
             )
         }
         composable<DoughRoute> {

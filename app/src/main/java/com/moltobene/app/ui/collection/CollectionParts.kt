@@ -1,5 +1,6 @@
 package com.moltobene.app.ui.collection
 
+import android.content.res.Resources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -20,15 +21,18 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -40,22 +44,31 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.moltobene.app.R
+import com.moltobene.app.data.TagCount
 import com.moltobene.app.ui.components.DraftLabel
 import com.moltobene.app.ui.components.OptionButton
 import com.moltobene.app.ui.components.RecipePhoto
+import com.moltobene.app.ui.components.TagLabels
 import com.moltobene.app.ui.theme.Spacing
 
 /** Suchfeld als ruhige Pille ohne Rahmen, daneben der Umschalter Raster/Liste. */
@@ -102,16 +115,26 @@ internal fun SearchRow(
     }
 }
 
-/** Filter „Alle / Favoriten / Entwürfe“; erscheint nur, wenn es etwas zu filtern gibt. */
+/**
+ * Filter „Alle / Favoriten / Entwürfe“ und Schlagwörter (#57) in einer verschiebbaren Zeile; erscheint nur, wenn es
+ * etwas zu filtern gibt. Bei großer Schrift steht statt der Schlagwort-Chips eine Schaltfläche „Schlagwort: Alle“ mit Liste.
+ * Der aktive Filter ist am Text und am Häkchen zu erkennen, nicht nur an der Farbe.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun FilterRow(
     filter: CollectionFilter,
     hasFavorites: Boolean,
     hasDrafts: Boolean,
+    tagCounts: List<TagCount>,
+    selectedTags: Set<String>,
     onFilterChange: (CollectionFilter) -> Unit,
+    onToggleTag: (String) -> Unit,
 ) {
-    if (!hasFavorites && !hasDrafts && filter == CollectionFilter.ALL) return
+    if (!hasFavorites && !hasDrafts && tagCounts.isEmpty() && filter == CollectionFilter.ALL) return
+    val resources = LocalResources.current
+    val large = LocalDensity.current.fontScale > 1.3f
+    var chooseTags by rememberSaveable { mutableStateOf(false) }
     Row(
         modifier = Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = Spacing.m),
         horizontalArrangement = Arrangement.spacedBy(Spacing.s),
@@ -128,8 +151,60 @@ internal fun FilterRow(
                 label = { Text(stringResource(label)) },
             )
         }
+        if (large) {
+            if (tagCounts.isNotEmpty()) {
+                val label = when (selectedTags.size) {
+                    0 -> stringResource(R.string.tag_filter_all)
+                    1 -> stringResource(R.string.tag_filter_one, tagLabel(resources, tagCounts, selectedTags.first()))
+                    else -> stringResource(R.string.tag_filter_many, selectedTags.size)
+                }
+                FilterChip(selected = selectedTags.isNotEmpty(), onClick = { chooseTags = true }, label = { Text(label) })
+            }
+        } else {
+            for (entry in tagCounts) {
+                val on = entry.tag.name in selectedTags
+                FilterChip(
+                    selected = on,
+                    onClick = { onToggleTag(entry.tag.name) },
+                    label = { Text(stringResource(R.string.tag_filter_chip, TagLabels.text(resources, entry.tag), entry.count)) },
+                    leadingIcon = if (on) {
+                        { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(18.dp)) }
+                    } else {
+                        null
+                    },
+                )
+            }
+        }
+    }
+    if (chooseTags) {
+        AlertDialog(
+            onDismissRequest = { chooseTags = false },
+            title = { Text(stringResource(R.string.tag_filter_title), modifier = Modifier.semantics { heading() }) },
+            text = {
+                LazyColumn {
+                    items(tagCounts, key = { it.tag.name }) { entry ->
+                        val on = entry.tag.name in selectedTags
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.s),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 48.dp)
+                                .toggleable(value = on, role = Role.Checkbox, onValueChange = { onToggleTag(entry.tag.name) }),
+                        ) {
+                            Checkbox(checked = on, onCheckedChange = null)
+                            Text(stringResource(R.string.tag_filter_chip, TagLabels.text(resources, entry.tag), entry.count))
+                        }
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { chooseTags = false }) { Text(stringResource(R.string.close)) } },
+        )
     }
 }
+
+private fun tagLabel(resources: Resources, counts: List<TagCount>, name: String): String =
+    counts.firstOrNull { it.tag.name == name }?.let { TagLabels.text(resources, it.tag) } ?: name
 
 @Composable
 internal fun RecipeGrid(items: List<RecipeListItem>, onOpenRecipe: (String) -> Unit) {
@@ -184,7 +259,7 @@ private fun FavoriteBadge(modifier: Modifier = Modifier) {
 
 /** Foto des Gerichts oder, ohne Foto, eine ruhige Fläche mit dem Anfangsbuchstaben. */
 @Composable
-private fun Thumbnail(item: RecipeListItem, title: String, modifier: Modifier) {
+internal fun Thumbnail(item: RecipeListItem, title: String, modifier: Modifier) {
     if (item.thumbnail != null) {
         RecipePhoto(file = item.thumbnail, placeholderIconSize = 28.dp, modifier = modifier)
     } else {

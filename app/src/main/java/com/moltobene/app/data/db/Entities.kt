@@ -131,6 +131,9 @@ data class RecipeSearchEntity(
     val notes: String,
 )
 
+/** Kennung und Titel eines Rezepts. */
+data class RecipeTitleRow(val id: String, val title: String)
+
 /** Zeile der Sammlungsliste: nur das, was die Liste anzeigt. */
 data class RecipeSummaryRow(
     val id: String,

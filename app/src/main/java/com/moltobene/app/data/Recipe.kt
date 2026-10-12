@@ -63,6 +63,9 @@ enum class SourceType(val key: String) {
 /** Schlagwort. Mitgelieferte Vorschläge haben eine feste englische Kennung [predefinedKey]. */
 data class Tag(val name: String, val predefinedKey: String? = null)
 
+/** Kennung und Titel eines Rezepts. */
+data class RecipeTitle(val id: String, val title: String)
+
 /** Kurzfassung für die Liste der Sammlung. */
 data class RecipeSummary(
     val id: String,

@@ -51,7 +51,7 @@ class RecipeSharer(private val context: Context, private val photoStore: PhotoSt
         val folder = newFolder()
         val jpeg = recipe.photoIds.firstOrNull()?.let { photoStore.encodeForSharing(it) }
         val file = File(folder, "${ShareFiles.baseName(recipe.title, labels.untitled)}.${RecipeJsonLd.FILE_EXTENSION}")
-        file.writeText(RecipeJsonLd.build(recipe, labels.untitled, jpeg, labels.page))
+        file.writeText(RecipeJsonLd.build(recipe, labels.untitled, jpeg, tag = labels.tag, page = labels.page))
         PreparedShare(
             mimeType = RecipeJsonLd.MIME_TYPE,
             subject = recipe.title.trim().ifEmpty { labels.untitled },

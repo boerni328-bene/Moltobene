@@ -4,6 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moltobene.app.data.AppPreferences
 import com.moltobene.app.data.RecipeRepository
+import kotlinx.coroutines.flow.Flow
+import com.moltobene.app.data.TagFilter
+import com.moltobene.app.data.TagCount
+import com.moltobene.app.data.Tag
 import com.moltobene.app.data.ocr.PendingRecognition
 import com.moltobene.app.data.photos.PhotoStore
 import com.moltobene.app.data.translate.RecipeTranslations
@@ -40,6 +44,10 @@ sealed interface CollectionUiState {
         val filter: CollectionFilter,
         val hasFavorites: Boolean,
         val hasDrafts: Boolean,
+        /** Schlagwörter in Gebrauch mit Anzahl (#57), unabhängig von Suche und Filter. */
+        val tagCounts: List<TagCount> = emptyList(),
+        /** Gewählte Schlagwörter (Namen); ein Rezept muss alle haben. */
+        val selectedTags: Set<String> = emptySet(),
     ) : CollectionUiState
 }
 
@@ -63,16 +71,23 @@ class CollectionViewModel(
     /** Raster (true) oder Liste; die Wahl bleibt gemerkt. */
     val grid: StateFlow<Boolean> = _grid.asStateFlow()
 
-    val state: StateFlow<CollectionUiState> = combine(_query, _filter) { query, filter -> query to filter }
-        .flatMapLatest { (query, filter) ->
-            repository.observeSummaries(query).map { summaries ->
+    private val _selectedTags = MutableStateFlow<Set<String>>(emptySet())
+
+    private val tagsByRecipe: Flow<Map<String, List<Tag>>> = repository.observeTagsByRecipe().catch { emit(emptyMap()) }
+
+    val state: StateFlow<CollectionUiState> = combine(_query, _filter, _selectedTags) { query, filter, tags -> Triple(query, filter, tags) }
+        .flatMapLatest { (query, filter, chosen) ->
+            combine(repository.observeSummaries(query), tagsByRecipe) { summaries, tagsOf ->
+                val tagCounts = TagFilter.counts(tagsOf)
+                // Ein Schlagwort, das kein Rezept mehr hat, zählt nicht mehr als gewählt.
+                val selected = chosen.filterTo(HashSet()) { name -> tagCounts.any { it.tag.name == name } }
                 CollectionUiState.Content(
                     items = summaries.filter {
                         when (filter) {
                             CollectionFilter.ALL -> true
                             CollectionFilter.FAVORITES -> it.favorite
                             CollectionFilter.DRAFTS -> it.isDraft
-                        }
+                        } && TagFilter.matches(tagsOf[it.id].orEmpty(), selected)
                     }.map { summary ->
                         RecipeListItem(
                             id = summary.id,
@@ -86,6 +101,8 @@ class CollectionViewModel(
                     filter = filter,
                     hasFavorites = summaries.any { it.favorite },
                     hasDrafts = summaries.any { it.isDraft },
+                    tagCounts = tagCounts,
+                    selectedTags = selected,
                 ) as CollectionUiState
             }
         }
@@ -103,6 +120,11 @@ class CollectionViewModel(
 
     fun onFilterChange(value: CollectionFilter) {
         _filter.value = value
+    }
+
+    /** Schlagwort im Filter wählen oder abwählen (#57). */
+    fun onToggleTag(name: String) {
+        _selectedTags.value = _selectedTags.value.let { if (name in it) it - name else it + name }
     }
 
     fun onGridChange(value: Boolean) {

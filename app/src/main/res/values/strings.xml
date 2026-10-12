@@ -236,6 +236,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Basic recipes: ten reliable basics such as béchamel sauce, tomato sauce, vinaigrette or shortcrust pastry can be imported from the home screen into the collection and then edited like any other recipe.</item>
+        <item>Tags: recipes can get bundled tags such as “Sauces”, “Desserts” or “Soups”, plus tags of their own. The collection can be filtered by one or more tags at once, with the number of recipes per tag.</item>
         <item>Cooking bar in the recipe: “Previous”, “Read aloud”, “Next” and “Ingredients” move through the steps and read them aloud on tap, with voices that work without internet.</item>
         <item>Home screen: “What to cook today?” suggests a recipe from the collection (favorites preferred); “Another recipe” picks a different one.</item>
         <item>Home screen: “Recently opened” shows the last recipes opened. This list stays on the device only.</item>
@@ -311,6 +313,43 @@
     <string name="home_today_cook">Cook</string>
     <string name="home_today_another">Another recipe</string>
     <string name="home_recent_title">Recently opened</string>
+    <!-- Basic recipes (#82) -->
+    <string name="basics_title">Basic recipes</string>
+    <string name="home_basics_text">Béchamel sauce, vinaigrette and more, ready to import</string>
+    <string name="basics_intro">Reliable basic recipes to import into the collection. Afterwards they can be edited, adjusted and translated like any other recipe.</string>
+    <string name="basics_adopt">Import</string>
+    <string name="basics_added">“%1$s” is now in the collection</string>
+    <string name="basics_open">Open</string>
+    <string name="basics_failed">The basic recipe could not be imported.</string>
+    <string name="basics_error">The basic recipes could not be loaded.</string>
+    <string name="basics_duplicate_title">Already in the collection</string>
+    <string name="basics_duplicate_text">“%1$s” has already been imported.</string>
+    <string name="basics_adopt_anyway">Import anyway</string>
+    <string name="basics_expanded">Expanded</string>
+    <string name="basics_collapsed">Collapsed</string>
+    <!-- Tags (#57): bundled tags show these names, own tags show what was typed -->
+    <string name="tags">Tags</string>
+    <string name="tag_filter_chip">%1$s · %2$d</string>
+    <string name="tag_filter_all">Tag: All</string>
+    <string name="tag_filter_one">Tag: %1$s</string>
+    <string name="tag_filter_many">Tags: %1$d</string>
+    <string name="tag_filter_title">Filter by tag</string>
+    <string name="tags_custom">Custom tag</string>
+    <string name="tags_add">Add</string>
+    <string name="tags_remove">Remove tag %1$s</string>
+    <string name="tag_main_course">Main courses</string>
+    <string name="tag_side_dish">Side dishes</string>
+    <string name="tag_appetizer">Appetizers</string>
+    <string name="tag_soup">Soups</string>
+    <string name="tag_salad">Salads</string>
+    <string name="tag_sauce">Sauces</string>
+    <string name="tag_pasta">Pasta dishes</string>
+    <string name="tag_casserole">Casseroles</string>
+    <string name="tag_dessert">Desserts</string>
+    <string name="tag_bread">Bread</string>
+    <string name="tag_cake">Cakes</string>
+    <string name="tag_pizza">Pizza</string>
+    <string name="tag_basics">Basics</string>
     <!-- Cooking bar and reading aloud (#79) -->
     <string name="cook_bar_previous">Previous</string>
     <string name="cook_bar_previous_description">Previous step</string>

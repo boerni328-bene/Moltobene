@@ -1,0 +1,527 @@
+{
+  "version": 1,
+  "recipes": [
+    {
+      "id": "tomato_sauce",
+      "tags": [
+        "basics",
+        "sauce"
+      ],
+      "servings": 4,
+      "prepMinutes": 10,
+      "totalMinutes": 50,
+      "texts": {
+        "de": {
+          "title": "Tomatensauce",
+          "summary": "Grundsauce für Pasta, Pizza und Eintöpfe, ohne tierische Zutaten.",
+          "ingredients": [
+            "1 Zwiebel",
+            "1–2 Knoblauchzehen",
+            "2 EL Olivenöl",
+            "800 g Tomaten aus der Dose oder passierte Tomaten",
+            "1 TL Salz",
+            "1 Prise Zucker",
+            "Pfeffer",
+            "1 TL getrockneter Oregano oder einige Basilikumblätter"
+          ],
+          "steps": [
+            "Zwiebel fein würfeln, Knoblauch fein hacken.",
+            "Öl bei mittlerer Hitze erwärmen, die Zwiebel etwa 5 Minuten glasig dünsten und den Knoblauch kurz mitdünsten, ohne dass er braun wird.",
+            "Tomaten zugeben, mit Salz, Zucker, Pfeffer und Oregano würzen und stückige Tomaten mit dem Löffel zerdrücken.",
+            "Offen bei kleiner Hitze 30 bis 40 Minuten köcheln lassen, gelegentlich umrühren, bis die Sauce eingedickt ist.",
+            "Abschmecken. Für eine glatte Sauce pürieren. Frisches Basilikum erst am Ende unterrühren."
+          ],
+          "notes": "Im Kühlschrank 3 bis 5 Tage haltbar, eingefroren mehrere Monate. Schmeckt die Sauce zu sauer, helfen längeres Einkochen oder eine weitere Prise Zucker."
+        },
+        "en": {
+          "title": "Tomato sauce",
+          "summary": "Basic sauce for pasta, pizza and stews, with no animal ingredients.",
+          "ingredients": [
+            "1 onion",
+            "1–2 garlic cloves",
+            "2 tbsp olive oil",
+            "800 g canned tomatoes or tomato passata",
+            "1 tsp salt",
+            "1 pinch of sugar",
+            "pepper",
+            "1 tsp dried oregano or a few basil leaves"
+          ],
+          "steps": [
+            "Dice the onion finely and chop the garlic finely.",
+            "Warm the oil over medium heat, cook the onion for about 5 minutes until translucent, then add the garlic briefly without letting it brown.",
+            "Add the tomatoes, season with salt, sugar, pepper and oregano, and crush any whole tomatoes with a spoon.",
+            "Simmer uncovered over low heat for 30 to 40 minutes, stirring now and then, until the sauce has thickened.",
+            "Taste and adjust. Blend for a smooth sauce. Stir in fresh basil only at the end."
+          ],
+          "notes": "Keeps 3 to 5 days in the refrigerator and several months in the freezer. If the sauce tastes too sharp, simmer it longer or add another pinch of sugar."
+        }
+      }
+    },
+    {
+      "id": "pancake_batter",
+      "tags": [
+        "basics"
+      ],
+      "servings": 4,
+      "prepMinutes": 10,
+      "totalMinutes": 40,
+      "texts": {
+        "de": {
+          "title": "Pfannkuchenteig",
+          "summary": "Dünne Pfannkuchen, süß oder herzhaft; das Verhältnis Mehl zu Milch ist 1 zu 2.",
+          "ingredients": [
+            "250 g Mehl",
+            "1 Prise Salz",
+            "500 ml Milch",
+            "3 Eier",
+            "Butter oder Öl zum Ausbacken"
+          ],
+          "steps": [
+            "Mehl und Salz in einer Schüssel mischen.",
+            "Die Milch nach und nach einrühren, bis ein glatter, dünnflüssiger Teig entsteht. Klümpchen wegrühren oder den Teig durch ein Sieb gießen.",
+            "Die Eier unterrühren.",
+            "Den Teig 15 bis 20 Minuten ruhen lassen.",
+            "Wenig Fett in einer Pfanne erhitzen, eine Kelle Teig dünn verteilen und bei mittlerer Hitze 1 bis 2 Minuten backen, bis die Oberseite stockt. Wenden und kurz fertig backen.",
+            "Mit dem übrigen Teig ebenso verfahren und bei Bedarf Fett nachgeben."
+          ],
+          "notes": "Ergibt etwa 8 Pfannkuchen. Für süße Pfannkuchen 1 bis 2 EL Zucker in den Teig geben. Ist der Teig zu dick, mit etwas Milch oder Mineralwasser verdünnen. Der rohe Teig ist nicht zum Verzehr gedacht. Fertige Pfannkuchen halten sich 2 bis 3 Tage im Kühlschrank."
+        },
+        "en": {
+          "title": "Pancake batter",
+          "summary": "Thin pancakes, sweet or savory; the ratio of flour to milk is 1 to 2.",
+          "ingredients": [
+            "250 g flour",
+            "1 pinch of salt",
+            "500 ml milk",
+            "3 eggs",
+            "butter or oil for frying"
+          ],
+          "steps": [
+            "Mix the flour and salt in a bowl.",
+            "Stir in the milk a little at a time until the batter is smooth and thin. Whisk out any lumps or pour the batter through a sieve.",
+            "Stir in the eggs.",
+            "Let the batter rest for 15 to 20 minutes.",
+            "Heat a little fat in a pan, spread a ladle of batter thinly and cook over medium heat for 1 to 2 minutes until the top has set. Flip and finish briefly.",
+            "Repeat with the remaining batter, adding fat as needed."
+          ],
+          "notes": "Makes about 8 pancakes. For sweet pancakes, add 1 to 2 tbsp sugar to the batter. If the batter is too thick, thin it with a little milk or sparkling water. The raw batter is not meant to be eaten. Cooked pancakes keep 2 to 3 days in the refrigerator."
+        }
+      }
+    },
+    {
+      "id": "bechamel",
+      "tags": [
+        "basics",
+        "sauce"
+      ],
+      "servings": 4,
+      "prepMinutes": 5,
+      "totalMinutes": 15,
+      "texts": {
+        "de": {
+          "title": "Béchamelsauce",
+          "summary": "Helle Grundsauce für Gratin, Lasagne und Gemüse; Butter, Mehl und Milch im Verhältnis 1 zu 1 zu 10.",
+          "ingredients": [
+            "50 g Butter",
+            "50 g Mehl",
+            "500 ml Milch",
+            "Salz",
+            "Pfeffer",
+            "Muskatnuss"
+          ],
+          "steps": [
+            "Die Butter bei mittlerer Hitze schmelzen.",
+            "Das Mehl einrühren und 2 bis 3 Minuten unter Rühren anschwitzen, ohne dass es Farbe nimmt.",
+            "Die Milch nach und nach unter ständigem Rühren mit dem Schneebesen zugießen, zuerst nur einen kleinen Schluck, dann mehr.",
+            "Aufkochen und 5 bis 8 Minuten köcheln lassen, bis die Sauce cremig ist und nicht mehr nach Mehl schmeckt.",
+            "Mit Salz, Pfeffer und frisch geriebener Muskatnuss würzen."
+          ],
+          "notes": "Warme Milch verringert die Gefahr von Klumpen; sie lassen sich durch ein Sieb streichen oder wegpürieren. Für eine festere Sauce, etwa als Füllung, je 70 g Butter und Mehl auf 500 ml Milch nehmen. Mit Folie direkt auf der Oberfläche 2 bis 3 Tage im Kühlschrank haltbar; einfrierbar, nach dem Auftauen kräftig aufrühren."
+        },
+        "en": {
+          "title": "Béchamel sauce",
+          "summary": "Basic white sauce for gratins, lasagna and vegetables; butter, flour and milk in a ratio of 1 to 1 to 10.",
+          "ingredients": [
+            "50 g butter",
+            "50 g flour",
+            "500 ml milk",
+            "salt",
+            "pepper",
+            "nutmeg"
+          ],
+          "steps": [
+            "Melt the butter over medium heat.",
+            "Stir in the flour and cook for 2 to 3 minutes, stirring, without letting it take on color.",
+            "Add the milk a little at a time while whisking constantly, first just a splash, then more.",
+            "Bring to a boil and simmer for 5 to 8 minutes until the sauce is creamy and no longer tastes of raw flour.",
+            "Season with salt, pepper and freshly grated nutmeg."
+          ],
+          "notes": "Warm milk lowers the risk of lumps; lumps can be pressed through a sieve or blended away. For a firmer sauce, such as for a filling, use 70 g butter and 70 g flour per 500 ml milk. With plastic wrap pressed onto the surface it keeps 2 to 3 days in the refrigerator; it can be frozen and should be whisked well after thawing."
+        }
+      }
+    },
+    {
+      "id": "shortcrust",
+      "tags": [
+        "basics",
+        "cake"
+      ],
+      "servings": 12,
+      "prepMinutes": 15,
+      "totalMinutes": 75,
+      "texts": {
+        "de": {
+          "title": "Mürbeteig (3-2-1)",
+          "summary": "Teig für Kuchenboden, Tarte und Kekse; Mehl, Butter und Zucker im Verhältnis 3 zu 2 zu 1.",
+          "ingredients": [
+            "300 g Mehl",
+            "100 g Zucker",
+            "1 Prise Salz",
+            "200 g kalte Butter",
+            "1 Ei"
+          ],
+          "steps": [
+            "Mehl, Zucker und Salz mischen.",
+            "Die kalte Butter in Würfeln und das Ei zugeben und zügig zu einem glatten Teig verkneten; die Butter soll dabei kühl bleiben.",
+            "Den Teig zu einer Scheibe formen, in Folie wickeln und 30 bis 60 Minuten kühlen.",
+            "Auf wenig Mehl ausrollen, eine Form von etwa 26 cm Durchmesser damit auslegen und den Boden mehrmals einstechen.",
+            "Je nach Rezept backen, etwa bei 175 °C Ober- und Unterhitze (150 °C Umluft). Zum Vorbacken den Boden mit Backpapier und Hülsenfrüchten beschweren und etwa 15 Minuten backen."
+          ],
+          "notes": "Ergibt einen Boden für eine Form von etwa 26 cm. Für herzhafte Füllungen den Zucker weglassen und etwas mehr Salz nehmen. Wird der Teig bröselig, 1 EL kaltes Wasser einarbeiten. Zu langes Kneten oder warme Butter machen ihn zäh. Der rohe Teig ist nicht zum Verzehr gedacht. Im Kühlschrank 2 bis 3 Tage haltbar, eingefroren mehrere Wochen."
+        },
+        "en": {
+          "title": "Shortcrust pastry (3-2-1)",
+          "summary": "Dough for a pie crust, tart or cookies; flour, butter and sugar in a ratio of 3 to 2 to 1.",
+          "ingredients": [
+            "300 g flour",
+            "100 g sugar",
+            "1 pinch of salt",
+            "200 g cold butter",
+            "1 egg"
+          ],
+          "steps": [
+            "Mix the flour, sugar and salt.",
+            "Add the cold butter in cubes and the egg and knead quickly into a smooth dough; the butter should stay cool.",
+            "Shape the dough into a disc, wrap it in plastic and chill for 30 to 60 minutes.",
+            "Roll it out on a little flour, line a pan of about 26 cm in diameter and prick the bottom several times.",
+            "Bake as the recipe says, about 175 °C conventional (150 °C fan). To blind bake, weigh the crust down with parchment paper and dried beans and bake for about 15 minutes."
+          ],
+          "notes": "Makes one crust for a pan of about 26 cm. For savory fillings, leave out the sugar and add a little more salt. If the dough turns crumbly, work in 1 tbsp cold water. Overworking or warm butter makes it tough. The raw dough is not meant to be eaten. Keeps 2 to 3 days in the refrigerator and several weeks in the freezer."
+        }
+      }
+    },
+    {
+      "id": "mashed_potatoes",
+      "tags": [
+        "basics",
+        "side_dish"
+      ],
+      "servings": 4,
+      "prepMinutes": 10,
+      "totalMinutes": 40,
+      "texts": {
+        "de": {
+          "title": "Kartoffelpüree",
+          "summary": "Klassische Beilage aus mehligkochenden Kartoffeln, Milch und Butter.",
+          "ingredients": [
+            "1 kg mehligkochende Kartoffeln",
+            "Salz",
+            "300 ml Milch",
+            "40 g Butter",
+            "Muskatnuss"
+          ],
+          "steps": [
+            "Die Kartoffeln schälen, vierteln und in kaltem Salzwasser aufsetzen.",
+            "Nach dem Aufkochen 20 bis 25 Minuten garen, bis sie weich sind, aber nicht zerfallen.",
+            "Abgießen und 1 bis 2 Minuten ausdampfen lassen.",
+            "Milch mit Butter erhitzen, aber nicht kochen.",
+            "Die Kartoffeln durch die Presse drücken oder stampfen und die heiße Milch mit der Butter nach und nach unterrühren.",
+            "Mit Salz und Muskatnuss abschmecken."
+          ],
+          "notes": "Je nach gewünschter Festigkeit 250 bis 400 ml Milch nehmen. Ein Mixer oder Pürierstab macht das Püree klebrig. Im Kühlschrank 2 bis 3 Tage haltbar; vor dem Essen gut durcherhitzen."
+        },
+        "en": {
+          "title": "Mashed potatoes",
+          "summary": "Classic side dish of starchy potatoes, milk and butter.",
+          "ingredients": [
+            "1 kg starchy potatoes",
+            "salt",
+            "300 ml milk",
+            "40 g butter",
+            "nutmeg"
+          ],
+          "steps": [
+            "Peel the potatoes, quarter them and start them in cold salted water.",
+            "After it comes to a boil, cook for 20 to 25 minutes until tender but not falling apart.",
+            "Drain and let them steam dry for 1 to 2 minutes.",
+            "Heat the milk with the butter, but do not boil it.",
+            "Press the potatoes through a ricer or mash them, then stir in the hot milk and butter a little at a time.",
+            "Season with salt and nutmeg."
+          ],
+          "notes": "Use 250 to 400 ml milk depending on how firm the mash should be. A blender or immersion blender makes the mash gluey. Keeps 2 to 3 days in the refrigerator; heat it through thoroughly before eating."
+        }
+      }
+    },
+    {
+      "id": "vinaigrette",
+      "tags": [
+        "basics",
+        "sauce",
+        "salad"
+      ],
+      "servings": 4,
+      "prepMinutes": 5,
+      "totalMinutes": 5,
+      "texts": {
+        "de": {
+          "title": "Vinaigrette",
+          "summary": "Salatsauce aus Öl und Essig im Verhältnis 3 zu 1, in fünf Minuten fertig.",
+          "ingredients": [
+            "6 EL Öl",
+            "2 EL Essig",
+            "1 TL Senf",
+            "½ TL Salz",
+            "Pfeffer",
+            "1 TL Honig (nach Belieben)",
+            "1 kleine Schalotte, fein gewürfelt (nach Belieben)"
+          ],
+          "steps": [
+            "Essig, Senf, Salz, Pfeffer und nach Belieben Honig verrühren.",
+            "Das Öl in dünnem Strahl unterschlagen oder alles in einem Schraubglas kräftig schütteln.",
+            "Nach Belieben die Schalotte untermischen und abschmecken."
+          ],
+          "notes": "Der Senf bindet Öl und Essig. Ist die Sauce zu sauer, mehr Öl oder eine Prise Zucker oder Honig zugeben. Ohne frische Zutaten im Kühlschrank 1 bis 2 Wochen haltbar, mit Schalotte, Knoblauch oder Kräutern 4 bis 5 Tage; vor Gebrauch schütteln."
+        },
+        "en": {
+          "title": "Vinaigrette",
+          "summary": "Salad dressing of oil and vinegar in a ratio of 3 to 1, ready in five minutes.",
+          "ingredients": [
+            "6 tbsp oil",
+            "2 tbsp vinegar",
+            "1 tsp mustard",
+            "½ tsp salt",
+            "pepper",
+            "1 tsp honey (optional)",
+            "1 small shallot, finely diced (optional)"
+          ],
+          "steps": [
+            "Whisk the vinegar, mustard, salt, pepper and, if using, honey together.",
+            "Whisk in the oil in a thin stream, or shake everything hard in a screw-top jar.",
+            "Mix in the shallot if using, and taste."
+          ],
+          "notes": "The mustard binds oil and vinegar. If the dressing is too sharp, add more oil or a pinch of sugar or honey. Without fresh ingredients it keeps 1 to 2 weeks in the refrigerator, with shallot, garlic or herbs 4 to 5 days; shake before using."
+        }
+      }
+    },
+    {
+      "id": "vegetable_broth",
+      "tags": [
+        "basics",
+        "soup"
+      ],
+      "servings": 6,
+      "prepMinutes": 15,
+      "totalMinutes": 75,
+      "texts": {
+        "de": {
+          "title": "Gemüsebrühe",
+          "summary": "Klare Brühe als Grundlage für Suppen, Saucen und Risotto, aus Suppengemüse.",
+          "ingredients": [
+            "800 g Suppengemüse (Möhren, Sellerie, Lauch)",
+            "1 Zwiebel mit Schale",
+            "1 Knoblauchzehe",
+            "2 l Wasser",
+            "2 TL Salz",
+            "2 Lorbeerblätter",
+            "1 TL Pfefferkörner",
+            "einige Petersilienstängel (nach Belieben)"
+          ],
+          "steps": [
+            "Das Gemüse waschen und grob würfeln, etwa 2 cm groß. Die Zwiebel mit Schale halbieren.",
+            "Alles mit dem kalten Wasser, dem Salz und den Gewürzen in einen großen Topf geben und zum Kochen bringen.",
+            "Die Hitze reduzieren und zugedeckt 45 bis 60 Minuten leise köcheln lassen; sprudelndes Kochen macht die Brühe trüb.",
+            "Durch ein Sieb gießen und das Gemüse leicht ausdrücken.",
+            "Abschmecken und bei Bedarf nachsalzen."
+          ],
+          "notes": "Ergibt etwa 1,5 l. Kohl und rote Bete weglassen, sie machen die Brühe bitter oder färben sie. Für mehr Geschmack das Gemüse vorher anrösten. Im Kühlschrank 3 bis 5 Tage haltbar, eingefroren bis zu 6 Monate; im Gefäß Platz für die Ausdehnung lassen. Enthält Sellerie."
+        },
+        "en": {
+          "title": "Vegetable broth",
+          "summary": "Clear broth made from soup vegetables, the base for soups, sauces and risotto.",
+          "ingredients": [
+            "800 g soup vegetables (carrots, celery, leek)",
+            "1 onion with its skin",
+            "1 garlic clove",
+            "2 l water",
+            "2 tsp salt",
+            "2 bay leaves",
+            "1 tsp peppercorns",
+            "a few parsley stems (optional)"
+          ],
+          "steps": [
+            "Wash the vegetables and cut them into rough pieces of about 2 cm. Halve the onion with its skin.",
+            "Put everything into a large pot with the cold water, the salt and the spices and bring to a boil.",
+            "Reduce the heat and simmer gently, covered, for 45 to 60 minutes; a hard boil makes the broth cloudy.",
+            "Pour through a sieve and press the vegetables lightly.",
+            "Taste and add more salt if needed."
+          ],
+          "notes": "Makes about 1.5 l. Leave out cabbage and beets, which make the broth bitter or color it. For a deeper flavor, roast the vegetables first. Keeps 3 to 5 days in the refrigerator and up to 6 months in the freezer; leave room in the container for expansion. Contains celery."
+        }
+      }
+    },
+    {
+      "id": "spaetzle_batter",
+      "tags": [
+        "basics",
+        "side_dish"
+      ],
+      "servings": 4,
+      "prepMinutes": 15,
+      "totalMinutes": 45,
+      "texts": {
+        "de": {
+          "title": "Spätzleteig",
+          "summary": "Teig für Spätzle aus Mehl, Eiern und Wasser, ohne Spezialgerät vom Brett zu schaben.",
+          "ingredients": [
+            "500 g Mehl",
+            "5 Eier",
+            "1 TL Salz",
+            "200 ml Wasser",
+            "Salzwasser zum Kochen"
+          ],
+          "steps": [
+            "Mehl, Eier und Salz in einer großen Schüssel verrühren.",
+            "Das Wasser nach und nach zugeben und den Teig mit dem Kochlöffel kräftig schlagen, bis er zäh ist, Blasen wirft und in Fäden vom Löffel reißt.",
+            "Den Teig 15 bis 30 Minuten ruhen lassen.",
+            "Reichlich Salzwasser aufkochen und dann nur noch sieden lassen.",
+            "Den Teig portionsweise vom nassen Brett in das Wasser schaben oder durch eine Spätzlepresse oder einen Hobel drücken.",
+            "Sobald die Spätzle oben schwimmen, nach 1 bis 2 Minuten mit einer Schaumkelle herausheben und abtropfen lassen."
+          ],
+          "notes": "Je nach Größe der Eier sind 4 bis 6 Eier und 100 bis 250 ml Wasser nötig. Ist der Teig zu fest, etwas Wasser zugeben, ist er zu dünn, etwas Mehl. Der rohe Teig ist nicht zum Verzehr gedacht. Gekochte Spätzle halten sich 2 Tage im Kühlschrank und lassen sich einfrieren."
+        },
+        "en": {
+          "title": "Spaetzle batter",
+          "summary": "Batter for spaetzle made of flour, eggs and water, scraped off a board without special equipment.",
+          "ingredients": [
+            "500 g flour",
+            "5 eggs",
+            "1 tsp salt",
+            "200 ml water",
+            "salted water for cooking"
+          ],
+          "steps": [
+            "Mix the flour, eggs and salt in a large bowl.",
+            "Add the water a little at a time and beat the batter hard with a wooden spoon until it is thick, forms bubbles and tears off the spoon in strands.",
+            "Let the batter rest for 15 to 30 minutes.",
+            "Bring plenty of salted water to a boil, then keep it at a simmer.",
+            "Scrape the batter in portions from a wet board into the water, or press it through a spaetzle press or grater.",
+            "Once the spaetzle float to the top, lift them out with a slotted spoon after 1 to 2 minutes and let them drain."
+          ],
+          "notes": "Depending on the size of the eggs, 4 to 6 eggs and 100 to 250 ml water are needed. If the batter is too stiff, add a little water; if it is too thin, add a little flour. The raw batter is not meant to be eaten. Cooked spaetzle keep 2 days in the refrigerator and can be frozen."
+        }
+      }
+    },
+    {
+      "id": "pesto_genovese",
+      "tags": [
+        "basics",
+        "sauce",
+        "pasta"
+      ],
+      "servings": 4,
+      "prepMinutes": 15,
+      "totalMinutes": 15,
+      "texts": {
+        "de": {
+          "title": "Pesto Genovese",
+          "summary": "Grüne Sauce aus Basilikum, Pinienkernen und Parmesan, in einer Viertelstunde gemacht.",
+          "ingredients": [
+            "100 g Basilikumblätter",
+            "40 g Pinienkerne",
+            "1 kleine Knoblauchzehe",
+            "60 g frisch geriebener Parmesan",
+            "120 ml Olivenöl",
+            "Salz"
+          ],
+          "steps": [
+            "Das Basilikum zupfen; nasse Blätter gut trocken tupfen.",
+            "Basilikum, Pinienkerne, Knoblauch und eine Prise Salz im Mörser zerreiben oder im Mixer in kurzen Stößen zerkleinern, damit es nicht warm wird.",
+            "Den Parmesan unterrühren und das Öl nach und nach einarbeiten, bis eine cremige Sauce entsteht.",
+            "Abschmecken, der Käse ist bereits salzig.",
+            "Für Pasta etwas Nudelwasser untermischen und das Pesto nicht miterhitzen."
+          ],
+          "notes": "Reicht für 4 Portionen Pasta. Im Glas mit einer dünnen Ölschicht bedeckt im Kühlschrank etwa 1 Woche haltbar; immer einen sauberen Löffel benutzen. Erhitzen macht Pesto bitter und dunkel. Enthält Nüsse (Pinienkerne) und Milch (Parmesan); Walnüsse oder Cashewkerne sind ebenfalls Nüsse."
+        },
+        "en": {
+          "title": "Pesto Genovese",
+          "summary": "Green sauce of basil, pine nuts and Parmesan, made in a quarter of an hour.",
+          "ingredients": [
+            "100 g basil leaves",
+            "40 g pine nuts",
+            "1 small garlic clove",
+            "60 g freshly grated Parmesan",
+            "120 ml olive oil",
+            "salt"
+          ],
+          "steps": [
+            "Pick the basil; pat wet leaves dry thoroughly.",
+            "Grind the basil, pine nuts, garlic and a pinch of salt in a mortar, or chop in a blender in short pulses so that it does not warm up.",
+            "Stir in the Parmesan and work in the oil a little at a time until the sauce is creamy.",
+            "Taste; the cheese is already salty.",
+            "For pasta, mix in a little pasta water and do not heat the pesto."
+          ],
+          "notes": "Enough for 4 servings of pasta. Covered with a thin layer of oil in a jar it keeps about 1 week in the refrigerator; always use a clean spoon. Heating makes pesto bitter and dark. Contains nuts (pine nuts) and milk (Parmesan); walnuts or cashews are nuts as well."
+        }
+      }
+    },
+    {
+      "id": "vanilla_sauce",
+      "tags": [
+        "basics",
+        "sauce",
+        "dessert"
+      ],
+      "servings": 4,
+      "prepMinutes": 10,
+      "totalMinutes": 25,
+      "texts": {
+        "de": {
+          "title": "Vanillesauce",
+          "summary": "Cremige Sauce aus Milch, Eigelb und Vanille zu Desserts und Kuchen.",
+          "ingredients": [
+            "300 ml Milch",
+            "½ Vanilleschote",
+            "3 Eigelb",
+            "50 g Zucker"
+          ],
+          "steps": [
+            "Die Vanilleschote aufschlitzen und das Mark auskratzen. Milch mit Schote und Mark aufkochen und 5 bis 10 Minuten ziehen lassen.",
+            "Eigelb und Zucker in einer Schüssel schaumig rühren.",
+            "Die heiße Milch ohne die Schote in dünnem Strahl unter Rühren zum Eigelb gießen, nicht umgekehrt.",
+            "Alles zurück in den Topf geben und bei kleiner Hitze unter ständigem Rühren erwärmen, bis die Sauce am Löffelrücken haftet und eine Spur hält. Sie ist dann etwa 75 bis 80 °C warm und darf nicht kochen.",
+            "Sofort durch ein Sieb in eine kalte Schüssel gießen und abkühlen lassen."
+          ],
+          "notes": "Eigelb gerinnt ab etwa 80 °C, ein Küchenthermometer hilft. Beginnt die Sauce zu gerinnen, sofort vom Herd nehmen und pürieren oder durch ein Sieb streichen. Für eine reichere Sauce 150 ml der Milch durch Sahne ersetzen. Im Kühlschrank gut abgedeckt 2 Tage haltbar; nicht einfrieren."
+        },
+        "en": {
+          "title": "Vanilla sauce",
+          "summary": "Creamy sauce of milk, egg yolk and vanilla for desserts and cakes.",
+          "ingredients": [
+            "300 ml milk",
+            "½ vanilla bean",
+            "3 egg yolks",
+            "50 g sugar"
+          ],
+          "steps": [
+            "Split the vanilla bean and scrape out the seeds. Bring the milk to a boil with the bean and seeds and let it steep for 5 to 10 minutes.",
+            "Beat the egg yolks and sugar in a bowl until foamy.",
+            "Pour the hot milk, without the bean, into the yolks in a thin stream while stirring, not the other way round.",
+            "Return everything to the pot and warm over low heat, stirring constantly, until the sauce coats the back of a spoon and holds a trail. It is then about 75 to 80 °C and must not boil.",
+            "Immediately strain it into a cold bowl and let it cool."
+          ],
+          "notes": "Egg yolk curdles from about 80 °C, so a kitchen thermometer helps. If the sauce starts to curdle, take it off the heat at once and blend it or press it through a sieve. For a richer sauce, replace 150 ml of the milk with cream. Keeps 2 days in the refrigerator, well covered; do not freeze."
+        }
+      }
+    }
+  ]
+}
