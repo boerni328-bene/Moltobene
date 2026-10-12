@@ -13,8 +13,9 @@ object DoughNumbers {
     /** Menge in Gramm: Mehl und Wasser auf 1 g, Salz und Öl auf 0,5 g, Hefe auf 0,1 g; nie „0“, dann zwei Stellen. */
     fun grams(value: Double, role: LineRole, language: String?): String {
         val step = when (role) {
-            LineRole.FLOUR, LineRole.WATER -> 1.0
-            LineRole.SALT, LineRole.OIL -> 0.5
+            LineRole.FLOUR, LineRole.WATER, LineRole.SEMOLINA, LineRole.EGG, LineRole.YOLK, LineRole.MILK, LineRole.LIQUID,
+            LineRole.SUGAR, LineRole.BUTTER, LineRole.QUARK -> 1.0
+            LineRole.SALT, LineRole.OIL, LineRole.BAKING_POWDER -> 0.5
             LineRole.YEAST -> 0.1
         }
         val rounded = (value / step).roundToLong() * step
@@ -46,8 +47,12 @@ interface DoughTexts {
 
     fun ingredient(role: LineRole, yeastKind: YeastKind): String
 
-    /** Einheit der Portionen ohne Anzahl, z. B. „Teigkugeln (je 250 g)“. */
-    fun servingsUnit(kind: YieldKind, pieceGrams: String): String
+    fun pastaTitle(kind: PastaKind): String
+
+    fun cakeTitle(kind: CakeKind): String
+
+    /** Einheit der Portionen ohne Anzahl, z. B. „Teigkugeln (je 250 g)“; [detail] ist das Gewicht, bei einer Form ihr Maß. */
+    fun servingsUnit(kind: YieldKind, detail: String): String
 }
 
 /**
@@ -83,6 +88,29 @@ data class DoughDraft(
             input: LeavenedInput,
             texts: DoughTexts,
             language: String,
+        ): DoughDraft = build(
+            result, texts, language, input.yeastKind, texts.title(input.type, input.preferment),
+            DoughNumbers.separator(DoughNumbers.plain(result.yield.pieceGrams, 1), language),
+        )
+
+        fun fromPasta(result: DoughResult.Success, input: PastaInput, texts: DoughTexts, language: String): DoughDraft = build(
+            result, texts, language, YeastKind.FRESH, texts.pastaTitle(input.kind),
+            DoughNumbers.separator(DoughNumbers.plain(result.yield.pieceGrams, 1), language),
+        )
+
+        /** Bei einer Form steht ihr Maß in der Einheit, damit „Backform umrechnen“ sie wieder erkennt. */
+        fun fromCake(result: DoughResult.Success, input: CakeInput, texts: DoughTexts, language: String): DoughDraft {
+            val detail = (input.size as? CakeSize.PanSize)?.let { panText(it.pan, language) }.orEmpty()
+            return build(result, texts, language, input.yeastKind, texts.cakeTitle(input.kind), detail)
+        }
+
+        private fun build(
+            result: DoughResult.Success,
+            texts: DoughTexts,
+            language: String,
+            yeastKind: YeastKind,
+            title: String,
+            detail: String,
         ): DoughDraft {
             val lines = mutableListOf<Ingredient>()
             val sections = result.sections
@@ -91,15 +119,14 @@ data class DoughDraft(
                 for (line in section.lines) {
                     val amount = DoughNumbers.grams(line.grams, line.role, language)
                     val percent = DoughNumbers.percent(line.grams / result.flourGrams * 100, language)
-                    lines += Ingredient("$amount g ${texts.ingredient(line.role, input.yeastKind)} ($percent %)")
+                    lines += Ingredient("$amount g ${texts.ingredient(line.role, yeastKind)} ($percent %)")
                 }
             }
-            val unit = texts.servingsUnit(result.yield.kind, DoughNumbers.plain(result.yield.pieceGrams, 1).let { DoughNumbers.separator(it, language) })
             return DoughDraft(
-                title = texts.title(input.type, input.preferment),
+                title = title,
                 language = language,
                 servings = result.yield.count,
-                servingsUnit = unit,
+                servingsUnit = texts.servingsUnit(result.yield.kind, detail),
                 ingredients = lines,
             )
         }

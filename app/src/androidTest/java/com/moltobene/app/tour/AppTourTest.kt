@@ -49,6 +49,7 @@ import com.moltobene.app.ui.whatsnew.WhatsNew
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Rule
@@ -298,6 +299,37 @@ class AppTourTest(private val variant: DisplayVariant) {
 
         composeRule.onNodeWithText(text(R.string.servings_reset)).performScrollTo().performClick()
         waitForText("200 g Mehl")
+    }
+
+    /** Teigrechner Pasta und Kuchen (#70): Eierteig, Wasserteig, Rührteig und Quark-Öl-Teig, Entwurf mit Backform. */
+    @Test
+    fun teigrechnerPastaUndKuchen() {
+        openAddMenu()
+        waitForText(text(R.string.dough_title))
+        clickVisible(text(R.string.dough_title))
+        waitForText(text(R.string.dough_save))
+
+        clickVisible(text(R.string.dough_type_pasta))
+        waitForText(text(R.string.dough_pasta_egg))
+        screenshot("14f-teigrechner-pasta")
+        clickVisible(text(R.string.dough_pasta_water))
+        waitForText(text(R.string.dough_semolina))
+        screenshot("14g-teigrechner-wasserteig")
+
+        clickVisible(text(R.string.dough_type_cake))
+        waitForText(text(R.string.dough_cake_batter))
+        screenshot("14h-teigrechner-kuchen")
+        clickVisible(text(R.string.dough_cake_quark_oil))
+        waitForText(text(R.string.dough_label_quark))
+        composeRule.onNodeWithText(text(R.string.dough_save)).performClick()
+        composeRule.waitUntil(10_000) {
+            runBlocking { container().repository.getAll().any { it.isDraft && it.title == text(R.string.dough_cake_quark_oil) } }
+        }
+        val draft = runBlocking { container().repository.getAll().first { it.isDraft } }
+        assertEquals(1, draft.servings)
+        assertNotNull(com.moltobene.app.data.PanScaling.parse(draft.servingsUnit))
+        waitForText(text(R.string.dough_saved))
+        screenshot("14i-teigrechner-kuchen-entwurf")
     }
 
     /** Sammlung: Favorit markieren, Filter „Favoriten“, Umschalten auf die Liste. */

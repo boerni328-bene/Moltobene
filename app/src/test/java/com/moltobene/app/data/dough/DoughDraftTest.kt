@@ -11,23 +11,7 @@ import org.junit.Test
 /** Teigrechner → Rezept (#69): Das Ergebnis muss sich umrechnen, lesen und teilen lassen. */
 class DoughDraftTest {
 
-    private object German : DoughTexts {
-        override fun title(type: DoughType, preferment: Preferment) =
-            if (preferment == Preferment.NONE) "Pizzateig" else "Pizzateig mit ${preferment.key}"
-
-        override fun heading(kind: SectionKind, preferment: Preferment) =
-            if (kind == SectionKind.PREFERMENT) "Für den Vorteig (${preferment.key})" else "Für den Hauptteig"
-
-        override fun ingredient(role: LineRole, yeastKind: YeastKind) = when (role) {
-            LineRole.FLOUR -> "Mehl"
-            LineRole.WATER -> "Wasser"
-            LineRole.SALT -> "Salz"
-            LineRole.OIL -> "Öl"
-            LineRole.YEAST -> "Frischhefe"
-        }
-
-        override fun servingsUnit(kind: YieldKind, pieceGrams: String) = "Teigkugeln (je $pieceGrams g)"
-    }
+    private val German = GermanTexts
 
     private val biga = LeavenedInput(
         DoughType.PIZZA, 6, 250.0, 60.0, 2.5, 0.0, YeastKind.FRESH, 0.1, Preferment.BIGA, 40.0, 45.0,

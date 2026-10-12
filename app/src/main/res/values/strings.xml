@@ -236,8 +236,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>New collection with photo cards, filters and an “Add” button at the bottom right that opens every way to add a recipe and the dough calculator.</item>
-        <item>Favorites, a dough calculator with a fixed result bar, servings and ingredients in cards.</item>
+        <item>The dough calculator now also covers pasta (egg and water dough) and cake (batter, sponge, shortcrust, yeast dough, choux, quark-oil dough).</item>
+        <item>For cakes the amount of flour follows the pan size; the result can be saved as a recipe.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->
@@ -434,4 +434,63 @@
     <string name="favorite_label">Favorite</string>
     <string name="favorite_add">Mark as favorite</string>
     <string name="favorite_remove">Remove from favorites</string>
+
+    <!-- Dough calculator: pasta and cake (#70) -->
+    <string name="dough_type_pasta">Pasta</string>
+    <string name="dough_type_cake">Cake</string>
+    <string name="dough_section_ingredients">Ingredients</string>
+    <string name="dough_section_size">Size</string>
+    <string name="dough_portions">Servings</string>
+    <string name="dough_flour_per_portion">Flour per serving</string>
+    <string name="dough_semolina">Durum semolina</string>
+    <string name="dough_egg_whole">Whole egg</string>
+    <string name="dough_yolk">Egg yolk</string>
+    <string name="dough_percent_note_all">All amounts in % of flour</string>
+    <string name="dough_error_liquid">Whole egg and yolk together: at least %1$s %%.</string>
+    <string name="dough_error_pan">Check the pan size (5 to 100 cm).</string>
+    <string name="dough_pasta_egg">Egg pasta dough</string>
+    <string name="dough_pasta_water">Water pasta dough</string>
+    <plurals name="dough_eggs_about">
+        <item quantity="one">About %d egg</item>
+        <item quantity="other">About %d eggs</item>
+    </plurals>
+    <plurals name="dough_yolks_about">
+        <item quantity="one">About %d yolk</item>
+        <item quantity="other">About %d yolks</item>
+    </plurals>
+    <string name="dough_ingredient_semolina">durum semolina</string>
+    <string name="dough_ingredient_egg">eggs</string>
+    <string name="dough_ingredient_yolk">egg yolks</string>
+    <string name="dough_ingredient_milk">milk</string>
+    <string name="dough_ingredient_liquid">water or milk</string>
+    <string name="dough_ingredient_sugar">sugar</string>
+    <string name="dough_ingredient_butter">butter</string>
+    <string name="dough_ingredient_quark">quark</string>
+    <string name="dough_ingredient_baking_powder">baking powder</string>
+    <string name="dough_unit_portions">servings (%1$s g flour each)</string>
+    <string name="dough_unit_pan">pan (%1$s)</string>
+    <string name="dough_unit_dough">dough</string>
+    <string name="dough_cake_batter">Batter cake</string>
+    <string name="dough_cake_sponge">Sponge cake</string>
+    <string name="dough_cake_shortcrust">Shortcrust</string>
+    <string name="dough_cake_yeast">Yeast dough</string>
+    <string name="dough_cake_choux">Choux pastry</string>
+    <string name="dough_cake_quark_oil">Quark-oil dough</string>
+    <string name="dough_label_butter">Butter</string>
+    <string name="dough_label_sugar">Sugar</string>
+    <string name="dough_label_eggs">Eggs</string>
+    <string name="dough_label_milk">Milk</string>
+    <string name="dough_label_liquid">Water or milk</string>
+    <string name="dough_label_quark">Quark</string>
+    <string name="dough_label_baking_powder">Baking powder</string>
+    <string name="dough_label_flour">Flour</string>
+    <string name="dough_size_pan">Pan</string>
+    <string name="dough_size_flour">Flour</string>
+    <string name="dough_unit_cm">cm</string>
+    <string name="dough_unit_inch">inch</string>
+    <string name="dough_pan_diameter">Diameter</string>
+    <string name="dough_pan_length">Length</string>
+    <string name="dough_pan_width">Width</string>
+    <string name="dough_cake_flour_from_pan">Flour for this pan: about %1$s g</string>
+    <string name="dough_cake_baking_note">Baking time and temperature change with pan size and depth. For a larger pan, check with a skewer; for deeper batter, bake longer at slightly lower heat.</string>
 </resources>

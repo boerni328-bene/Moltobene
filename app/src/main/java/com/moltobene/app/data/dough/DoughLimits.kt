@@ -24,6 +24,7 @@ object DoughLimits {
             DoughField.YEAST -> yeast(5.0, preferment)
             DoughField.PREFERMENT_FLOUR -> Range(1.0, 100.0)
             DoughField.PREFERMENT_WATER -> Range(40.0, 125.0)
+            else -> unsupported(type, field)
         }
         DoughType.BREAD -> when (field) {
             DoughField.COUNT -> Range(1.0, 20.0)
@@ -34,10 +35,14 @@ object DoughLimits {
             DoughField.YEAST -> yeast(3.0, preferment)
             DoughField.PREFERMENT_FLOUR -> Range(1.0, 100.0)
             DoughField.PREFERMENT_WATER -> Range(40.0, 125.0)
+            else -> unsupported(type, field)
         }
-        // Pasta und Kuchen haben eigene Eingaben (#70); für sie gelten vorerst dieselben weiten Grenzen wie bei Brot.
-        DoughType.PASTA, DoughType.CAKE -> range(DoughType.BREAD, field, preferment)
+        // Pasta und Kuchen haben eigene Eingaben und Grenzen ([PastaLimits], [CakeLimits]).
+        DoughType.PASTA, DoughType.CAKE -> unsupported(type, field)
     }
+
+    private fun unsupported(type: DoughType, field: DoughField): Nothing =
+        throw IllegalArgumentException("Das Feld $field gibt es bei $type nicht in diesen Grenzen.")
 
     /** Hefe: mindestens 0,01 %; mit Sauerteig darf sie ganz fehlen. */
     private fun yeast(max: Double, preferment: Preferment) =
@@ -50,11 +55,12 @@ object DoughLimits {
             yeastKind = YeastKind.FRESH, yeast = 0.5, preferment = Preferment.NONE, prefermentFlour = 20.0,
             prefermentWater = 100.0,
         )
-        else -> LeavenedInput(
+        DoughType.PIZZA -> LeavenedInput(
             type = DoughType.PIZZA, count = 4, pieceGrams = 250.0, water = 65.0, salt = 2.8, oil = 0.0,
             yeastKind = YeastKind.FRESH, yeast = 0.2, preferment = Preferment.NONE, prefermentFlour = 30.0,
             prefermentWater = 100.0,
         )
+        DoughType.PASTA, DoughType.CAKE -> throw IllegalArgumentException("Pasta und Kuchen haben eigene Startwerte.")
     }
 
     /** Wasser im Vorteig, das bei Biga und Poolish vorausgefüllt wird. */

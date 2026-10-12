@@ -118,6 +118,13 @@ class AppPreferences(context: Context) {
     suspend fun doughValues(type: DoughType): LeavenedInput = withContext(Dispatchers.IO) {
         DoughMemory.decode(type, prefs.getString(KEY_DOUGH_PREFIX + type.key, null))
     }
+    /** Gemerkte Werte einer Teigart des Teigrechners als Text (Pasta und Kuchen je Art, #70); null, wenn nichts da ist. */
+    suspend fun doughMemory(key: String): String? = withContext(Dispatchers.IO) { prefs.getString(KEY_DOUGH_PREFIX + key, null) }
+
+    suspend fun setDoughMemory(key: String, text: String) = withContext(Dispatchers.IO) {
+        prefs.edit { putString(KEY_DOUGH_PREFIX + key, text) }
+    }
+
 
     suspend fun setDoughValues(input: LeavenedInput) = withContext(Dispatchers.IO) {
         prefs.edit { putString(KEY_DOUGH_PREFIX + input.type.key, DoughMemory.encode(input)) }

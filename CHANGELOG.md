@@ -3,6 +3,13 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.32.0] – 2026-10-12 (versionCode 59)
+
+### Neu
+- **Teigrechner für Pasta und Kuchen:** Zur Teigart kommen „Pasta“ und „Kuchen“. Pasta gibt es als Eierteig (auch nur mit Eigelb, mit oder ohne Hartweizengrieß) und als Wasserteig, z. B. Grieß und Wasser für Orecchiette. Die Mengen richten sich nach Portionen und Mehl je Portion; bei Eiern steht dazu „etwa 4 Eier“.
+- **Kuchen in sechs Arten:** Rührteig, Biskuit, Mürbeteig, Hefeteig (auch für Hefezopf), Brandteig und Quark-Öl-Teig. Die Mehlmenge folgt der Backform (rund oder eckig, in cm oder Zoll, nach der Fläche wie bei „Backform umrechnen“) oder wird direkt eingegeben. Alle Angaben sind Richtwerte; die Backzeit rechnet die App nie um, ein Hinweis erinnert an die Stäbchenprobe.
+- Wie bei Pizza und Brot gibt „Als Rezept speichern“ einen Entwurf. Bei Kuchen steht die Backform als Einheit im Rezept, sodass „Umrechnen … nach Backform“ sie gleich erkennt. Die zuletzt benutzten Werte merkt sich der Rechner für jede Art getrennt.
+
 ## [0.31.0] – 2026-10-12 (versionCode 58)
 
 ### Neu

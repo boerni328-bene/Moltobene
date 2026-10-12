@@ -49,9 +49,14 @@ enum class Preferment(val key: String) {
     }
 }
 
+/** Eingaben eines Teigrechners; jede Teigart hat ihre eigene Form (#70). */
+sealed interface DoughInput {
+    val type: DoughType
+}
+
 /** Eingaben für Pizza und Brot (Teige mit Hefe oder Sauerteig); alle Prozente als Zahl, 65 heißt 65 % vom Mehl. */
 data class LeavenedInput(
-    val type: DoughType,
+    override val type: DoughType,
     /** Anzahl der Teigkugeln bzw. Laibe. */
     val count: Int,
     /** Gewicht je Teigkugel bzw. Laib in Gramm. */
@@ -67,9 +72,9 @@ data class LeavenedInput(
     val prefermentFlour: Double,
     /** Wasser im Vorteig in % vom Mehl im Vorteig. */
     val prefermentWater: Double,
-)
+) : DoughInput
 
-enum class LineRole { FLOUR, WATER, SALT, OIL, YEAST }
+enum class LineRole { FLOUR, WATER, SALT, OIL, YEAST, SEMOLINA, EGG, YOLK, MILK, LIQUID, SUGAR, BUTTER, QUARK, BAKING_POWDER }
 
 /** Eine Zutat in Gramm, ungerundet; gerundet wird erst beim Schreiben ([DoughNumbers]). */
 data class DoughLine(val role: LineRole, val grams: Double)
@@ -79,12 +84,15 @@ enum class SectionKind { PLAIN, PREFERMENT, MAIN }
 /** Ein Abschnitt des Ergebnisses: bei einem Vorteig „Vorteig“ und „Hauptteig“, sonst ein einziger. */
 data class DoughSection(val kind: SectionKind, val preferment: Preferment, val lines: List<DoughLine>)
 
-enum class YieldKind { BALL, LOAF }
+enum class YieldKind { BALL, LOAF, PORTION, PAN, DOUGH }
 
 /** Was herauskommt: [count] Teigkugeln bzw. Laibe zu je [pieceGrams] Gramm. */
 data class DoughYield(val count: Int, val kind: YieldKind, val pieceGrams: Double)
 
-enum class DoughField { COUNT, PIECE_GRAMS, WATER, SALT, OIL, YEAST, PREFERMENT_FLOUR, PREFERMENT_WATER }
+enum class DoughField {
+    COUNT, PIECE_GRAMS, WATER, SALT, OIL, YEAST, PREFERMENT_FLOUR, PREFERMENT_WATER,
+    FLOUR_PER_PORTION, SEMOLINA, WHOLE_EGG, YOLK, FLOUR_GRAMS, FAT, SUGAR, EGG, MILK, QUARK, BAKING_POWDER, PAN_SIZE,
+}
 
 /** Warum eine Eingabe nicht rechnet. */
 sealed interface DoughIssue {
@@ -96,6 +104,12 @@ sealed interface DoughIssue {
 
     /** Der Vorteig bräuchte mehr Wasser, als der ganze Teig haben soll. */
     data class PrefermentWaterTooHigh(val neededPercent: Double, val totalPercent: Double) : DoughIssue
+
+    /** Beim Eierteig braucht es genug Ei und Eigelb zusammen, sonst gibt es keinen Teig. */
+    data class TooLittleLiquid(val neededPercent: Double) : DoughIssue
+
+    /** Die Backform ist ungültig (zu klein, zu groß oder keine Zahl). */
+    data object PanInvalid : DoughIssue
 
     /** Die Rechnung ergab etwas Unmögliches; sollte nie vorkommen und wird nie angezeigt. */
     data object Inconsistent : DoughIssue

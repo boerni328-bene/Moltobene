@@ -234,8 +234,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Neue Sammlung mit Foto-Karten, Filtern und dem Knopf „Hinzufügen“ unten rechts, der alle Wege und den Teigrechner öffnet.</item>
-        <item>Favoriten, Teigrechner mit fester Ergebnisleiste, Portionen und Zutaten in Karten.</item>
+        <item>Der Teigrechner kann jetzt auch Pasta (Eierteig und Wasserteig) und Kuchen (Rührteig, Biskuit, Mürbeteig, Hefeteig, Brandteig, Quark-Öl-Teig).</item>
+        <item>Bei Kuchen richtet sich die Mehlmenge nach der Backform; das Ergebnis lässt sich als Rezept speichern.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->
@@ -430,4 +430,63 @@
     <string name="favorite_label">Favorit</string>
     <string name="favorite_add">Als Favorit markieren</string>
     <string name="favorite_remove">Favorit entfernen</string>
+
+    <!-- Teigrechner: Pasta und Kuchen (#70) -->
+    <string name="dough_type_pasta">Pasta</string>
+    <string name="dough_type_cake">Kuchen</string>
+    <string name="dough_section_ingredients">Zutaten</string>
+    <string name="dough_section_size">Größe</string>
+    <string name="dough_portions">Portionen</string>
+    <string name="dough_flour_per_portion">Mehl je Portion</string>
+    <string name="dough_semolina">Hartweizengrieß</string>
+    <string name="dough_egg_whole">Vollei</string>
+    <string name="dough_yolk">Eigelb</string>
+    <string name="dough_percent_note_all">Alle Angaben in % vom Mehl</string>
+    <string name="dough_error_liquid">Vollei und Eigelb zusammen: mindestens %1$s %%.</string>
+    <string name="dough_error_pan">Maße der Backform prüfen (5 bis 100 cm).</string>
+    <string name="dough_pasta_egg">Eierteig</string>
+    <string name="dough_pasta_water">Wasserteig</string>
+    <plurals name="dough_eggs_about">
+        <item quantity="one">Etwa %d Ei</item>
+        <item quantity="other">Etwa %d Eier</item>
+    </plurals>
+    <plurals name="dough_yolks_about">
+        <item quantity="one">Etwa %d Eigelb</item>
+        <item quantity="other">Etwa %d Eigelb</item>
+    </plurals>
+    <string name="dough_ingredient_semolina">Hartweizengrieß</string>
+    <string name="dough_ingredient_egg">Eier</string>
+    <string name="dough_ingredient_yolk">Eigelb</string>
+    <string name="dough_ingredient_milk">Milch</string>
+    <string name="dough_ingredient_liquid">Wasser oder Milch</string>
+    <string name="dough_ingredient_sugar">Zucker</string>
+    <string name="dough_ingredient_butter">Butter</string>
+    <string name="dough_ingredient_quark">Quark</string>
+    <string name="dough_ingredient_baking_powder">Backpulver</string>
+    <string name="dough_unit_portions">Portionen (je %1$s g Mehl)</string>
+    <string name="dough_unit_pan">Backform (%1$s)</string>
+    <string name="dough_unit_dough">Teig</string>
+    <string name="dough_cake_batter">Rührteig</string>
+    <string name="dough_cake_sponge">Biskuit</string>
+    <string name="dough_cake_shortcrust">Mürbeteig</string>
+    <string name="dough_cake_yeast">Hefeteig</string>
+    <string name="dough_cake_choux">Brandteig</string>
+    <string name="dough_cake_quark_oil">Quark-Öl-Teig</string>
+    <string name="dough_label_butter">Butter</string>
+    <string name="dough_label_sugar">Zucker</string>
+    <string name="dough_label_eggs">Eier</string>
+    <string name="dough_label_milk">Milch</string>
+    <string name="dough_label_liquid">Wasser oder Milch</string>
+    <string name="dough_label_quark">Quark</string>
+    <string name="dough_label_baking_powder">Backpulver</string>
+    <string name="dough_label_flour">Mehl</string>
+    <string name="dough_size_pan">Backform</string>
+    <string name="dough_size_flour">Mehl</string>
+    <string name="dough_unit_cm">cm</string>
+    <string name="dough_unit_inch">Zoll</string>
+    <string name="dough_pan_diameter">Durchmesser</string>
+    <string name="dough_pan_length">Länge</string>
+    <string name="dough_pan_width">Breite</string>
+    <string name="dough_cake_flour_from_pan">Mehl für diese Backform: etwa %1$s g</string>
+    <string name="dough_cake_baking_note">Backzeit und Temperatur ändern sich mit Form und Höhe. Bei größerer Fläche Stäbchenprobe machen, bei höherem Teig länger bei etwas weniger Hitze backen.</string>
 </resources>

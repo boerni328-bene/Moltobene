@@ -50,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.moltobene.app.R
+import com.moltobene.app.data.dough.DoughDraft
 import com.moltobene.app.data.dough.DoughCalculator
 import com.moltobene.app.data.dough.DoughField
 import com.moltobene.app.data.dough.DoughIssue
@@ -72,9 +73,8 @@ import java.util.Locale
 internal fun parseNumber(text: String): Double =
     text.trim().replace(',', '.').toDoubleOrNull()?.takeIf { it.isFinite() } ?: Double.NaN
 
-private fun show(value: Double): String =
+internal fun show(value: Double): String =
     DoughNumbers.separator(DoughNumbers.plain(value, 2), Locale.getDefault().language)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DoughScreen(
@@ -85,10 +85,6 @@ fun DoughScreen(
 ) {
     var typeKey by rememberSaveable { mutableStateOf(DoughType.PIZZA.key) }
     val type = DoughType.fromKey(typeKey) ?: DoughType.PIZZA
-    val loaded by produceState<LeavenedInput?>(null, type) {
-        value = null
-        value = viewModel.load(type)
-    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -103,39 +99,76 @@ fun DoughScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
-            val initial = loaded
-            if (initial == null) {
-                Header(type) { typeKey = it.key }
-                CircularProgressIndicator(Modifier.padding(Spacing.m))
-            } else {
-                DoughForm(initial, viewModel, onSaved) { Header(type) { typeKey = it.key } }
+            val header: @Composable () -> Unit = { Header(type) { typeKey = it.key } }
+            when (type) {
+                DoughType.PIZZA, DoughType.BREAD -> LeavenedContent(type, viewModel, onSaved, header)
+                DoughType.PASTA -> PastaContent(viewModel, onSaved, header)
+                DoughType.CAKE -> CakeContent(viewModel, onSaved, header)
             }
         }
     }
 }
 
-/** Überschrift und Wahl der Teigart: ein Schalter über die volle Breite. */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Header(selected: DoughType, onSelect: (DoughType) -> Unit) {
+private fun LeavenedContent(
+    type: DoughType,
+    viewModel: DoughViewModel,
+    onSaved: (String) -> Unit,
+    header: @Composable () -> Unit,
+) {
+    val loaded by produceState<LeavenedInput?>(null, type) {
+        value = null
+        value = viewModel.load(type)
+    }
+    val initial = loaded
+    if (initial == null) {
+        Column { header() }
+        CircularProgressIndicator(Modifier.padding(Spacing.m))
+    } else {
+        DoughForm(initial, viewModel, onSaved, header)
+    }
+}
+
+private fun typeLabel(type: DoughType): Int = when (type) {
+    DoughType.PIZZA -> R.string.dough_type_pizza
+    DoughType.BREAD -> R.string.dough_type_bread
+    DoughType.PASTA -> R.string.dough_type_pasta
+    DoughType.CAKE -> R.string.dough_type_cake
+}
+
+/** Überschrift und Wahl der Teigart: ein Schalter über die volle Breite, bei großer Schrift Chips untereinander. */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+internal fun Header(selected: DoughType, onSelect: (DoughType) -> Unit) {
     ScreenTitle(stringResource(R.string.dough_title), modifier = Modifier.padding(ScreenTitlePadding))
-    val types = listOf(DoughType.PIZZA, DoughType.BREAD)
-    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m)) {
-        types.forEachIndexed { index, type ->
-            SegmentedButton(
-                selected = type == selected,
-                onClick = { onSelect(type) },
-                shape = SegmentedButtonDefaults.itemShape(index, types.size),
-            ) {
-                Text(stringResource(if (type == DoughType.BREAD) R.string.dough_type_bread else R.string.dough_type_pizza))
+    val types = DoughType.entries
+    if (isLargeText()) {
+        FlowRow(
+            modifier = Modifier.padding(horizontal = Spacing.m),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.s),
+        ) {
+            for (type in types) {
+                FilterChip(selected = type == selected, onClick = { onSelect(type) }, label = { Text(stringResource(typeLabel(type))) })
+            }
+        }
+    } else {
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m)) {
+            types.forEachIndexed { index, type ->
+                SegmentedButton(
+                    selected = type == selected,
+                    onClick = { onSelect(type) },
+                    shape = SegmentedButtonDefaults.itemShape(index, types.size),
+                    icon = {},
+                ) {
+                    Text(stringResource(typeLabel(type)), maxLines = 1)
+                }
             }
         }
     }
 }
-
 /** Eine Karte mit Überschrift; gliedert das Formular ruhig und kompakt. */
 @Composable
-private fun Card(title: String, content: @Composable () -> Unit) {
+internal fun Card(title: String, content: @Composable () -> Unit) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainer,
         shape = MaterialTheme.shapes.large,
@@ -154,7 +187,7 @@ private fun Card(title: String, content: @Composable () -> Unit) {
 
 /** Felder nebeneinander; bei großer Schrift untereinander. */
 @Composable
-private fun Fields(vararg fields: @Composable (Modifier) -> Unit, weights: List<Float>? = null) {
+internal fun Fields(vararg fields: @Composable (Modifier) -> Unit, weights: List<Float>? = null) {
     if (isLargeText()) {
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) { fields.forEach { it(Modifier.fillMaxWidth()) } }
     } else {
@@ -165,7 +198,7 @@ private fun Fields(vararg fields: @Composable (Modifier) -> Unit, weights: List<
 }
 
 @Composable
-private fun NumberField(
+internal fun NumberField(
     label: String,
     value: String,
     onChange: (String) -> Unit,
@@ -189,11 +222,13 @@ private fun NumberField(
 }
 
 @Composable
-private fun issueText(issue: DoughIssue): String? = when (issue) {
+internal fun issueText(issue: DoughIssue): String? = when (issue) {
     is DoughIssue.NotANumber -> stringResource(R.string.dough_error_number)
     is DoughIssue.OutOfRange -> stringResource(R.string.dough_error_range, show(issue.min), show(issue.max))
     is DoughIssue.PrefermentWaterTooHigh ->
         stringResource(R.string.dough_error_preferment, show(issue.neededPercent), show(issue.totalPercent))
+    is DoughIssue.TooLittleLiquid -> stringResource(R.string.dough_error_liquid, show(issue.neededPercent))
+    DoughIssue.PanInvalid -> stringResource(R.string.dough_error_pan)
     DoughIssue.Inconsistent -> null
 }
 
@@ -406,41 +441,13 @@ private fun DoughForm(
             }
         }
 
-        // Immer sichtbar: die Summen und „Als Rezept speichern“ – auch beim Ändern der Eingaben weiter oben.
-        Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, tonalElevation = 3.dp) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m, vertical = Spacing.s),
-                verticalArrangement = Arrangement.spacedBy(Spacing.s),
-            ) {
-                Column(modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }) {
-                    when (result) {
-                        is DoughResult.Success -> {
-                            val draft = viewModel.draft(result, input)
-                            Text(
-                                stringResource(
-                                    R.string.dough_total_line,
-                                    DoughNumbers.separator(DoughNumbers.plain(result.totalGrams, 0), draft.language),
-                                    "${draft.servings} ${draft.servingsUnit}",
-                                ),
-                                style = MaterialTheme.typography.titleSmall,
-                            )
-                            // Bei großer Schrift stehen die Summen im Formular, damit die Leiste unten klein bleibt.
-                            if (!isLargeText()) Text(viewModel.totals(result, input), style = MaterialTheme.typography.bodyMedium)
-                        }
-                        is DoughResult.Invalid -> Text(
-                            stringResource(R.string.dough_invalid),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    }
-                }
-                Button(
-                    onClick = { viewModel.saveAsRecipe(input, onSaved) },
-                    enabled = result is DoughResult.Success,
-                    modifier = Modifier.fillMaxWidth(),
-                ) { Text(stringResource(R.string.dough_save)) }
-            }
-        }
+        val success = result as? DoughResult.Success
+        val draft = success?.let { viewModel.draft(it, input) }
+        ResultBar(
+            summary = if (success != null && draft != null) summaryLine(success, draft) else null,
+            totals = success?.let { viewModel.totals(it, input) },
+            onSave = { viewModel.saveAsRecipe(input, onSaved) },
+        )
     }
 }
 
@@ -458,3 +465,39 @@ private fun prefermentExplanation(preferment: Preferment): Int = when (prefermen
     Preferment.SOURDOUGH -> R.string.dough_explain_sourdough
 }
 
+
+/** „1000 g Teig · 4 Teigkugeln (je 250 g)“. */
+@Composable
+internal fun summaryLine(result: DoughResult.Success, draft: DoughDraft): String = stringResource(
+    R.string.dough_total_line,
+    DoughNumbers.separator(DoughNumbers.plain(result.totalGrams, 0), draft.language),
+    "${draft.servings} ${draft.servingsUnit}",
+)
+
+/** Immer sichtbar: die Summen und „Als Rezept speichern“ – auch beim Ändern der Eingaben weiter oben. [summary] null = ungültig. */
+@Composable
+internal fun ResultBar(summary: String?, totals: String?, onSave: () -> Unit) {
+    Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, tonalElevation = 3.dp) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m, vertical = Spacing.s),
+            verticalArrangement = Arrangement.spacedBy(Spacing.s),
+        ) {
+            Column(modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }) {
+                if (summary != null) {
+                    Text(summary, style = MaterialTheme.typography.titleSmall)
+                    // Bei großer Schrift stehen die Summen im Formular, damit die Leiste unten klein bleibt.
+                    if (totals != null && !isLargeText()) Text(totals, style = MaterialTheme.typography.bodyMedium)
+                } else {
+                    Text(
+                        stringResource(R.string.dough_invalid),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+            Button(onClick = onSave, enabled = summary != null, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.dough_save))
+            }
+        }
+    }
+}
