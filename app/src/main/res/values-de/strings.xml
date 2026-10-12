@@ -234,6 +234,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Teigrechner: Voreinstellungen für Pizza und Brot (zum Beispiel Neapolitanisch, Pizza vom Blech, Weißbrot, Brot mit Poolish) lassen sich mit Pfeilen durchschalten oder aus einer Liste wählen. Eigene Werte können mit Namen als Voreinstellung gespeichert werden.</item>
         <item>Teigrechner: Regler lassen sich über den Feldern einschalten („Zahlen | Regler“), mit einer Marke beim Standardwert. Listen wie die Kuchenart und bei großer Schrift auch Hefeart und Vorteig sind jetzt Auswahlfelder.</item>
         <item>Teigrechner: Jeder Wert hat jetzt Plus- und Minus-Knöpfe für die Feineinstellung, Standardwerte sind markiert und ein Knopf setzt einen Wert auf den Standard zurück.</item>
         <item>Teigrechner: Die Gesamtmengen stehen als übersichtliche Kacheln über „Als Rezept speichern“.</item>
@@ -481,6 +482,25 @@
     <string name="dough_mode_numbers">Zahlen</string>
     <string name="dough_mode_sliders">Regler</string>
     <string name="dough_input_mode">Eingabe</string>
+    <string name="dough_preset_title">Voreinstellung</string>
+    <string name="dough_preset_custom">Eigene Werte</string>
+    <string name="dough_preset_position">%1$d von %2$d</string>
+    <string name="dough_preset_previous">Vorherige Voreinstellung</string>
+    <string name="dough_preset_next">Nächste Voreinstellung</string>
+    <string name="dough_preset_choose">Voreinstellung wählen: %1$s</string>
+    <string name="dough_preset_note">Eine Voreinstellung setzt Wasseranteil, Salz, Öl, Hefe und Vorteig. Anzahl und Gewicht bleiben, wie sie sind.</string>
+    <string name="dough_preset_default">Standardwerte</string>
+    <string name="dough_preset_neapolitan">Neapolitanisch</string>
+    <string name="dough_preset_sheet_pan">Pizza vom Blech</string>
+    <string name="dough_preset_white_bread">Weißbrot</string>
+    <string name="dough_preset_poolish_bread">Brot mit Poolish</string>
+    <string name="dough_preset_save">Als Voreinstellung speichern</string>
+    <string name="dough_preset_save_title">Voreinstellung speichern</string>
+    <string name="dough_preset_name">Name</string>
+    <string name="dough_preset_replace_hint">Eine Voreinstellung mit diesem Namen wird ersetzt.</string>
+    <string name="dough_preset_too_many">Höchstens %1$d eigene Voreinstellungen. Eine löschen, um Platz zu schaffen.</string>
+    <string name="dough_preset_delete">Voreinstellung löschen</string>
+    <string name="dough_preset_delete_title">Voreinstellung „%1$s“ wirklich löschen?</string>
     <string name="dough_cake_kind_label">Kuchenart</string>
     <string name="dough_saved">Als Entwurf gespeichert. Zubereitung ergänzen.</string>
     <string name="dough_error_number">Zahl eingeben.</string>

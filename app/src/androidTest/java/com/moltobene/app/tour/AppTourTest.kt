@@ -490,6 +490,29 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText("4 " + text(R.string.dough_unit_balls, "250"), substring = true)
         screenshot("14a-teigrechner")
 
+        // Voreinstellungen (#83, Etappe 3): weiterschalten, eigene speichern, löschen, zurück zu den Standardwerten.
+        // Die gemerkten Werte des vorigen Durchgangs bleiben stehen; „Zurücksetzen“ führt zu den Standardwerten.
+        composeRule.onNodeWithText(text(R.string.dough_reset)).performScrollTo().performClick()
+        waitForText(text(R.string.dough_preset_default))
+        composeRule.onNodeWithText(text(R.string.dough_preset_position, 1, 3)).assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.dough_preset_next)).performScrollTo().performClick()
+        waitForText(text(R.string.dough_preset_neapolitan))
+        composeRule.onNodeWithText(text(R.string.dough_preset_position, 2, 3)).assertExists()
+        screenshot("14l-teigrechner-voreinstellung")
+        composeRule.onNodeWithText(text(R.string.dough_preset_save)).performScrollTo().performClick()
+        waitForText(text(R.string.dough_preset_save_title))
+        field(R.string.dough_preset_name).performTextInput("Mein Teig")
+        screenshot("14m-teigrechner-voreinstellung-speichern")
+        composeRule.onNode(hasText(text(R.string.save)) and hasClickAction()).performClick()
+        waitForText("Mein Teig")
+        composeRule.onNodeWithText(text(R.string.dough_preset_position, 4, 4)).assertExists()
+        composeRule.onNodeWithText(text(R.string.dough_preset_delete)).performScrollTo().performClick()
+        waitForText(text(R.string.dough_preset_delete_title, "Mein Teig"))
+        composeRule.onNode(hasText(text(R.string.delete)) and hasClickAction()).performClick()
+        waitUntilGone("Mein Teig")
+        composeRule.onNodeWithContentDescription(text(R.string.dough_preset_previous)).performScrollTo().performClick()
+        waitForText(text(R.string.dough_preset_default))
+
         // Plus/Minus und Standard (#83): Wasseranteil um 1 erhöhen, der Standard wird genannt, mit dem Knopf geht es zurück.
         val waterLabel = text(R.string.dough_water)
         composeRule.onNodeWithContentDescription(text(R.string.dough_step_more, waterLabel, "1 %")).performScrollTo().performClick()

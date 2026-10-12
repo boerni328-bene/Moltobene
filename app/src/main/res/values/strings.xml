@@ -236,6 +236,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Dough calculator: presets for pizza and bread (such as Neapolitan, sheet-pan pizza, white bread, bread with poolish) can be flipped through with arrows or picked from a list. Own values can be saved as a preset with a name.</item>
         <item>Dough calculator: sliders can be switched on above the fields (“Numbers | Sliders”), with a mark at the default value. Lists such as the type of cake and, with large text, the yeast type and the preferment are now choice fields.</item>
         <item>Dough calculator: every value now has plus and minus buttons for fine adjustments, default values are marked, and a button sets a value back to its default.</item>
         <item>Dough calculator: the totals appear as clear tiles above “Save as recipe”.</item>
@@ -485,6 +486,25 @@
     <string name="dough_mode_numbers">Numbers</string>
     <string name="dough_mode_sliders">Sliders</string>
     <string name="dough_input_mode">Input</string>
+    <string name="dough_preset_title">Preset</string>
+    <string name="dough_preset_custom">Custom values</string>
+    <string name="dough_preset_position">%1$d of %2$d</string>
+    <string name="dough_preset_previous">Previous preset</string>
+    <string name="dough_preset_next">Next preset</string>
+    <string name="dough_preset_choose">Choose preset: %1$s</string>
+    <string name="dough_preset_note">A preset sets hydration, salt, oil, yeast and preferment. Number and weight stay as they are.</string>
+    <string name="dough_preset_default">Default values</string>
+    <string name="dough_preset_neapolitan">Neapolitan</string>
+    <string name="dough_preset_sheet_pan">Sheet-pan pizza</string>
+    <string name="dough_preset_white_bread">White bread</string>
+    <string name="dough_preset_poolish_bread">Bread with poolish</string>
+    <string name="dough_preset_save">Save as preset</string>
+    <string name="dough_preset_save_title">Save preset</string>
+    <string name="dough_preset_name">Name</string>
+    <string name="dough_preset_replace_hint">A preset with this name will be replaced.</string>
+    <string name="dough_preset_too_many">Up to %1$d own presets. Delete one to make room.</string>
+    <string name="dough_preset_delete">Delete preset</string>
+    <string name="dough_preset_delete_title">Really delete preset “%1$s”?</string>
     <string name="dough_cake_kind_label">Type of cake</string>
     <string name="dough_saved">Saved as a draft. Add the instructions.</string>
     <string name="dough_error_number">Enter a number.</string>

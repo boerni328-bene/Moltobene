@@ -75,6 +75,7 @@ import com.moltobene.app.data.dough.DoughField
 import com.moltobene.app.data.dough.DoughIssue
 import com.moltobene.app.data.dough.DoughLimits
 import com.moltobene.app.data.dough.DoughNumbers
+import com.moltobene.app.data.dough.DoughPresets
 import com.moltobene.app.data.dough.DoughResult
 import com.moltobene.app.data.dough.DoughStepper
 import com.moltobene.app.data.dough.DoughType
@@ -511,6 +512,25 @@ private fun DoughForm(
         }
     }
 
+    // Voreinstellungen (#83, Etappe 3): mitgelieferte und eigene; die zuletzt gewählte eigene bleibt vorn, solange die Werte passen.
+    val entries = presetEntries(type, viewModel.own(type))
+    val entryInputs = entries.map { it.input }
+    var chosen by rememberSaveable(type) { mutableStateOf(-1) }
+    val presetIndex = chosen.takeIf { it in entryInputs.indices && DoughPresets.matches(input, entryInputs[it]) }
+        ?: DoughPresets.indexOf(input, entryInputs)
+    fun applyPreset(i: Int) {
+        val preset = entries.getOrNull(i)?.input ?: return
+        chosen = i
+        water = show(preset.water)
+        salt = show(preset.salt)
+        oil = show(preset.oil)
+        yeastKindKey = preset.yeastKind.key
+        yeast = show(preset.yeast)
+        prefermentKey = preset.preferment.key
+        prefermentFlour = show(preset.prefermentFlour)
+        prefermentWater = show(preset.prefermentWater)
+    }
+
     val bread = type == DoughType.BREAD
     Column(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -518,6 +538,25 @@ private fun DoughForm(
             verticalArrangement = Arrangement.spacedBy(Spacing.s),
         ) {
             header()
+
+            PresetCard(
+                entries = entries,
+                index = presetIndex,
+                canSave = result is DoughResult.Success,
+                onSelect = ::applyPreset,
+                onSave = { name ->
+                    val saved = viewModel.saveOwnPreset(type, name, input)
+                    if (saved == DoughPresets.SaveResult.SAVED) {
+                        val position = viewModel.own(type).indexOfFirst { it.name.equals(DoughPresets.cleanName(name), ignoreCase = true) }
+                        chosen = DoughPresets.shipped(type).size + position
+                    }
+                    saved
+                },
+                onDelete = { name ->
+                    viewModel.deleteOwnPreset(type, name)
+                    chosen = -1
+                },
+            )
 
             Card(stringResource(R.string.dough_section_dough)) {
                 Fields(

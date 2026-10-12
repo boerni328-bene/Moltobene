@@ -2,6 +2,7 @@ package com.moltobene.app.ui.dough
 
 import android.content.Context
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -20,6 +21,7 @@ import com.moltobene.app.data.dough.PastaMemory
 import com.moltobene.app.data.dough.DoughCalculator
 import com.moltobene.app.data.dough.DoughDraft
 import com.moltobene.app.data.dough.DoughNumbers
+import com.moltobene.app.data.dough.DoughPresets
 import com.moltobene.app.data.dough.DoughResult
 import com.moltobene.app.data.dough.DoughTexts
 import com.moltobene.app.data.dough.DoughType
@@ -138,7 +140,30 @@ class DoughViewModel(
         viewModelScope.launch { runCatching { preferences.setDoughMemory(SLIDERS_KEY, if (on) "1" else "0") } }
     }
 
-    suspend fun load(type: DoughType): LeavenedInput = preferences.doughValues(type)
+    /** Eigene Voreinstellungen je Teigart (#83, Etappe 3); nur auf dem Handy, nicht in der Sicherung. */
+    private val ownPresets = mutableStateMapOf<String, List<DoughPresets.Own>>()
+
+    fun own(type: DoughType): List<DoughPresets.Own> = ownPresets[type.key].orEmpty()
+
+    /** Lädt die gemerkten Werte und die eigenen Voreinstellungen der Teigart. */
+    suspend fun load(type: DoughType): LeavenedInput {
+        ownPresets[type.key] = runCatching { DoughPresets.decode(preferences.doughMemory(DoughPresets.key(type))) }
+            .getOrDefault(emptyList())
+        return preferences.doughValues(type)
+    }
+
+    fun saveOwnPreset(type: DoughType, name: String, input: LeavenedInput): DoughPresets.SaveResult {
+        val (list, result) = DoughPresets.save(own(type), name, input)
+        if (result == DoughPresets.SaveResult.SAVED) persistOwn(type, list)
+        return result
+    }
+
+    fun deleteOwnPreset(type: DoughType, name: String) = persistOwn(type, DoughPresets.delete(own(type), name))
+
+    private fun persistOwn(type: DoughType, list: List<DoughPresets.Own>) {
+        ownPresets[type.key] = list
+        viewModelScope.launch { runCatching { preferences.setDoughMemory(DoughPresets.key(type), DoughPresets.encode(list)) } }
+    }
 
     fun remember(input: LeavenedInput) {
         viewModelScope.launch { preferences.setDoughValues(input) }

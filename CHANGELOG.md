@@ -3,6 +3,13 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.38.0] – 2026-10-12 (versionCode 66)
+
+### Neu
+- **Teigrechner: Voreinstellungen.** Bei Pizza und Brot steht oben die Karte „Voreinstellung“ mit Pfeilen zum Durchschalten; Antippen des Namens öffnet die Liste. Mitgeliefert sind für Pizza „Standardwerte“, „Neapolitanisch“ und „Pizza vom Blech“, für Brot „Standardwerte“, „Weißbrot“ und „Brot mit Poolish“. Eine Voreinstellung setzt Wasseranteil, Salz, Öl, Hefe und Vorteig; Anzahl und Gewicht bleiben. Ändert sich danach ein Wert, steht dort „Eigene Werte“, die mitgelieferten bleiben unverändert.
+- **Eigene Voreinstellungen.** Mit „Als Voreinstellung speichern“ lassen sich die aktuellen Werte unter einem eigenen Namen merken (bis zu 20 je Teigart) und mit „Voreinstellung löschen“ wieder entfernen. Sie bleiben auf dem Handy und sind noch nicht Teil der Sicherungsdatei.
+- Die mitgelieferten Werte sind gerundete Richtwerte und können je nach Mehl und Ofen abweichen; sie lassen sich jederzeit ändern.
+
 ## [0.37.1] – 2026-10-12 (versionCode 65)
 
 ### Geändert
