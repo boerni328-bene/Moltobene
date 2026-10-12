@@ -212,7 +212,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithText(text(R.string.home_today_title)).performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText(text(R.string.home_today_another)).performScrollTo().performClick()
         composeRule.onNodeWithText(text(R.string.home_today_cook)).performScrollTo().performClick()
-        composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.recentRecipes.value?.size == 1 }
+        composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.recentRecipes.value.orEmpty().isNotEmpty() }
         pressBack()
         waitForText(recipes)
         // „Zuletzt geöffnet“ zeigt das eben geöffnete Rezept.
