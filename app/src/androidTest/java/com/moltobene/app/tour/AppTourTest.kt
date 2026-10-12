@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
@@ -509,9 +510,17 @@ class AppTourTest(private val variant: DisplayVariant) {
             waitForText(text(R.string.dough_yeast_instant))
             screenshot("14k-teigrechner-auswahlfeld")
             clickVisible(text(R.string.dough_yeast_instant))
-            composeRule.onNodeWithText(text(R.string.dough_pre_none)).performScrollTo().performClick()
+            // Das Auswahlfeld des Vorteigs liest sich als „Vorteig: Ohne“; die Liste öffnet die ganze Fläche.
+            val prefix = text(R.string.dough_section_preferment) + ":"
+            composeRule.onNode(
+                SemanticsMatcher("Beschreibung beginnt mit $prefix") {
+                    it.config.getOrNull(SemanticsProperties.ContentDescription)?.any { d -> d.startsWith(prefix) } == true
+                },
+            ).performScrollTo().performClick()
+            composeRule.onAllNodesWithText(text(R.string.dough_pre_biga))[0].performClick()
+        } else {
+            composeRule.onNodeWithText(text(R.string.dough_pre_biga)).performScrollTo().performClick()
         }
-        composeRule.onNodeWithText(text(R.string.dough_pre_biga)).performScrollTo().performClick()
         waitForText(text(R.string.dough_explain_biga))
 
         screenshot("14b-teigrechner-biga")
