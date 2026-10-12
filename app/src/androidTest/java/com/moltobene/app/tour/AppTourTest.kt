@@ -505,7 +505,7 @@ class AppTourTest(private val variant: DisplayVariant) {
 
         if (variant == DisplayVariant.LARGE_TEXT) {
             // Bei großer Schrift sind Hefeart und Vorteig Auswahlfelder statt Chips.
-            clickVisible(text(R.string.dough_yeast_fresh))
+            composeRule.onAllNodesWithText(text(R.string.dough_yeast_fresh))[0].performScrollTo().performClick()
             waitForText(text(R.string.dough_yeast_instant))
             screenshot("14k-teigrechner-auswahlfeld")
             clickVisible(text(R.string.dough_yeast_instant))
