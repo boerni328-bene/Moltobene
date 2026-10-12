@@ -79,7 +79,7 @@ fun BasicsScreen(
             val result = snackbarHostState.showSnackbar(
                 message = resources.getString(R.string.basics_added, event.title),
                 actionLabel = resources.getString(R.string.basics_open),
-                duration = SnackbarDuration.Long,
+                duration = SnackbarDuration.Short,
             )
             if (viewModel.event === event) viewModel.event = null
             if (result == SnackbarResult.ActionPerformed) onOpenRecipe(event.recipeId)

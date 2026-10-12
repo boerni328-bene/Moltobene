@@ -206,7 +206,8 @@ class AppTourTest(private val variant: DisplayVariant) {
         val recipes = activity.resources.getQuantityString(R.plurals.home_recipes_count, count, count)
         waitForText(recipes)
         composeRule.onNodeWithText(text(R.string.home_recipes_title)).assertIsDisplayed()
-        composeRule.onNodeWithText(text(R.string.dough_title)).assertIsDisplayed()
+        // Bei großer Schrift reicht der Bildschirm nicht für alle Kacheln; die Seite scrollt.
+        composeRule.onNodeWithText(text(R.string.dough_title)).performScrollTo().assertIsDisplayed()
         // „Was koche ich heute?“ (#81): ein Vorschlag aus der Sammlung, „Anderes Rezept“ wechselt, „Kochen“ öffnet.
         waitForText(text(R.string.home_today_cook))
         screenshot("00-startseite")
@@ -642,7 +643,9 @@ class AppTourTest(private val variant: DisplayVariant) {
     }
 
     private fun adoptFirstBasic() {
-        composeRule.onAllNodesWithText(text(R.string.basics_adopt)).onFirst().performScrollTo().performClick()
+        // Direkt auslösen statt antippen: Der Hinweis nach dem Übernehmen liegt kurz über dem Knopf.
+        composeRule.onAllNodesWithText(text(R.string.basics_adopt)).onFirst().performScrollTo()
+            .performSemanticsAction(SemanticsActions.OnClick)
     }
 
     @Test
