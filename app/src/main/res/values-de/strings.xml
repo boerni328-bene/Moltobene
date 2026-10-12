@@ -234,8 +234,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Teigrechner für Pizza und Brot (Rechner-Symbol oben in der Sammlung): Mengen für Teigkugeln oder Laibe, auf Wunsch mit Biga, Poolish oder Sauerteig.</item>
-        <item>Das Ergebnis lässt sich als Rezept speichern und wie jedes Rezept umrechnen und teilen.</item>
+        <item>Neue Sammlung mit Foto-Karten, Filtern und dem Knopf „Hinzufügen“ unten rechts, der alle Wege und den Teigrechner öffnet.</item>
+        <item>Favoriten, Teigrechner mit fester Ergebnisleiste, Portionen und Zutaten in Karten.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->
@@ -374,18 +374,17 @@
     <string name="dough_type_pizza">Pizza</string>
     <string name="dough_type_bread">Brot</string>
     <string name="dough_section_dough">Teig</string>
-    <string name="dough_count_ball">Anzahl Teigkugeln</string>
-    <string name="dough_count_loaf">Anzahl Laibe</string>
-    <string name="dough_piece_ball">Gewicht je Teigkugel (g)</string>
-    <string name="dough_piece_loaf">Gewicht je Laib (g)</string>
-    <string name="dough_water">Wasseranteil (% vom Mehl)</string>
-    <string name="dough_salt">Salz (% vom Mehl)</string>
-    <string name="dough_oil">Öl (% vom Mehl)</string>
+    <string name="dough_count_ball">Teigkugeln</string>
+    <string name="dough_count_loaf">Laibe</string>
+    <string name="dough_piece">Gewicht je Stück</string>
+    <string name="dough_water">Wasseranteil</string>
+    <string name="dough_salt">Salz</string>
+    <string name="dough_oil">Öl</string>
     <string name="dough_section_yeast">Hefe</string>
     <string name="dough_yeast_fresh">Frischhefe</string>
     <string name="dough_yeast_instant">Trockenhefe (Instant)</string>
     <string name="dough_yeast_active">Aktive Trockenhefe</string>
-    <string name="dough_yeast_amount">Hefe (% vom Mehl)</string>
+    <string name="dough_yeast_amount">Menge (% vom Mehl)</string>
     <string name="dough_section_preferment">Vorteig</string>
     <string name="dough_explain_preferment">Vorteig: Ein Teil von Mehl, Wasser und Hefe wird vorher angesetzt. Das gibt mehr Geschmack und einen lockereren Teig.</string>
     <string name="dough_pre_none">Ohne</string>
@@ -393,10 +392,11 @@
     <string name="dough_explain_biga">Biga: Fester Vorteig mit wenig Wasser.</string>
     <string name="dough_explain_poolish">Poolish: Flüssiger Vorteig mit gleich viel Wasser wie Mehl.</string>
     <string name="dough_explain_sourdough">Sauerteig: Mehl und Wasser, ohne zugesetzte Hefe vergoren. Im Hauptteig kann trotzdem Hefe dazukommen.</string>
-    <string name="dough_preferment_flour">Mehl im Vorteig (% vom gesamten Mehl)</string>
-    <string name="dough_preferment_water">Wasser im Vorteig (% von dessen Mehl)</string>
+    <string name="dough_preferment_flour">Mehl (% vom gesamten)</string>
+    <string name="dough_preferment_water">Wasser (% von dessen Mehl)</string>
     <string name="dough_section_result">Ergebnis</string>
-    <string name="dough_total">Teig gesamt: %1$s g</string>
+    <string name="dough_total_line">%1$s g Teig · %2$s</string>
+    <string name="dough_percent_note">Wasseranteil, Salz und Öl in % vom Mehl</string>
     <string name="dough_yeast_item">%1$s g %2$s</string>
     <string name="dough_yeast_equal">Gleichwertige Hefemenge: %1$s</string>
     <string name="dough_invalid">Rot markierte Eingaben prüfen.</string>
@@ -419,4 +419,15 @@
     <string name="dough_ingredient_oil">Öl</string>
     <string name="dough_unit_balls">Teigkugeln (je %1$s g)</string>
     <string name="dough_unit_loaves">Laibe (je %1$s g)</string>
+
+    <!-- Sammlung: Hinzufügen-Menü, Filter, Ansicht -->
+    <string name="add_short">Hinzufügen</string>
+    <string name="filter_all">Alle</string>
+    <string name="filter_favorites">Favoriten</string>
+    <string name="filter_drafts">Entwürfe</string>
+    <string name="view_as_list">Als Liste anzeigen</string>
+    <string name="view_as_grid">Als Raster anzeigen</string>
+    <string name="favorite_label">Favorit</string>
+    <string name="favorite_add">Als Favorit markieren</string>
+    <string name="favorite_remove">Favorit entfernen</string>
 </resources>

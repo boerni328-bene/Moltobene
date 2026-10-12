@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -51,6 +52,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
@@ -85,30 +87,40 @@ fun CollectionScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val query by viewModel.query.collectAsStateWithLifecycle()
+    val grid by viewModel.grid.collectAsStateWithLifecycle()
     val backupHint by viewModel.backupHint.collectAsStateWithLifecycle()
     // Beim Zurückkehren neu lesen, z. B. nachdem in den Einstellungen gesichert wurde (#51).
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshBackupHint() }
-    // „Rezept übernehmen“: Auswahl der Erfassungswege, damit oben ein Symbol genügt.
-    var chooseImport by rememberSaveable { mutableStateOf(false) }
-    if (chooseImport) {
-        ImportChooser(
+
+    // „Hinzufügen“: alle Wege an einer Stelle, dazu der Teigrechner.
+    var chooseAdd by rememberSaveable { mutableStateOf(false) }
+    if (chooseAdd) {
+        AddChooser(
+            onWrite = {
+                chooseAdd = false
+                onAddRecipe()
+            },
+            onFromLink = {
+                chooseAdd = false
+                onAddFromLink()
+            },
             onFromPhoto = {
-                chooseImport = false
+                chooseAdd = false
                 onAddFromPhoto()
             },
             onFromText = {
-                chooseImport = false
+                chooseAdd = false
                 onAddFromText()
             },
-            onFromLink = {
-                chooseImport = false
-                onAddFromLink()
-            },
             onFromFile = {
-                chooseImport = false
+                chooseAdd = false
                 onAddFromFile()
             },
-            onDismiss = { chooseImport = false },
+            onDough = {
+                chooseAdd = false
+                onOpenDough()
+            },
+            onDismiss = { chooseAdd = false },
         )
     }
 
@@ -117,17 +129,7 @@ fun CollectionScreen(
             TopAppBar(
                 // Der Name der App als Titel (Wunsch des Projektinhabers vom 08.10.2026).
                 title = { AppTitle(style = MaterialTheme.typography.titleLarge, heading = true) },
-                // Hinzufügen und Übernehmen als Symbole oben statt großer Knöpfe unten (Wunsch vom 08.10.2026).
                 actions = {
-                    IconButton(onClick = onAddRecipe) {
-                        Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_recipe))
-                    }
-                    IconButton(onClick = { chooseImport = true }) {
-                        Icon(painterResource(R.drawable.ic_move_to_inbox), contentDescription = stringResource(R.string.import_recipe))
-                    }
-                    IconButton(onClick = onOpenDough) {
-                        Icon(painterResource(R.drawable.ic_calculate), contentDescription = stringResource(R.string.dough_title))
-                    }
                     IconButton(onClick = onOpenSettings) {
                         Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings_title))
                     }
@@ -135,17 +137,27 @@ fun CollectionScreen(
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            val addLabel = stringResource(R.string.add_short)
+            ExtendedFloatingActionButton(
+                onClick = { chooseAdd = true },
+                modifier = Modifier.semantics { contentDescription = addLabel },
+                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                text = { Text(stringResource(R.string.add_short)) },
+            )
+        },
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
             when (val current = state) {
                 CollectionUiState.Loading -> CenteredMessage(text = "") { CircularProgressIndicator() }
                 CollectionUiState.Error -> CenteredMessage(text = stringResource(R.string.collection_error))
                 is CollectionUiState.Content -> {
-                    val collectionIsEmpty = current.items.isEmpty() && query.isBlank()
+                    val collectionIsEmpty = current.items.isEmpty() && query.isBlank() && current.filter == CollectionFilter.ALL
                     if (collectionIsEmpty) {
-                        EmptyCollection(onAddRecipe = onAddRecipe, onImport = { chooseImport = true })
+                        EmptyCollection()
                     } else {
-                        SearchField(query = query, onQueryChange = viewModel::onQueryChange)
+                        SearchRow(query = query, onQueryChange = viewModel::onQueryChange, grid = grid, onGridChange = viewModel::onGridChange)
+                        FilterRow(current.filter, current.hasFavorites, current.hasDrafts, viewModel::onFilterChange)
                         backupHint?.takeIf { query.isBlank() }?.let { unsaved ->
                             BackupHint(
                                 unsaved = unsaved,
@@ -156,7 +168,11 @@ fun CollectionScreen(
                         if (current.items.isEmpty()) {
                             CenteredMessage(text = stringResource(R.string.search_no_results))
                         } else {
-                            RecipeList(items = current.items, onOpenRecipe = onOpenRecipe)
+                            if (grid) {
+                                RecipeGrid(items = current.items, onOpenRecipe = onOpenRecipe)
+                            } else {
+                                RecipeList(items = current.items, onOpenRecipe = onOpenRecipe)
+                            }
                         }
                     }
                 }
@@ -166,72 +182,7 @@ fun CollectionScreen(
 }
 
 @Composable
-private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
-    OutlinedTextField(
-        value = query,
-        onValueChange = onQueryChange,
-        placeholder = { Text(stringResource(R.string.search_placeholder)) },
-        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-        trailingIcon = {
-            if (query.isNotEmpty()) {
-                IconButton(onClick = { onQueryChange("") }) {
-                    Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.search_clear))
-                }
-            }
-        },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = Spacing.m, vertical = Spacing.s),
-    )
-}
-
-@Composable
-private fun RecipeList(items: List<RecipeListItem>, onOpenRecipe: (String) -> Unit) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = Spacing.m),
-    ) {
-        items(items, key = { it.id }) { item ->
-            RecipeRow(item = item, onClick = { onOpenRecipe(item.id) })
-            HorizontalDivider(modifier = Modifier.padding(start = Spacing.m + 64.dp + Spacing.m))
-        }
-    }
-}
-
-@Composable
-private fun RecipeRow(item: RecipeListItem, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .heightIn(min = 80.dp)
-            .padding(horizontal = Spacing.m, vertical = Spacing.s),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.m),
-    ) {
-        RecipePhoto(
-            file = item.thumbnail,
-            placeholderIconSize = 28.dp,
-            modifier = Modifier
-                .size(64.dp)
-                .clip(MaterialTheme.shapes.medium),
-        )
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-            Text(
-                text = item.title.ifBlank { stringResource(R.string.untitled_recipe) },
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-            if (item.isDraft) DraftLabel()
-        }
-    }
-}
-
-@Composable
-private fun EmptyCollection(onAddRecipe: () -> Unit, onImport: () -> Unit) {
+private fun EmptyCollection() {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -259,46 +210,8 @@ private fun EmptyCollection(onAddRecipe: () -> Unit, onImport: () -> Unit) {
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(Modifier.size(Spacing.l))
-        Button(onClick = onAddRecipe) {
-            Text(stringResource(R.string.add_recipe))
-        }
-        Spacer(Modifier.size(Spacing.s))
-        OutlinedButton(onClick = onImport) {
-            Text(stringResource(R.string.import_recipe))
-        }
+}
     }
-}
-
-/** Woher das Rezept kommt: Link, Foto, Text oder Datei. */
-@Composable
-private fun ImportChooser(
-    onFromPhoto: () -> Unit,
-    onFromText: () -> Unit,
-    onFromLink: () -> Unit,
-    onFromFile: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.import_recipe), modifier = Modifier.semantics { heading() }) },
-        text = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(Spacing.s),
-            ) {
-                // Reihenfolge wie in der Vision: Internetseiten zuerst.
-                OptionButton(R.drawable.ic_link, R.string.import_from_link, onFromLink)
-                OptionButton(R.drawable.ic_document_scanner, R.string.import_from_photo, onFromPhoto)
-                OptionButton(R.drawable.ic_content_paste, R.string.import_from_text, onFromText)
-                OptionButton(R.drawable.ic_description, R.string.import_from_file, onFromFile)
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
-        },
-    )
-}
 
 /**
  * Ruhiger Hinweis zum Sichern (#51): kein Fenster und keine Benachrichtigung. „Sichern“ führt zu den Einstellungen;

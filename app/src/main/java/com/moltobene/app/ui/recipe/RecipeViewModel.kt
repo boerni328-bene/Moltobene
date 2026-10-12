@@ -233,6 +233,12 @@ class RecipeViewModel(
         }
     }
 
+    /** Favorit setzen oder entfernen; Änderungszeit und Inhalt des Rezepts bleiben unberührt. */
+    fun toggleFavorite() {
+        val recipe = (state.value as? RecipeUiState.Content)?.recipe ?: return
+        viewModelScope.launch { repository.save(recipe.copy(favorite = !recipe.favorite)) }
+    }
+
     fun delete(onDeleted: () -> Unit) {
         viewModelScope.launch {
             repository.delete(recipeId)

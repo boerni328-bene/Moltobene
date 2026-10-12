@@ -81,6 +81,7 @@ class AppTourTest(private val variant: DisplayVariant) {
 
     @Test
     fun rezeptHinzufuegen() {
+        openAddMenu()
         clickVisible(text(R.string.add_recipe))
         waitForField(R.string.field_title)
         screenshot("02-rezept-hinzufuegen")
@@ -104,6 +105,7 @@ class AppTourTest(private val variant: DisplayVariant) {
 
     @Test
     fun titelFehltUndVerwerfen() {
+        openAddMenu()
         clickVisible(text(R.string.add_recipe))
         waitForField(R.string.field_title)
         input(R.string.ingredients, "500 g Mehl")
@@ -298,17 +300,55 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText("200 g Mehl")
     }
 
+    /** Sammlung: Favorit markieren, Filter „Favoriten“, Umschalten auf die Liste. */
+    @Test
+    fun favoritenUndAnsicht() {
+        addSampleRecipes()
+        if (composeRule.onAllNodesWithContentDescription(text(R.string.view_as_grid)).fetchSemanticsNodes().isNotEmpty()) {
+            clickVisible(text(R.string.view_as_grid))
+        }
+        openRecipe(SampleRecipes.TOMATO_SAUCE)
+        waitForText(SampleRecipes.TOMATO_SAUCE)
+        composeRule.onNodeWithContentDescription(text(R.string.more_options)).performClick()
+        waitForText(text(R.string.favorite_add))
+        composeRule.onNodeWithText(text(R.string.favorite_add)).performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) {
+            runBlocking { container().repository.getAll().any { it.favorite } }
+        }
+        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+        waitForText(text(R.string.filter_favorites))
+        screenshot("14d-sammlung-favorit")
+
+        clickVisible(text(R.string.filter_favorites))
+        waitForText(SampleRecipes.TOMATO_SAUCE)
+        composeRule.onNodeWithText(SampleRecipes.POTATO_SALAD).assertDoesNotExist()
+        clickVisible(text(R.string.filter_all))
+        // Die Ansicht bleibt gemerkt; hier immer auf die Liste und zurück.
+        if (composeRule.onAllNodesWithContentDescription(text(R.string.view_as_list)).fetchSemanticsNodes().isNotEmpty()) {
+            clickVisible(text(R.string.view_as_list))
+        }
+        composeRule.waitUntil(TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithContentDescription(text(R.string.view_as_grid)).fetchSemanticsNodes().isNotEmpty()
+        }
+        screenshot("14e-sammlung-liste")
+        // Zurück zum Raster, damit die übrigen Bildschirmfotos die Standardansicht zeigen.
+        clickVisible(text(R.string.view_as_grid))
+    }
+
     /** Teigrechner (#69): von der Sammlung öffnen, Biga wählen, als Entwurf speichern. */
     @Test
     fun teigrechner() {
-        composeRule.onNodeWithContentDescription(text(R.string.dough_title)).performClick()
-        waitForText(text(R.string.dough_section_result))
-        waitForText("4 " + text(R.string.dough_unit_balls, "250"))
+        // Der Teigrechner steht im Menü des Hauptknopfs „Hinzufügen“.
+        openAddMenu()
+        waitForText(text(R.string.dough_title))
+        clickVisible(text(R.string.dough_title))
+        waitForText(text(R.string.dough_save))
+        waitForText("4 " + text(R.string.dough_unit_balls, "250"), substring = true)
         screenshot("14a-teigrechner")
 
         composeRule.onNodeWithText(text(R.string.dough_pre_biga)).performScrollTo().performClick()
         waitForText(text(R.string.dough_explain_biga))
-        composeRule.onNodeWithText(text(R.string.dough_save)).performScrollTo()
+
         screenshot("14b-teigrechner-biga")
 
         composeRule.onNodeWithText(text(R.string.dough_save)).performClick()
@@ -395,7 +435,7 @@ class AppTourTest(private val variant: DisplayVariant) {
 
     @Test
     fun ausFotoUebernehmen() {
-        clickVisible(text(R.string.import_recipe))
+        openAddMenu()
         waitForText(text(R.string.import_from_text))
         screenshot("15-rezept-uebernehmen")
 
@@ -479,7 +519,7 @@ class AppTourTest(private val variant: DisplayVariant) {
 
     @Test
     fun ausTextUebernehmen() {
-        clickVisible(text(R.string.import_recipe))
+        openAddMenu()
         waitForText(text(R.string.import_from_text))
         composeRule.onNodeWithText(text(R.string.import_from_text)).performClick()
         waitForField(R.string.import_text_field)
@@ -509,7 +549,7 @@ class AppTourTest(private val variant: DisplayVariant) {
     fun ausLinkUebernehmen() {
         // Nachgestellte Rezeptseite statt echtem Internet (#55).
         container().pageLoader = SamplePage.loader(activity)
-        clickVisible(text(R.string.import_recipe))
+        openAddMenu()
         waitForText(text(R.string.import_from_link))
         composeRule.onNodeWithText(text(R.string.import_from_link)).performClick()
         waitForField(R.string.import_link_field)
@@ -548,7 +588,7 @@ class AppTourTest(private val variant: DisplayVariant) {
     @Test
     fun ausVideoUebernehmen() {
         container().pageLoader = SamplePage.loader(activity)
-        clickVisible(text(R.string.import_recipe))
+        openAddMenu()
         waitForText(text(R.string.import_from_link))
         composeRule.onNodeWithText(text(R.string.import_from_link)).performClick()
         waitForField(R.string.import_link_field)
@@ -753,6 +793,12 @@ class AppTourTest(private val variant: DisplayVariant) {
         // Direkt auslösen statt antippen: Ganz unten liegen die Knöpfe „Rezept übernehmen“ und
         // „Rezept hinzufügen“ über der Liste, ein Tipp in die Mitte des Eintrags kann sie treffen.
         composeRule.onNodeWithText(title).performSemanticsAction(SemanticsActions.OnClick)
+    }
+
+    /** Öffnet das Menü des Hauptknopfs „Hinzufügen“ in der Sammlung. */
+    private fun openAddMenu() {
+        waitForDescription(text(R.string.add_short))
+        composeRule.onNodeWithContentDescription(text(R.string.add_short)).performClick()
     }
 
     /**

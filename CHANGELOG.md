@@ -3,6 +3,18 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.31.0] – 2026-10-12 (versionCode 58)
+
+### Neu
+- **Neue Sammlung:** Die Rezepte erscheinen als Karten mit großem Foto, zwei nebeneinander. Rezepte ohne Foto bekommen eine ruhige Fläche mit dem Anfangsbuchstaben. Ein Umschalter neben der Suche wechselt zwischen Karten und Liste, die Wahl bleibt gemerkt. Das Suchfeld ist schlanker, und darunter stehen die Filter „Alle“, „Favoriten“ und „Entwürfe“, sobald es Favoriten oder Entwürfe gibt.
+- **Ein Knopf für alles:** Unten rechts steht „Hinzufügen“. Er öffnet die Wege Rezept eintippen, Aus Link, Aus Foto, Aus Text und Aus Datei übernehmen sowie den Teigrechner. Oben bleiben der Schriftzug und die Einstellungen; bei großer Schrift verschwindet der Schriftzug nicht mehr.
+- **Favoriten:** In der Rezeptansicht gibt es im Menü „Als Favorit markieren“. Favoriten tragen ein Herz und lassen sich filtern.
+- **Teigrechner neu gestaltet:** Die Eingaben stehen in Karten (Teig, Hefe, Vorteig), Anzahl und Gewicht nebeneinander, die Teigart wird oben umgeschaltet. Unten bleiben die Summen („594 g Mehl · 386 g Wasser · …“) und „Als Rezept speichern“ immer sichtbar, auch beim Ändern der Eingaben. Mit Vorteig steht die Aufteilung in einer eigenen Karte.
+- **Rezeptansicht:** Portionen und „Umrechnen …“ stehen zusammen in einer Karte, die Zutaten ebenfalls. Das Foto hat weiche Ecken. Beim Bearbeiten stehen „Aus Link / Foto / Text übernehmen“ als kleine Schaltflächen in einer Zeile.
+
+### Behoben
+- Zwischenüberschriften im Entwurf aus dem Teigrechner hatten zwei Doppelpunkte; in den Feldern des Teigrechners steht im Deutschen das Dezimalkomma.
+
 ## [0.30.0] – 2026-10-11 (versionCode 57)
 
 ### Neu

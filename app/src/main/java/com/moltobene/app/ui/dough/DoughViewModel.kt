@@ -8,6 +8,7 @@ import com.moltobene.app.data.AppPreferences
 import com.moltobene.app.data.RecipeRepository
 import com.moltobene.app.data.dough.DoughCalculator
 import com.moltobene.app.data.dough.DoughDraft
+import com.moltobene.app.data.dough.DoughNumbers
 import com.moltobene.app.data.dough.DoughResult
 import com.moltobene.app.data.dough.DoughTexts
 import com.moltobene.app.data.dough.DoughType
@@ -92,6 +93,16 @@ class DoughViewModel(
     /** Der Entwurf zum Ergebnis, für die Anzeige und zum Speichern. */
     fun draft(result: DoughResult.Success, input: LeavenedInput): DoughDraft =
         DoughDraft.from(result, input, texts, if (Locale.getDefault().language == "de") "de" else "en")
+
+    /** Summen über Vorteig und Hauptteig, z. B. „594 g Mehl · 386 g Wasser · 18 g Salz“; für die Leiste unten. */
+    fun totals(result: DoughResult.Success, input: LeavenedInput): String {
+        val language = if (Locale.getDefault().language == "de") "de" else "en"
+        val lines = result.sections.flatMap { it.lines }
+        return LineRole.entries.mapNotNull { role ->
+            val grams = lines.filter { it.role == role }.sumOf { it.grams }
+            if (grams <= 0) null else "${DoughNumbers.grams(grams, role, language)} g ${texts.ingredient(role, input.yeastKind)}"
+        }.joinToString(" · ")
+    }
 
     /** Speichert das Ergebnis als Entwurf; [onSaved] bekommt die Nummer des Rezepts. */
     fun saveAsRecipe(input: LeavenedInput, onSaved: (String) -> Unit) {

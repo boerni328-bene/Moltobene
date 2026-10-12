@@ -136,6 +136,7 @@ data class RecipeSummaryRow(
     val id: String,
     val title: String,
     val isDraft: Boolean,
+    val favorite: Boolean,
     val photoId: String?,
 )
 

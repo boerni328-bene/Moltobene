@@ -107,6 +107,13 @@ class AppPreferences(context: Context) {
         prefs.edit { putInt(KEY_BACKUP_HINT_HIDDEN_AT, unsaved) }
     }
 
+    /** Sammlung als Raster (Standard) oder Liste. */
+    suspend fun collectionGrid(): Boolean = withContext(Dispatchers.IO) { prefs.getBoolean(KEY_COLLECTION_GRID, true) }
+
+    suspend fun setCollectionGrid(grid: Boolean) = withContext(Dispatchers.IO) {
+        prefs.edit { putBoolean(KEY_COLLECTION_GRID, grid) }
+    }
+
     /** Zuletzt benutzte Werte des Teigrechners je Teigart (#69); geprüft wird beim Lesen in [DoughMemory]. */
     suspend fun doughValues(type: DoughType): LeavenedInput = withContext(Dispatchers.IO) {
         DoughMemory.decode(type, prefs.getString(KEY_DOUGH_PREFIX + type.key, null))
@@ -138,6 +145,7 @@ class AppPreferences(context: Context) {
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_PALETTE = "palette"
         const val KEY_SCREEN_ON = "screen_on"
+        const val KEY_COLLECTION_GRID = "collection_grid"
         const val KEY_DOUGH_PREFIX = "dough_values_"
     }
 }

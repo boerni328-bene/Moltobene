@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -567,9 +568,7 @@ private fun RecognitionSection(
                     onRetry = viewModel::retryRecognition,
                 )
                 else -> {
-                    OptionButton(R.drawable.ic_link, R.string.import_from_link, onImportLink, enabled = enabled)
-                    OptionButton(R.drawable.ic_document_scanner, R.string.import_from_photo, onStart, enabled = enabled)
-                    OptionButton(R.drawable.ic_content_paste, R.string.import_from_text, onImportText, enabled = enabled)
+                    ImportChips(enabled, onImportLink, onStart, onImportText)
                 }
             }
         }
@@ -1031,6 +1030,31 @@ private fun PhotoSection(
                 Spacer(Modifier.size(Spacing.s))
                 Text(stringResource(R.string.photo_remove))
             }
+        }
+    }
+}
+
+/** Die Wege „Aus Link / Foto / Text übernehmen“ als kleine Chips statt dreier großer Schaltflächen. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun ImportChips(enabled: Boolean, onLink: () -> Unit, onPhoto: () -> Unit, onText: () -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(Spacing.s),
+        modifier = Modifier.horizontalScroll(rememberScrollState()),
+    ) {
+        for ((icon, label, action) in listOf(
+            Triple(R.drawable.ic_link, R.string.import_from_link, onLink),
+            Triple(R.drawable.ic_document_scanner, R.string.import_from_photo, onPhoto),
+            Triple(R.drawable.ic_content_paste, R.string.import_from_text, onText),
+        )) {
+            androidx.compose.material3.AssistChip(
+                onClick = action,
+                enabled = enabled,
+                label = { Text(stringResource(label)) },
+                leadingIcon = {
+                    Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(18.dp))
+                },
+            )
         }
     }
 }

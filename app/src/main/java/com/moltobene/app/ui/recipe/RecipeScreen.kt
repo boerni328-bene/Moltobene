@@ -14,6 +14,7 @@ import android.text.format.Formatter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
@@ -51,6 +53,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -118,6 +121,7 @@ import com.moltobene.app.ui.components.CenteredMessage
 import com.moltobene.app.ui.components.DraftLabel
 import com.moltobene.app.ui.components.PageViewer
 import com.moltobene.app.ui.components.RecipePhoto
+import com.moltobene.app.ui.components.isLargeText
 import com.moltobene.app.ui.components.RecipePhotoLarge
 import com.moltobene.app.ui.theme.Spacing
 import kotlinx.coroutines.awaitCancellation
@@ -235,6 +239,20 @@ fun RecipeScreen(
                                 Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options))
                             }
                             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            stringResource(
+                                                if (content.recipe.favorite) R.string.favorite_remove else R.string.favorite_add,
+                                            ),
+                                        )
+                                    },
+                                    leadingIcon = { Icon(Icons.Filled.Favorite, contentDescription = null) },
+                                    onClick = {
+                                        menuOpen = false
+                                        viewModel.toggleFavorite()
+                                    },
+                                )
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.share_recipe)) },
                                     leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
@@ -440,15 +458,17 @@ private fun RecipeContent(
     onShowPhoto: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Das Foto läuft oben bündig unter die Leiste; unten sind die Ecken weich.
+    val photoShape = MaterialTheme.shapes.extraLarge.copy(topStart = CornerSize(0.dp), topEnd = CornerSize(0.dp))
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
         if (photo != null) {
-            RecipePhotoLarge(file = photo, onOpen = onShowPhoto, modifier = Modifier.fillMaxWidth())
+            RecipePhotoLarge(file = photo, onOpen = onShowPhoto, modifier = Modifier.fillMaxWidth().clip(photoShape))
         } else {
-            RecipePhoto(file = null, placeholderIconSize = 40.dp, modifier = Modifier.fillMaxWidth().height(120.dp))
+            RecipePhoto(file = null, placeholderIconSize = 40.dp, modifier = Modifier.fillMaxWidth().height(120.dp).clip(photoShape))
         }
 
         Column(
@@ -512,6 +532,14 @@ private fun RecipeContent(
                 }
             }
 
+            var adjusting by rememberSaveable { mutableStateOf(false) }
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                shape = MaterialTheme.shapes.large,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Column(modifier = Modifier.padding(horizontal = Spacing.s, vertical = Spacing.xs)) {
+            AdjustRow(onAdjust = { adjusting = true }) {
             if (originalServings != null) {
                 // Nach Backform bleibt es bei der Anzahl der Formen; nur die Mengen ändern sich (#67).
                 val exact = if (cooking.adjustment is Adjustment.ByPan) originalServings.toDouble() else originalServings * factor
@@ -530,7 +558,7 @@ private fun RecipeContent(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            var adjusting by rememberSaveable { mutableStateOf(false) }
+            }
             run {
                 AdjustActions(
                     adjusted = factor != 1.0,
@@ -551,6 +579,8 @@ private fun RecipeContent(
                     onAdjust = { adjusting = true },
                     onReset = { cooking.onAdjust(null) },
                 )
+            }
+                }
             }
             if (adjusting) {
                 AdjustDialog(
@@ -578,6 +608,12 @@ private fun RecipeContent(
 
             if (recipe.ingredients.isNotEmpty()) {
                 SectionTitle(stringResource(R.string.ingredients))
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceContainer,
+                    shape = MaterialTheme.shapes.large,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.xs)) {
                 recipe.ingredients.forEachIndexed { index, ingredient ->
                     if (ingredient.isHeading) {
                         Text(
@@ -596,6 +632,8 @@ private fun RecipeContent(
                     }
                 }
             }
+                    }
+                }
 
             if (recipe.steps.isNotEmpty()) {
                 SectionTitle(stringResource(R.string.instructions))
@@ -691,7 +729,6 @@ private fun AdjustActions(adjusted: Boolean, hint: String?, bakingNote: Boolean,
         )
     }
     FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-        TextButton(onClick = onAdjust) { Text(stringResource(R.string.adjust_action)) }
         if (adjusted) TextButton(onClick = onReset) { Text(stringResource(R.string.servings_reset)) }
     }
 }
@@ -997,4 +1034,21 @@ private fun panLabel(pan: Pan, inch: Boolean): String {
     if (!inch) return base
     val size = if (pan.round) inches(pan.a) else stringResource(R.string.pan_size_pair, inches(pan.a), inches(pan.b))
     return stringResource(R.string.pan_with_inch, base, stringResource(R.string.pan_inch, size))
+}
+
+/** „Umrechnen …“ neben den Portionen in derselben Zeile; bei großer Schrift darunter. */
+@Composable
+private fun AdjustRow(onAdjust: () -> Unit, content: @Composable () -> Unit) {
+    val button = @Composable { TextButton(onClick = onAdjust) { Text(stringResource(R.string.adjust_action)) } }
+    if (isLargeText()) {
+        Column {
+            content()
+            button()
+        }
+    } else {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.weight(1f)) { content() }
+            button()
+        }
+    }
 }

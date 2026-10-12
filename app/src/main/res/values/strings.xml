@@ -236,8 +236,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Dough calculator for pizza and bread (calculator icon at the top of the collection): amounts for dough balls or loaves, optionally with biga, poolish or sourdough starter.</item>
-        <item>The result can be saved as a recipe and adjusted and shared like any other recipe.</item>
+        <item>New collection with photo cards, filters and an “Add” button at the bottom right that opens every way to add a recipe and the dough calculator.</item>
+        <item>Favorites, a dough calculator with a fixed result bar, servings and ingredients in cards.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->
@@ -376,18 +376,17 @@
     <string name="dough_type_pizza">Pizza</string>
     <string name="dough_type_bread">Bread</string>
     <string name="dough_section_dough">Dough</string>
-    <string name="dough_count_ball">Number of dough balls</string>
-    <string name="dough_count_loaf">Number of loaves</string>
-    <string name="dough_piece_ball">Weight per dough ball (g)</string>
-    <string name="dough_piece_loaf">Weight per loaf (g)</string>
-    <string name="dough_water">Hydration (% of flour)</string>
-    <string name="dough_salt">Salt (% of flour)</string>
-    <string name="dough_oil">Oil (% of flour)</string>
+    <string name="dough_count_ball">Dough balls</string>
+    <string name="dough_count_loaf">Loaves</string>
+    <string name="dough_piece">Weight each</string>
+    <string name="dough_water">Hydration</string>
+    <string name="dough_salt">Salt</string>
+    <string name="dough_oil">Oil</string>
     <string name="dough_section_yeast">Yeast</string>
     <string name="dough_yeast_fresh">Fresh yeast</string>
     <string name="dough_yeast_instant">Instant yeast</string>
     <string name="dough_yeast_active">Active dry yeast</string>
-    <string name="dough_yeast_amount">Yeast (% of flour)</string>
+    <string name="dough_yeast_amount">Amount (% of flour)</string>
     <string name="dough_section_preferment">Preferment</string>
     <string name="dough_explain_preferment">Preferment: Part of the flour, water and yeast is mixed ahead of time. This gives more flavor and a lighter dough.</string>
     <string name="dough_pre_none">None</string>
@@ -397,10 +396,11 @@
     <string name="dough_explain_biga">Biga: Stiff preferment with little water.</string>
     <string name="dough_explain_poolish">Poolish: Liquid preferment with as much water as flour.</string>
     <string name="dough_explain_sourdough">Sourdough starter: Flour and water, fermented without added yeast. Yeast can still be added to the final dough.</string>
-    <string name="dough_preferment_flour">Flour in the preferment (% of total flour)</string>
-    <string name="dough_preferment_water">Water in the preferment (% of its flour)</string>
+    <string name="dough_preferment_flour">Flour (% of total)</string>
+    <string name="dough_preferment_water">Water (% of its flour)</string>
     <string name="dough_section_result">Result</string>
-    <string name="dough_total">Total dough: %1$s g</string>
+    <string name="dough_total_line">%1$s g dough · %2$s</string>
+    <string name="dough_percent_note">Salt, oil and hydration in % of flour</string>
     <string name="dough_yeast_item">%1$s g %2$s</string>
     <string name="dough_yeast_equal">The same amount of yeast: %1$s</string>
     <string name="dough_invalid">Check the entries marked in red.</string>
@@ -423,4 +423,15 @@
     <string name="dough_ingredient_oil">oil</string>
     <string name="dough_unit_balls">dough balls (%1$s g each)</string>
     <string name="dough_unit_loaves">loaves (%1$s g each)</string>
+
+    <!-- Collection: add menu, filter, view -->
+    <string name="add_short">Add</string>
+    <string name="filter_all">All</string>
+    <string name="filter_favorites">Favorites</string>
+    <string name="filter_drafts">Drafts</string>
+    <string name="view_as_list">Show as list</string>
+    <string name="view_as_grid">Show as grid</string>
+    <string name="favorite_label">Favorite</string>
+    <string name="favorite_add">Mark as favorite</string>
+    <string name="favorite_remove">Remove from favorites</string>
 </resources>

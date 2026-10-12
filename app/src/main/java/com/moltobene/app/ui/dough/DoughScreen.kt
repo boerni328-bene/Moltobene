@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,12 +20,16 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,9 +39,12 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -56,14 +64,16 @@ import com.moltobene.app.data.dough.YeastKind
 import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.components.ScreenTitle
 import com.moltobene.app.ui.components.ScreenTitlePadding
+import com.moltobene.app.ui.components.isLargeText
 import com.moltobene.app.ui.theme.Spacing
+import java.util.Locale
 
 /** Zahl aus einem Eingabefeld: Komma oder Punkt; leer oder Text ergibt NaN (wird als „keine Zahl“ gemeldet). */
 internal fun parseNumber(text: String): Double =
     text.trim().replace(',', '.').toDoubleOrNull()?.takeIf { it.isFinite() } ?: Double.NaN
 
 private fun show(value: Double): String =
-    DoughNumbers.separator(DoughNumbers.plain(value, 2), java.util.Locale.getDefault().language)
+    DoughNumbers.separator(DoughNumbers.plain(value, 2), Locale.getDefault().language)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,48 +102,66 @@ fun DoughScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
-        Column(
-            modifier = Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(Spacing.s),
-        ) {
-            ScreenTitle(stringResource(R.string.dough_title), modifier = Modifier.padding(ScreenTitlePadding))
-            TypeChoice(type) { typeKey = it.key }
+        Column(modifier = Modifier.padding(padding).fillMaxSize()) {
             val initial = loaded
             if (initial == null) {
+                Header(type) { typeKey = it.key }
                 CircularProgressIndicator(Modifier.padding(Spacing.m))
             } else {
-                DoughForm(initial, viewModel, onSaved)
+                DoughForm(initial, viewModel, onSaved) { Header(type) { typeKey = it.key } }
             }
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+/** Überschrift und Wahl der Teigart: ein Schalter über die volle Breite. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TypeChoice(selected: DoughType, onSelect: (DoughType) -> Unit) {
-    FlowRow(
-        modifier = Modifier.padding(horizontal = Spacing.m),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.s),
-    ) {
-        for (type in listOf(DoughType.PIZZA, DoughType.BREAD)) {
-            FilterChip(
+private fun Header(selected: DoughType, onSelect: (DoughType) -> Unit) {
+    ScreenTitle(stringResource(R.string.dough_title), modifier = Modifier.padding(ScreenTitlePadding))
+    val types = listOf(DoughType.PIZZA, DoughType.BREAD)
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m)) {
+        types.forEachIndexed { index, type ->
+            SegmentedButton(
                 selected = type == selected,
                 onClick = { onSelect(type) },
-                label = {
-                    Text(stringResource(if (type == DoughType.BREAD) R.string.dough_type_bread else R.string.dough_type_pizza))
-                },
-            )
+                shape = SegmentedButtonDefaults.itemShape(index, types.size),
+            ) {
+                Text(stringResource(if (type == DoughType.BREAD) R.string.dough_type_bread else R.string.dough_type_pizza))
+            }
         }
     }
 }
 
+/** Eine Karte mit Überschrift; gliedert das Formular ruhig und kompakt. */
 @Composable
-private fun Section(text: String) {
-    Text(
-        text,
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.xs).semantics { heading() },
-    )
+private fun Card(title: String, content: @Composable () -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        shape = MaterialTheme.shapes.large,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m),
+    ) {
+        Column(modifier = Modifier.padding(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+            Text(
+                title,
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.semantics { heading() },
+            )
+            content()
+        }
+    }
+}
+
+/** Felder nebeneinander; bei großer Schrift untereinander. */
+@Composable
+private fun Fields(vararg fields: @Composable (Modifier) -> Unit, weights: List<Float>? = null) {
+    if (isLargeText()) {
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) { fields.forEach { it(Modifier.fillMaxWidth()) } }
+    } else {
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+            fields.forEachIndexed { index, field -> field(Modifier.weight(weights?.getOrNull(index) ?: 1f)) }
+        }
+    }
 }
 
 @Composable
@@ -142,18 +170,21 @@ private fun NumberField(
     value: String,
     onChange: (String) -> Unit,
     issue: DoughIssue?,
+    modifier: Modifier = Modifier,
     integer: Boolean = false,
+    suffix: String? = null,
 ) {
     val error = issue?.let { issueText(it) }
     OutlinedTextField(
         value = value,
         onValueChange = onChange,
-        label = { Text(label) },
+        label = { Text(label, maxLines = 1) },
+        suffix = suffix?.let { { Text(it) } },
         isError = error != null,
         supportingText = error?.let { { Text(it) } },
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = if (integer) KeyboardType.Number else KeyboardType.Decimal),
-        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m),
+        modifier = modifier,
     )
 }
 
@@ -168,7 +199,12 @@ private fun issueText(issue: DoughIssue): String? = when (issue) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun DoughForm(initial: LeavenedInput, viewModel: DoughViewModel, onSaved: (String) -> Unit) {
+private fun DoughForm(
+    initial: LeavenedInput,
+    viewModel: DoughViewModel,
+    onSaved: (String) -> Unit,
+    header: @Composable () -> Unit,
+) {
     val type = initial.type
     // Neu beginnen mit den gemerkten Werten (nach „Zurücksetzen“: mit den Standardwerten).
     var resetCount by rememberSaveable(type) { mutableStateOf(0) }
@@ -211,136 +247,201 @@ private fun DoughForm(initial: LeavenedInput, viewModel: DoughViewModel, onSaved
     }
 
     val bread = type == DoughType.BREAD
-    Section(stringResource(R.string.dough_section_dough))
-    NumberField(
-        stringResource(if (bread) R.string.dough_count_loaf else R.string.dough_count_ball), count,
-        { count = it }, issueFor(DoughField.COUNT), integer = true,
-    )
-    NumberField(
-        stringResource(if (bread) R.string.dough_piece_loaf else R.string.dough_piece_ball), piece,
-        { piece = it }, issueFor(DoughField.PIECE_GRAMS),
-    )
-    NumberField(stringResource(R.string.dough_water), water, { water = it }, issueFor(DoughField.WATER))
-    NumberField(stringResource(R.string.dough_salt), salt, { salt = it }, issueFor(DoughField.SALT))
-    NumberField(stringResource(R.string.dough_oil), oil, { oil = it }, issueFor(DoughField.OIL))
+    Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(Spacing.s),
+        ) {
+            header()
 
-    Section(stringResource(R.string.dough_section_yeast))
-    FlowRow(
-        modifier = Modifier.padding(horizontal = Spacing.m),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.s),
-    ) {
-        for (kind in YeastKind.entries) {
-            FilterChip(
-                selected = kind == yeastKind,
-                onClick = {
-                    // Die Menge bleibt gleichwertig, wenn die Hefeart wechselt.
-                    val current = parseNumber(yeast)
-                    if (current.isFinite()) yeast = DoughNumbers.separator(DoughNumbers.plain(yeastKind.convert(current, kind), 3), java.util.Locale.getDefault().language)
-                    yeastKindKey = kind.key
-                },
-                label = { Text(stringResource(AndroidDoughTexts.yeastName(kind))) },
-            )
-        }
-    }
-    NumberField(stringResource(R.string.dough_yeast_amount), yeast, { yeast = it }, issueFor(DoughField.YEAST))
-
-    Section(stringResource(R.string.dough_section_preferment))
-    Text(
-        stringResource(R.string.dough_explain_preferment),
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.padding(horizontal = Spacing.m),
-    )
-    FlowRow(
-        modifier = Modifier.padding(horizontal = Spacing.m),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.s),
-    ) {
-        for (option in Preferment.entries) {
-            FilterChip(
-                selected = option == preferment,
-                onClick = {
-                    prefermentKey = option.key
-                    // Biga und Poolish haben feste Wasseranteile, die hier vorausgefüllt werden.
-                    if (option != Preferment.NONE) prefermentWater = show(DoughLimits.defaultPrefermentWater(option))
-                },
-                label = { Text(stringResource(prefermentLabel(option))) },
-            )
-        }
-    }
-    prefermentExplanation(preferment)?.let {
-        Text(
-            stringResource(it),
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(horizontal = Spacing.m),
-        )
-    }
-    if (preferment != Preferment.NONE) {
-        NumberField(
-            stringResource(R.string.dough_preferment_flour), prefermentFlour, { prefermentFlour = it },
-            issueFor(DoughField.PREFERMENT_FLOUR),
-        )
-        NumberField(
-            stringResource(R.string.dough_preferment_water), prefermentWater, { prefermentWater = it },
-            issueFor(DoughField.PREFERMENT_WATER),
-        )
-    }
-
-    Section(stringResource(R.string.dough_section_result))
-    when (result) {
-        is DoughResult.Success -> {
-            val draft = viewModel.draft(result, input)
-            Column(
-                modifier = Modifier.padding(horizontal = Spacing.m),
-                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
-            ) {
-                Text(
-                    "${draft.servings} ${draft.servingsUnit}",
-                    style = MaterialTheme.typography.titleSmall,
+            Card(stringResource(R.string.dough_section_dough)) {
+                Fields(
+                    { m ->
+                        NumberField(
+                            stringResource(if (bread) R.string.dough_count_loaf else R.string.dough_count_ball), count,
+                            { count = it }, issueFor(DoughField.COUNT), m, integer = true,
+                        )
+                    },
+                    { m ->
+                        NumberField(
+                            stringResource(R.string.dough_piece), piece, { piece = it },
+                            issueFor(DoughField.PIECE_GRAMS), m, suffix = "g",
+                        )
+                    },
                 )
-                for (line in draft.ingredients) {
-                    Text(
-                        line.text,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = if (line.isHeading) FontWeight.Bold else null,
-                        modifier = Modifier.padding(top = if (line.isHeading) Spacing.s else 0.dp),
+                Text(
+                    stringResource(R.string.dough_percent_note),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Fields(
+                    { m -> NumberField(stringResource(R.string.dough_water), water, { water = it }, issueFor(DoughField.WATER), m, suffix = "%") },
+                    { m -> NumberField(stringResource(R.string.dough_salt), salt, { salt = it }, issueFor(DoughField.SALT), m, suffix = "%") },
+                    { m -> NumberField(stringResource(R.string.dough_oil), oil, { oil = it }, issueFor(DoughField.OIL), m, suffix = "%") },
+                    weights = listOf(1.6f, 1f, 1f),
+                )
+            }
+
+            Card(stringResource(R.string.dough_section_yeast)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                    for (kind in YeastKind.entries) {
+                        FilterChip(
+                            selected = kind == yeastKind,
+                            onClick = {
+                                // Die Menge bleibt gleichwertig, wenn die Hefeart wechselt.
+                                val current = parseNumber(yeast)
+                                if (current.isFinite()) {
+                                    yeast = DoughNumbers.separator(
+                                        DoughNumbers.plain(yeastKind.convert(current, kind), 3),
+                                        Locale.getDefault().language,
+                                    )
+                                }
+                                yeastKindKey = kind.key
+                            },
+                            label = { Text(stringResource(AndroidDoughTexts.yeastName(kind))) },
+                        )
+                    }
+                }
+                NumberField(
+                    stringResource(R.string.dough_yeast_amount), yeast, { yeast = it },
+                    issueFor(DoughField.YEAST), Modifier.fillMaxWidth(), suffix = "%",
+                )
+            }
+
+            Card(stringResource(R.string.dough_section_preferment)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                    for (option in Preferment.entries) {
+                        FilterChip(
+                            selected = option == preferment,
+                            onClick = {
+                                prefermentKey = option.key
+                                // Biga und Poolish haben feste Wasseranteile, die hier vorausgefüllt werden.
+                                if (option != Preferment.NONE) prefermentWater = show(DoughLimits.defaultPrefermentWater(option))
+                            },
+                            label = { Text(stringResource(prefermentLabel(option))) },
+                        )
+                    }
+                }
+                Text(
+                    stringResource(prefermentExplanation(preferment)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (preferment != Preferment.NONE) {
+                    Fields(
+                        { m ->
+                            NumberField(
+                                stringResource(R.string.dough_preferment_flour), prefermentFlour, { prefermentFlour = it },
+                                issueFor(DoughField.PREFERMENT_FLOUR), m, suffix = "%",
+                            )
+                        },
+                        { m ->
+                            NumberField(
+                                stringResource(R.string.dough_preferment_water), prefermentWater, { prefermentWater = it },
+                                issueFor(DoughField.PREFERMENT_WATER), m, suffix = "%",
+                            )
+                        },
                     )
                 }
-                Text(
-                    stringResource(R.string.dough_total, DoughNumbers.separator(DoughNumbers.plain(result.totalGrams, 0), draft.language)),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = Spacing.s),
-                )
-                val yeastGrams = result.sections.flatMap { it.lines }.filter { it.role == LineRole.YEAST }.sumOf { it.grams }
-                if (yeastGrams > 0) {
-                    val resources = LocalResources.current
-                    val others = YeastKind.entries.filter { it != yeastKind }.joinToString(", ") { other ->
-                        val grams = DoughNumbers.grams(yeastKind.convert(yeastGrams, other), LineRole.YEAST, draft.language)
-                        resources.getString(R.string.dough_yeast_item, grams, resources.getString(AndroidDoughTexts.yeastName(other)))
+            }
+
+            // Mit Vorteig steht hier die Aufteilung; die Summen stehen immer unten.
+            if (result is DoughResult.Success && preferment != Preferment.NONE) {
+                val draft = viewModel.draft(result, input)
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    shape = MaterialTheme.shapes.large,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m),
+                ) {
+                    Column(modifier = Modifier.padding(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                        Text(
+                            stringResource(R.string.dough_section_result),
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier.semantics { heading() },
+                        )
+                        for (line in draft.ingredients) {
+                            Text(
+                                line.text,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = if (line.isHeading) FontWeight.Bold else null,
+                                modifier = Modifier.padding(top = if (line.isHeading) Spacing.xs else 0.dp),
+                            )
+                        }
                     }
-                    Text(stringResource(R.string.dough_yeast_equal, others), style = MaterialTheme.typography.bodyMedium)
                 }
             }
+
+            if (result is DoughResult.Success) {
+                val yeastGrams = result.sections.flatMap { it.lines }.filter { it.role == LineRole.YEAST }.sumOf { it.grams }
+                if (yeastGrams > 0) {
+                    val language = LocalConfiguration.current.locales[0].language
+                    val resources = LocalResources.current
+                    val others = YeastKind.entries.filter { it != yeastKind }.joinToString(", ") { other ->
+                        val grams = DoughNumbers.grams(yeastKind.convert(yeastGrams, other), LineRole.YEAST, language)
+                        resources.getString(R.string.dough_yeast_item, grams, resources.getString(AndroidDoughTexts.yeastName(other)))
+                    }
+                    Text(
+                        stringResource(R.string.dough_yeast_equal, others),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(horizontal = Spacing.m),
+                    )
+                }
+            }
+            if (isLargeText() && result is DoughResult.Success) {
+                Text(
+                    viewModel.totals(result, input),
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(horizontal = Spacing.m),
+                )
+            }
+            Text(
+                stringResource(R.string.dough_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = Spacing.m),
+            )
+            TextButton(onClick = { resetCount += 1 }, modifier = Modifier.padding(horizontal = Spacing.s)) {
+                Text(stringResource(R.string.dough_reset))
+            }
         }
-        is DoughResult.Invalid -> Text(
-            stringResource(R.string.dough_invalid),
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(horizontal = Spacing.m),
-        )
+
+        // Immer sichtbar: die Summen und „Als Rezept speichern“ – auch beim Ändern der Eingaben weiter oben.
+        Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, tonalElevation = 3.dp) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m, vertical = Spacing.s),
+                verticalArrangement = Arrangement.spacedBy(Spacing.s),
+            ) {
+                Column(modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }) {
+                    when (result) {
+                        is DoughResult.Success -> {
+                            val draft = viewModel.draft(result, input)
+                            Text(
+                                stringResource(
+                                    R.string.dough_total_line,
+                                    DoughNumbers.separator(DoughNumbers.plain(result.totalGrams, 0), draft.language),
+                                    "${draft.servings} ${draft.servingsUnit}",
+                                ),
+                                style = MaterialTheme.typography.titleSmall,
+                            )
+                            // Bei großer Schrift stehen die Summen im Formular, damit die Leiste unten klein bleibt.
+                            if (!isLargeText()) Text(viewModel.totals(result, input), style = MaterialTheme.typography.bodyMedium)
+                        }
+                        is DoughResult.Invalid -> Text(
+                            stringResource(R.string.dough_invalid),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+                Button(
+                    onClick = { viewModel.saveAsRecipe(input, onSaved) },
+                    enabled = result is DoughResult.Success,
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text(stringResource(R.string.dough_save)) }
+            }
+        }
     }
-    Text(
-        stringResource(R.string.dough_hint),
-        style = MaterialTheme.typography.bodySmall,
-        modifier = Modifier.padding(horizontal = Spacing.m),
-    )
-    Button(
-        onClick = { viewModel.saveAsRecipe(input, onSaved) },
-        enabled = result is DoughResult.Success,
-        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m),
-    ) { Text(stringResource(R.string.dough_save)) }
-    OutlinedButton(
-        onClick = { resetCount += 1 },
-        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m),
-    ) { Text(stringResource(R.string.dough_reset)) }
-    Column(Modifier.padding(bottom = Spacing.l)) {}
 }
 
 private fun prefermentLabel(preferment: Preferment): Int = when (preferment) {
@@ -350,9 +451,10 @@ private fun prefermentLabel(preferment: Preferment): Int = when (preferment) {
     Preferment.SOURDOUGH -> R.string.dough_pre_sourdough
 }
 
-private fun prefermentExplanation(preferment: Preferment): Int? = when (preferment) {
-    Preferment.NONE -> null
+private fun prefermentExplanation(preferment: Preferment): Int = when (preferment) {
+    Preferment.NONE -> R.string.dough_explain_preferment
     Preferment.BIGA -> R.string.dough_explain_biga
     Preferment.POOLISH -> R.string.dough_explain_poolish
     Preferment.SOURDOUGH -> R.string.dough_explain_sourdough
 }
+

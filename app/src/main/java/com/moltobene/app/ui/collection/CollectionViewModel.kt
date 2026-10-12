@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -24,13 +25,22 @@ data class RecipeListItem(
     val id: String,
     val title: String,
     val isDraft: Boolean,
+    val favorite: Boolean,
     val thumbnail: File?,
 )
+
+/** Welche Rezepte die Sammlung zeigt (neben der Suche). */
+enum class CollectionFilter { ALL, FAVORITES, DRAFTS }
 
 sealed interface CollectionUiState {
     data object Loading : CollectionUiState
     data object Error : CollectionUiState
-    data class Content(val items: List<RecipeListItem>, val query: String) : CollectionUiState
+    data class Content(
+        val items: List<RecipeListItem>, val query: String,
+        val filter: CollectionFilter,
+        val hasFavorites: Boolean,
+        val hasDrafts: Boolean,
+    ) : CollectionUiState
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -45,19 +55,37 @@ class CollectionViewModel(
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
 
-    val state: StateFlow<CollectionUiState> = _query
-        .flatMapLatest { query ->
+    private val _filter = MutableStateFlow(CollectionFilter.ALL)
+    val filter: StateFlow<CollectionFilter> = _filter.asStateFlow()
+
+    private val _grid = MutableStateFlow(true)
+
+    /** Raster (true) oder Liste; die Wahl bleibt gemerkt. */
+    val grid: StateFlow<Boolean> = _grid.asStateFlow()
+
+    val state: StateFlow<CollectionUiState> = combine(_query, _filter) { query, filter -> query to filter }
+        .flatMapLatest { (query, filter) ->
             repository.observeSummaries(query).map { summaries ->
                 CollectionUiState.Content(
-                    items = summaries.map { summary ->
+                    items = summaries.filter {
+                        when (filter) {
+                            CollectionFilter.ALL -> true
+                            CollectionFilter.FAVORITES -> it.favorite
+                            CollectionFilter.DRAFTS -> it.isDraft
+                        }
+                    }.map { summary ->
                         RecipeListItem(
                             id = summary.id,
                             title = summary.title,
                             isDraft = summary.isDraft,
+                            favorite = summary.favorite,
                             thumbnail = summary.photoId?.let { photoStore.thumbFile(it) },
                         )
                     },
                     query = query,
+                    filter = filter,
+                    hasFavorites = summaries.any { it.favorite },
+                    hasDrafts = summaries.any { it.isDraft },
                 ) as CollectionUiState
             }
         }
@@ -65,11 +93,21 @@ class CollectionViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CollectionUiState.Loading)
 
     init {
+        viewModelScope.launch { runCatching { preferences.collectionGrid() }.getOrNull()?.let { _grid.value = it } }
         viewModelScope.launch {
             runCatching { repository.cleanUpUnusedPhotos() }
             runCatching { pendingRecognition.deleteLeftovers() }
             runCatching { translations.deleteUnused(repository.updatedAtById().keys) }
         }
+    }
+
+    fun onFilterChange(value: CollectionFilter) {
+        _filter.value = value
+    }
+
+    fun onGridChange(value: Boolean) {
+        _grid.value = value
+        viewModelScope.launch { runCatching { preferences.setCollectionGrid(value) } }
     }
 
     fun onQueryChange(value: String) {
