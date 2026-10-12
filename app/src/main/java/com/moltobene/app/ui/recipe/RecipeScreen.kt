@@ -142,6 +142,7 @@ import com.moltobene.app.ui.components.RecipePhotoLarge
 import com.moltobene.app.ui.theme.Spacing
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.abs
@@ -566,7 +567,14 @@ private fun RecipeContent(
     val speechLanguage = (translated?.language ?: shownLanguage ?: recipeLanguage).take(2)
     val speechState by speech.state.collectAsStateWithLifecycle()
     val speaking = speechState is SpeechState.Speaking
-    val scope = rememberCoroutineScope()
+    // Kurzmeldungen stehen in der Kochleiste selbst, damit sie die Knöpfe nicht verdecken wie eine Snackbar.
+    var barMessage by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(barMessage) {
+        if (barMessage != null) {
+            delay(BAR_MESSAGE_MILLIS)
+            barMessage = null
+        }
+    }
     val lastStepMessage = stringResource(R.string.cook_last_step)
     val allCheckedMessage = stringResource(R.string.cook_all_checked)
     fun readStep(index: Int) {
@@ -576,7 +584,7 @@ private fun RecipeContent(
     fun move(result: StepMove) {
         when (result) {
             is StepMove.To -> if (speaking) readStep(result.index)
-            StepMove.AtEnd -> scope.launch { snackbarHostState.showSnackbar(lastStepMessage) }
+            StepMove.AtEnd -> barMessage = lastStepMessage
             StepMove.None -> Unit
         }
     }
@@ -586,7 +594,7 @@ private fun RecipeContent(
             !ingredient.isHeading && RecipeViewModel.progressKey(index, ingredient.text) !in cooking.checked
         }
         if (open.isEmpty()) {
-            scope.launch { snackbarHostState.showSnackbar(allCheckedMessage) }
+            barMessage = allCheckedMessage
             return
         }
         val about = SpokenText.about(speechLanguage)
@@ -794,6 +802,7 @@ private fun RecipeContent(
                 hasSteps = recipe.steps.isNotEmpty(),
                 hasIngredients = recipe.ingredients.any { !it.isHeading },
                 speaking = speaking,
+                message = barMessage,
                 onPrevious = { move(cooking.onPreviousStep()) },
                 onRead = {
                     if (speaking) {
@@ -972,6 +981,7 @@ private fun CookingBar(
     hasSteps: Boolean,
     hasIngredients: Boolean,
     speaking: Boolean,
+    message: String?,
     onPrevious: () -> Unit,
     onRead: () -> Unit,
     onNext: () -> Unit,
@@ -991,6 +1001,14 @@ private fun CookingBar(
             modifier = Modifier.padding(horizontal = Spacing.s, vertical = Spacing.s),
             verticalArrangement = Arrangement.spacedBy(Spacing.s),
         ) {
+            if (message != null) {
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
+                    textAlign = TextAlign.Center,
+                )
+            }
             if (stacked) {
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
                     BarButton(previous, previousDescription, hasSteps, onPrevious)
@@ -1029,6 +1047,9 @@ private fun RowScope.BarButton(text: String, description: String, enabled: Boole
         }
     }
 }
+
+/** So lange steht eine Kurzmeldung („Letzter Schritt“) in der Kochleiste. */
+private const val BAR_MESSAGE_MILLIS = 3_000L
 
 /** Ab dieser Abweichung von einer ganzen Zahl steht „etwa“ vor den Portionen. */
 private const val SERVINGS_TOLERANCE = 0.01
