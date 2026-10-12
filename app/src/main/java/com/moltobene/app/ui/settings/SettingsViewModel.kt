@@ -11,6 +11,7 @@ import com.moltobene.app.data.AppPreferences
 import com.moltobene.app.data.Appearance
 import com.moltobene.app.data.Palette
 import com.moltobene.app.data.ScreenOn
+import com.moltobene.app.data.StartScreen
 import com.moltobene.app.data.StorageFull
 import com.moltobene.app.data.ThemeMode
 import com.moltobene.app.data.backup.BackupManager
@@ -75,6 +76,13 @@ class SettingsViewModel(
         viewModelScope.launch {
             runCatching { preferences.setAppearance(change(appearance.value ?: Appearance())) }
         }
+    }
+
+    /** „Beim Öffnen der App“ (#81); gilt beim nächsten Öffnen. */
+    val startScreen: StateFlow<StartScreen?> = preferences.startScreen
+
+    fun setStartScreen(startScreen: StartScreen) {
+        viewModelScope.launch { runCatching { preferences.setStartScreen(startScreen) } }
     }
 
     /** „Bildschirm in der Rezeptansicht“ (#68); gilt sofort. */

@@ -12,6 +12,7 @@ import com.moltobene.app.BuildConfig
 import com.moltobene.app.MoltobeneApplication
 import com.moltobene.app.data.Appearance
 import com.moltobene.app.data.ScreenOn
+import com.moltobene.app.data.StartScreen
 import kotlinx.coroutines.runBlocking
 import org.junit.rules.ExternalResource
 import kotlin.math.abs
@@ -60,5 +61,7 @@ class DeviceSetupRule(private val variant: DisplayVariant) : ExternalResource() 
         // Standard-Darstellung: „Schiefer“ und wie das Handy – Hell/Dunkel kommt dann von der Darstellung des Rundgangs.
         container.preferences.setAppearance(Appearance())
         container.preferences.setScreenOn(ScreenOn.STAYS_ON)
+        // Der Rundgang beginnt in der Sammlung (Start: Rezepte); die Startseite liegt darunter und hat ihren eigenen Test.
+        container.preferences.setStartScreen(StartScreen.COLLECTION)
     }
 }

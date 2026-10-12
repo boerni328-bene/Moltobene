@@ -236,8 +236,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>The dough calculator now also covers pasta (egg and water dough) and cake (batter, sponge, shortcrust, yeast dough, choux, quark-oil dough).</item>
-        <item>For cakes the amount of flour follows the pan size; the result can be saved as a recipe.</item>
+        <item>New home screen: when opening the app, large tiles for “Recipes” (with the count) and the dough calculator appear.</item>
+        <item>In Settings under “Start” you can choose whether the app begins with the home screen or straight with the recipes.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->
@@ -295,6 +295,17 @@
         <item quantity="other">Turns off %1$d minutes after last tap</item>
     </plurals>
     <string name="screen_on_device">Same as device</string>
+    <!-- Startseite (#81) -->
+    <string name="home_recipes_title">Recipes</string>
+    <plurals name="home_recipes_count">
+        <item quantity="one">%1$d recipe</item>
+        <item quantity="other">%1$d recipes</item>
+    </plurals>
+    <string name="home_dough_text">Amounts for pizza, bread, pasta and cake</string>
+    <string name="settings_section_start">Start</string>
+    <string name="start_title">When opening the app</string>
+    <string name="start_home">Home</string>
+    <string name="start_collection">Recipes</string>
     <!-- Einstellungen: Darstellung (Hell/Dunkel und Farbwelt) -->
     <string name="settings_section_appearance">Appearance</string>
     <string name="appearance_mode">Light or dark</string>

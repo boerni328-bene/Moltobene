@@ -3,9 +3,12 @@ package com.moltobene.app.ui.navigation
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -16,6 +19,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.moltobene.app.MoltobeneApplication
 import com.moltobene.app.data.ScreenOn
+import com.moltobene.app.data.StartScreen
 import com.moltobene.app.ui.collection.CollectionScreen
 import com.moltobene.app.ui.collection.CollectionViewModel
 import com.moltobene.app.R
@@ -24,6 +28,8 @@ import com.moltobene.app.ui.dough.DoughViewModel
 import com.moltobene.app.ui.edit.EditScreen
 import com.moltobene.app.ui.edit.EditViewModel
 import com.moltobene.app.ui.edit.SharedContent
+import com.moltobene.app.ui.home.HomeScreen
+import com.moltobene.app.ui.home.HomeViewModel
 import com.moltobene.app.ui.licenses.LicensesScreen
 import com.moltobene.app.ui.licenses.LicensesViewModel
 import com.moltobene.app.ui.recipe.RecipeScreen
@@ -51,7 +57,36 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
         }
     }
 
-    NavHost(navController = navController, startDestination = CollectionRoute) {
+    val startScreen by container.preferences.startScreen.collectAsStateWithLifecycle()
+
+    // Die Startseite ist die Wurzel: Zurück aus der Sammlung führt hierher, Zurück von hier beendet die App (#81).
+    NavHost(navController = navController, startDestination = HomeRoute) {
+        composable<HomeRoute> {
+            // „Beim Öffnen: Rezepte“: gleich weiter zur Sammlung, nur einmal und nicht bei geteilten Inhalten. Bis dahin
+            // bleibt die Seite leer, damit die Startseite nicht kurz aufblitzt. Zurück führt dann zur Startseite.
+            var forwardToCollection by rememberSaveable {
+                mutableStateOf(startScreen == StartScreen.COLLECTION && shared == null)
+            }
+            if (forwardToCollection) {
+                LaunchedEffect(Unit) {
+                    forwardToCollection = false
+                    navController.navigate(CollectionRoute)
+                }
+            } else {
+                HomeScreen(
+                    viewModel = viewModel { HomeViewModel(container.repository) },
+                    snackbarHostState = snackbarHostState,
+                    onOpenCollection = { navController.navigate(CollectionRoute) },
+                    onOpenDough = { navController.navigate(DoughRoute) },
+                    onAddRecipe = { navController.navigate(EditRoute()) },
+                    onAddFromPhoto = { navController.navigate(EditRoute(fromPhoto = true)) },
+                    onAddFromText = { navController.navigate(EditRoute(fromText = true)) },
+                    onAddFromLink = { navController.navigate(EditRoute(fromLink = true)) },
+                    onAddFromFile = { navController.navigate(EditRoute(fromFile = true)) },
+                    onOpenSettings = { navController.navigate(SettingsRoute) },
+                )
+            }
+        }
         composable<CollectionRoute> {
             CollectionScreen(
                 viewModel = viewModel {

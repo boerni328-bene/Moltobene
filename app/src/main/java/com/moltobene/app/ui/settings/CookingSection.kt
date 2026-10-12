@@ -13,6 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import com.moltobene.app.R
 import com.moltobene.app.data.ScreenOn
+import com.moltobene.app.data.StartScreen
 
 /**
  * „Kochen“ in den Einstellungen (#68): wie lange der Bildschirm in der Rezeptansicht anbleibt. Später kommt hier auch
@@ -40,5 +41,23 @@ private fun label(choice: ScreenOn): String {
         minutes != null -> pluralStringResource(R.plurals.screen_on_off_after, minutes, minutes)
         choice == ScreenOn.DEVICE -> stringResource(R.string.screen_on_device)
         else -> stringResource(R.string.screen_on_stays)
+    }
+}
+
+/** „Start“ in den Einstellungen (#81): Startseite oder gleich die Rezepte beim Öffnen der App. */
+@Composable
+internal fun StartSection(startScreen: StartScreen, onStartScreen: (StartScreen) -> Unit) {
+    GroupLabel(stringResource(R.string.start_title))
+    Column(modifier = Modifier.selectableGroup()) {
+        StartScreen.entries.forEach { choice ->
+            val selected = startScreen == choice
+            ListItem(
+                headlineContent = {
+                    Text(stringResource(if (choice == StartScreen.HOME) R.string.start_home else R.string.start_collection))
+                },
+                leadingContent = { RadioButton(selected = selected, onClick = null) },
+                modifier = Modifier.selectable(selected = selected, role = Role.RadioButton, onClick = { onStartScreen(choice) }),
+            )
+        }
     }
 }

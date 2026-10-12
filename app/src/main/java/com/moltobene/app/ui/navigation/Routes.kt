@@ -5,6 +5,9 @@ import kotlinx.serialization.Serializable
 // Ziele der Navigation. Werden über ihren Namen gefunden – siehe Schutzregel in proguard-rules.pro.
 
 @Serializable
+object HomeRoute
+
+@Serializable
 object CollectionRoute
 
 @Serializable

@@ -43,6 +43,7 @@ import com.moltobene.app.R
 import com.moltobene.app.data.Appearance
 import com.moltobene.app.data.Palette
 import com.moltobene.app.data.ScreenOn
+import com.moltobene.app.data.StartScreen
 import com.moltobene.app.data.ThemeMode
 import com.moltobene.app.data.share.RecipeJsonLd
 import com.moltobene.app.ui.whatsnew.WhatsNew
@@ -188,6 +189,37 @@ class AppTourTest(private val variant: DisplayVariant) {
         val titles = runBlocking { container().repository.getAll().map { it.title } }
         assertFalse(SampleRecipes.TOMATO_SAUCE in titles)
         assertTrue(SampleRecipes.POTATO_SALAD in titles)
+    }
+
+    /**
+     * Startseite (#81): Der Rundgang beginnt mit „Beim Öffnen: Rezepte“, Zurück führt zur Startseite mit den Kacheln
+     * „Rezepte“ (mit Anzahl) und „Teigrechner“; die Einstellung „Beim Öffnen der App“ lässt sich ändern.
+     */
+    @Test
+    fun startseite() {
+        addSampleRecipes()
+        waitForText(SampleRecipes.POTATO_SALAD)
+        val count = runBlocking { container().repository.getAll().size }
+        pressBack()
+
+        val recipes = activity.resources.getQuantityString(R.plurals.home_recipes_count, count, count)
+        waitForText(recipes)
+        composeRule.onNodeWithText(text(R.string.home_recipes_title)).assertIsDisplayed()
+        composeRule.onNodeWithText(text(R.string.dough_title)).assertIsDisplayed()
+        screenshot("00-startseite")
+
+        // „Rezepte“ öffnet die Sammlung, Zurück führt wieder zur Startseite.
+        composeRule.onNodeWithText(text(R.string.home_recipes_title)).performClick()
+        waitForText(SampleRecipes.POTATO_SALAD)
+        pressBack()
+        waitForText(recipes)
+
+        composeRule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        waitForText(text(R.string.settings_section_start))
+        composeRule.onNodeWithText(text(R.string.start_home)).performScrollTo().performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.startScreen.value == StartScreen.HOME }
+        composeRule.onNodeWithText(text(R.string.start_home)).assertIsSelected()
+        screenshot("00a-einstellung-start")
     }
 
     /** Kochen (#56): Zutat abhaken, aktueller Schritt, Portionen umrechnen – das gespeicherte Rezept bleibt. */
@@ -796,6 +828,10 @@ class AppTourTest(private val variant: DisplayVariant) {
 
     private fun input(@StringRes label: Int, value: String) {
         field(label).performScrollTo().performTextInput(value)
+    }
+
+    private fun pressBack() = InstrumentationRegistry.getInstrumentation().runOnMainSync {
+        activity.onBackPressedDispatcher.onBackPressed()
     }
 
     private fun container() = (activity.application as MoltobeneApplication).container

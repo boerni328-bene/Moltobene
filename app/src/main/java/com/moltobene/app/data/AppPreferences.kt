@@ -23,6 +23,11 @@ class AppPreferences(context: Context) {
     /** Darstellung aus den Einstellungen; null, bis [loadAppearance] sie gelesen hat. */
     val appearance: StateFlow<Appearance?> = appearanceState.asStateFlow()
 
+    private val startScreenState = MutableStateFlow<StartScreen?>(null)
+
+    /** „Beim Öffnen der App“ (#81); null, bis [loadAppearance] sie gelesen hat. */
+    val startScreen: StateFlow<StartScreen?> = startScreenState.asStateFlow()
+
     private val screenOnState = MutableStateFlow<ScreenOn?>(null)
 
     /** „Bildschirm in der Rezeptansicht“ (#68); null, bis [loadAppearance] sie gelesen hat (dann gilt „Bleibt an“). */
@@ -33,6 +38,9 @@ class AppPreferences(context: Context) {
      * in den richtigen Farben kommt.
      */
     suspend fun loadAppearance() = withContext(Dispatchers.IO) {
+        // Vor der Darstellung, denn die Oberfläche erscheint, sobald die Darstellung da ist, und braucht den Start.
+        val start = runCatching { StartScreen.fromKey(prefs.getString(KEY_START_SCREEN, null)) }.getOrDefault(StartScreen.HOME)
+        startScreenState.compareAndSet(null, start)
         val stored = runCatching {
             Appearance(
                 mode = ThemeMode.fromKey(prefs.getString(KEY_THEME_MODE, null)),
@@ -42,6 +50,12 @@ class AppPreferences(context: Context) {
         appearanceState.compareAndSet(null, stored)
         val screen = runCatching { ScreenOn.fromKey(prefs.getString(KEY_SCREEN_ON, null)) }.getOrDefault(ScreenOn.STAYS_ON)
         screenOnState.compareAndSet(null, screen)
+    }
+
+    /** Gilt beim nächsten Öffnen der App; gespeichert wird danach. */
+    suspend fun setStartScreen(startScreen: StartScreen) {
+        startScreenState.value = startScreen
+        withContext(Dispatchers.IO) { prefs.edit { putString(KEY_START_SCREEN, startScreen.key) } }
     }
 
     /** Gilt sofort, gespeichert wird danach. */
@@ -152,6 +166,7 @@ class AppPreferences(context: Context) {
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_PALETTE = "palette"
         const val KEY_SCREEN_ON = "screen_on"
+        const val KEY_START_SCREEN = "start_screen"
         const val KEY_COLLECTION_GRID = "collection_grid"
         const val KEY_DOUGH_PREFIX = "dough_values_"
     }

@@ -53,6 +53,7 @@ import com.moltobene.app.BuildConfig
 import com.moltobene.app.R
 import com.moltobene.app.data.Appearance
 import com.moltobene.app.data.ScreenOn
+import com.moltobene.app.data.StartScreen
 import com.moltobene.app.data.backup.BackupManager
 import com.moltobene.app.data.backup.BackupReader
 import com.moltobene.app.data.translate.LanguagePack
@@ -86,6 +87,7 @@ fun SettingsScreen(
     val languagePack by viewModel.languagePackState.collectAsStateWithLifecycle()
     val appearance by viewModel.appearance.collectAsStateWithLifecycle()
     val screenOn by viewModel.screenOn.collectAsStateWithLifecycle()
+    val startScreen by viewModel.startScreen.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val createBackup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
         if (uri != null) viewModel.backup(uri)
@@ -158,6 +160,8 @@ fun SettingsScreen(
                 onCancel = viewModel::cancelLanguagePack,
                 onDelete = { confirmDeletePack = true },
             )
+            SectionHeader(stringResource(R.string.settings_section_start))
+            StartSection(startScreen = startScreen ?: StartScreen.HOME, onStartScreen = viewModel::setStartScreen)
             SectionHeader(stringResource(R.string.settings_section_cooking))
             CookingSection(screenOn = screenOn ?: ScreenOn.STAYS_ON, onScreenOn = viewModel::setScreenOn)
             SectionHeader(stringResource(R.string.settings_section_appearance))

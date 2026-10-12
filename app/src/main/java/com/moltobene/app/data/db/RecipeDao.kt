@@ -56,6 +56,10 @@ abstract class RecipeDao {
     @Query("SELECT COUNT(*) FROM recipes WHERE updatedAt > :since")
     abstract fun observeChangedSince(since: Long): Flow<Int>
 
+    /** Anzahl der Rezepte für die Startseite (#81): eine einzige Zählung, ohne Rezepte zu laden. */
+    @Query("SELECT COUNT(*) FROM recipes")
+    abstract fun observeCount(): Flow<Int>
+
     @Query("SELECT photoId FROM recipe_photos")
     abstract suspend fun getAllPhotoIds(): List<String>
 

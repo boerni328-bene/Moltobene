@@ -3,6 +3,13 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.33.0] – 2026-10-12 (versionCode 60)
+
+### Neu
+- **Startseite:** Beim Öffnen der App erscheint nicht mehr gleich die Rezeptliste, sondern eine Startseite mit großen Kacheln: „Rezepte“ (mit der Anzahl der Rezepte) führt in die Sammlung, „Teigrechner“ öffnet den Teigrechner. Hinzufügen und Einstellungen sind wie in der Sammlung zu erreichen. Die Zurück-Taste führt aus der Sammlung zur Startseite, von dort beendet sie die App. Der Teigrechner bleibt zusätzlich unter „Hinzufügen“. Bei großer Schrift untereinander und scrollbar.
+- **Einstellung „Start“:** Unter „Beim Öffnen der App“ lässt sich „Startseite“ (Standard) oder „Rezepte“ wählen. Mit „Rezepte“ beginnt die App wie bisher in der Sammlung, die Startseite liegt dann dahinter.
+- Geteilte Rezepte, Links und Dateien öffnen sich beim Start wie bisher gleich zum Übernehmen.
+
 ## [0.32.0] – 2026-10-12 (versionCode 59)
 
 ### Neu
