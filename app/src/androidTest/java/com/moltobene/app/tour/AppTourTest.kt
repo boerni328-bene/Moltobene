@@ -585,9 +585,12 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("15b-schlagwoerter-rezept")
 
         pressBack()
-        waitForText(SampleRecipes.POTATO_SALAD)
         val sauces = text(R.string.tag_filter_chip, text(R.string.tag_sauce), 1)
-        if (variant == DisplayVariant.LARGE_TEXT) {
+        val large = variant == DisplayVariant.LARGE_TEXT
+        // Die Sammlung kann bei großer Schrift nicht alles zugleich zeigen; Rezepte werden darum gezielt angesteuert.
+        waitForText(if (large) text(R.string.tag_filter_all) else sauces)
+        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(SampleRecipes.POTATO_SALAD))
+        if (large) {
             composeRule.onNodeWithText(text(R.string.tag_filter_all)).performScrollTo().performClick()
             waitForText(sauces)
             composeRule.onNodeWithText(sauces).performClick()
@@ -596,6 +599,7 @@ class AppTourTest(private val variant: DisplayVariant) {
             composeRule.onNodeWithText(sauces).performScrollTo().performClick()
         }
         waitUntilGone(SampleRecipes.POTATO_SALAD)
+        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(SampleRecipes.TOMATO_SAUCE))
         composeRule.onNodeWithText(SampleRecipes.TOMATO_SAUCE).assertIsDisplayed()
         screenshot("15c-filter-schlagwort")
     }
