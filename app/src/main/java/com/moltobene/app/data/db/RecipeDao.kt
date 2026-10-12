@@ -85,6 +85,10 @@ abstract class RecipeDao {
     @Query("SELECT recipeId, name, predefinedKey FROM recipe_tags")
     abstract fun observeTagLinks(): Flow<List<RecipeTagEntity>>
 
+    // Titel der Rezepte mit einer bestimmten Quelle, z. B. „Moltobene“ für übernommene Grundrezepte (#82).
+    @Query("SELECT id, title FROM recipes WHERE sourceName = :name")
+    abstract suspend fun getTitlesBySourceName(name: String): List<RecipeTitleRow>
+
     @Query("SELECT COUNT(*) FROM recipes")
     abstract fun observeCount(): Flow<Int>
 

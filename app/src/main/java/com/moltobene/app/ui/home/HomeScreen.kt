@@ -63,6 +63,7 @@ fun HomeScreen(
     snackbarHostState: SnackbarHostState,
     onOpenCollection: () -> Unit,
     onOpenDough: () -> Unit,
+    onOpenBasics: () -> Unit,
     onOpenRecipe: (String) -> Unit,
     onAddRecipe: () -> Unit,
     onAddFromPhoto: () -> Unit,
@@ -161,6 +162,12 @@ fun HomeScreen(
             if (recent.isNotEmpty()) {
                 RecentTile(items = recent, onOpenRecipe = onOpenRecipe)
             }
+            HomeTile(
+                icon = R.drawable.ic_restaurant,
+                title = stringResource(R.string.basics_title),
+                subtitle = stringResource(R.string.home_basics_text),
+                onClick = onOpenBasics,
+            )
             HomeTile(
                 icon = R.drawable.ic_calculate,
                 title = stringResource(R.string.dough_title),

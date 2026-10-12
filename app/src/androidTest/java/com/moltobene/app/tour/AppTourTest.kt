@@ -44,6 +44,7 @@ import com.moltobene.app.data.Appearance
 import com.moltobene.app.data.Palette
 import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.StartScreen
+import com.moltobene.app.data.basics.BasicRecipes
 import com.moltobene.app.data.ThemeMode
 import com.moltobene.app.data.share.RecipeJsonLd
 import com.moltobene.app.ui.whatsnew.WhatsNew
@@ -597,6 +598,47 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitUntilGone(SampleRecipes.POTATO_SALAD)
         composeRule.onNodeWithText(SampleRecipes.TOMATO_SAUCE).assertIsDisplayed()
         screenshot("15c-filter-schlagwort")
+    }
+
+    /**
+     * Grundrezepte (#82): von der Startseite aus ein Grundrezept ansehen, als normales Rezept übernehmen (Quelle
+     * „Moltobene“, mit Schlagwörtern) und beim zweiten Mal den Hinweis „Schon in der Sammlung“ sehen.
+     */
+    @Test
+    fun grundrezepte() {
+        addSampleRecipes()
+        waitForText(SampleRecipes.POTATO_SALAD)
+        pressBack()
+        waitForText(text(R.string.home_recipes_title))
+        composeRule.onNodeWithText(text(R.string.basics_title)).performScrollTo().performClick()
+        waitForText(text(R.string.basics_intro))
+
+        val first = runBlocking { container().basicRecipes.load() }.first()
+        val title = BasicRecipes.text(first, variant.language).title
+        composeRule.onNodeWithText(title).performScrollTo().performClick()
+        waitForText(text(R.string.instructions))
+        screenshot("16a-grundrezepte")
+
+        adoptFirstBasic()
+        waitForText(text(R.string.basics_added, title))
+        screenshot("16b-grundrezept-uebernommen")
+        val stored = runBlocking { container().repository.getAll().filter { it.title == title } }
+        assertEquals(1, stored.size)
+        assertEquals("Moltobene", stored.single().source?.name)
+        assertEquals(variant.language, stored.single().language)
+        assertTrue(stored.single().tags.any { it.name == "basics" })
+
+        adoptFirstBasic()
+        waitForText(text(R.string.basics_duplicate_title))
+        screenshot("16c-grundrezept-duplikat")
+        composeRule.onNodeWithText(text(R.string.basics_adopt_anyway)).performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) {
+            runBlocking { container().repository.getAll().count { it.title == title } } == 2
+        }
+    }
+
+    private fun adoptFirstBasic() {
+        composeRule.onAllNodesWithText(text(R.string.basics_adopt)).onFirst().performScrollTo().performClick()
     }
 
     @Test

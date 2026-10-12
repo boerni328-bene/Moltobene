@@ -259,7 +259,7 @@ private fun FavoriteBadge(modifier: Modifier = Modifier) {
 
 /** Foto des Gerichts oder, ohne Foto, eine ruhige Fläche mit dem Anfangsbuchstaben. */
 @Composable
-private fun Thumbnail(item: RecipeListItem, title: String, modifier: Modifier) {
+internal fun Thumbnail(item: RecipeListItem, title: String, modifier: Modifier) {
     if (item.thumbnail != null) {
         RecipePhoto(file = item.thumbnail, placeholderIconSize = 28.dp, modifier = modifier)
     } else {
