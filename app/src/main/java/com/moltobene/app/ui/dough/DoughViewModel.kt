@@ -133,7 +133,7 @@ class DoughViewModel(
         viewModelScope.launch { sliders = runCatching { preferences.doughMemory(SLIDERS_KEY) == "1" }.getOrDefault(false) }
     }
 
-    fun setSliders(on: Boolean) {
+    fun chooseSliders(on: Boolean) {
         sliders = on
         viewModelScope.launch { runCatching { preferences.setDoughMemory(SLIDERS_KEY, if (on) "1" else "0") } }
     }

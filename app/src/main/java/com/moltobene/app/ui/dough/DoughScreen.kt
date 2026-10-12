@@ -123,7 +123,7 @@ fun DoughScreen(
             Column(modifier = Modifier.padding(padding).fillMaxSize()) {
                 val header: @Composable () -> Unit = {
                     Header(type) { typeKey = it.key }
-                    InputModeToggle(viewModel.sliders, viewModel::setSliders)
+                    InputModeToggle(viewModel.sliders, viewModel::chooseSliders)
                 }
                 when (type) {
                     DoughType.PIZZA, DoughType.BREAD -> LeavenedContent(type, viewModel, onSaved, header)
