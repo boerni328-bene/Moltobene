@@ -87,4 +87,8 @@ Außerdem ohne eigenen Rang: **Hinzufügen-Auswahl mit Zweitzeile und Gruppe „
 - Issues für Rang 1–5 angelegt: #86 (Teigrechner), #87 (Startseite), #88 (Meldungen), #89 (Kochansicht), #90 (Hinweiskarte). Rang 6–10 bleiben Vorschläge im Protokoll.
 - Teigrechner: Regler + Zahl, Plus/Minus nur bei kleinen Zahlen; Umschalter „Zahlen | Regler“ entfällt.
 - Kochansicht: Foto niedriger, schrumpft beim Scrollen (nicht einklappbar).
-- Noch offen: Fragen 3 bis 7 oben (Zutaten ins Menü bei großer Schrift, TalkBack, Baseline-Profil, Store-Fotos, Markenprüfung).
+- Bei Schrift 200 % wandert „Zutaten“ aus der Kochleiste ins Menü (Frage 3: ja).
+- TalkBack: Die App liest bei eingeschaltetem TalkBack selbst vor (Frage 4); Zusammenspiel auf einem echten Handy prüfen.
+- Baseline-Profil: prüfen (Frage 5), vorher mit dem Projektinhaber abstimmen, weil es ein zusätzliches Gradle-Modul braucht; Messwerte aus #52 abwarten.
+- Marke: „Molto Bene“ vor dem Store-Start im Markenregister prüfen lassen (Frage 7: ja).
+- Noch offen: Frage 6 (eigene Gerichtefotos für die Store-Bilder, Zeitpunkt).
