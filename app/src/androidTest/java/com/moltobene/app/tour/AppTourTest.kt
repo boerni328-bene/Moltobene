@@ -481,6 +481,14 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText("4 " + text(R.string.dough_unit_balls, "250"), substring = true)
         screenshot("14a-teigrechner")
 
+        // Plus/Minus und Standard (#83): Wasseranteil um 1 erhöhen, der Standard wird genannt, mit dem Knopf geht es zurück.
+        val waterLabel = text(R.string.dough_water)
+        composeRule.onNodeWithContentDescription(text(R.string.dough_step_more, waterLabel, "1 %")).performScrollTo().performClick()
+        waitForText(text(R.string.dough_default_value, "65 %"))
+        screenshot("14d-teigrechner-plus-minus")
+        composeRule.onNodeWithContentDescription(text(R.string.dough_default_reset, waterLabel)).performScrollTo().performClick()
+        waitUntilGone(text(R.string.dough_default_value, "65 %"))
+
         composeRule.onNodeWithText(text(R.string.dough_pre_biga)).performScrollTo().performClick()
         waitForText(text(R.string.dough_explain_biga))
 

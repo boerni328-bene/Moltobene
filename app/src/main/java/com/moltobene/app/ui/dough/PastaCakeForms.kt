@@ -38,6 +38,7 @@ import com.moltobene.app.data.dough.DoughField
 import com.moltobene.app.data.dough.DoughIssue
 import com.moltobene.app.data.dough.DoughNumbers
 import com.moltobene.app.data.dough.DoughResult
+import com.moltobene.app.data.dough.DoughStepper
 import com.moltobene.app.data.dough.PastaCalculator
 import com.moltobene.app.data.dough.PastaInput
 import com.moltobene.app.data.dough.PastaKind
@@ -46,6 +47,7 @@ import com.moltobene.app.data.dough.LineRole
 import com.moltobene.app.data.dough.YeastKind
 import com.moltobene.app.ui.theme.Spacing
 import java.util.Locale
+import kotlinx.coroutines.delay
 
 private const val SUFFIX_PERCENT = "%"
 
@@ -92,6 +94,9 @@ private fun PastaForm(
     var salt by rememberSaveable(kind, resetCount) { mutableStateOf(show(start.salt)) }
     var oil by rememberSaveable(kind, resetCount) { mutableStateOf(show(start.oil)) }
 
+    val defaults = PastaLimits.defaults(kind)
+    fun stepping(field: DoughField, default: Double) =
+        Stepping(DoughStepper.stepFor(field), default, PastaLimits.range(kind, field))
     val input = PastaInput(
         kind = kind,
         portions = portions.trim().toIntOrNull() ?: 0,
@@ -106,7 +111,10 @@ private fun PastaForm(
     val result = PastaCalculator.calculate(input)
     val issues = (result as? DoughResult.Invalid)?.issues.orEmpty()
     LaunchedEffect(input, result is DoughResult.Success) {
-        if (result is DoughResult.Success) viewModel.rememberPasta(input)
+        if (result is DoughResult.Success) {
+            delay(MEMORY_DELAY_MILLIS)
+            viewModel.rememberPasta(input)
+        }
     }
 
     FormFrame(
@@ -134,11 +142,17 @@ private fun PastaForm(
                 }
             }
             Fields(
-                { m -> NumberField(stringResource(R.string.dough_portions), portions, { portions = it }, issues.forField(DoughField.COUNT), m, integer = true) },
+                { m ->
+                    NumberField(
+                        stringResource(R.string.dough_portions), portions, { portions = it }, issues.forField(DoughField.COUNT), m,
+                        integer = true, stepping = stepping(DoughField.COUNT, defaults.portions.toDouble()),
+                    )
+                },
                 { m ->
                     NumberField(
                         stringResource(R.string.dough_flour_per_portion), flour, { flour = it },
                         issues.forField(DoughField.FLOUR_PER_PORTION), m, suffix = "g",
+                        stepping = stepping(DoughField.FLOUR_PER_PORTION, defaults.flourPerPortion),
                     )
                 },
             )
@@ -154,19 +168,29 @@ private fun PastaForm(
                     NumberField(
                         stringResource(R.string.dough_semolina), semolina, { semolina = it },
                         issues.forField(DoughField.SEMOLINA), m, suffix = SUFFIX_PERCENT,
+                        stepping = stepping(DoughField.SEMOLINA, defaults.semolina),
                     )
                 },
                 { m ->
-                    NumberField(stringResource(R.string.dough_water), water, { water = it }, issues.forField(DoughField.WATER), m, suffix = SUFFIX_PERCENT)
+                    NumberField(
+                        stringResource(R.string.dough_water), water, { water = it }, issues.forField(DoughField.WATER), m, suffix = SUFFIX_PERCENT,
+                        stepping = stepping(DoughField.WATER, defaults.water),
+                    )
                 },
             )
             if (kind == PastaKind.EGG) {
                 Fields(
                     { m ->
-                        NumberField(stringResource(R.string.dough_egg_whole), egg, { egg = it }, issues.forField(DoughField.WHOLE_EGG), m, suffix = SUFFIX_PERCENT)
+                        NumberField(
+                            stringResource(R.string.dough_egg_whole), egg, { egg = it }, issues.forField(DoughField.WHOLE_EGG), m, suffix = SUFFIX_PERCENT,
+                            stepping = stepping(DoughField.WHOLE_EGG, defaults.egg),
+                        )
                     },
                     { m ->
-                        NumberField(stringResource(R.string.dough_yolk), yolk, { yolk = it }, issues.forField(DoughField.YOLK), m, suffix = SUFFIX_PERCENT)
+                        NumberField(
+                            stringResource(R.string.dough_yolk), yolk, { yolk = it }, issues.forField(DoughField.YOLK), m, suffix = SUFFIX_PERCENT,
+                            stepping = stepping(DoughField.YOLK, defaults.yolk),
+                        )
                     },
                 )
                 issues.filterIsInstance<DoughIssue.TooLittleLiquid>().firstOrNull()?.let {
@@ -186,8 +210,18 @@ private fun PastaForm(
                 }
             }
             Fields(
-                { m -> NumberField(stringResource(R.string.dough_salt), salt, { salt = it }, issues.forField(DoughField.SALT), m, suffix = SUFFIX_PERCENT) },
-                { m -> NumberField(stringResource(R.string.dough_oil), oil, { oil = it }, issues.forField(DoughField.OIL), m, suffix = SUFFIX_PERCENT) },
+                { m ->
+                    NumberField(
+                        stringResource(R.string.dough_salt), salt, { salt = it }, issues.forField(DoughField.SALT), m, suffix = SUFFIX_PERCENT,
+                        stepping = stepping(DoughField.SALT, defaults.salt),
+                    )
+                },
+                { m ->
+                    NumberField(
+                        stringResource(R.string.dough_oil), oil, { oil = it }, issues.forField(DoughField.OIL), m, suffix = SUFFIX_PERCENT,
+                        stepping = stepping(DoughField.OIL, defaults.oil),
+                    )
+                },
             )
         }
     }
@@ -220,7 +254,7 @@ private fun FormFrame(
     header: @Composable () -> Unit,
     bar: @Composable () -> Unit,
     onReset: () -> Unit,
-    extra: String?,
+    extra: List<TotalItem>?,
     note: Int? = null,
     content: @Composable () -> Unit,
 ) {
@@ -232,7 +266,7 @@ private fun FormFrame(
             header()
             content()
             if (com.moltobene.app.ui.components.isLargeText() && extra != null) {
-                Text(extra, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(horizontal = Spacing.m))
+                TotalsCard(extra)
             }
             if (note != null) {
                 Text(
@@ -322,6 +356,7 @@ private fun CakeForm(
         mutableStateOf(fmt((start.size as? CakeSize.FlourGrams)?.grams ?: CakeLimits.referenceFlour(kind), 0))
     }
     val fields = CakeLimits.fields(kind)
+    val defaults = CakeLimits.defaults(kind)
     var fat by rememberSaveable(kind, resetCount) { mutableStateOf(fmt(start.fat, 2)) }
     var sugar by rememberSaveable(kind, resetCount) { mutableStateOf(fmt(start.sugar, 2)) }
     var egg by rememberSaveable(kind, resetCount) { mutableStateOf(fmt(start.egg, 2)) }
@@ -333,6 +368,8 @@ private fun CakeForm(
     var yeastKindKey by rememberSaveable(kind, resetCount) { mutableStateOf(start.yeastKind.key) }
     val yeastKind = YeastKind.fromKey(yeastKindKey) ?: YeastKind.FRESH
 
+    fun cakeStepping(field: CakeField, default: Double) =
+        Stepping(DoughStepper.stepFor(field.toDoughField()), default, CakeLimits.range(kind, field))
     val size = if (byPan) {
         fun cm(text: String) = PanScaling.toCm(parseNumber(text), inch)
         CakeSize.PanSize(if (round) Pan.round(cm(panA)) else Pan.rectangle(cm(panA), cm(panB)))
@@ -348,7 +385,10 @@ private fun CakeForm(
     val result = CakeCalculator.calculate(input)
     val issues = (result as? DoughResult.Invalid)?.issues.orEmpty()
     LaunchedEffect(input, result is DoughResult.Success) {
-        if (result is DoughResult.Success) viewModel.rememberCake(input)
+        if (result is DoughResult.Success) {
+            delay(MEMORY_DELAY_MILLIS)
+            viewModel.rememberCake(input)
+        }
     }
 
     FormFrame(
@@ -417,11 +457,24 @@ private fun CakeForm(
                     NumberField(
                         stringResource(R.string.dough_pan_diameter), panA, { panA = it },
                         panIssue ?: sizeIssue, Modifier.fillMaxWidth(), suffix = unit,
+                        stepping = Stepping(DoughStepper.stepFor(DoughField.PAN_SIZE)),
                     )
                 } else {
                     Fields(
-                        { m -> NumberField(stringResource(R.string.dough_pan_length), panA, { panA = it }, panIssue ?: sizeIssue, m, suffix = unit) },
-                        { m -> NumberField(stringResource(R.string.dough_pan_width), panB, { panB = it }, panIssue, m, suffix = unit) },
+                        {
+                            m ->
+                            NumberField(
+                                stringResource(R.string.dough_pan_length), panA, { panA = it }, panIssue ?: sizeIssue, m, suffix = unit,
+                                stepping = Stepping(DoughStepper.stepFor(DoughField.PAN_SIZE)),
+                            )
+                        },
+                        {
+                            m ->
+                            NumberField(
+                                stringResource(R.string.dough_pan_width), panB, { panB = it }, panIssue, m, suffix = unit,
+                                stepping = Stepping(DoughStepper.stepFor(DoughField.PAN_SIZE)),
+                            )
+                        },
                     )
                 }
                 (result as? DoughResult.Success)?.let {
@@ -435,6 +488,7 @@ private fun CakeForm(
                 NumberField(
                     stringResource(R.string.dough_label_flour), flour, { flour = it },
                     issues.forField(DoughField.FLOUR_GRAMS), Modifier.fillMaxWidth(), suffix = "g",
+                    stepping = Stepping(DoughStepper.stepFor(DoughField.FLOUR_GRAMS), CakeLimits.referenceFlour(kind)),
                 )
             }
         }
@@ -458,6 +512,7 @@ private fun CakeForm(
                 NumberField(
                     stringResource(R.string.dough_yeast_amount), yeast, { yeast = it },
                     issues.forField(DoughField.YEAST), Modifier.fillMaxWidth(), suffix = SUFFIX_PERCENT,
+                    stepping = cakeStepping(CakeField.YEAST, YeastKind.FRESH.convert(defaults.yeast, yeastKind)),
                 )
             }
         }
@@ -486,6 +541,7 @@ private fun CakeForm(
                             NumberField(
                                 stringResource(cakeFieldLabel(kind, field)), value, change,
                                 issues.forField(field.toDoughField()), m, suffix = SUFFIX_PERCENT,
+                                stepping = cakeStepping(field, CakeLimits.value(defaults, field)),
                             )
                         }
                         content

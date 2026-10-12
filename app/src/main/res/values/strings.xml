@@ -236,11 +236,10 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Dough calculator: every value now has plus and minus buttons for fine adjustments, default values are marked, and a button sets a value back to its default.</item>
+        <item>Dough calculator: the totals appear as clear tiles above “Save as recipe”.</item>
         <item>Basic recipes: ten reliable basics such as béchamel sauce, tomato sauce, vinaigrette or shortcrust pastry can be imported from the home screen into the collection and then edited like any other recipe.</item>
         <item>Tags: recipes can get bundled tags such as “Sauces”, “Desserts” or “Soups”, plus tags of their own. The collection can be filtered by one or more tags at once, with the number of recipes per tag.</item>
-        <item>Cooking bar in the recipe: “Previous”, “Read aloud”, “Next” and “Ingredients” move through the steps and read them aloud on tap, with voices that work without internet.</item>
-        <item>Home screen: “What to cook today?” suggests a recipe from the collection (favorites preferred); “Another recipe” picks a different one.</item>
-        <item>Home screen: “Recently opened” shows the last recipes opened. This list stays on the device only.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->
@@ -477,6 +476,12 @@
     <string name="dough_hint">Do not eat raw dough. Raw flour can contain germs.</string>
     <string name="dough_save">Save as recipe</string>
     <string name="dough_reset">Reset</string>
+    <string name="dough_step_less">Decrease %1$s by %2$s</string>
+    <string name="dough_step_more">Increase %1$s by %2$s</string>
+    <string name="dough_default_marker">Default</string>
+    <string name="dough_default_value">Default: %1$s</string>
+    <string name="dough_default_reset">Set %1$s to default</string>
+    <string name="dough_totals_title">Totals</string>
     <string name="dough_saved">Saved as a draft. Add the instructions.</string>
     <string name="dough_error_number">Enter a number.</string>
     <string name="dough_error_range">Between %1$s and %2$s.</string>
