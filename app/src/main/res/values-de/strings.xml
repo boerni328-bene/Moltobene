@@ -234,11 +234,10 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Teigrechner: Jeder Wert hat jetzt Plus- und Minus-Knöpfe für die Feineinstellung, Standardwerte sind markiert und ein Knopf setzt einen Wert auf den Standard zurück.</item>
+        <item>Teigrechner: Die Gesamtmengen stehen als übersichtliche Kacheln über „Als Rezept speichern“.</item>
         <item>Grundrezepte: Zehn bewährte Grundrezepte wie Béchamelsauce, Tomatensauce, Vinaigrette oder Mürbeteig lassen sich auf der Startseite in die Sammlung übernehmen und danach wie jedes andere Rezept bearbeiten.</item>
         <item>Schlagwörter: Rezepte können mitgelieferte Schlagwörter wie „Saucen“, „Desserts“ oder „Suppen“ bekommen, dazu eigene. Die Sammlung lässt sich nach einem oder mehreren Schlagwörtern zugleich filtern, mit der Anzahl der Rezepte je Schlagwort.</item>
-        <item>Kochleiste im Rezept: „Zurück“, „Vorlesen“, „Weiter“ und „Zutaten“ führen durch die Schritte und lesen sie auf Antippen vor, mit Stimmen, die ohne Internet funktionieren.</item>
-        <item>Startseite: „Was koche ich heute?“ schlägt ein Rezept aus der Sammlung vor (Favoriten bevorzugt); „Anderes Rezept“ zeigt ein anderes.</item>
-        <item>Startseite: „Zuletzt geöffnet“ zeigt die zuletzt geöffneten Rezepte. Die Liste bleibt nur auf dem Handy.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->
@@ -473,6 +472,12 @@
     <string name="dough_hint">Rohen Teig nicht essen. Rohes Mehl kann Keime enthalten.</string>
     <string name="dough_save">Als Rezept speichern</string>
     <string name="dough_reset">Zurücksetzen</string>
+    <string name="dough_step_less">%1$s um %2$s verringern</string>
+    <string name="dough_step_more">%1$s um %2$s erhöhen</string>
+    <string name="dough_default_marker">Standard</string>
+    <string name="dough_default_value">Standard: %1$s</string>
+    <string name="dough_default_reset">%1$s auf Standard setzen</string>
+    <string name="dough_totals_title">Gesamtmengen</string>
     <string name="dough_saved">Als Entwurf gespeichert. Zubereitung ergänzen.</string>
     <string name="dough_error_number">Zahl eingeben.</string>
     <string name="dough_error_range">Zwischen %1$s und %2$s.</string>

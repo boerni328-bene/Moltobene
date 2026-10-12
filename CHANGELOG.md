@@ -3,6 +3,14 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.36.0] – 2026-10-12 (versionCode 63)
+
+### Neu
+- **Teigrechner: Plus und Minus.** Jeder Wert (Anzahl, Gewicht, Wasseranteil, Salz, Öl, Hefe, Vorteig, bei Pasta und Kuchen alle Anteile und Maße) hat neben dem Eingabefeld die Knöpfe „−“ und „+“ für die Feineinstellung mit passender Schrittweite, etwa 1 % beim Wasseranteil oder 0,1 % beim Salz. An den Grenzen bleibt der Wert stehen.
+- **Standardwerte markiert.** Unter jedem Wert steht „Standard“ oder, wenn er abweicht, „Standard: 65 %“; ein Knopf setzt den einzelnen Wert auf den Standard zurück (zusätzlich zu „Zurücksetzen“ für alles).
+- **Übersichtlichere Ergebnisleiste.** Über „Als Rezept speichern“ steht die Überschrift des Ergebnisses fett, darunter die Gesamtmengen als Kacheln mit großer Menge und Namen (seitlich zu verschieben). Bei großer Schrift stehen die Gesamtmengen als Liste im Formular.
+- Die Eingabefelder stehen untereinander über die volle Breite. Die zuletzt benutzten Werte werden erst nach einer kurzen Pause gemerkt.
+
 ## [0.35.0] – 2026-10-12 (versionCode 62)
 
 ### Neu

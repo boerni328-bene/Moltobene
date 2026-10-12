@@ -30,6 +30,9 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 import java.util.UUID
 
+/** Eine Gesamtmenge mit Namen, z. B. „594 g“ und „Mehl“ (#83). */
+data class TotalItem(val amount: String, val name: String)
+
 /** Texte des Entwurfs aus den Ressourcen der Oberfläche (#69). */
 class AndroidDoughTexts(private val context: Context) : DoughTexts {
 
@@ -129,15 +132,15 @@ class DoughViewModel(
     fun draft(result: DoughResult.Success, input: LeavenedInput): DoughDraft =
         DoughDraft.from(result, input, texts, if (Locale.getDefault().language == "de") "de" else "en")
 
-    /** Summen über Vorteig und Hauptteig, z. B. „594 g Mehl · 386 g Wasser · 18 g Salz“; für die Leiste unten. */
-    fun totals(result: DoughResult.Success, input: LeavenedInput): String = totalsText(result, input.yeastKind)
+    /** Summen über Vorteig und Hauptteig, z. B. „594 g“ – „Mehl“; für die Leiste unten und die Karte bei großer Schrift. */
+    fun totals(result: DoughResult.Success, input: LeavenedInput): List<TotalItem> = totalItems(result, input.yeastKind)
 
-    private fun totalsText(result: DoughResult.Success, yeastKind: YeastKind): String {
+    private fun totalItems(result: DoughResult.Success, yeastKind: YeastKind): List<TotalItem> {
         val lines = result.sections.flatMap { it.lines }
         return TOTALS_ORDER.mapNotNull { role ->
             val grams = lines.filter { it.role == role }.sumOf { it.grams }
-            if (grams <= 0) null else "${DoughNumbers.grams(grams, role, language)} g ${texts.ingredient(role, yeastKind)}"
-        }.joinToString(" · ")
+            if (grams <= 0) null else TotalItem("${DoughNumbers.grams(grams, role, language)} g", texts.ingredient(role, yeastKind))
+        }
     }
 
     private val language get() = if (Locale.getDefault().language == "de") "de" else "en"
@@ -169,7 +172,7 @@ class DoughViewModel(
     }
 
     /** Summen für Pasta und Kuchen, wie [totals]. */
-    fun totals(result: DoughResult.Success, yeastKind: YeastKind): String = totalsText(result, yeastKind)
+    fun totals(result: DoughResult.Success, yeastKind: YeastKind): List<TotalItem> = totalItems(result, yeastKind)
 
     private fun save(draft: DoughDraft, onSaved: (String) -> Unit) {
         val recipe = draft.toRecipe(UUID.randomUUID().toString(), System.currentTimeMillis())

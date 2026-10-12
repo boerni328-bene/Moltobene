@@ -1,5 +1,6 @@
 package com.moltobene.app.ui.dough
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -9,13 +10,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,9 +42,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
@@ -57,6 +63,7 @@ import com.moltobene.app.data.dough.DoughIssue
 import com.moltobene.app.data.dough.DoughLimits
 import com.moltobene.app.data.dough.DoughNumbers
 import com.moltobene.app.data.dough.DoughResult
+import com.moltobene.app.data.dough.DoughStepper
 import com.moltobene.app.data.dough.DoughType
 import com.moltobene.app.data.dough.LeavenedInput
 import com.moltobene.app.data.dough.LineRole
@@ -68,6 +75,7 @@ import com.moltobene.app.ui.components.ScreenTitlePadding
 import com.moltobene.app.ui.components.isLargeText
 import com.moltobene.app.ui.theme.Spacing
 import java.util.Locale
+import kotlinx.coroutines.delay
 
 /** Zahl aus einem Eingabefeld: Komma oder Punkt; leer oder Text ergibt NaN (wird als „keine Zahl“ gemeldet). */
 internal fun parseNumber(text: String): Double =
@@ -185,17 +193,17 @@ internal fun Card(title: String, content: @Composable () -> Unit) {
     }
 }
 
-/** Felder nebeneinander; bei großer Schrift untereinander. */
+/** Felder untereinander, jedes über die volle Breite, damit Platz für Plus und Minus bleibt (#83). */
 @Composable
 internal fun Fields(vararg fields: @Composable (Modifier) -> Unit, weights: List<Float>? = null) {
-    if (isLargeText()) {
-        Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) { fields.forEach { it(Modifier.fillMaxWidth()) } }
-    } else {
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-            fields.forEachIndexed { index, field -> field(Modifier.weight(weights?.getOrNull(index) ?: 1f)) }
-        }
-    }
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) { fields.forEach { it(Modifier.fillMaxWidth()) } }
 }
+
+/** Plus, Minus und die Markierung „Standard“ eines Felds (#83): Schrittweite, Standardwert, Grenzen. */
+internal class Stepping(val step: Double, val default: Double? = null, val range: DoughLimits.Range? = null)
+
+/** So lange nach der letzten Änderung wird gemerkt, damit Plus/Minus und Tippen nicht jedes Mal schreiben. */
+internal const val MEMORY_DELAY_MILLIS = 400L
 
 @Composable
 internal fun NumberField(
@@ -206,19 +214,68 @@ internal fun NumberField(
     modifier: Modifier = Modifier,
     integer: Boolean = false,
     suffix: String? = null,
+    stepping: Stepping? = null,
 ) {
     val error = issue?.let { issueText(it) }
-    OutlinedTextField(
-        value = value,
-        onValueChange = onChange,
-        label = { Text(label, maxLines = 1) },
-        suffix = suffix?.let { { Text(it) } },
-        isError = error != null,
-        supportingText = error?.let { { Text(it) } },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = if (integer) KeyboardType.Number else KeyboardType.Decimal),
-        modifier = modifier,
-    )
+    val current = parseNumber(value)
+    val default = stepping?.default
+    val atDefault = default != null && DoughStepper.isDefault(current, default)
+    val marker = when {
+        default == null -> null
+        atDefault -> stringResource(R.string.dough_default_marker)
+        else -> stringResource(R.string.dough_default_value, show(default) + suffix?.let { " $it" }.orEmpty())
+    }
+    val hint = error ?: marker
+    val field: @Composable (Modifier) -> Unit = { m ->
+        OutlinedTextField(
+            value = value,
+            onValueChange = onChange,
+            label = { Text(label, maxLines = 1) },
+            suffix = suffix?.let { { Text(it) } },
+            isError = error != null,
+            supportingText = hint?.let { { Text(it) } },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = if (integer) KeyboardType.Number else KeyboardType.Decimal),
+            modifier = m,
+        )
+    }
+    if (stepping == null) {
+        field(modifier)
+        return
+    }
+    fun text(number: Double) = if (integer) number.toLong().toString() else show(number)
+    val buttons: @Composable () -> Unit = {
+        val stepText = show(stepping.step) + suffix?.let { " $it" }.orEmpty()
+        FilledTonalIconButton(
+            onClick = { onChange(text(DoughStepper.next(current, stepping.step, -1, stepping.range, default))) },
+            enabled = DoughStepper.canStep(current, -1, stepping.range),
+        ) {
+            Icon(painterResource(R.drawable.ic_remove), contentDescription = stringResource(R.string.dough_step_less, label, stepText))
+        }
+        FilledTonalIconButton(
+            onClick = { onChange(text(DoughStepper.next(current, stepping.step, +1, stepping.range, default))) },
+            enabled = DoughStepper.canStep(current, +1, stepping.range),
+        ) {
+            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.dough_step_more, label, stepText))
+        }
+        if (default != null) {
+            IconButton(onClick = { onChange(text(default)) }, enabled = !atDefault) {
+                Icon(painterResource(R.drawable.ic_undo), contentDescription = stringResource(R.string.dough_default_reset, label))
+            }
+        }
+    }
+    if (isLargeText()) {
+        // Bei großer Schrift hat das Feld die volle Breite, die Knöpfe stehen darunter.
+        Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            field(Modifier.fillMaxWidth())
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalAlignment = Alignment.CenterVertically) { buttons() }
+        }
+    } else {
+        Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            field(Modifier.weight(1f))
+            Row(modifier = Modifier.padding(top = Spacing.xs)) { buttons() }
+        }
+    }
 }
 
 @Composable
@@ -257,6 +314,9 @@ private fun DoughForm(
 
     val yeastKind = YeastKind.fromKey(yeastKindKey) ?: YeastKind.FRESH
     val preferment = Preferment.fromKey(prefermentKey) ?: Preferment.NONE
+    val defaults = DoughLimits.defaults(type)
+    fun stepping(field: DoughField, default: Double?) =
+        Stepping(DoughStepper.stepFor(field), default, DoughLimits.range(type, field, preferment))
     val input = LeavenedInput(
         type = type,
         count = count.trim().toIntOrNull() ?: 0,
@@ -278,7 +338,10 @@ private fun DoughForm(
 
     // Gültige Werte merken, damit sie beim nächsten Öffnen wieder da sind.
     LaunchedEffect(input, result is DoughResult.Success) {
-        if (result is DoughResult.Success) viewModel.remember(input)
+        if (result is DoughResult.Success) {
+            delay(MEMORY_DELAY_MILLIS)
+            viewModel.remember(input)
+        }
     }
 
     val bread = type == DoughType.BREAD
@@ -295,12 +358,14 @@ private fun DoughForm(
                         NumberField(
                             stringResource(if (bread) R.string.dough_count_loaf else R.string.dough_count_ball), count,
                             { count = it }, issueFor(DoughField.COUNT), m, integer = true,
+                            stepping = stepping(DoughField.COUNT, defaults.count.toDouble()),
                         )
                     },
                     { m ->
                         NumberField(
                             stringResource(R.string.dough_piece), piece, { piece = it },
                             issueFor(DoughField.PIECE_GRAMS), m, suffix = "g",
+                            stepping = stepping(DoughField.PIECE_GRAMS, defaults.pieceGrams),
                         )
                     },
                 )
@@ -310,10 +375,24 @@ private fun DoughForm(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Fields(
-                    { m -> NumberField(stringResource(R.string.dough_water), water, { water = it }, issueFor(DoughField.WATER), m, suffix = "%") },
-                    { m -> NumberField(stringResource(R.string.dough_salt), salt, { salt = it }, issueFor(DoughField.SALT), m, suffix = "%") },
-                    { m -> NumberField(stringResource(R.string.dough_oil), oil, { oil = it }, issueFor(DoughField.OIL), m, suffix = "%") },
-                    weights = listOf(1.6f, 1f, 1f),
+                    { m ->
+                        NumberField(
+                            stringResource(R.string.dough_water), water, { water = it }, issueFor(DoughField.WATER), m, suffix = "%",
+                            stepping = stepping(DoughField.WATER, defaults.water),
+                        )
+                    },
+                    { m ->
+                        NumberField(
+                            stringResource(R.string.dough_salt), salt, { salt = it }, issueFor(DoughField.SALT), m, suffix = "%",
+                            stepping = stepping(DoughField.SALT, defaults.salt),
+                        )
+                    },
+                    { m ->
+                        NumberField(
+                            stringResource(R.string.dough_oil), oil, { oil = it }, issueFor(DoughField.OIL), m, suffix = "%",
+                            stepping = stepping(DoughField.OIL, defaults.oil),
+                        )
+                    },
                 )
             }
 
@@ -340,6 +419,7 @@ private fun DoughForm(
                 NumberField(
                     stringResource(R.string.dough_yeast_amount), yeast, { yeast = it },
                     issueFor(DoughField.YEAST), Modifier.fillMaxWidth(), suffix = "%",
+                    stepping = stepping(DoughField.YEAST, YeastKind.FRESH.convert(defaults.yeast, yeastKind)),
                 )
             }
 
@@ -368,12 +448,14 @@ private fun DoughForm(
                             NumberField(
                                 stringResource(R.string.dough_preferment_flour), prefermentFlour, { prefermentFlour = it },
                                 issueFor(DoughField.PREFERMENT_FLOUR), m, suffix = "%",
+                                stepping = stepping(DoughField.PREFERMENT_FLOUR, defaults.prefermentFlour),
                             )
                         },
                         { m ->
                             NumberField(
                                 stringResource(R.string.dough_preferment_water), prefermentWater, { prefermentWater = it },
                                 issueFor(DoughField.PREFERMENT_WATER), m, suffix = "%",
+                                stepping = stepping(DoughField.PREFERMENT_WATER, DoughLimits.defaultPrefermentWater(preferment)),
                             )
                         },
                     )
@@ -424,11 +506,7 @@ private fun DoughForm(
                 }
             }
             if (isLargeText() && result is DoughResult.Success) {
-                Text(
-                    viewModel.totals(result, input),
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(horizontal = Spacing.m),
-                )
+                TotalsCard(viewModel.totals(result, input))
             }
             Text(
                 stringResource(R.string.dough_hint),
@@ -474,19 +552,25 @@ internal fun summaryLine(result: DoughResult.Success, draft: DoughDraft): String
     "${draft.servings} ${draft.servingsUnit}",
 )
 
-/** Immer sichtbar: die Summen und „Als Rezept speichern“ – auch beim Ändern der Eingaben weiter oben. [summary] null = ungültig. */
+/**
+ * Immer sichtbar: die Überschrift des Ergebnisses, die Gesamtmengen als Kacheln (seitlich zu verschieben) und
+ * „Als Rezept speichern“ – auch beim Ändern der Eingaben weiter oben. [summary] null = ungültig. Bei großer Schrift
+ * stehen die Gesamtmengen als Karte im Formular ([TotalsCard]), damit die Leiste klein bleibt (#83).
+ */
 @Composable
-internal fun ResultBar(summary: String?, totals: String?, onSave: () -> Unit) {
-    Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, tonalElevation = 3.dp) {
+internal fun ResultBar(summary: String?, totals: List<TotalItem>?, onSave: () -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        tonalElevation = 3.dp,
+        shape = MaterialTheme.shapes.large.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)),
+    ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m, vertical = Spacing.s),
             verticalArrangement = Arrangement.spacedBy(Spacing.s),
         ) {
             Column(modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }) {
                 if (summary != null) {
-                    Text(summary, style = MaterialTheme.typography.titleSmall)
-                    // Bei großer Schrift stehen die Summen im Formular, damit die Leiste unten klein bleibt.
-                    if (totals != null && !isLargeText()) Text(totals, style = MaterialTheme.typography.bodyMedium)
+                    Text(summary, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 } else {
                     Text(
                         stringResource(R.string.dough_invalid),
@@ -495,8 +579,47 @@ internal fun ResultBar(summary: String?, totals: String?, onSave: () -> Unit) {
                     )
                 }
             }
+            if (summary != null && !totals.isNullOrEmpty() && !isLargeText()) {
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.s),
+                ) {
+                    for (item in totals) TotalTile(item)
+                }
+            }
             Button(onClick = onSave, enabled = summary != null, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.dough_save))
+            }
+        }
+    }
+}
+
+/** Eine Gesamtmenge als Kachel: die Menge groß, darunter der Name. */
+@Composable
+private fun TotalTile(item: TotalItem) {
+    Surface(color = MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(horizontal = Spacing.s, vertical = Spacing.xs).semantics(mergeDescendants = true) {},
+        ) {
+            Text(item.amount, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(item.name, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+/** Bei großer Schrift: die Gesamtmengen als Liste mit dem Namen links und der Menge rechts (#83). */
+@Composable
+internal fun TotalsCard(items: List<TotalItem>) {
+    if (items.isEmpty()) return
+    Card(stringResource(R.string.dough_totals_title)) {
+        for (item in items) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) {},
+            ) {
+                Text(item.name, style = MaterialTheme.typography.bodyLarge)
+                Text(item.amount, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
             }
         }
     }
