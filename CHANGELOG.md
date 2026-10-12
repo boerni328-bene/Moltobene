@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.34.0] – 2026-10-12 (versionCode 61)
+
+### Neu
+- **Startseite: „Was koche ich heute?“** Die Kachel schlägt ein Rezept aus der eigenen Sammlung vor, Favoriten werden bevorzugt, Entwürfe nie. „Kochen“ öffnet das Rezept, „Anderes Rezept“ zeigt ein anderes. Ohne Rezepte führt die Kachel zu „Rezept hinzufügen“.
+- **Startseite: „Zuletzt geöffnet“:** Die bis zu fünf zuletzt geöffneten Rezepte, das neueste zuerst. Die Liste bleibt nur auf dem Handy, sie ist nicht in der Sicherung und wird nie geteilt.
+
 ## [0.33.0] – 2026-10-12 (versionCode 60)
 
 ### Neu

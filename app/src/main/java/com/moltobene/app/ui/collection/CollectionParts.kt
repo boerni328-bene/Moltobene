@@ -218,7 +218,7 @@ internal fun RecipeList(items: List<RecipeListItem>, onOpenRecipe: (String) -> U
 }
 
 @Composable
-private fun RecipeRow(item: RecipeListItem, onClick: () -> Unit) {
+internal fun RecipeRow(item: RecipeListItem, onClick: () -> Unit) {
     val title = item.title.ifBlank { stringResource(R.string.untitled_recipe) }
     Row(
         modifier = Modifier

@@ -206,7 +206,18 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(recipes)
         composeRule.onNodeWithText(text(R.string.home_recipes_title)).assertIsDisplayed()
         composeRule.onNodeWithText(text(R.string.dough_title)).assertIsDisplayed()
+        // „Was koche ich heute?“ (#81): ein Vorschlag aus der Sammlung, „Anderes Rezept“ wechselt, „Kochen“ öffnet.
+        waitForText(text(R.string.home_today_cook))
         screenshot("00-startseite")
+        composeRule.onNodeWithText(text(R.string.home_today_title)).performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText(text(R.string.home_today_another)).performScrollTo().performClick()
+        composeRule.onNodeWithText(text(R.string.home_today_cook)).performScrollTo().performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.recentRecipes.value?.size == 1 }
+        pressBack()
+        waitForText(recipes)
+        // „Zuletzt geöffnet“ zeigt das eben geöffnete Rezept.
+        composeRule.onNodeWithText(text(R.string.home_recent_title)).performScrollTo().assertIsDisplayed()
+        screenshot("00b-startseite-zuletzt")
 
         // „Rezepte“ öffnet die Sammlung, Zurück führt wieder zur Startseite.
         composeRule.onNodeWithText(text(R.string.home_recipes_title)).performClick()
