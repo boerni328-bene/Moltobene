@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
@@ -423,6 +425,9 @@ class AppTourTest(private val variant: DisplayVariant) {
         clickVisible(text(R.string.dough_type_cake))
         waitForText(text(R.string.dough_cake_batter))
         screenshot("14h-teigrechner-kuchen")
+        // Die sechs Kuchenarten stehen in einem Auswahlfeld (#83): öffnen und die Art wählen.
+        clickVisible(text(R.string.dough_cake_batter))
+        waitForText(text(R.string.dough_cake_quark_oil))
         clickVisible(text(R.string.dough_cake_quark_oil))
         waitForText(text(R.string.dough_label_quark))
         composeRule.onNodeWithText(text(R.string.dough_save)).performClick()
@@ -490,6 +495,22 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithContentDescription(text(R.string.dough_default_reset, waterLabel)).performScrollTo().performClick()
         waitUntilGone(text(R.string.dough_default_value, "65 %"))
 
+        // Regler (#83, Etappe 2): einschalten, es erscheinen Regler unter den Feldern; wieder auf Zahlen.
+        composeRule.onNodeWithText(text(R.string.dough_mode_sliders)).performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) {
+            composeRule.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)).fetchSemanticsNodes().isNotEmpty()
+        }
+        screenshot("14j-teigrechner-regler")
+        composeRule.onNodeWithText(text(R.string.dough_mode_numbers)).performClick()
+
+        if (variant == DisplayVariant.LARGE_TEXT) {
+            // Bei großer Schrift sind Hefeart und Vorteig Auswahlfelder statt Chips.
+            clickVisible(text(R.string.dough_yeast_fresh))
+            waitForText(text(R.string.dough_yeast_instant))
+            screenshot("14k-teigrechner-auswahlfeld")
+            clickVisible(text(R.string.dough_yeast_instant))
+            composeRule.onNodeWithText(text(R.string.dough_pre_none)).performScrollTo().performClick()
+        }
         composeRule.onNodeWithText(text(R.string.dough_pre_biga)).performScrollTo().performClick()
         waitForText(text(R.string.dough_explain_biga))
 

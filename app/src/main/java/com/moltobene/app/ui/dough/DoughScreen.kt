@@ -1,7 +1,9 @@
 package com.moltobene.app.ui.dough
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -18,6 +20,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
@@ -29,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -36,7 +41,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -44,14 +51,20 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -106,12 +119,17 @@ fun DoughScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
-        Column(modifier = Modifier.padding(padding).fillMaxSize()) {
-            val header: @Composable () -> Unit = { Header(type) { typeKey = it.key } }
-            when (type) {
-                DoughType.PIZZA, DoughType.BREAD -> LeavenedContent(type, viewModel, onSaved, header)
-                DoughType.PASTA -> PastaContent(viewModel, onSaved, header)
-                DoughType.CAKE -> CakeContent(viewModel, onSaved, header)
+        CompositionLocalProvider(LocalDoughSliders provides viewModel.sliders) {
+            Column(modifier = Modifier.padding(padding).fillMaxSize()) {
+                val header: @Composable () -> Unit = {
+                    Header(type) { typeKey = it.key }
+                    InputModeToggle(viewModel.sliders, viewModel::setSliders)
+                }
+                when (type) {
+                    DoughType.PIZZA, DoughType.BREAD -> LeavenedContent(type, viewModel, onSaved, header)
+                    DoughType.PASTA -> PastaContent(viewModel, onSaved, header)
+                    DoughType.CAKE -> CakeContent(viewModel, onSaved, header)
+                }
             }
         }
     }
@@ -200,7 +218,15 @@ internal fun Fields(vararg fields: @Composable (Modifier) -> Unit, weights: List
 }
 
 /** Plus, Minus und die Markierung „Standard“ eines Felds (#83): Schrittweite, Standardwert, Grenzen. */
-internal class Stepping(val step: Double, val default: Double? = null, val range: DoughLimits.Range? = null)
+internal class Stepping(
+    val step: Double,
+    val default: Double? = null,
+    val range: DoughLimits.Range? = null,
+    val field: DoughField? = null,
+)
+
+/** Sind die Regler eingeschaltet? Gilt für alle Felder des Teigrechners (#83, Etappe 2). */
+internal val LocalDoughSliders = compositionLocalOf { false }
 
 /** So lange nach der letzten Änderung wird gemerkt, damit Plus/Minus und Tippen nicht jedes Mal schreiben. */
 internal const val MEMORY_DELAY_MILLIS = 400L
@@ -264,16 +290,157 @@ internal fun NumberField(
             }
         }
     }
+    val bounds = if (LocalDoughSliders.current && stepping.field != null) DoughStepper.sliderBounds(stepping.field, stepping.range) else null
+    val slider: @Composable () -> Unit = {
+        if (bounds != null && stepping.field != null) {
+            ValueSlider(
+                label = label,
+                current = current,
+                bounds = bounds,
+                stepping = stepping,
+                field = stepping.field,
+                valueText = if (current.isFinite()) text(current) + suffix?.let { " $it" }.orEmpty() else "",
+                onChange = { onChange(text(it)) },
+            )
+        }
+    }
     if (isLargeText()) {
         // Bei großer Schrift hat das Feld die volle Breite, die Knöpfe stehen darunter.
         Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
             field(Modifier.fillMaxWidth())
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalAlignment = Alignment.CenterVertically) { buttons() }
+            slider()
         }
     } else {
-        Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-            field(Modifier.weight(1f))
-            Row(modifier = Modifier.padding(top = Spacing.xs)) { buttons() }
+        Column(modifier = modifier) {
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                field(Modifier.weight(1f))
+                Row(modifier = Modifier.padding(top = Spacing.xs)) { buttons() }
+            }
+            slider()
+        }
+    }
+}
+
+/**
+ * Regler zu einem Feld (#83, Etappe 2): zeigt den üblichen Bereich, rundet auf die Schrittweite und hält die Grenzen
+ * aus [DoughLimits] ein. Eine Marke zeigt den Standardwert; die Zahl im Feld bleibt die Wahrheit. Hefe läuft auf einer
+ * gestauchten Skala, damit kleine Mengen treffbar sind.
+ */
+@Composable
+private fun ValueSlider(
+    label: String,
+    current: Double,
+    bounds: DoughLimits.Range,
+    stepping: Stepping,
+    field: DoughField,
+    valueText: String,
+    onChange: (Double) -> Unit,
+) {
+    val curved = DoughStepper.isCurved(field)
+    val step = DoughStepper.sliderStepFor(field)
+    val position = DoughStepper.positionOf(current, bounds, curved)
+    val ticks = ((bounds.max - bounds.min) / step).let { Math.round(it).toInt() }
+    // Bei wenigen Stufen (z. B. Anzahl) rastet der Regler ein, sonst läuft er stufenlos und rundet beim Loslassen der Zahl.
+    val steps = if (!curved && ticks in 2..20) ticks - 1 else 0
+    val markColor = MaterialTheme.colorScheme.tertiary
+    val defaultPosition = stepping.default?.let { DoughStepper.positionOf(it, bounds, curved) }
+    Slider(
+        value = position,
+        onValueChange = { onChange(DoughStepper.valueAt(it, bounds, curved, step, stepping.range)) },
+        valueRange = 0f..1f,
+        steps = steps,
+        modifier = Modifier
+            .fillMaxWidth()
+            .drawBehind {
+                // Marke für den Standardwert auf der Leiste (der Daumen des Reglers ist etwa 20 dp breit).
+                if (defaultPosition != null) {
+                    val inset = 10.dp.toPx()
+                    val x = inset + (size.width - 2 * inset) * defaultPosition
+                    drawLine(markColor, Offset(x, size.height / 2 - 14.dp.toPx()), Offset(x, size.height / 2 + 14.dp.toPx()), strokeWidth = 3.dp.toPx())
+                }
+            }
+            .semantics {
+                contentDescription = label
+                stateDescription = valueText
+            },
+    )
+}
+
+/**
+ * Auswahl aus festen Möglichkeiten (#83, Etappe 2): bei wenigen Möglichkeiten Chips, bei vielen Möglichkeiten oder großer
+ * Schrift ein Auswahlfeld. Die Erklärung steht in beiden Fällen darunter.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal fun <T> ChoiceField(
+    label: String,
+    options: List<T>,
+    selected: T,
+    optionLabel: @Composable (T) -> String,
+    onSelect: (T) -> Unit,
+) {
+    val dropdown = options.size >= DROPDOWN_ALWAYS_FROM || (isLargeText() && options.size >= DROPDOWN_LARGE_FROM)
+    if (!dropdown) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+            for (option in options) {
+                FilterChip(selected = option == selected, onClick = { onSelect(option) }, label = { Text(optionLabel(option)) })
+            }
+        }
+        return
+    }
+    var open by rememberSaveable { mutableStateOf(false) }
+    val selectedLabel = optionLabel(selected)
+    Box(modifier = Modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = selectedLabel,
+            onValueChange = {},
+            readOnly = true,
+            singleLine = true,
+            label = { Text(label, maxLines = 1) },
+            trailingIcon = { Text("▾") },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        // Die ganze Fläche öffnet die Liste; das Feld und die Auswahl lesen sich als ein Element.
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .semantics(mergeDescendants = true) {
+                    role = Role.DropdownList
+                    contentDescription = "$label: $selectedLabel"
+                }
+                .clickable(onClickLabel = label) { open = true },
+        )
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            for (option in options) {
+                DropdownMenuItem(text = { Text(optionLabel(option)) }, onClick = {
+                    open = false
+                    onSelect(option)
+                })
+            }
+        }
+    }
+}
+
+/** Ab so vielen Möglichkeiten gibt es immer ein Auswahlfeld, bei großer Schrift schon ab drei. */
+private const val DROPDOWN_ALWAYS_FROM = 6
+private const val DROPDOWN_LARGE_FROM = 3
+
+/** Wahl zwischen Zahlen und Reglern; gilt für alle Teigarten und bleibt gemerkt. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun InputModeToggle(sliders: Boolean, onChange: (Boolean) -> Unit) {
+    val numbers = stringResource(R.string.dough_mode_numbers)
+    val sliderLabel = stringResource(R.string.dough_mode_sliders)
+    val group = stringResource(R.string.dough_input_mode)
+    SingleChoiceSegmentedButtonRow(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m).semantics { contentDescription = group },
+    ) {
+        SegmentedButton(selected = !sliders, onClick = { onChange(false) }, shape = SegmentedButtonDefaults.itemShape(0, 2), icon = {}) {
+            Text(numbers, maxLines = 1)
+        }
+        SegmentedButton(selected = sliders, onClick = { onChange(true) }, shape = SegmentedButtonDefaults.itemShape(1, 2), icon = {}) {
+            Text(sliderLabel, maxLines = 1)
         }
     }
 }
@@ -316,7 +483,7 @@ private fun DoughForm(
     val preferment = Preferment.fromKey(prefermentKey) ?: Preferment.NONE
     val defaults = DoughLimits.defaults(type)
     fun stepping(field: DoughField, default: Double?) =
-        Stepping(DoughStepper.stepFor(field), default, DoughLimits.range(type, field, preferment))
+        Stepping(DoughStepper.stepFor(field), default, DoughLimits.range(type, field, preferment), field)
     val input = LeavenedInput(
         type = type,
         count = count.trim().toIntOrNull() ?: 0,
@@ -397,25 +564,23 @@ private fun DoughForm(
             }
 
             Card(stringResource(R.string.dough_section_yeast)) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-                    for (kind in YeastKind.entries) {
-                        FilterChip(
-                            selected = kind == yeastKind,
-                            onClick = {
-                                // Die Menge bleibt gleichwertig, wenn die Hefeart wechselt.
-                                val current = parseNumber(yeast)
-                                if (current.isFinite()) {
-                                    yeast = DoughNumbers.separator(
-                                        DoughNumbers.plain(yeastKind.convert(current, kind), 3),
-                                        Locale.getDefault().language,
-                                    )
-                                }
-                                yeastKindKey = kind.key
-                            },
-                            label = { Text(stringResource(AndroidDoughTexts.yeastName(kind))) },
-                        )
-                    }
-                }
+                ChoiceField(
+                    label = stringResource(R.string.dough_section_yeast),
+                    options = YeastKind.entries,
+                    selected = yeastKind,
+                    optionLabel = { stringResource(AndroidDoughTexts.yeastName(it)) },
+                    onSelect = { kind ->
+                        // Die Menge bleibt gleichwertig, wenn die Hefeart wechselt.
+                        val current = parseNumber(yeast)
+                        if (current.isFinite()) {
+                            yeast = DoughNumbers.separator(
+                                DoughNumbers.plain(yeastKind.convert(current, kind), 3),
+                                Locale.getDefault().language,
+                            )
+                        }
+                        yeastKindKey = kind.key
+                    },
+                )
                 NumberField(
                     stringResource(R.string.dough_yeast_amount), yeast, { yeast = it },
                     issueFor(DoughField.YEAST), Modifier.fillMaxWidth(), suffix = "%",
@@ -424,19 +589,17 @@ private fun DoughForm(
             }
 
             Card(stringResource(R.string.dough_section_preferment)) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-                    for (option in Preferment.entries) {
-                        FilterChip(
-                            selected = option == preferment,
-                            onClick = {
-                                prefermentKey = option.key
-                                // Biga und Poolish haben feste Wasseranteile, die hier vorausgefüllt werden.
-                                if (option != Preferment.NONE) prefermentWater = show(DoughLimits.defaultPrefermentWater(option))
-                            },
-                            label = { Text(stringResource(prefermentLabel(option))) },
-                        )
-                    }
-                }
+                ChoiceField(
+                    label = stringResource(R.string.dough_section_preferment),
+                    options = Preferment.entries,
+                    selected = preferment,
+                    optionLabel = { stringResource(prefermentLabel(it)) },
+                    onSelect = { option ->
+                        prefermentKey = option.key
+                        // Biga und Poolish haben feste Wasseranteile, die hier vorausgefüllt werden.
+                        if (option != Preferment.NONE) prefermentWater = show(DoughLimits.defaultPrefermentWater(option))
+                    },
+                )
                 Text(
                     stringResource(prefermentExplanation(preferment)),
                     style = MaterialTheme.typography.bodySmall,

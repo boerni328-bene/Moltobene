@@ -236,6 +236,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Dough calculator: sliders can be switched on above the fields (“Numbers | Sliders”), with a mark at the default value. Lists such as the type of cake and, with large text, the yeast type and the preferment are now choice fields.</item>
         <item>Dough calculator: every value now has plus and minus buttons for fine adjustments, default values are marked, and a button sets a value back to its default.</item>
         <item>Dough calculator: the totals appear as clear tiles above “Save as recipe”.</item>
         <item>Basic recipes: ten reliable basics such as béchamel sauce, tomato sauce, vinaigrette or shortcrust pastry can be imported from the home screen into the collection and then edited like any other recipe.</item>
@@ -482,6 +483,10 @@
     <string name="dough_default_value">Default: %1$s</string>
     <string name="dough_default_reset">Set %1$s to default</string>
     <string name="dough_totals_title">Totals</string>
+    <string name="dough_mode_numbers">Numbers</string>
+    <string name="dough_mode_sliders">Sliders</string>
+    <string name="dough_input_mode">Input</string>
+    <string name="dough_cake_kind_label">Type of cake</string>
     <string name="dough_saved">Saved as a draft. Add the instructions.</string>
     <string name="dough_error_number">Enter a number.</string>
     <string name="dough_error_range">Between %1$s and %2$s.</string>

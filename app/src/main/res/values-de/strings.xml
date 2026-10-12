@@ -234,6 +234,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Teigrechner: Regler lassen sich über den Feldern einschalten („Zahlen | Regler“), mit einer Marke beim Standardwert. Listen wie die Kuchenart und bei großer Schrift auch Hefeart und Vorteig sind jetzt Auswahlfelder.</item>
         <item>Teigrechner: Jeder Wert hat jetzt Plus- und Minus-Knöpfe für die Feineinstellung, Standardwerte sind markiert und ein Knopf setzt einen Wert auf den Standard zurück.</item>
         <item>Teigrechner: Die Gesamtmengen stehen als übersichtliche Kacheln über „Als Rezept speichern“.</item>
         <item>Grundrezepte: Zehn bewährte Grundrezepte wie Béchamelsauce, Tomatensauce, Vinaigrette oder Mürbeteig lassen sich auf der Startseite in die Sammlung übernehmen und danach wie jedes andere Rezept bearbeiten.</item>
@@ -478,6 +479,10 @@
     <string name="dough_default_value">Standard: %1$s</string>
     <string name="dough_default_reset">%1$s auf Standard setzen</string>
     <string name="dough_totals_title">Gesamtmengen</string>
+    <string name="dough_mode_numbers">Zahlen</string>
+    <string name="dough_mode_sliders">Regler</string>
+    <string name="dough_input_mode">Eingabe</string>
+    <string name="dough_cake_kind_label">Kuchenart</string>
     <string name="dough_saved">Als Entwurf gespeichert. Zubereitung ergänzen.</string>
     <string name="dough_error_number">Zahl eingeben.</string>
     <string name="dough_error_range">Zwischen %1$s und %2$s.</string>

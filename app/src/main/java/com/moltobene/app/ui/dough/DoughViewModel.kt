@@ -1,6 +1,9 @@
 package com.moltobene.app.ui.dough
 
 import android.content.Context
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moltobene.app.R
@@ -122,6 +125,19 @@ class DoughViewModel(
 
     private val texts = AndroidDoughTexts(context.applicationContext)
 
+    /** Regler statt oder neben den Zahlen (#83, Etappe 2); gilt für alle Teigarten, bleibt auf dem Handy gemerkt. */
+    var sliders by mutableStateOf(false)
+        private set
+
+    init {
+        viewModelScope.launch { sliders = runCatching { preferences.doughMemory(SLIDERS_KEY) == "1" }.getOrDefault(false) }
+    }
+
+    fun setSliders(on: Boolean) {
+        sliders = on
+        viewModelScope.launch { runCatching { preferences.setDoughMemory(SLIDERS_KEY, if (on) "1" else "0") } }
+    }
+
     suspend fun load(type: DoughType): LeavenedInput = preferences.doughValues(type)
 
     fun remember(input: LeavenedInput) {
@@ -192,6 +208,8 @@ class DoughViewModel(
         }
     }
 }
+
+private const val SLIDERS_KEY = "sliders"
 
 /** Reihenfolge der Summen: Mehl zuerst, dann Flüssiges, Würze, Treibmittel. */
 private val TOTALS_ORDER = listOf(

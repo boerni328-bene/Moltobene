@@ -43,6 +43,56 @@ object DoughStepper {
         return if (direction > 0) range == null || current < range.max - EPSILON else current > (range?.min ?: 0.0) + EPSILON
     }
 
+    /**
+     * Der Bereich, den ein Regler zeigt (#83, Etappe 2): der **übliche** Bereich eines Felds, nie größer als die Grenzen
+     * aus [DoughLimits]. Wer mehr braucht, tippt den Wert. Null, wenn das Feld keinen Regler bekommt.
+     */
+    fun sliderBounds(field: DoughField, limits: DoughLimits.Range?): DoughLimits.Range? {
+        val practical = when (field) {
+            DoughField.COUNT -> DoughLimits.Range(1.0, 12.0)
+            DoughField.PIECE_GRAMS -> DoughLimits.Range(100.0, 1000.0)
+            DoughField.WATER -> DoughLimits.Range(50.0, 90.0)
+            DoughField.SALT -> DoughLimits.Range(0.0, 4.0)
+            DoughField.OIL -> DoughLimits.Range(0.0, 8.0)
+            DoughField.YEAST -> DoughLimits.Range(0.0, 2.0)
+            DoughField.PREFERMENT_FLOUR -> DoughLimits.Range(5.0, 100.0)
+            DoughField.PREFERMENT_WATER -> DoughLimits.Range(40.0, 120.0)
+            DoughField.FLOUR_PER_PORTION -> DoughLimits.Range(50.0, 200.0)
+            DoughField.FLOUR_GRAMS -> DoughLimits.Range(100.0, 1000.0)
+            DoughField.SEMOLINA, DoughField.WHOLE_EGG, DoughField.YOLK, DoughField.FAT, DoughField.SUGAR, DoughField.EGG,
+            DoughField.MILK, DoughField.QUARK, DoughField.BAKING_POWDER -> null
+            DoughField.PAN_SIZE -> return null
+        }
+        if (limits == null) return practical
+        if (practical == null) return limits.takeIf { it.max > it.min }
+        val low = maxOf(practical.min, limits.min)
+        val high = minOf(practical.max, limits.max)
+        return if (high > low) DoughLimits.Range(low, high) else limits.takeIf { it.max > it.min }
+    }
+
+    /** Schrittweite des Reglers; bei der Hefe feiner als bei Plus/Minus, damit kleine Mengen treffbar sind. */
+    fun sliderStepFor(field: DoughField): Double = if (field == DoughField.YEAST) 0.01 else stepFor(field)
+
+    /** Die Hefe hat eine gestauchte Skala: feine Schritte im unteren Bereich, wo die üblichen Mengen liegen. */
+    fun isCurved(field: DoughField): Boolean = field == DoughField.YEAST
+
+    /** Stellung des Reglers (0 bis 1) für einen Wert; Werte außerhalb des Bereichs stehen am Rand. */
+    fun positionOf(value: Double, bounds: DoughLimits.Range, curved: Boolean): Float {
+        if (!value.isFinite()) return 0f
+        val linear = ((value - bounds.min) / (bounds.max - bounds.min)).coerceIn(0.0, 1.0)
+        return (if (curved) Math.cbrt(linear) else linear).toFloat()
+    }
+
+    /** Der Wert an einer Reglerstellung, auf die Schrittweite gerundet und innerhalb von [limits] ([bounds] ohne Grenzen). */
+    fun valueAt(position: Float, bounds: DoughLimits.Range, curved: Boolean, step: Double, limits: DoughLimits.Range?): Double {
+        val p = position.toDouble().coerceIn(0.0, 1.0)
+        val raw = bounds.min + (bounds.max - bounds.min) * (if (curved) p * p * p else p)
+        val steps = Math.round(raw / step)
+        val rounded = BigDecimal(steps).multiply(BigDecimal(step.toString())).setScale(4, RoundingMode.HALF_UP).toDouble()
+        val range = limits ?: bounds
+        return rounded.coerceIn(range.min, range.max)
+    }
+
     fun isDefault(current: Double, default: Double): Boolean = current.isFinite() && abs(current - default) < EPSILON
 
     private const val EPSILON = 1e-6
