@@ -22,6 +22,16 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove" />
 
     <!--
+      Vorlesen (#79): Ab Android 11 sieht die App Sprachausgaben nur, wenn sie hier genannt sind. Das ist keine
+      Berechtigung; die App erfährt damit nur, welche Sprachausgabe das Handy bereithält.
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
+
+    <!--
       Datensicherung (#12): keine Cloud-Sicherung ins Google-Konto (Vision: „keine Cloud“).
       Ab Android 12 bleibt der direkte Umzug von Handy zu Handy erlaubt (data_extraction_rules);
       Android 8–11 kennt diese Trennung nicht, dort ist die Android-Sicherung ganz ausgeschlossen.

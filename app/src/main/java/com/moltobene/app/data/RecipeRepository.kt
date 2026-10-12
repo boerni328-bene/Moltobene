@@ -14,6 +14,7 @@ import com.moltobene.app.data.photos.PhotoStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlin.random.Random
 
 /** Zentrale Stelle für Speichern und Laden von Rezepten. */
 class RecipeRepository(
@@ -29,6 +30,26 @@ class RecipeRepository(
             dao.observeSearch(match)
         }
         return source.map { rows -> rows.map { it.toSummary() } }
+    }
+
+    /** Kurzfassungen der genannten Rezepte in der Reihenfolge von [ids]; gelöschte fehlen. */
+    suspend fun getSummaries(ids: List<String>): List<RecipeSummary> {
+        if (ids.isEmpty()) return emptyList()
+        val byId = dao.getSummaries(ids).associateBy { it.id }
+        return ids.mapNotNull { byId[it]?.toSummary() }
+    }
+
+    /**
+     * „Was koche ich heute?“ (#81): ein zufälliges Rezept, kein Entwurf, zwei von drei Mal ein Favorit, wenn es welche
+     * gibt. [exclude] ist das zuletzt gezeigte Rezept; gibt es kein anderes, kommt es noch einmal.
+     */
+    suspend fun suggestRecipe(exclude: String? = null, favoriteChance: Int = 2, random: Int = Random.nextInt(3)): RecipeSummary? {
+        val skip = exclude.orEmpty()
+        val preferFavorite = random < favoriteChance
+        val row = (if (preferFavorite) dao.getRandomSummary(skip, true) else null)
+            ?: dao.getRandomSummary(skip, false)
+            ?: dao.getRandomSummary("", false)
+        return row?.toSummary()
     }
 
     fun observeRecipe(id: String): Flow<Recipe?> = dao.observeDetails(id).map { it?.toRecipe() }

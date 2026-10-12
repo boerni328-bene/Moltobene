@@ -17,6 +17,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.moltobene.app.MoltobeneApplication
 import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.StartScreen
@@ -74,10 +75,11 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                 }
             } else {
                 HomeScreen(
-                    viewModel = viewModel { HomeViewModel(container.repository) },
+                    viewModel = viewModel { HomeViewModel(container.repository, container.photoStore, container.preferences) },
                     snackbarHostState = snackbarHostState,
                     onOpenCollection = { navController.navigate(CollectionRoute) },
                     onOpenDough = { navController.navigate(DoughRoute) },
+                    onOpenRecipe = { id -> navController.navigate(RecipeRoute(id)) },
                     onAddRecipe = { navController.navigate(EditRoute()) },
                     onAddFromPhoto = { navController.navigate(EditRoute(fromPhoto = true)) },
                     onAddFromText = { navController.navigate(EditRoute(fromText = true)) },
@@ -109,7 +111,10 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                 onOpenSettings = { navController.navigate(SettingsRoute) },
             )
         }
-        composable<RecipeRoute> {
+        composable<RecipeRoute> { entry ->
+            // „Zuletzt geöffnet“ auf der Startseite (#81): nur auf diesem Handy gemerkt.
+            val openedId = entry.toRoute<RecipeRoute>().id
+            LaunchedEffect(openedId) { runCatching { container.preferences.addRecentRecipe(openedId) } }
             val screenOn by container.preferences.screenOn.collectAsStateWithLifecycle()
             RecipeScreen(
                 viewModel = viewModel {
@@ -122,6 +127,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                     )
                 },
                 screenOn = screenOn ?: ScreenOn.STAYS_ON,
+                speech = container.speech,
                 snackbarHostState = snackbarHostState,
                 onBack = { navController.popBackStack() },
                 onEdit = { id -> navController.navigate(EditRoute(id)) },

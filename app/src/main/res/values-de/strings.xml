@@ -234,8 +234,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Neue Startseite: Beim Öffnen stehen große Kacheln für „Rezepte“ (mit Anzahl) und den Teigrechner.</item>
-        <item>In den Einstellungen unter „Start“ lässt sich wählen, ob die App mit der Startseite oder gleich mit den Rezepten beginnt.</item>
+        <item>Kochleiste im Rezept: „Zurück“, „Vorlesen“, „Weiter“ und „Zutaten“ führen durch die Schritte und lesen sie auf Antippen vor, mit Stimmen, die ohne Internet funktionieren.</item>
+        <item>Startseite: „Was koche ich heute?“ schlägt ein Rezept aus der Sammlung vor (Favoriten bevorzugt); „Anderes Rezept“ zeigt ein anderes.</item>
+        <item>Startseite: „Zuletzt geöffnet“ zeigt die zuletzt geöffneten Rezepte. Die Liste bleibt nur auf dem Handy.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->
@@ -304,6 +305,25 @@
     <string name="start_title">Beim Öffnen der App</string>
     <string name="start_home">Startseite</string>
     <string name="start_collection">Rezepte</string>
+    <string name="home_today_title">Was koche ich heute?</string>
+    <string name="home_today_cook">Kochen</string>
+    <string name="home_today_another">Anderes Rezept</string>
+    <string name="home_recent_title">Zuletzt geöffnet</string>
+    <!-- Kochleiste und Vorlesen (#79) -->
+    <string name="cook_bar_previous">Zurück</string>
+    <string name="cook_bar_previous_description">Vorheriger Schritt</string>
+    <string name="cook_bar_next">Weiter</string>
+    <string name="cook_bar_next_description">Nächster Schritt</string>
+    <string name="cook_bar_read">Vorlesen</string>
+    <string name="cook_bar_read_description">Aktuellen Schritt vorlesen</string>
+    <string name="cook_bar_stop">Anhalten</string>
+    <string name="cook_bar_stop_description">Vorlesen anhalten</string>
+    <string name="cook_bar_ingredients">Zutaten</string>
+    <string name="cook_bar_ingredients_description">Zutaten vorlesen</string>
+    <string name="cook_last_step">Letzter Schritt</string>
+    <string name="cook_all_checked">Alle Zutaten sind abgehakt</string>
+    <string name="speech_no_voice">Keine Stimme für %1$s, die ohne Internet funktioniert. In den Einstellungen des Handys unter Sprachausgabe lässt sich eine laden.</string>
+    <string name="speech_unavailable">Vorlesen ist auf diesem Handy nicht möglich. Es ist keine Sprachausgabe eingerichtet.</string>
     <!-- Einstellungen: Darstellung (Hell/Dunkel und Farbwelt) -->
     <string name="settings_section_appearance">Darstellung</string>
     <string name="appearance_mode">Hell oder dunkel</string>

@@ -34,6 +34,30 @@ abstract class RecipeDao {
     )
     abstract fun observeSearch(match: String): Flow<List<RecipeSummaryRow>>
 
+    @Query(
+        """
+        SELECT id, title, isDraft, favorite,
+            (SELECT photoId FROM recipe_photos WHERE recipe_photos.recipeId = recipes.id AND kind = 'photo'
+             ORDER BY position LIMIT 1) AS photoId
+        FROM recipes
+        WHERE id IN (:ids)
+        """
+    )
+    abstract suspend fun getSummaries(ids: List<String>): List<RecipeSummaryRow>
+
+    // „Was koche ich heute?“: ein zufälliges Rezept, keine Entwürfe; ohne Auswahl ist :exclude leer.
+    @Query(
+        """
+        SELECT id, title, isDraft, favorite,
+            (SELECT photoId FROM recipe_photos WHERE recipe_photos.recipeId = recipes.id AND kind = 'photo'
+             ORDER BY position LIMIT 1) AS photoId
+        FROM recipes
+        WHERE isDraft = 0 AND id != :exclude AND (:favoritesOnly = 0 OR favorite = 1)
+        ORDER BY RANDOM() LIMIT 1
+        """
+    )
+    abstract suspend fun getRandomSummary(exclude: String, favoritesOnly: Boolean): RecipeSummaryRow?
+
     @Transaction
     @Query("SELECT * FROM recipes WHERE id = :id")
     abstract fun observeDetails(id: String): Flow<RecipeWithDetails?>

@@ -28,6 +28,11 @@ class AppPreferences(context: Context) {
     /** „Beim Öffnen der App“ (#81); null, bis [loadAppearance] sie gelesen hat. */
     val startScreen: StateFlow<StartScreen?> = startScreenState.asStateFlow()
 
+    private val recentState = MutableStateFlow<List<String>?>(null)
+
+    /** Zuletzt geöffnete Rezepte (#81), das neueste zuerst; null, bis [loadRecentRecipes] sie gelesen hat. */
+    val recentRecipes: StateFlow<List<String>?> = recentState.asStateFlow()
+
     private val screenOnState = MutableStateFlow<ScreenOn?>(null)
 
     /** „Bildschirm in der Rezeptansicht“ (#68); null, bis [loadAppearance] sie gelesen hat (dann gilt „Bleibt an“). */
@@ -50,6 +55,19 @@ class AppPreferences(context: Context) {
         appearanceState.compareAndSet(null, stored)
         val screen = runCatching { ScreenOn.fromKey(prefs.getString(KEY_SCREEN_ON, null)) }.getOrDefault(ScreenOn.STAYS_ON)
         screenOnState.compareAndSet(null, screen)
+    }
+
+    suspend fun loadRecentRecipes() = withContext(Dispatchers.IO) {
+        val stored = runCatching { RecentRecipes.decode(prefs.getString(KEY_RECENT_RECIPES, null)) }.getOrDefault(emptyList())
+        recentState.compareAndSet(null, stored)
+    }
+
+    /** Merkt ein geöffnetes Rezept für „Zuletzt geöffnet“. */
+    suspend fun addRecentRecipe(id: String) {
+        loadRecentRecipes()
+        val updated = RecentRecipes.add(recentState.value.orEmpty(), id)
+        recentState.value = updated
+        withContext(Dispatchers.IO) { prefs.edit { putString(KEY_RECENT_RECIPES, RecentRecipes.encode(updated)) } }
     }
 
     /** Gilt beim nächsten Öffnen der App; gespeichert wird danach. */
@@ -167,6 +185,7 @@ class AppPreferences(context: Context) {
         const val KEY_PALETTE = "palette"
         const val KEY_SCREEN_ON = "screen_on"
         const val KEY_START_SCREEN = "start_screen"
+        const val KEY_RECENT_RECIPES = "recent_recipes"
         const val KEY_COLLECTION_GRID = "collection_grid"
         const val KEY_DOUGH_PREFIX = "dough_values_"
     }
