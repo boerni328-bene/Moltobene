@@ -18,7 +18,10 @@ import com.moltobene.app.data.DraftText
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeIds
 import com.moltobene.app.data.RecipeRepository
+import com.moltobene.app.data.PredefinedTags
 import com.moltobene.app.data.RecipeText
+import com.moltobene.app.data.Tag
+import com.moltobene.app.data.TagCodec
 import com.moltobene.app.data.SourceLine
 import com.moltobene.app.data.TextLinks
 import com.moltobene.app.data.ocr.AreaFrame
@@ -120,6 +123,8 @@ class EditViewModel(
     private val sourcePageField = SavedField(handle, "sourcePage", "")
     /** Link zu einem Video des Rezepts, z. B. auf YouTube – getrennt von der Quelle. */
     private val videoField = SavedField(handle, "video", "")
+    /** Schlagwörter (#57) als Text, siehe [TagCodec]. */
+    private val tagsField = SavedField(handle, "tags", "")
     /** Bei der Texterkennung gefundene Seitenzahl – als Vorschlag für „Seite“. */
     private val suggestedPageField = SavedField(handle, "suggestedPage", "")
     private val notesField = SavedField(handle, "notes", "")
@@ -203,6 +208,29 @@ class EditViewModel(
     var sourcePage: String
         get() = sourcePageField.value
         set(value) = change(sourcePageField, value)
+
+    /** Die gewählten Schlagwörter (#57), mitgelieferte und eigene. */
+    val tags: List<Tag> get() = TagCodec.decode(tagsField.value)
+
+    /** Wählt ein mitgeliefertes Schlagwort oder hebt die Wahl auf. */
+    fun toggleTag(tag: Tag) {
+        val current = tags
+        val updated = if (current.any { it.name == tag.name }) current.filterNot { it.name == tag.name } else current + tag
+        change(tagsField, TagCodec.encode(updated))
+    }
+
+    /** Fügt ein eigenes Schlagwort hinzu; meint es ein mitgeliefertes ([labels]), wird dieses gewählt. */
+    fun addCustomTag(text: String, labels: Map<String, String>) {
+        val tag = PredefinedTags.resolve(text, labels)
+        if (tag.name.isEmpty() || tag.name.length > TagCodec.MAX_NAME) return
+        val current = tags
+        if (current.size >= TagCodec.MAX_TAGS || current.any { it.name.equals(tag.name, ignoreCase = true) }) return
+        change(tagsField, TagCodec.encode(current + tag))
+    }
+
+    fun removeTag(tag: Tag) {
+        change(tagsField, TagCodec.encode(tags.filterNot { it.name == tag.name }))
+    }
 
     var video: String
         get() = videoField.value
@@ -382,6 +410,7 @@ class EditViewModel(
                 sourceField.value = RecipeText.formatSource(recipe.source)
                 sourcePageField.value = recipe.source?.page.orEmpty()
                 videoField.value = recipe.videoUrl.orEmpty()
+                tagsField.value = TagCodec.encode(recipe.tags)
                 notesField.value = recipe.notes
                 photoIdField.value = recipe.photoIds.firstOrNull()
                 originalPhotoIdField.value = recipe.photoIds.firstOrNull()
@@ -1418,6 +1447,8 @@ class EditViewModel(
             source = parsedSource,
             // Links zu YouTube-Videos ohne Zusätze wie „si=…“, mit denen YouTube Weitergaben verfolgt.
             videoUrl = video.trim().ifEmpty { null }?.let { link -> YouTube.videoId(link)?.let(YouTube::watchUrl) ?: link },
+            // Solange das gespeicherte Rezept noch nicht geladen ist, bleiben seine Schlagwörter unberührt.
+            tags = if (base != null && !loadedField.value) base.tags else tags,
             notes = notes.trim(),
             isDraft = isDraft,
             ingredients = RecipeText.parseIngredients(ingredients),

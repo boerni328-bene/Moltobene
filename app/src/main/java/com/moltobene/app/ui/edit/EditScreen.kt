@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
@@ -34,8 +35,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -62,6 +65,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -70,6 +74,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -77,6 +82,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.moltobene.app.R
+import com.moltobene.app.data.PredefinedTags
+import com.moltobene.app.data.TagCodec
 import com.moltobene.app.data.TextLinks
 import com.moltobene.app.data.ocr.TextLanguage
 import com.moltobene.app.data.share.IncomingText
@@ -84,6 +91,7 @@ import com.moltobene.app.data.web.WebAddress
 import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.components.CenteredMessage
 import com.moltobene.app.ui.components.OptionButton
+import com.moltobene.app.ui.components.TagLabels
 import com.moltobene.app.ui.components.isLargeText
 import com.moltobene.app.ui.components.PageViewer
 import com.moltobene.app.ui.components.RecipePhotoLarge
@@ -382,6 +390,8 @@ fun EditScreen(
                 SourceSection(viewModel)
 
                 RecipeLanguageField(language = viewModel.language, onChange = viewModel::changeLanguage)
+
+                TagsSection(viewModel)
 
                 OutlinedTextField(
                     value = viewModel.notes,
@@ -1055,6 +1065,77 @@ private fun ImportChips(enabled: Boolean, onLink: () -> Unit, onPhoto: () -> Uni
                     Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(18.dp))
                 },
             )
+        }
+    }
+}
+
+/**
+ * Schlagwörter (#57): mitgelieferte Vorschläge zum Antippen und eigene Schlagwörter. Ein eigenes Schlagwort, das einem
+ * Vorschlag entspricht, wird zu diesem. Eigene Eingaben werden nie übersetzt.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun TagsSection(viewModel: EditViewModel) {
+    val resources = LocalResources.current
+    val labels = remember(resources) { TagLabels.all(resources) }
+    var input by rememberSaveable { mutableStateOf("") }
+    val selected = viewModel.tags
+    val addInput = {
+        viewModel.addCustomTag(input, labels)
+        input = ""
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+        Text(
+            text = stringResource(R.string.tags),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.semantics { heading() },
+        )
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+            for (key in PredefinedTags.KEYS) {
+                val tag = PredefinedTags.tag(key)
+                val on = selected.any { it.name == key }
+                FilterChip(
+                    selected = on,
+                    onClick = { viewModel.toggleTag(tag) },
+                    label = { Text(TagLabels.text(resources, tag)) },
+                    leadingIcon = if (on) {
+                        { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(18.dp)) }
+                    } else {
+                        null
+                    },
+                )
+            }
+        }
+        val own = selected.filter { it.predefinedKey == null }
+        if (own.isNotEmpty()) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                for (tag in own) {
+                    InputChip(
+                        selected = true,
+                        onClick = { viewModel.removeTag(tag) },
+                        label = { Text(tag.name) },
+                        trailingIcon = {
+                            Icon(
+                                Icons.Filled.Close,
+                                contentDescription = stringResource(R.string.tags_remove, tag.name),
+                                modifier = Modifier.size(18.dp),
+                            )
+                        },
+                    )
+                }
+            }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalAlignment = Alignment.CenterVertically) {
+            OutlinedTextField(
+                value = input,
+                onValueChange = { if (it.length <= TagCodec.MAX_NAME) input = it },
+                label = { Text(stringResource(R.string.tags_custom)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { addInput() }),
+                modifier = Modifier.weight(1f),
+            )
+            TextButton(onClick = addInput, enabled = input.isNotBlank()) { Text(stringResource(R.string.tags_add)) }
         }
     }
 }

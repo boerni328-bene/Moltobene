@@ -126,6 +126,7 @@ import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeText
 import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.ScreenOnTimer
+import com.moltobene.app.data.Tag
 import com.moltobene.app.data.ocr.TextLanguage
 import com.moltobene.app.data.share.PreparedShare
 import com.moltobene.app.data.share.RecipeShareText
@@ -134,6 +135,7 @@ import com.moltobene.app.data.translate.LanguagePack
 import com.moltobene.app.data.translate.RecipeTranslations
 import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.components.CenteredMessage
+import com.moltobene.app.ui.components.TagLabels
 import com.moltobene.app.ui.components.DraftLabel
 import com.moltobene.app.ui.components.PageViewer
 import com.moltobene.app.ui.components.RecipePhoto
@@ -419,6 +421,7 @@ private fun shareLabels(resources: Resources) = ShareLabels(
     source = { resources.getString(R.string.share_source, it) },
     page = { resources.getString(R.string.source_page, it) },
     video = { resources.getString(R.string.share_video, it) },
+    tag = { TagLabels.text(resources, it) },
 )
 
 /** Öffnet das Android-Teilen-Menü. Andere Apps dürfen nur die übergebene Datei lesen. */
@@ -714,6 +717,7 @@ private fun RecipeContent(
                     )
                 }
                 RecipeTimes(recipe.prepMinutes, recipe.totalMinutes)
+                if (recipe.tags.isNotEmpty()) RecipeTags(recipe.tags)
 
                 if (recipe.ingredients.isNotEmpty()) {
                     SectionTitle(stringResource(R.string.ingredients))
@@ -1263,6 +1267,28 @@ private fun AdjustRow(onAdjust: () -> Unit, content: @Composable () -> Unit) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier.weight(1f)) { content() }
             button()
+        }
+    }
+}
+
+/** Die Schlagwörter des Rezepts (#57) als ruhige Marken unter den Zeiten; mit Text, nicht nur mit Farbe. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun RecipeTags(tags: List<Tag>) {
+    val resources = LocalResources.current
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(Spacing.s),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+    ) {
+        for (tag in tags) {
+            Surface(color = MaterialTheme.colorScheme.secondaryContainer, shape = MaterialTheme.shapes.small) {
+                Text(
+                    text = TagLabels.text(resources, tag),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.padding(horizontal = Spacing.s, vertical = Spacing.xs),
+                )
+            }
         }
     }
 }

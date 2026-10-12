@@ -3,6 +3,14 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.35.0] – 2026-10-12 (versionCode 62)
+
+### Neu
+- **Schlagwörter:** Beim Bearbeiten lassen sich dreizehn mitgelieferte Schlagwörter antippen – Hauptgerichte, Beilagen, Vorspeisen, Suppen, Salate, Saucen, Pastagerichte, Aufläufe, Desserts, Brot, Kuchen, Pizza und Grundrezepte – und eigene hinzufügen (bis zu 20 je Rezept). Ein eigenes Schlagwort, das einem mitgelieferten entspricht, wird zu diesem. Eigene Schlagwörter werden nie übersetzt; mitgelieferte erscheinen in der Sprache der App.
+- **Anzeige:** In der Rezeptansicht stehen die Schlagwörter unter dem Titel.
+- **Filter in der Sammlung:** Neben „Alle“, „Favoriten“ und „Entwürfe“ gibt es für jedes verwendete Schlagwort eine Auswahl mit der Anzahl der Rezepte („Saucen · 12“). Mehrere Schlagwörter zugleich zeigen nur Rezepte, die alle haben. Bei großer Schrift steht statt der Auswahl eine Schaltfläche „Schlagwort: Alle“ mit einer Liste.
+- **Teilen:** In der Rezeptdatei stehen die Schlagwörter als Stichwörter, mitgelieferte in der Sprache der App.
+
 ## [0.34.0] – 2026-10-12 (versionCode 61)
 
 ### Neu

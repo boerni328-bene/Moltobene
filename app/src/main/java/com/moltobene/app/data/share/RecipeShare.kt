@@ -3,6 +3,7 @@ package com.moltobene.app.data.share
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeSource
 import com.moltobene.app.data.RecipeText
+import com.moltobene.app.data.Tag
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.add
@@ -32,6 +33,8 @@ class ShareLabels(
     val page: (String) -> String = { it },
     /** Zeile mit dem Link zum Video, z. B. „Video: https://…“. */
     val video: (String) -> String = { it },
+    /** Name eines Schlagworts; mitgelieferte in der Sprache der Oberfläche (#57). */
+    val tag: (Tag) -> String = { it.name },
 )
 
 object RecipeShareText {
@@ -108,7 +111,13 @@ object RecipeJsonLd {
      * [photoJpeg] wird als data-Link eingebettet, damit die Datei ohne Internet vollständig ist.
      * [page] schreibt eine Seitenzahl der Quelle aus, z. B. „S. 47“.
      */
-    fun build(recipe: Recipe, untitled: String, photoJpeg: ByteArray?, page: (String) -> String = { it }): String {
+    fun build(
+        recipe: Recipe,
+        untitled: String,
+        photoJpeg: ByteArray?,
+        tag: (Tag) -> String = { it.name },
+        page: (String) -> String = { it },
+    ): String {
         val document: JsonObject = buildJsonObject {
             put("@context", "https://schema.org")
             put("@type", "Recipe")
@@ -136,7 +145,7 @@ object RecipeJsonLd {
                     }
                 }
             }
-            if (recipe.tags.isNotEmpty()) put("keywords", recipe.tags.joinToString(", ") { it.name })
+            if (recipe.tags.isNotEmpty()) put("keywords", recipe.tags.joinToString(", ") { tag(it) })
             val url = recipe.source?.url?.trim()?.takeIf { it.isNotEmpty() }
             if (url != null) {
                 put("url", url)

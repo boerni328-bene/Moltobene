@@ -152,12 +152,21 @@ fun CollectionScreen(
                 CollectionUiState.Loading -> CenteredMessage(text = "") { CircularProgressIndicator() }
                 CollectionUiState.Error -> CenteredMessage(text = stringResource(R.string.collection_error))
                 is CollectionUiState.Content -> {
-                    val collectionIsEmpty = current.items.isEmpty() && query.isBlank() && current.filter == CollectionFilter.ALL
+                    val collectionIsEmpty = current.items.isEmpty() && query.isBlank() && current.filter == CollectionFilter.ALL &&
+                        current.selectedTags.isEmpty()
                     if (collectionIsEmpty) {
                         EmptyCollection()
                     } else {
                         SearchRow(query = query, onQueryChange = viewModel::onQueryChange, grid = grid, onGridChange = viewModel::onGridChange)
-                        FilterRow(current.filter, current.hasFavorites, current.hasDrafts, viewModel::onFilterChange)
+                        FilterRow(
+                            filter = current.filter,
+                            hasFavorites = current.hasFavorites,
+                            hasDrafts = current.hasDrafts,
+                            tagCounts = current.tagCounts,
+                            selectedTags = current.selectedTags,
+                            onFilterChange = viewModel::onFilterChange,
+                            onToggleTag = viewModel::onToggleTag,
+                        )
                         backupHint?.takeIf { query.isBlank() }?.let { unsaved ->
                             BackupHint(
                                 unsaved = unsaved,

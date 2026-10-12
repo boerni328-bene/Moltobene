@@ -81,6 +81,10 @@ abstract class RecipeDao {
     abstract fun observeChangedSince(since: Long): Flow<Int>
 
     /** Anzahl der Rezepte für die Startseite (#81): eine einzige Zählung, ohne Rezepte zu laden. */
+    // Alle Schlagwörter aller Rezepte für den Filter der Sammlung; eine Abfrage, keine Rezepte oder Fotos.
+    @Query("SELECT recipeId, name, predefinedKey FROM recipe_tags")
+    abstract fun observeTagLinks(): Flow<List<RecipeTagEntity>>
+
     @Query("SELECT COUNT(*) FROM recipes")
     abstract fun observeCount(): Flow<Int>
 

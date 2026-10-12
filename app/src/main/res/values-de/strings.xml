@@ -234,6 +234,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Schlagwörter: Rezepte können mitgelieferte Schlagwörter wie „Saucen“, „Desserts“ oder „Suppen“ bekommen, dazu eigene. Die Sammlung lässt sich nach einem oder mehreren Schlagwörtern zugleich filtern, mit der Anzahl der Rezepte je Schlagwort.</item>
         <item>Kochleiste im Rezept: „Zurück“, „Vorlesen“, „Weiter“ und „Zutaten“ führen durch die Schritte und lesen sie auf Antippen vor, mit Stimmen, die ohne Internet funktionieren.</item>
         <item>Startseite: „Was koche ich heute?“ schlägt ein Rezept aus der Sammlung vor (Favoriten bevorzugt); „Anderes Rezept“ zeigt ein anderes.</item>
         <item>Startseite: „Zuletzt geöffnet“ zeigt die zuletzt geöffneten Rezepte. Die Liste bleibt nur auf dem Handy.</item>
@@ -309,6 +310,29 @@
     <string name="home_today_cook">Kochen</string>
     <string name="home_today_another">Anderes Rezept</string>
     <string name="home_recent_title">Zuletzt geöffnet</string>
+    <!-- Schlagwörter (#57): mitgelieferte zeigen diese Namen, eigene den eingegebenen Text -->
+    <string name="tags">Schlagwörter</string>
+    <string name="tag_filter_chip">%1$s · %2$d</string>
+    <string name="tag_filter_all">Schlagwort: Alle</string>
+    <string name="tag_filter_one">Schlagwort: %1$s</string>
+    <string name="tag_filter_many">Schlagwörter: %1$d</string>
+    <string name="tag_filter_title">Nach Schlagwort filtern</string>
+    <string name="tags_custom">Eigenes Schlagwort</string>
+    <string name="tags_add">Hinzufügen</string>
+    <string name="tags_remove">Schlagwort %1$s entfernen</string>
+    <string name="tag_main_course">Hauptgerichte</string>
+    <string name="tag_side_dish">Beilagen</string>
+    <string name="tag_appetizer">Vorspeisen</string>
+    <string name="tag_soup">Suppen</string>
+    <string name="tag_salad">Salate</string>
+    <string name="tag_sauce">Saucen</string>
+    <string name="tag_pasta">Pastagerichte</string>
+    <string name="tag_casserole">Aufläufe</string>
+    <string name="tag_dessert">Desserts</string>
+    <string name="tag_bread">Brot</string>
+    <string name="tag_cake">Kuchen</string>
+    <string name="tag_pizza">Pizza</string>
+    <string name="tag_basics">Grundrezepte</string>
     <!-- Kochleiste und Vorlesen (#79) -->
     <string name="cook_bar_previous">Zurück</string>
     <string name="cook_bar_previous_description">Vorheriger Schritt</string>

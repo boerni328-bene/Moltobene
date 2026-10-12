@@ -557,6 +557,48 @@ class AppTourTest(private val variant: DisplayVariant) {
         assertEquals("en", stored.language)
     }
 
+    /**
+     * Schlagwörter (#57): im Bearbeiten ein mitgeliefertes wählen und ein eigenes hinzufügen, in der Rezeptansicht
+     * sehen, in der Sammlung danach filtern (bei Schrift 200 % über die Liste „Schlagwort: Alle“).
+     */
+    @Test
+    fun schlagwoerter() {
+        addSampleRecipes()
+        openRecipe(SampleRecipes.TOMATO_SAUCE)
+        waitForText("800 g reife Tomaten")
+        composeRule.onNodeWithContentDescription(text(R.string.edit_recipe)).performClick()
+        waitForField(R.string.field_title)
+
+        composeRule.onNodeWithText(text(R.string.tag_sauce)).performScrollTo().performClick()
+        input(R.string.tags_custom, "Omas Klassiker")
+        composeRule.onNode(hasText(text(R.string.tags_add)) and hasClickAction()).performScrollTo().performClick()
+        composeRule.onNodeWithText("Omas Klassiker").performScrollTo().assertIsDisplayed()
+        screenshot("15a-schlagwoerter-bearbeiten")
+        composeRule.onNodeWithText(text(R.string.save)).performClick()
+
+        waitForText("Omas Klassiker")
+        composeRule.onNodeWithText(text(R.string.tag_sauce)).assertIsDisplayed()
+        val stored = runBlocking { container().repository.getAll().first { it.title == SampleRecipes.TOMATO_SAUCE } }
+        assertEquals(listOf("sauce", "Omas Klassiker"), stored.tags.map { it.name })
+        assertEquals(listOf("sauce", null), stored.tags.map { it.predefinedKey })
+        screenshot("15b-schlagwoerter-rezept")
+
+        pressBack()
+        waitForText(SampleRecipes.POTATO_SALAD)
+        val sauces = text(R.string.tag_filter_chip, text(R.string.tag_sauce), 1)
+        if (variant == DisplayVariant.LARGE_TEXT) {
+            composeRule.onNodeWithText(text(R.string.tag_filter_all)).performScrollTo().performClick()
+            waitForText(sauces)
+            composeRule.onNodeWithText(sauces).performClick()
+            composeRule.onNodeWithText(text(R.string.close)).performClick()
+        } else {
+            composeRule.onNodeWithText(sauces).performScrollTo().performClick()
+        }
+        waitUntilGone(SampleRecipes.POTATO_SALAD)
+        composeRule.onNodeWithText(SampleRecipes.TOMATO_SAUCE).assertIsDisplayed()
+        screenshot("15c-filter-schlagwort")
+    }
+
     @Test
     fun entwurfOhneFoto() {
         addSampleRecipes()
