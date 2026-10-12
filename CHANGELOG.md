@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.37.0] – 2026-10-12 (versionCode 64)
+
+### Neu
+- **Teigrechner: Regler.** Über den Feldern steht der Schalter „Zahlen | Regler“. Mit „Regler“ erscheint unter jedem passenden Wert ein Regler, der den üblichen Bereich zeigt (etwa 50 bis 90 % beim Wasseranteil); die Zahl im Feld bleibt immer sichtbar und lässt sich weiter eintippen, auch außerhalb des Reglerbereichs. Eine Marke zeigt den Standardwert. Bei wenigen Stufen rastet der Regler ein; die Hefe läuft auf einer gestauchten Skala, damit kleine Mengen treffbar sind. Die Wahl wird gemerkt.
+- **Teigrechner: Auswahlfelder.** Die Kuchenart steht in einem Auswahlfeld statt in sechs Chips. Bei großer Schrift sind auch Hefeart und Vorteig Auswahlfelder; bei normaler Schrift bleiben es die schnellen Chips.
+
 ## [0.36.0] – 2026-10-12 (versionCode 63)
 
 ### Neu

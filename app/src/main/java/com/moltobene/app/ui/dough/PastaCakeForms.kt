@@ -96,7 +96,7 @@ private fun PastaForm(
 
     val defaults = PastaLimits.defaults(kind)
     fun stepping(field: DoughField, default: Double) =
-        Stepping(DoughStepper.stepFor(field), default, PastaLimits.range(kind, field))
+        Stepping(DoughStepper.stepFor(field), default, PastaLimits.range(kind, field), field)
     val input = PastaInput(
         kind = kind,
         portions = portions.trim().toIntOrNull() ?: 0,
@@ -369,7 +369,7 @@ private fun CakeForm(
     val yeastKind = YeastKind.fromKey(yeastKindKey) ?: YeastKind.FRESH
 
     fun cakeStepping(field: CakeField, default: Double) =
-        Stepping(DoughStepper.stepFor(field.toDoughField()), default, CakeLimits.range(kind, field))
+        Stepping(DoughStepper.stepFor(field.toDoughField()), default, CakeLimits.range(kind, field), field.toDoughField())
     val size = if (byPan) {
         fun cm(text: String) = PanScaling.toCm(parseNumber(text), inch)
         CakeSize.PanSize(if (round) Pan.round(cm(panA)) else Pan.rectangle(cm(panA), cm(panB)))
@@ -407,15 +407,13 @@ private fun CakeForm(
         note = R.string.dough_cake_baking_note,
     ) {
         Card(stringResource(R.string.dough_section_dough)) {
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-                for (option in CakeKind.entries) {
-                    FilterChip(
-                        selected = option == kind,
-                        onClick = { onKind(option) },
-                        label = { Text(stringResource(AndroidDoughTexts.cakeKindName(option))) },
-                    )
-                }
-            }
+            ChoiceField(
+                label = stringResource(R.string.dough_cake_kind_label),
+                options = CakeKind.entries,
+                selected = kind,
+                optionLabel = { stringResource(AndroidDoughTexts.cakeKindName(it)) },
+                onSelect = onKind,
+            )
         }
 
         Card(stringResource(R.string.dough_section_size)) {
@@ -488,27 +486,25 @@ private fun CakeForm(
                 NumberField(
                     stringResource(R.string.dough_label_flour), flour, { flour = it },
                     issues.forField(DoughField.FLOUR_GRAMS), Modifier.fillMaxWidth(), suffix = "g",
-                    stepping = Stepping(DoughStepper.stepFor(DoughField.FLOUR_GRAMS), CakeLimits.referenceFlour(kind)),
+                    stepping = Stepping(DoughStepper.stepFor(DoughField.FLOUR_GRAMS), CakeLimits.referenceFlour(kind), null, DoughField.FLOUR_GRAMS),
                 )
             }
         }
 
         if (CakeField.YEAST in fields) {
             Card(stringResource(R.string.dough_section_yeast)) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-                    for (option in YeastKind.entries) {
-                        FilterChip(
-                            selected = option == yeastKind,
-                            onClick = {
-                                // Die Menge bleibt gleichwertig, wenn die Hefeart wechselt.
-                                val current = parseNumber(yeast)
-                                if (current.isFinite()) yeast = fmt(yeastKind.convert(current, option), 3)
-                                yeastKindKey = option.key
-                            },
-                            label = { Text(stringResource(AndroidDoughTexts.yeastName(option))) },
-                        )
-                    }
-                }
+                ChoiceField(
+                    label = stringResource(R.string.dough_section_yeast),
+                    options = YeastKind.entries,
+                    selected = yeastKind,
+                    optionLabel = { stringResource(AndroidDoughTexts.yeastName(it)) },
+                    onSelect = { option ->
+                        // Die Menge bleibt gleichwertig, wenn die Hefeart wechselt.
+                        val current = parseNumber(yeast)
+                        if (current.isFinite()) yeast = fmt(yeastKind.convert(current, option), 3)
+                        yeastKindKey = option.key
+                    },
+                )
                 NumberField(
                     stringResource(R.string.dough_yeast_amount), yeast, { yeast = it },
                     issues.forField(DoughField.YEAST), Modifier.fillMaxWidth(), suffix = SUFFIX_PERCENT,

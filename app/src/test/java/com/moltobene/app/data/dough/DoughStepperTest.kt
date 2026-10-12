@@ -60,6 +60,61 @@ class DoughStepperTest {
     }
 
     @Test
+    fun reglerZeigtDenUeblichenBereichInnerhalbDerGrenzen() {
+        val water = DoughStepper.sliderBounds(DoughField.WATER, DoughLimits.Range(45.0, 100.0))!!
+        assertEquals(50.0, water.min, 0.0)
+        assertEquals(90.0, water.max, 0.0)
+        // Engere Grenzen gewinnen (Pasta-Wasser 35 bis 70).
+        val pasta = DoughStepper.sliderBounds(DoughField.WATER, DoughLimits.Range(35.0, 70.0))!!
+        assertEquals(50.0, pasta.min, 0.0)
+        assertEquals(70.0, pasta.max, 0.0)
+        // Ohne üblichen Bereich gelten die Grenzen; Backform und leere Grenzen bekommen keinen Regler.
+        val fat = DoughStepper.sliderBounds(DoughField.FAT, DoughLimits.Range(20.0, 120.0))!!
+        assertEquals(20.0, fat.min, 0.0)
+        assertEquals(null, DoughStepper.sliderBounds(DoughField.PAN_SIZE, null))
+        assertEquals(null, DoughStepper.sliderBounds(DoughField.WHOLE_EGG, DoughLimits.Range(0.0, 0.0)))
+    }
+
+    @Test
+    fun reglerstellungUndWertGehenHinUndZurueck() {
+        val bounds = DoughLimits.Range(50.0, 90.0)
+        assertEquals(0f, DoughStepper.positionOf(50.0, bounds, false), 0f)
+        assertEquals(1f, DoughStepper.positionOf(90.0, bounds, false), 0f)
+        assertEquals(0.5f, DoughStepper.positionOf(70.0, bounds, false), 0.0001f)
+        assertEquals(0f, DoughStepper.positionOf(30.0, bounds, false), 0f)
+        assertEquals(1f, DoughStepper.positionOf(150.0, bounds, false), 0f)
+        for (value in listOf(50.0, 62.0, 65.0, 78.0, 90.0)) {
+            val position = DoughStepper.positionOf(value, bounds, false)
+            assertEquals(value, DoughStepper.valueAt(position, bounds, false, 1.0, DoughLimits.Range(45.0, 100.0)), 0.0)
+        }
+    }
+
+    @Test
+    fun hefeHatEineGestauchteSkalaUndBleibtInDenGrenzen() {
+        val bounds = DoughStepper.sliderBounds(DoughField.YEAST, DoughLimits.Range(0.01, 5.0))!!
+        val step = DoughStepper.sliderStepFor(DoughField.YEAST)
+        assertTrue(DoughStepper.isCurved(DoughField.YEAST))
+        // Die Mitte des Reglers liegt weit unten, nicht bei der Hälfte des Bereichs.
+        val middle = DoughStepper.valueAt(0.5f, bounds, true, step, DoughLimits.Range(0.01, 5.0))
+        assertTrue("Mitte $middle", middle < 0.5)
+        // Ganz links ist der Wert nie unter der unteren Grenze (0 wäre ungültig).
+        assertEquals(0.01, DoughStepper.valueAt(0f, bounds, true, step, DoughLimits.Range(0.01, 5.0)), 0.0)
+        assertEquals(2.0, DoughStepper.valueAt(1f, bounds, true, step, DoughLimits.Range(0.01, 5.0)), 0.0)
+        // Hin und zurück ändert den Wert höchstens um einen Schritt.
+        val position = DoughStepper.positionOf(0.2, bounds, true)
+        assertEquals(0.2, DoughStepper.valueAt(position, bounds, true, step, null), 0.011)
+    }
+
+    @Test
+    fun jedesFeldMitReglerHatSinnvolleSchritte() {
+        for (field in DoughField.entries) {
+            val bounds = DoughStepper.sliderBounds(field, DoughLimits.Range(0.0, 200.0)) ?: continue
+            val step = DoughStepper.sliderStepFor(field)
+            assertTrue("$field", bounds.max > bounds.min && step > 0 && (bounds.max - bounds.min) / step >= 2)
+        }
+    }
+
+    @Test
     fun schrittweitenSindEndlichUndPositiv() {
         for (field in DoughField.entries) {
             val step = DoughStepper.stepFor(field)

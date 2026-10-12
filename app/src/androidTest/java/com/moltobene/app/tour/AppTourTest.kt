@@ -6,6 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
@@ -423,6 +426,9 @@ class AppTourTest(private val variant: DisplayVariant) {
         clickVisible(text(R.string.dough_type_cake))
         waitForText(text(R.string.dough_cake_batter))
         screenshot("14h-teigrechner-kuchen")
+        // Die sechs Kuchenarten stehen in einem Auswahlfeld (#83): öffnen und die Art wählen.
+        clickVisible(text(R.string.dough_cake_batter))
+        waitForText(text(R.string.dough_cake_quark_oil))
         clickVisible(text(R.string.dough_cake_quark_oil))
         waitForText(text(R.string.dough_label_quark))
         composeRule.onNodeWithText(text(R.string.dough_save)).performClick()
@@ -490,7 +496,31 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithContentDescription(text(R.string.dough_default_reset, waterLabel)).performScrollTo().performClick()
         waitUntilGone(text(R.string.dough_default_value, "65 %"))
 
-        composeRule.onNodeWithText(text(R.string.dough_pre_biga)).performScrollTo().performClick()
+        // Regler (#83, Etappe 2): einschalten, es erscheinen Regler unter den Feldern; wieder auf Zahlen.
+        composeRule.onNodeWithText(text(R.string.dough_mode_sliders)).performScrollTo().performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) {
+            composeRule.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)).fetchSemanticsNodes().isNotEmpty()
+        }
+        screenshot("14j-teigrechner-regler")
+        composeRule.onNodeWithText(text(R.string.dough_mode_numbers)).performScrollTo().performClick()
+
+        if (variant == DisplayVariant.LARGE_TEXT) {
+            // Bei großer Schrift sind Hefeart und Vorteig Auswahlfelder statt Chips.
+            composeRule.onAllNodesWithText(text(R.string.dough_yeast_fresh))[0].performScrollTo().performClick()
+            waitForText(text(R.string.dough_yeast_instant))
+            screenshot("14k-teigrechner-auswahlfeld")
+            clickVisible(text(R.string.dough_yeast_instant))
+            // Das Auswahlfeld des Vorteigs liest sich als „Vorteig: Ohne“; die Liste öffnet die ganze Fläche.
+            val prefix = text(R.string.dough_section_preferment) + ":"
+            composeRule.onNode(
+                SemanticsMatcher("Beschreibung beginnt mit $prefix") {
+                    it.config.getOrNull(SemanticsProperties.ContentDescription)?.any { d -> d.startsWith(prefix) } == true
+                },
+            ).performScrollTo().performClick()
+            composeRule.onAllNodesWithText(text(R.string.dough_pre_biga))[0].performClick()
+        } else {
+            composeRule.onNodeWithText(text(R.string.dough_pre_biga)).performScrollTo().performClick()
+        }
         waitForText(text(R.string.dough_explain_biga))
 
         screenshot("14b-teigrechner-biga")
