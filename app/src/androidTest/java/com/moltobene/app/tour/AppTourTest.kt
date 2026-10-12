@@ -496,12 +496,12 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitUntilGone(text(R.string.dough_default_value, "65 %"))
 
         // Regler (#83, Etappe 2): einschalten, es erscheinen Regler unter den Feldern; wieder auf Zahlen.
-        composeRule.onNodeWithText(text(R.string.dough_mode_sliders)).performClick()
+        composeRule.onNodeWithText(text(R.string.dough_mode_sliders)).performScrollTo().performClick()
         composeRule.waitUntil(TIMEOUT_MILLIS) {
             composeRule.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)).fetchSemanticsNodes().isNotEmpty()
         }
         screenshot("14j-teigrechner-regler")
-        composeRule.onNodeWithText(text(R.string.dough_mode_numbers)).performClick()
+        composeRule.onNodeWithText(text(R.string.dough_mode_numbers)).performScrollTo().performClick()
 
         if (variant == DisplayVariant.LARGE_TEXT) {
             // Bei großer Schrift sind Hefeart und Vorteig Auswahlfelder statt Chips.
