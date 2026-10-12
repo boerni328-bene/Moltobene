@@ -226,7 +226,8 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("00b-startseite-zuletzt")
 
         // „Rezepte“ öffnet die Sammlung, Zurück führt wieder zur Startseite.
-        composeRule.onNodeWithText(text(R.string.home_recipes_title)).performClick()
+        // Die Startseite steht noch bei „Zuletzt geöffnet“; bei großer Schrift muss die Kachel erst ins Bild.
+        composeRule.onNodeWithText(text(R.string.home_recipes_title)).performScrollTo().performClick()
         waitForText(SampleRecipes.POTATO_SALAD)
         pressBack()
         waitForText(recipes)
