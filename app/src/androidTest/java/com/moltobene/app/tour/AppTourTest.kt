@@ -212,6 +212,10 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithText(text(R.string.home_today_title)).performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText(text(R.string.home_today_another)).performScrollTo().performClick()
         composeRule.onNodeWithText(text(R.string.home_today_cook)).performScrollTo().performClick()
+        // Erst weiter, wenn das Rezept offen ist; sonst würde Zurück die App von der Startseite aus beenden.
+        composeRule.waitUntil(TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText(text(R.string.home_today_title)).fetchSemanticsNodes().isEmpty()
+        }
         composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.recentRecipes.value.orEmpty().isNotEmpty() }
         pressBack()
         waitForText(recipes)
