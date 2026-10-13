@@ -781,6 +781,9 @@ class AppTourTest(private val variant: DisplayVariant) {
      */
     @Test
     fun teigwissen() {
+        // Der Rundgang startet in der Sammlung; die Startseite liegt darunter.
+        waitForText(text(R.string.add_short))
+        pressBack()
         waitForText(text(R.string.home_recipes_title))
         composeRule.onNodeWithText(text(R.string.knowhow_title)).performScrollTo().performClick()
         waitForText(text(R.string.knowhow_intro))
