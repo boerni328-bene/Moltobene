@@ -513,6 +513,14 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithContentDescription(text(R.string.dough_preset_previous)).performScrollTo().performClick()
         waitForText(text(R.string.dough_preset_default))
 
+        // Teigwissen (#84, Etappe 1): „Was bewirkt das?“ an der Karte „Teig“ öffnet kurze Hinweise.
+        composeRule.onNodeWithContentDescription(text(R.string.dough_help_open, text(R.string.dough_section_dough)))
+            .performScrollTo().performClick()
+        waitForText(text(R.string.dough_help_water_effect))
+        screenshot("14n-teigrechner-hinweise")
+        composeRule.onNode(hasText(text(R.string.dough_help_close)) and hasClickAction()).performClick()
+        waitUntilGone(text(R.string.dough_help_water_effect))
+
         // Plus/Minus und Standard (#83): Wasseranteil um 1 erhöhen, der Standard wird genannt, mit dem Knopf geht es zurück.
         val waterLabel = text(R.string.dough_water)
         composeRule.onNodeWithContentDescription(text(R.string.dough_step_more, waterLabel, "1 %")).performScrollTo().performClick()
