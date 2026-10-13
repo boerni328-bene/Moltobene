@@ -70,6 +70,12 @@ object SpokenText {
     /** „etwa“ / „about“ für Mengen mit „≈“; für andere Sprachen das Zeichen selbst. */
     fun about(language: String): String = words(language)?.about ?: "≈"
 
+    /** Der Satz der Hörprobe (#85); er folgt der Sprache der Stimme, nicht der Oberfläche. */
+    fun sample(language: String): String = when (language.lowercase().take(2)) {
+        "de" -> "So klingt die Stimme beim Vorlesen eines Rezepts. Schritt 1: Die Zwiebeln fein würfeln."
+        else -> "This is how the voice sounds when reading a recipe aloud. Step 1: Dice the onions finely."
+    }
+
     /** „Schritt 3“ vor dem Vorlesen eines Schritts; für andere Sprachen nur die Zahl. */
     fun stepLabel(language: String, number: Int): String = "${words(language)?.step ?: ""} $number".trim() + "."
 

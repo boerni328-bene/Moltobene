@@ -8,7 +8,7 @@ import android.os.Handler
 import android.os.Looper
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
-import android.speech.tts.Voice
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +20,10 @@ import java.util.Locale
  * Meldung ([SpeechState.NoVoice]). Während des Vorlesens hat die App den Audiofokus und hält an, wenn ihn jemand
  * anderes braucht (Anruf, Wecker). Die Sprachausgabe wird erst beim ersten Vorlesen gestartet und bei [release] beendet.
  */
-class AndroidSpeechOutput(context: Context) : SpeechOutput {
+class AndroidSpeechOutput(
+    context: Context,
+    private val settings: () -> SpeechSettings = { SpeechSettings() },
+) : SpeechOutput {
 
     private val appContext = context.applicationContext
     private val main = Handler(Looper.getMainLooper())
@@ -29,21 +32,33 @@ class AndroidSpeechOutput(context: Context) : SpeechOutput {
 
     private var engine: TextToSpeech? = null
     private var ready = false
-    private var pending: Pair<String, List<String>>? = null
+    private var pending: Triple<String, List<String>, SpeechSettings?>? = null
+    private var readyWaiters = mutableListOf<CompletableDeferred<Boolean>>()
     private var token = 0
     private var lastUtterance: String? = null
     private var focusRequest: AudioFocusRequest? = null
 
-    override fun speak(language: String, sentences: List<String>) {
+    override fun speak(language: String, sentences: List<String>, settings: SpeechSettings?) {
         stopSpeaking()
         if (sentences.isEmpty()) return
-        mutableState.value = SpeechState.Speaking
+        mutableState.value = SpeechState.Speaking()
         if (ready) {
-            play(language, sentences)
+            play(language, sentences, settings)
         } else {
-            pending = language to sentences
+            pending = Triple(language, sentences, settings)
             startEngine()
         }
+    }
+
+    override suspend fun voices(language: String): List<VoiceInfo>? {
+        if (!ready) {
+            val waiter = CompletableDeferred<Boolean>()
+            readyWaiters += waiter
+            startEngine()
+            if (!waiter.await()) return null
+        }
+        val current = engine ?: return null
+        return VoiceSelection.usable(infos(current), language, Locale.getDefault().country)
     }
 
     override fun stop() {
@@ -57,6 +72,8 @@ class AndroidSpeechOutput(context: Context) : SpeechOutput {
         engine?.shutdown()
         engine = null
         ready = false
+        readyWaiters.forEach { it.complete(false) }
+        readyWaiters.clear()
     }
 
     private fun startEngine() {
@@ -72,9 +89,13 @@ class AndroidSpeechOutput(context: Context) : SpeechOutput {
             engine = null
             pending = null
             mutableState.value = SpeechState.Unavailable
+            readyWaiters.forEach { it.complete(false) }
+            readyWaiters.clear()
             return
         }
         ready = true
+        readyWaiters.forEach { it.complete(true) }
+        readyWaiters.clear()
         current.setAudioAttributes(
             AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build(),
         )
@@ -90,15 +111,17 @@ class AndroidSpeechOutput(context: Context) : SpeechOutput {
                 main.post { if (utteranceId != null && utteranceId.startsWith("$token:")) finish() }
             }
         })
-        pending?.let { (language, sentences) ->
+        pending?.let { (language, sentences, override) ->
             pending = null
-            play(language, sentences)
+            play(language, sentences, override)
         }
     }
 
-    private fun play(language: String, sentences: List<String>) {
+    private fun play(language: String, sentences: List<String>, override: SpeechSettings?) {
         val current = engine ?: return
-        val voice = chooseVoice(current, language)
+        val chosen = override ?: settings()
+        val choice = VoiceSelection.choose(infos(current), language, chosen.voiceFor(language), Locale.getDefault().country)
+        val voice = choice?.let { picked -> current.voices.orEmpty().firstOrNull { it.name == picked.voice.name } }
         if (voice == null) {
             mutableState.value = SpeechState.NoVoice(language)
             return
@@ -107,6 +130,9 @@ class AndroidSpeechOutput(context: Context) : SpeechOutput {
             mutableState.value = SpeechState.NoVoice(language)
             return
         }
+        current.setSpeechRate(chosen.rate / 100f)
+        current.setPitch(chosen.pitch / 100f)
+        if (choice.fellBack) mutableState.value = SpeechState.Speaking(usedFallback = true)
         requestFocus()
         token++
         sentences.forEachIndexed { index, sentence ->
@@ -116,19 +142,18 @@ class AndroidSpeechOutput(context: Context) : SpeechOutput {
         }
     }
 
-    /** Die beste Stimme für [language], die ohne Internet funktioniert und installiert ist; sonst null. */
-    private fun chooseVoice(current: TextToSpeech, language: String): Voice? {
-        val device = Locale.getDefault()
-        return runCatching { current.voices.orEmpty() }.getOrDefault(emptySet())
-            .filter { voice ->
-                voice.locale.language.equals(language, ignoreCase = true) &&
-                    !voice.isNetworkConnectionRequired &&
-                    TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in voice.features.orEmpty()
-            }
-            .maxWithOrNull(
-                compareBy<Voice>({ it.locale.country.equals(device.country, ignoreCase = true) }, { it.quality }),
+    /** Alle Stimmen der Sprachausgabe als [VoiceInfo]; ob sie ohne Internet gehen, melden die Stimmen selbst. */
+    private fun infos(current: TextToSpeech): List<VoiceInfo> =
+        runCatching { current.voices.orEmpty() }.getOrDefault(emptySet()).map { voice ->
+            VoiceInfo(
+                name = voice.name,
+                language = voice.locale.language,
+                country = voice.locale.country,
+                quality = voice.quality,
+                networkRequired = voice.isNetworkConnectionRequired,
+                installed = TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in voice.features.orEmpty(),
             )
-    }
+        }
 
     private fun stopSpeaking() {
         token++

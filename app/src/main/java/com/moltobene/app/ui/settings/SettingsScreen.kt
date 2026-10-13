@@ -88,6 +88,7 @@ fun SettingsScreen(
     val appearance by viewModel.appearance.collectAsStateWithLifecycle()
     val screenOn by viewModel.screenOn.collectAsStateWithLifecycle()
     val startScreen by viewModel.startScreen.collectAsStateWithLifecycle()
+    val speechSettings by viewModel.speechSettings.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val createBackup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
         if (uri != null) viewModel.backup(uri)
@@ -164,6 +165,14 @@ fun SettingsScreen(
             StartSection(startScreen = startScreen ?: StartScreen.HOME, onStartScreen = viewModel::setStartScreen)
             SectionHeader(stringResource(R.string.settings_section_cooking))
             CookingSection(screenOn = screenOn ?: ScreenOn.STAYS_ON, onScreenOn = viewModel::setScreenOn)
+            SectionHeader(stringResource(R.string.settings_section_speech))
+            SpeechSection(
+                settings = speechSettings,
+                onChange = viewModel::changeSpeech,
+                loadVoices = viewModel::voices,
+                onSample = viewModel::playSample,
+                onStopSpeech = viewModel::stopSpeech,
+            )
             SectionHeader(stringResource(R.string.settings_section_appearance))
             AppearanceSection(
                 appearance = appearance ?: Appearance(),

@@ -393,7 +393,7 @@ fun RecipeScreen(
 
 /** Texte für den geteilten Rezepttext, in der Sprache der Oberfläche. */
 /** Öffnet die Einstellungen der Sprachausgabe des Handys, sonst die allgemeinen Einstellungen. */
-private fun openSpeechSettings(context: Context) {
+internal fun openSpeechSettings(context: Context) {
     val intents = listOf(Intent("com.android.settings.TTS_SETTINGS"), Intent(android.provider.Settings.ACTION_SETTINGS))
     for (intent in intents) {
         try {
@@ -577,6 +577,10 @@ private fun RecipeContent(
             delay(BAR_MESSAGE_MILLIS)
             barMessage = null
         }
+    }
+    val fallbackMessage = stringResource(R.string.speech_voice_fallback)
+    LaunchedEffect(speechState) {
+        if ((speechState as? SpeechState.Speaking)?.usedFallback == true) barMessage = fallbackMessage
     }
     val lastStepMessage = stringResource(R.string.cook_last_step)
     val allCheckedMessage = stringResource(R.string.cook_all_checked)

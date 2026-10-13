@@ -6,7 +6,8 @@ import kotlinx.coroutines.flow.StateFlow
 sealed interface SpeechState {
     data object Idle : SpeechState
 
-    data object Speaking : SpeechState
+    /** Es wird vorgelesen; [usedFallback]: die gewählte Stimme gibt es nicht mehr, die beste passende wurde genommen (#85). */
+    data class Speaking(val usedFallback: Boolean = false) : SpeechState
 
     /** Für [language] gibt es keine Stimme, die ohne Internet funktioniert. */
     data class NoVoice(val language: String) : SpeechState
@@ -23,8 +24,17 @@ sealed interface SpeechState {
 interface SpeechOutput {
     val state: StateFlow<SpeechState>
 
-    /** Liest [sentences] satzweise vor und ersetzt, was gerade gelesen wird. */
-    fun speak(language: String, sentences: List<String>)
+    /**
+     * Liest [sentences] satzweise vor und ersetzt, was gerade gelesen wird. Stimme, Tempo und Tonhöhe kommen aus den
+     * Einstellungen (#85) oder, für die Hörprobe, aus [settings].
+     */
+    fun speak(language: String, sentences: List<String>, settings: SpeechSettings? = null)
+
+    /**
+     * Die auf dem Handy installierten Stimmen für [language], die ohne Internet funktionieren, die passendste zuerst
+     * (#85). null, wenn keine Sprachausgabe eingerichtet ist. Startet die Sprachausgabe bei Bedarf.
+     */
+    suspend fun voices(language: String): List<VoiceInfo>?
 
     /** Hält das Vorlesen an und setzt Meldungen („keine Stimme“) zurück. */
     fun stop()

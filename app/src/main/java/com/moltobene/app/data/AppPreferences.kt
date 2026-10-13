@@ -1,6 +1,7 @@
 package com.moltobene.app.data
 
 import com.moltobene.app.data.dough.DoughMemory
+import com.moltobene.app.data.speech.SpeechSettings
 import com.moltobene.app.data.dough.DoughType
 import com.moltobene.app.data.dough.LeavenedInput
 import android.content.Context
@@ -38,6 +39,11 @@ class AppPreferences(context: Context) {
     /** „Bildschirm in der Rezeptansicht“ (#68); null, bis [loadAppearance] sie gelesen hat (dann gilt „Bleibt an“). */
     val screenOn: StateFlow<ScreenOn?> = screenOnState.asStateFlow()
 
+    private val speechSettingsState = MutableStateFlow(SpeechSettings())
+
+    /** Stimme, Tempo und Tonhöhe beim Vorlesen (#85); bis [loadAppearance] sie gelesen hat, gelten die Standardwerte. */
+    val speechSettings: StateFlow<SpeechSettings> = speechSettingsState.asStateFlow()
+
     /**
      * Liest die Darstellung und die Bildschirm-Einstellung; gleich beim Start der App, damit der erste Bildschirm schon
      * in den richtigen Farben kommt.
@@ -55,6 +61,18 @@ class AppPreferences(context: Context) {
         appearanceState.compareAndSet(null, stored)
         val screen = runCatching { ScreenOn.fromKey(prefs.getString(KEY_SCREEN_ON, null)) }.getOrDefault(ScreenOn.STAYS_ON)
         screenOnState.compareAndSet(null, screen)
+        val speech = runCatching { SpeechSettings.decode(prefs.getString(KEY_SPEECH_SETTINGS, null)) }.getOrDefault(SpeechSettings())
+        if (!speechSettingsTouched) speechSettingsState.value = speech
+    }
+
+    @Volatile
+    private var speechSettingsTouched = false
+
+    /** Gilt sofort beim nächsten Vorlesen, gespeichert wird danach (#85). */
+    suspend fun setSpeechSettings(settings: SpeechSettings) {
+        speechSettingsTouched = true
+        speechSettingsState.value = settings
+        withContext(Dispatchers.IO) { prefs.edit { putString(KEY_SPEECH_SETTINGS, SpeechSettings.encode(settings)) } }
     }
 
     suspend fun loadRecentRecipes() = withContext(Dispatchers.IO) {
@@ -184,6 +202,7 @@ class AppPreferences(context: Context) {
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_PALETTE = "palette"
         const val KEY_SCREEN_ON = "screen_on"
+        const val KEY_SPEECH_SETTINGS = "speech_settings"
         const val KEY_START_SCREEN = "start_screen"
         const val KEY_RECENT_RECIPES = "recent_recipes"
         const val KEY_COLLECTION_GRID = "collection_grid"
