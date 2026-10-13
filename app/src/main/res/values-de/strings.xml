@@ -361,7 +361,7 @@
     <string name="cook_bar_ingredients_description">Zutaten vorlesen</string>
     <string name="cook_last_step">Letzter Schritt</string>
     <string name="cook_all_checked">Alle Zutaten sind abgehakt</string>
-    <string name="speech_no_voice">Keine Stimme für %1$s, die ohne Internet funktioniert. In den Einstellungen des Handys unter Sprachausgabe lässt sich eine laden.</string>
+    <string name="speech_no_voice">Keine Stimme für %1$s ohne Internet. Eine lässt sich in den Einstellungen des Handys laden.</string>
     <string name="speech_unavailable">Vorlesen ist auf diesem Handy nicht möglich. Es ist keine Sprachausgabe eingerichtet.</string>
     <!-- Einstellungen: Darstellung (Hell/Dunkel und Farbwelt) -->
     <string name="settings_section_appearance">Darstellung</string>

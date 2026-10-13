@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.38.1] – 2026-10-13 (versionCode 67)
+
+### Behoben
+- **Meldungen bei großer Schrift lesbar:** Bei großer Schrift stand die Aktion neben dem Text, und Wörter brachen mitten im Wort um, etwa bei „Keine Stimme für Deutsch …“. Jetzt steht die Aktion unter dem Text, und die Meldung zum Vorlesen ohne Stimme ist kürzer. Das gilt für alle Meldungen der App.
+
 ## [0.38.0] – 2026-10-12 (versionCode 66)
 
 ### Neu

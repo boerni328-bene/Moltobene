@@ -363,7 +363,7 @@
     <string name="cook_bar_ingredients_description">Read ingredients aloud</string>
     <string name="cook_last_step">Last step</string>
     <string name="cook_all_checked">All ingredients are checked off</string>
-    <string name="speech_no_voice">No voice for %1$s that works without internet. One can be downloaded in the device Settings under text-to-speech.</string>
+    <string name="speech_no_voice">No offline voice for %1$s. One can be downloaded in the device Settings.</string>
     <string name="speech_unavailable">Reading aloud is not available on this device. No text-to-speech is set up.</string>
     <!-- Einstellungen: Darstellung (Hell/Dunkel und Farbwelt) -->
     <string name="settings_section_appearance">Appearance</string>
