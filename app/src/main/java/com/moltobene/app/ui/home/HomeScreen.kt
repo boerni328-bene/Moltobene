@@ -65,7 +65,6 @@ fun HomeScreen(
     onOpenCollection: () -> Unit,
     onOpenDough: () -> Unit,
     onOpenBasics: () -> Unit,
-    onOpenKnowHow: () -> Unit,
     onOpenRecipe: (String) -> Unit,
     onAddRecipe: () -> Unit,
     onAddFromPhoto: () -> Unit,
@@ -155,12 +154,6 @@ fun HomeScreen(
                 title = stringResource(R.string.basics_title),
                 subtitle = stringResource(R.string.home_basics_text),
                 onClick = onOpenBasics,
-            )
-            HomeTile(
-                icon = R.drawable.ic_menu_book,
-                title = stringResource(R.string.knowhow_title),
-                subtitle = stringResource(R.string.home_knowhow_text),
-                onClick = onOpenKnowHow,
             )
             if (count == 0) {
                 // Noch keine Rezepte: statt eines Vorschlags der Weg zum ersten Rezept.

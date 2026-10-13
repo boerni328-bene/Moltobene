@@ -364,6 +364,42 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithText(text(R.string.cook_bar_stop)).performClick()
     }
 
+    /**
+     * Kopfhörertasten (#79): Nach dem ersten Vorlesen steuern Medientasten das Vorlesen – „Weiter“ liest den nächsten
+     * Schritt, Wiedergabe/Pause hält an. Die Tasten kommen wie am Kopfhörer über Android an (`input keyevent`).
+     */
+    @Test
+    fun kopfhoerertasten() {
+        val speech = SampleSpeech()
+        container().speech = speech
+        addSampleRecipes()
+        openRecipe(SampleRecipes.TOMATO_SAUCE)
+        waitForText("800 g reife Tomaten")
+        composeRule.onNodeWithText(text(R.string.cook_bar_next)).performClick()
+        composeRule.onNodeWithText(text(R.string.cook_bar_read)).performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { speech.spoken.isNotEmpty() }
+        assertEquals("Schritt 1.", speech.spoken.first().first())
+        waitForText(text(R.string.cook_bar_stop))
+
+        // Medientaste „Weiter“ (KEYCODE_MEDIA_NEXT = 87); die Sitzung braucht einen Augenblick, bis Android sie kennt.
+        var attempts = 0
+        while (speech.spoken.none { it.firstOrNull() == "Schritt 2." } && attempts < 8) {
+            pressMediaKey(87)
+            attempts++
+            Thread.sleep(1_000)
+        }
+        assertTrue("Medientaste Weiter hat nicht gewirkt", speech.spoken.any { it.firstOrNull() == "Schritt 2." })
+        screenshot("12p-kopfhoerertasten")
+
+        // Wiedergabe/Pause (KEYCODE_MEDIA_PLAY_PAUSE = 85) hält das Vorlesen an.
+        pressMediaKey(85)
+        waitForText(text(R.string.cook_bar_read))
+    }
+
+    private fun pressMediaKey(keyCode: Int) {
+        InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand("input keyevent $keyCode").close()
+    }
+
     /** Ohne Stimme (#79): ehrliche Meldung statt falscher Stimme, mit dem Weg in die Einstellungen. */
     @Test
     fun vorlesenOhneStimme() {
@@ -776,7 +812,7 @@ class AppTourTest(private val variant: DisplayVariant) {
     }
 
     /**
-     * Teigwissen (#84): von der Startseite aus die Artikel öffnen und den ersten (Mehltypen) aufklappen; alle Länder
+     * Teigwissen (#84): aus dem Teigrechner über das Info-Symbol die Artikel öffnen und den ersten (Mehltypen) aufklappen; alle Länder
      * stehen als Überschriften da.
      */
     @Test
@@ -785,7 +821,10 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForDescription(text(R.string.add_short))
         pressBack()
         waitForText(text(R.string.home_recipes_title))
-        composeRule.onNodeWithText(text(R.string.knowhow_title)).performScrollTo().performClick()
+        // Teigwissen liegt im Teigrechner: ein Info-Symbol in der obersten Zeile.
+        composeRule.onNodeWithText(text(R.string.dough_title)).performScrollTo().performClick()
+        waitForText(text(R.string.dough_save))
+        composeRule.onNodeWithContentDescription(text(R.string.knowhow_title)).performClick()
         waitForText(text(R.string.knowhow_intro))
         screenshot("17a-teigwissen")
 

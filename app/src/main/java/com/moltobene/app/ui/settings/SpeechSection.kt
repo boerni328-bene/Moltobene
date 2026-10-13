@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -21,6 +22,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -118,6 +120,18 @@ internal fun SpeechSection(
     ) {
         Text(stringResource(R.string.speech_sample))
     }
+
+    GroupLabel(stringResource(R.string.speech_headset_title))
+    ListItem(
+        headlineContent = { Text(stringResource(R.string.speech_headset_switch)) },
+        supportingContent = { Text(stringResource(R.string.speech_headset_note)) },
+        trailingContent = { Switch(checked = settings.headsetButtons, onCheckedChange = null) },
+        modifier = Modifier.toggleable(
+            value = settings.headsetButtons,
+            role = Role.Switch,
+            onValueChange = { on -> onChange { it.withHeadsetButtons(on) } },
+        ),
+    )
 
     choosing?.let { language ->
         VoiceDialog(

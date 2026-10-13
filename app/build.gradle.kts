@@ -17,8 +17,8 @@ android {
         applicationId = "com.moltobene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 71
-        versionName = "0.41.0"
+        versionCode = 72
+        versionName = "0.42.0"
 
         // Rundgang durch die App auf dem Emulator (app/src/androidTest).
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

@@ -103,6 +103,7 @@ fun DoughScreen(
     viewModel: DoughViewModel,
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
+    onOpenKnowHow: () -> Unit,
     onSaved: (String) -> Unit,
 ) {
     var typeKey by rememberSaveable { mutableStateOf(DoughType.PIZZA.key) }
@@ -114,6 +115,12 @@ fun DoughScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                    }
+                },
+                // Teigwissen (#84): ein einfaches Info-Symbol in der obersten Zeile.
+                actions = {
+                    IconButton(onClick = onOpenKnowHow) {
+                        Icon(painterResource(R.drawable.ic_info), contentDescription = stringResource(R.string.knowhow_title))
                     }
                 },
             )

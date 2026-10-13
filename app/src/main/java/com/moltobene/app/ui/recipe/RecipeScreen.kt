@@ -158,6 +158,7 @@ fun RecipeScreen(
     viewModel: RecipeViewModel,
     screenOn: ScreenOn,
     speech: SpeechOutput,
+    headsetButtons: Boolean = true,
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onEdit: (String) -> Unit,
@@ -357,6 +358,7 @@ fun RecipeScreen(
                     onOpenSettings = onOpenSettings,
                 ),
                 speech = speech,
+                headsetButtons = headsetButtons,
                 snackbarHostState = snackbarHostState,
                 onShowPages = { viewModel.viewer.open(0) },
                 onShowPhoto = { viewModel.photoViewer.open(0) },
@@ -516,6 +518,7 @@ private fun RecipeContent(
     cooking: CookingState,
     translation: TranslationActions,
     speech: SpeechOutput,
+    headsetButtons: Boolean,
     snackbarHostState: SnackbarHostState,
     onShowPages: () -> Unit,
     onShowPhoto: () -> Unit,
@@ -616,6 +619,36 @@ private fun RecipeContent(
         }
         speech.speak(speechLanguage, sentences)
     }
+    // Ohne Markierung beginnt das Vorlesen beim ersten Schritt.
+    fun startReading() {
+        val index = currentIndex ?: (cooking.onNextStep() as? StepMove.To)?.index
+        if (index != null) readStep(index)
+    }
+
+    // Kopfhörertasten (#79): erst aktiv, wenn in dieser Ansicht einmal vorgelesen wurde, damit Musik-Apps ihre Tasten
+    // behalten. Weiter und Zurück lesen den Schritt gleich vor, denn wer die Tasten benutzt, schaut nicht aufs Handy.
+    var headsetArmed by rememberSaveable { mutableStateOf(false) }
+    if (speaking) headsetArmed = true
+    HeadsetEffect(
+        enabled = headsetButtons && headsetArmed,
+        speaking = speaking,
+        onPlay = { if (!speaking) startReading() },
+        onPause = { speech.stop() },
+        onNext = {
+            when (val result = cooking.onNextStep()) {
+                is StepMove.To -> readStep(result.index)
+                StepMove.AtEnd -> barMessage = lastStepMessage
+                StepMove.None -> Unit
+            }
+        },
+        onPrevious = {
+            when (val result = cooking.onPreviousStep()) {
+                is StepMove.To -> readStep(result.index)
+                StepMove.AtEnd -> barMessage = lastStepMessage
+                StepMove.None -> Unit
+            }
+        },
+    )
 
     Column(modifier = modifier.fillMaxSize()) {
         Column(
@@ -813,13 +846,7 @@ private fun RecipeContent(
                 message = barMessage,
                 onPrevious = { move(cooking.onPreviousStep()) },
                 onRead = {
-                    if (speaking) {
-                        speech.stop()
-                    } else {
-                        // Ohne Markierung beginnt das Vorlesen beim ersten Schritt.
-                        val index = currentIndex ?: (cooking.onNextStep() as? StepMove.To)?.index
-                        if (index != null) readStep(index)
-                    }
+                    if (speaking) speech.stop() else startReading()
                 },
                 onNext = { move(cooking.onNextStep()) },
                 onIngredients = { if (speaking) speech.stop() else readIngredients() },
