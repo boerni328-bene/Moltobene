@@ -90,6 +90,8 @@ import com.moltobene.app.data.share.IncomingText
 import com.moltobene.app.data.web.WebAddress
 import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.components.CenteredMessage
+import com.moltobene.app.ui.components.NoticeCard
+import com.moltobene.app.ui.components.NoticeKind
 import com.moltobene.app.ui.components.OptionButton
 import com.moltobene.app.ui.components.TagLabels
 import com.moltobene.app.ui.components.isLargeText
@@ -309,6 +311,17 @@ fun EditScreen(
                 verticalArrangement = Arrangement.spacedBy(Spacing.m),
             ) {
                 ScreenTitle(stringResource(if (viewModel.isNew) R.string.add_recipe else R.string.edit_recipe))
+                // Hinweise zum Übernehmen stehen ganz oben, damit sie nicht unter dem Foto verschwinden (#90).
+                val checkHint = viewModel.checkHint
+                if (checkHint != null && !viewModel.isRecognizing) NoticeCard(stringResource(checkHint), NoticeKind.INFO)
+                viewModel.problem?.let { problem ->
+                    NoticeCard(stringResource(problem), NoticeKind.PROBLEM) {
+                        if (viewModel.canRetryImport) {
+                            TextButton(onClick = viewModel::retryImport) { Text(stringResource(R.string.import_retry)) }
+                        }
+                        TextButton(onClick = viewModel::dismissProblem) { Text(stringResource(R.string.notice_dismiss)) }
+                    }
+                }
                 PhotoSection(
                     viewModel = viewModel,
                     onChoose = {
@@ -583,24 +596,6 @@ private fun RecognitionSection(
             }
         }
 
-        // Bleibt bis zum Speichern sichtbar; der Screenreader liest den Hinweis vor, sobald er erscheint.
-        val checkHint = viewModel.checkHint
-        if (checkHint != null && !viewModel.isRecognizing) {
-            Surface(
-                color = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(
-                    text = stringResource(checkHint),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .padding(Spacing.m)
-                        .semantics { liveRegion = LiveRegionMode.Polite },
-                )
-            }
-        }
 
         // Links aus der Videobeschreibung stehen zur Auswahl; geladen wird erst der gewählte.
         val videoLinks = viewModel.videoRecipeLinks
@@ -1048,10 +1043,7 @@ private fun PhotoSection(
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 private fun ImportChips(enabled: Boolean, onLink: () -> Unit, onPhoto: () -> Unit, onText: () -> Unit) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(Spacing.s),
-        modifier = Modifier.horizontalScroll(rememberScrollState()),
-    ) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
         for ((icon, label, action) in listOf(
             Triple(R.drawable.ic_link, R.string.import_from_link, onLink),
             Triple(R.drawable.ic_document_scanner, R.string.import_from_photo, onPhoto),

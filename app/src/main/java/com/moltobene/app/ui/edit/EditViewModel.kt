@@ -146,6 +146,11 @@ class EditViewModel(
      * [CHECK_RECOGNIZED] nach der Texterkennung, [CHECK_TEXT] nach „Aus Text übernehmen“, sonst leer.
      */
     private val checkHintField = SavedField(handle, "checkHintKind", "")
+    /** Meldung zum Übernehmen, die stehen bleibt, bis sie geschlossen wird (#90): Text-Ressource als Zahl, leer = keine. */
+    private val problemField = SavedField(handle, "importProblem", "")
+
+    /** Der Link, der zuletzt nicht geladen werden konnte, für „Erneut versuchen“; leer = nichts zu wiederholen. */
+    private val retryUrlField = SavedField(handle, "importRetryUrl", "")
     /** Links aus einer Videobeschreibung, die zur Auswahl stehen, einer je Zeile; leer, wenn es keine gibt. */
     private val videoLinksField = SavedField(handle, "videoRecipeLinks", "")
     /**
@@ -279,6 +284,27 @@ class EditViewModel(
     val hasPhoto: Boolean get() = photoIdField.value != null
     val recognizedText: String get() = recognizedTextField.value
     val showCheckHint: Boolean get() = checkHintField.value.isNotEmpty()
+
+    /** Meldung zum Übernehmen als Karte (Fehler, nichts gefunden); bleibt, bis sie geschlossen oder neu übernommen wird. */
+    val problem: Int? get() = problemField.value.toIntOrNull()
+    val canRetryImport: Boolean get() = retryUrlField.value.isNotEmpty()
+
+    fun dismissProblem() {
+        problemField.value = ""
+        retryUrlField.value = ""
+    }
+
+    /** Versucht den zuletzt nicht geladenen Link noch einmal. */
+    fun retryImport() {
+        val url = retryUrlField.value
+        dismissProblem()
+        if (url.isNotEmpty()) importLink(url)
+    }
+
+    private fun reportProblem(@StringRes text: Int, retryUrl: String? = null) {
+        problemField.value = text.toString()
+        retryUrlField.value = retryUrl.orEmpty()
+    }
 
     /** Text des Hinweises zum Prüfen – nach der Texterkennung geht es um Lesefehler, sonst um die Aufteilung. */
     val checkHint: Int? get() = when (checkHintField.value) {
@@ -956,6 +982,7 @@ class EditViewModel(
      */
     fun importLink(raw: String, fallbackTitle: String? = null, fromVideo: Boolean = false, replacing: String? = null) {
         if (isImporting || isRecognizing) return
+        dismissProblem()
         val url = WebAddress.normalize(TextLinks.first(raw) ?: raw.trim())
         if (url == null) {
             message = R.string.link_invalid
@@ -996,10 +1023,10 @@ class EditViewModel(
                 throw e
             } catch (e: WebException) {
                 if (title.isBlank()) fallbackTitle?.let { title = it }
-                message = linkProblem(e.problem)
+                reportProblem(linkProblem(e.problem), url)
             } catch (e: Exception) {
                 if (title.isBlank()) fallbackTitle?.let { title = it }
-                message = R.string.link_error
+                reportProblem(R.string.link_error, url)
             } finally {
                 importing = null
                 importJob = null
@@ -1021,6 +1048,7 @@ class EditViewModel(
      */
     fun importFile(uri: Uri) {
         if (isImporting || isRecognizing) return
+        dismissProblem()
         importing = R.string.file_loading
         importJob = viewModelScope.launch {
             try {
@@ -1050,9 +1078,9 @@ class EditViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: IncomingRecipeFile.TooLargeException) {
-                message = R.string.file_too_large
+                reportProblem(R.string.file_too_large)
             } catch (e: Exception) {
-                message = R.string.file_error
+                reportProblem(R.string.file_error)
             } finally {
                 importing = null
                 importJob = null
@@ -1076,7 +1104,7 @@ class EditViewModel(
             checkHintField.value = CHECK_VIDEO
         } else {
             mergeIntoForm(result.text, ParsedRecipe(result.video.title, null, null, emptyList(), emptyList()), TextLanguage.detect(result.text))
-            message = if (result.recipeLinks.isNotEmpty()) R.string.video_link_only else R.string.video_no_recipe
+            reportProblem(if (result.recipeLinks.isNotEmpty()) R.string.video_link_only else R.string.video_no_recipe)
         }
         if (video.isBlank()) video = result.url
         videoLinksField.value = result.recipeLinks.joinToString("\n")
@@ -1168,7 +1196,7 @@ class EditViewModel(
 
     private fun noRecipe(pageTitle: String?, @StringRes text: Int) {
         if (title.isBlank()) pageTitle?.let { title = it }
-        message = text
+        reportProblem(text)
     }
 
     /** Aus einer Datei nur eingebettete Fotos (ohne Internet), von einer Seite nur Fotos aus dem Internet. */

@@ -234,7 +234,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Neue Startseite: „Was koche ich heute?“ mit Foto als größte Kachel, „Sammlung“ mit den zuletzt geöffneten Rezepten als kleine Bilder, Teigrechner und Grundrezepte nebeneinander.</item>
+        <item>Beim Übernehmen bleibt der Hinweis zum Prüfen oben im Formular; Fehler stehen als Karte da, bei Links mit „Erneut versuchen“.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->
@@ -645,4 +645,8 @@
     <string name="dough_pan_width">Breite</string>
     <string name="dough_cake_flour_from_pan">Mehl für diese Backform: etwa %1$s g</string>
     <string name="dough_cake_baking_note">Backzeit und Temperatur ändern sich mit Form und Höhe. Bei größerer Fläche Stäbchenprobe machen, bei höherem Teig länger bei etwas weniger Hitze backen.</string>
+
+    <!-- Hinweise beim Übernehmen (#90) -->
+    <string name="import_retry">Erneut versuchen</string>
+    <string name="notice_dismiss">Schließen</string>
 </resources>

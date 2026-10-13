@@ -3,6 +3,13 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.44.0] – 2026-10-13 (versionCode 75)
+
+### Neu
+- **Hinweise beim Übernehmen bleiben sichtbar:** Der Hinweis „Prüfen, ob alles an der richtigen Stelle steht“ steht jetzt ganz oben im Formular, mit Symbol, und nicht mehr unter dem Foto. Er geht erst mit dem Speichern.
+- **Fehler beim Übernehmen als Karte statt kurzer Meldung:** Konnte eine Seite oder Datei nicht gelesen werden, bleibt die Meldung mit Warnsymbol stehen, bis sie geschlossen wird. Bei Links ohne Verbindung, Zeitüberschreitung oder Serverfehler gibt es dazu „Erneut versuchen“. Der Link bleibt als Quelle gespeichert.
+- Die Wege „Aus Link / Foto / Text übernehmen“ im Formular brechen in die nächste Zeile um und sind nicht mehr abgeschnitten.
+
 ## [0.43.0] – 2026-10-13 (versionCode 74)
 
 ### Neu

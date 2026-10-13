@@ -981,6 +981,36 @@ class AppTourTest(private val variant: DisplayVariant) {
         assertEquals(3, recipe.steps.size)
     }
 
+    /**
+     * Übernehmen ohne Verbindung (#90): Die Meldung bleibt als Karte stehen, der Link ist gespeichert, „Erneut
+     * versuchen“ lädt ihn, sobald es wieder geht.
+     */
+    @Test
+    fun ausLinkOhneVerbindung() {
+        val online = SamplePage.loader(activity)
+        var connected = false
+        container().pageLoader = object : com.moltobene.app.data.web.PageLoader {
+            override suspend fun loadPage(url: String) =
+                if (connected) online.loadPage(url) else throw com.moltobene.app.data.web.WebException(com.moltobene.app.data.web.WebException.Problem.NO_CONNECTION)
+
+            override suspend fun loadImage(url: String, target: java.io.File) = online.loadImage(url, target)
+        }
+        openAddMenu()
+        waitForText(text(R.string.import_from_link))
+        composeRule.onNodeWithText(text(R.string.import_from_link)).performClick()
+        waitForField(R.string.import_link_field)
+        field(R.string.import_link_field).performTextInput(SamplePage.URL)
+        composeRule.onNodeWithText(text(R.string.import_text_action)).performClick()
+        waitForText(text(R.string.link_error_offline))
+        screenshot("25a-aus-link-ohne-verbindung")
+
+        connected = true
+        composeRule.onNodeWithText(text(R.string.import_retry)).performClick()
+        waitForText(text(R.string.link_done))
+        waitUntilGone(text(R.string.link_error_offline))
+        screenshot("25b-aus-link-erneut-versucht")
+    }
+
     @Test
     fun ausLinkUebernehmen() {
         // Nachgestellte Rezeptseite statt echtem Internet (#55).

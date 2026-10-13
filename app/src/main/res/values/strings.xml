@@ -236,7 +236,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>New home screen: “What to cook today?” with a photo as the largest tile, “Collection” with recently opened recipes as small pictures, dough calculator and basic recipes side by side.</item>
+        <item>When importing, the hint to check the result stays at the top of the form; errors show as a card, with “Try again” for links.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->
@@ -649,4 +649,8 @@
     <string name="dough_pan_width">Width</string>
     <string name="dough_cake_flour_from_pan">Flour for this pan: about %1$s g</string>
     <string name="dough_cake_baking_note">Baking time and temperature change with pan size and depth. For a larger pan, check with a skewer; for deeper batter, bake longer at slightly lower heat.</string>
+
+    <!-- Hinweise beim Übernehmen (#90) -->
+    <string name="import_retry">Try again</string>
+    <string name="notice_dismiss">Dismiss</string>
 </resources>
