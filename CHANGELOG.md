@@ -3,6 +3,13 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.43.0] – 2026-10-13 (versionCode 74)
+
+### Neu
+- **Neue Startseite mit Foto:** „Was koche ich heute?“ ist jetzt die größte Kachel und zeigt das Foto des vorgeschlagenen Rezepts (ohne Foto eine ruhige Fläche mit dem Anfangsbuchstaben). Tippen öffnet das Rezept, der Knopf daneben zeigt ein anderes.
+- Die Kachel „Rezepte“ heißt jetzt „Sammlung“ und zeigt darunter die zuletzt geöffneten Rezepte als kleine Bilder. Die doppelte Zeile „Zuletzt geöffnet“ ist weg.
+- Teigrechner und Grundrezepte stehen als zwei schmale Kacheln nebeneinander, jede mit eigenem Symbol und kürzerem Text; bei großer Schrift untereinander.
+
 ## [0.42.1] – 2026-10-13 (versionCode 73)
 
 ### Behoben

@@ -234,18 +234,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Vorlesen: Kopfhörertasten steuern beim Kochen das Vorlesen – Wiedergabe/Pause, Weiter und Zurück, ein Doppeldruck auf die Kopfhörertaste ist der nächste Schritt. Das gilt, sobald in einem Rezept einmal das Vorlesen gestartet wurde, und lässt sich in den Einstellungen abschalten.</item>
-        <item>Teigwissen: Die Artikel stehen jetzt im Teigrechner, erreichbar über das Info-Symbol oben, nicht mehr als Kachel auf der Startseite.</item>
-        <item>Teigwissen: Auf der Startseite gibt es die neue Kachel „Teigwissen“ mit drei Artikeln zum Nachschlagen: Mehltypen in Deutschland, Österreich, der Schweiz und Italien (auch, was das „W“ jeweils bedeutet), Weizen, Dinkel, Roggen und Vollkorn mit groben Nährwerten je 100 g sowie Gluten, Eiweiß und Backkraft.</item>
-        <item>Vorlesen: In den Einstellungen lässt sich für Deutsch und Englisch eine Stimme aus den auf dem Handy installierten Stimmen (ohne Internet) wählen, mit Hörprobe für jede. Tempo und Tonhöhe sind einstellbar, mit den Voreinstellungen „Entspannt“, „Normal“ und „Lebhaft“.</item>
-        <item>Teigrechner: Bevor eine Voreinstellung geänderte Werte ersetzt, fragt ein kurzes Fenster nach.</item>
-        <item>Teigrechner: Das neue Fragezeichen an den Karten erklärt in kurzen Hinweisen, was Wasseranteil, Salz, Öl, Hefe, Gehzeit und Vorteig bewirken und welche Werte üblich sind.</item>
-        <item>Teigrechner: Voreinstellungen für Pizza und Brot (zum Beispiel Neapolitanisch, Pizza vom Blech, Weißbrot, Brot mit Poolish) lassen sich mit Pfeilen durchschalten oder aus einer Liste wählen. Eigene Werte können mit Namen als Voreinstellung gespeichert werden.</item>
-        <item>Teigrechner: Regler lassen sich über den Feldern einschalten („Zahlen | Regler“), mit einer Marke beim Standardwert. Listen wie die Kuchenart und bei großer Schrift auch Hefeart und Vorteig sind jetzt Auswahlfelder.</item>
-        <item>Teigrechner: Jeder Wert hat jetzt Plus- und Minus-Knöpfe für die Feineinstellung, Standardwerte sind markiert und ein Knopf setzt einen Wert auf den Standard zurück.</item>
-        <item>Teigrechner: Die Gesamtmengen stehen als übersichtliche Kacheln über „Als Rezept speichern“.</item>
-        <item>Grundrezepte: Zehn bewährte Grundrezepte wie Béchamelsauce, Tomatensauce, Vinaigrette oder Mürbeteig lassen sich auf der Startseite in die Sammlung übernehmen und danach wie jedes andere Rezept bearbeiten.</item>
-        <item>Schlagwörter: Rezepte können mitgelieferte Schlagwörter wie „Saucen“, „Desserts“ oder „Suppen“ bekommen, dazu eigene. Die Sammlung lässt sich nach einem oder mehreren Schlagwörtern zugleich filtern, mit der Anzahl der Rezepte je Schlagwort.</item>
+        <item>Neue Startseite: „Was koche ich heute?“ mit Foto als größte Kachel, „Sammlung“ mit den zuletzt geöffneten Rezepten als kleine Bilder, Teigrechner und Grundrezepte nebeneinander.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->
@@ -304,12 +293,12 @@
     </plurals>
     <string name="screen_on_device">Wie das Handy</string>
     <!-- Startseite (#81) -->
-    <string name="home_recipes_title">Rezepte</string>
+    <string name="home_recipes_title">Sammlung</string>
     <plurals name="home_recipes_count">
         <item quantity="one">%1$d Rezept</item>
         <item quantity="other">%1$d Rezepte</item>
     </plurals>
-    <string name="home_dough_text">Mengen für Pizza, Brot, Pasta und Kuchen</string>
+    <string name="home_dough_text">Pizza, Brot, Pasta, Kuchen</string>
     <string name="settings_section_start">Start</string>
     <string name="start_title">Beim Öffnen der App</string>
     <string name="start_home">Startseite</string>
@@ -322,7 +311,7 @@
     <string name="knowhow_intro">Artikel zum Nachschlagen. Zahlen sind gerundete Richtwerte; die Verpackung des Herstellers geht vor.</string>
     <string name="knowhow_error">Die Artikel konnten nicht geladen werden.</string>
     <string name="basics_title">Grundrezepte</string>
-    <string name="home_basics_text">Béchamelsauce, Vinaigrette und mehr zum Übernehmen</string>
+    <string name="home_basics_text">Béchamelsauce, Vinaigrette und mehr</string>
     <string name="basics_intro">Bewährte Grundrezepte zum Übernehmen in die Sammlung. Danach lassen sie sich wie jedes andere Rezept bearbeiten, umrechnen und übersetzen.</string>
     <string name="basics_adopt">Übernehmen</string>
     <string name="basics_added">„%1$s“ ist jetzt in der Sammlung</string>

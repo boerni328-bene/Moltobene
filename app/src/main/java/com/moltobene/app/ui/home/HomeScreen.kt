@@ -1,7 +1,13 @@
 package com.moltobene.app.ui.home
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -36,6 +42,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -48,7 +55,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moltobene.app.R
 import com.moltobene.app.ui.collection.AddChooser
 import com.moltobene.app.ui.collection.RecipeListItem
-import com.moltobene.app.ui.collection.RecipeRow
+import com.moltobene.app.ui.collection.Thumbnail
+import com.moltobene.app.ui.components.isLargeText
 import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.theme.Spacing
 
@@ -134,27 +142,9 @@ fun HomeScreen(
                 .padding(padding)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(Spacing.m),
-            verticalArrangement = Arrangement.spacedBy(Spacing.m),
+                .padding(horizontal = Spacing.m),
+            verticalArrangement = Arrangement.spacedBy(Spacing.s),
         ) {
-            HomeTile(
-                icon = R.drawable.ic_restaurant,
-                title = stringResource(R.string.home_recipes_title),
-                subtitle = count?.let { pluralStringResource(R.plurals.home_recipes_count, it, it) },
-                onClick = onOpenCollection,
-            )
-            HomeTile(
-                icon = R.drawable.ic_calculate,
-                title = stringResource(R.string.dough_title),
-                subtitle = stringResource(R.string.home_dough_text),
-                onClick = onOpenDough,
-            )
-            HomeTile(
-                icon = R.drawable.ic_restaurant,
-                title = stringResource(R.string.basics_title),
-                subtitle = stringResource(R.string.home_basics_text),
-                onClick = onOpenBasics,
-            )
             if (count == 0) {
                 // Noch keine Rezepte: statt eines Vorschlags der Weg zum ersten Rezept.
                 HomeTile(
@@ -165,23 +155,23 @@ fun HomeScreen(
                 )
             } else {
                 suggestion?.let { item ->
-                    SuggestionTile(
-                        item = item,
-                        onCook = { onOpenRecipe(item.id) },
-                        onAnother = viewModel::suggestAnother,
-                    )
+                    SuggestionCard(item = item, onCook = { onOpenRecipe(item.id) }, onAnother = viewModel::suggestAnother)
                 }
             }
-            if (recent.isNotEmpty()) {
-                RecentTile(items = recent, onOpenRecipe = onOpenRecipe)
-            }
+            CollectionTile(
+                count = count,
+                recent = recent,
+                onOpenCollection = onOpenCollection,
+                onOpenRecipe = onOpenRecipe,
+            )
+            ToolTiles(dough = onOpenDough, basics = onOpenBasics)
             // Platz unter der letzten Kachel, damit der Knopf „Hinzufügen“ nichts verdeckt.
             Spacer(Modifier.size(72.dp))
         }
     }
 }
 
-/** Eine Kachel: Symbol und Text nebeneinander, nie nur ein Symbol; mindestens 96 dp hoch. */
+/** Eine Kachel: Symbol und Text nebeneinander, nie nur ein Symbol; mindestens 72 dp hoch. */
 @Composable
 private fun HomeTile(@DrawableRes icon: Int, title: String, subtitle: String?, onClick: () -> Unit) {
     Card(
@@ -190,7 +180,7 @@ private fun HomeTile(@DrawableRes icon: Int, title: String, subtitle: String?, o
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         ),
-        modifier = Modifier.fillMaxWidth().heightIn(min = 96.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 72.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -207,29 +197,32 @@ private fun HomeTile(@DrawableRes icon: Int, title: String, subtitle: String?, o
 }
 
 /**
- * „Was koche ich heute?“ (#81): eine schmale Kachel mit dem vorgeschlagenen Rezept. Tippen öffnet das Rezept, der Knopf
- * rechts zeigt ein anderes. Sie ist nur so hoch wie eine Zeile, damit die Startseite ruhig bleibt.
+ * „Was koche ich heute?“ (#87): die größte Kachel, mit dem Vorschaubild des vorgeschlagenen Rezepts; ohne Foto die ruhige
+ * Fläche mit dem Anfangsbuchstaben. Der Text steht unter dem Foto, nicht darauf, damit der Kontrast immer stimmt. Tippen
+ * öffnet das Rezept, der Knopf zeigt ein anderes.
  */
 @Composable
-private fun SuggestionTile(item: RecipeListItem, onCook: () -> Unit, onAnother: () -> Unit) {
+private fun SuggestionCard(item: RecipeListItem, onCook: () -> Unit, onAnother: () -> Unit) {
     val title = item.title.ifBlank { stringResource(R.string.untitled_recipe) }
     Card(
         onClick = onCook,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        ),
-        modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        shape = MaterialTheme.shapes.large,
+        modifier = Modifier.fillMaxWidth(),
     ) {
+        // Ohne Foto genügt ein flacher Streifen; mit Foto das volle Bild.
+        Thumbnail(item, title, Modifier.fillMaxWidth().aspectRatio(if (item.thumbnail != null) 16f / 9f else 3f))
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.m),
             modifier = Modifier.fillMaxWidth().padding(start = Spacing.m, top = Spacing.xs, bottom = Spacing.xs, end = Spacing.xs),
         ) {
-            Icon(painterResource(R.drawable.ic_restaurant), contentDescription = null, modifier = Modifier.size(32.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(stringResource(R.string.home_today_title), style = MaterialTheme.typography.titleMedium)
-                Text(title, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    stringResource(R.string.home_today_title),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(title, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
             IconButton(onClick = onAnother) {
                 Icon(painterResource(R.drawable.ic_refresh), contentDescription = stringResource(R.string.home_today_another))
@@ -238,23 +231,94 @@ private fun SuggestionTile(item: RecipeListItem, onCook: () -> Unit, onAnother: 
     }
 }
 
-/** „Zuletzt geöffnet“: bis zu fünf Rezepte, das neueste zuerst. */
+/**
+ * „Sammlung“ mit der Zahl der Rezepte und, wenn es welche gibt, einer Reihe der zuletzt geöffneten Rezepte als
+ * Vorschaubilder (höchstens fünf, feste Größe). Tippen auf die Kachel öffnet die Sammlung, auf ein Bild das Rezept.
+ */
 @Composable
-private fun RecentTile(items: List<RecipeListItem>, onOpenRecipe: (String) -> Unit) {
+private fun CollectionTile(
+    count: Int?,
+    recent: List<RecipeListItem>,
+    onOpenCollection: () -> Unit,
+    onOpenRecipe: (String) -> Unit,
+) {
     Card(
+        onClick = onOpenCollection,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-            contentColor = MaterialTheme.colorScheme.onSurface,
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         ),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(modifier = Modifier.padding(vertical = Spacing.m)) {
-            Text(
-                stringResource(R.string.home_recent_title),
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(horizontal = Spacing.m).semantics { heading() },
-            )
-            for (item in items) RecipeRow(item = item, onClick = { onOpenRecipe(item.id) })
+        Column(modifier = Modifier.padding(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
+                Icon(painterResource(R.drawable.ic_grid_view), contentDescription = null, modifier = Modifier.size(32.dp))
+                Column {
+                    Text(stringResource(R.string.home_recipes_title), style = MaterialTheme.typography.titleLarge)
+                    count?.let {
+                        Text(pluralStringResource(R.plurals.home_recipes_count, it, it), style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+            if (recent.isNotEmpty()) {
+                Text(
+                    stringResource(R.string.home_recent_title),
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.semantics { heading() },
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                    for (item in recent.take(5)) {
+                        val title = item.title.ifBlank { stringResource(R.string.untitled_recipe) }
+                        Box(
+                            modifier = Modifier
+                                .size(56.dp)
+                                .clip(MaterialTheme.shapes.medium)
+                                .clickable(onClickLabel = title) { onOpenRecipe(item.id) }
+                                .semantics { contentDescription = title },
+                        ) {
+                            Thumbnail(item, title, Modifier.fillMaxSize())
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Teigrechner und Grundrezepte als zwei schmale Kacheln nebeneinander, bei großer Schrift untereinander. */
+@Composable
+private fun ToolTiles(dough: () -> Unit, basics: () -> Unit) {
+    val doughTitle = stringResource(R.string.dough_title)
+    val doughText = stringResource(R.string.home_dough_text)
+    val basicsTitle = stringResource(R.string.basics_title)
+    val basicsText = stringResource(R.string.home_basics_text)
+    if (isLargeText()) {
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+            ToolTile(R.drawable.ic_calculate, doughTitle, doughText, dough, Modifier.fillMaxWidth())
+            ToolTile(R.drawable.ic_menu_book, basicsTitle, basicsText, basics, Modifier.fillMaxWidth())
+        }
+    } else {
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s), modifier = Modifier.height(IntrinsicSize.Max)) {
+            ToolTile(R.drawable.ic_calculate, doughTitle, doughText, dough, Modifier.weight(1f).fillMaxHeight())
+            ToolTile(R.drawable.ic_menu_book, basicsTitle, basicsText, basics, Modifier.weight(1f).fillMaxHeight())
+        }
+    }
+}
+
+@Composable
+private fun ToolTile(@DrawableRes icon: Int, title: String, subtitle: String, onClick: () -> Unit, modifier: Modifier) {
+    Card(
+        onClick = onClick,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        ),
+        modifier = modifier,
+    ) {
+        Column(modifier = Modifier.padding(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(28.dp))
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall)
         }
     }
 }
