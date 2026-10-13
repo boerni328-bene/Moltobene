@@ -116,10 +116,6 @@ class SettingsViewModel(
         runCatching { speech().stop() }
     }
 
-    override fun onCleared() {
-        runCatching { speech().release() }
-    }
-
     /** Letzte geprüfte Sicherung für „Zuletzt gesichert: …“ (#51); null, solange sie lädt oder es keine gibt. */
     var lastBackup by mutableStateOf<AppPreferences.LastBackup?>(null)
         private set
@@ -214,5 +210,7 @@ class SettingsViewModel(
 
     override fun onCleared() {
         (state as? SettingsUiState.ConfirmRestore)?.let { backupManager.discardRestore(it.preview) }
+        // Die Sprachausgabe, die für die Hörprobe gestartet wurde, wird mit den Einstellungen freigegeben (#85).
+        runCatching { speech().release() }
     }
 }
