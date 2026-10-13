@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.39.1] – 2026-10-13 (versionCode 69)
+
+### Geändert
+- **Hinweise „Was bewirkt das?“ überarbeitet** nach der fachlichen Prüfung: Zahlen sind jetzt als grobe Orientierung gekennzeichnet, der Wasseranteil ist definiert (Wasser in Prozent vom gesamten Mehl, Vorteig zählt mit), die Salzangaben nennen keine pauschale Regel mehr, die Ölwirkung ist neutraler beschrieben, die feste Grenze für den Kühlschrank ist entfernt, und beim Vorteig stehen Temperatur zur Reifezeit, der Bezug des Mehlanteils und der Unterschied zum Sauerteig.
+- Die Karte „Voreinstellung“ sagt jetzt, dass eine Voreinstellung ein Startpunkt und keine garantierte Rezeptur ist.
+
 ## [0.39.0] – 2026-10-13 (versionCode 68)
 
 ### Neu
