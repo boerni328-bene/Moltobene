@@ -195,18 +195,26 @@ internal fun Header(selected: DoughType, onSelect: (DoughType) -> Unit) {
 }
 /** Eine Karte mit Überschrift; gliedert das Formular ruhig und kompakt. */
 @Composable
-internal fun Card(title: String, content: @Composable () -> Unit) {
+internal fun Card(title: String, onHelp: (() -> Unit)? = null, content: @Composable () -> Unit) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainer,
         shape = MaterialTheme.shapes.large,
         modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m),
     ) {
         Column(modifier = Modifier.padding(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
-            Text(
-                title,
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.semantics { heading() },
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.weight(1f).semantics { heading() },
+                )
+                // „Was bewirkt das?“ (Teigwissen, #84): ein Fenster mit kurzen Hinweisen zu den Werten der Karte.
+                if (onHelp != null) {
+                    IconButton(onClick = onHelp) {
+                        Icon(painterResource(R.drawable.ic_help), contentDescription = stringResource(R.string.dough_help_open, title))
+                    }
+                }
+            }
             content()
         }
     }
@@ -531,6 +539,10 @@ private fun DoughForm(
         prefermentWater = show(preset.prefermentWater)
     }
 
+    // Hinweise „Was bewirkt das?“ (Teigwissen, #84): welche Karte gerade erklärt wird.
+    var help by rememberSaveable { mutableStateOf<String?>(null) }
+    DoughHelpDialog(helpTopics(help)) { help = null }
+
     val bread = type == DoughType.BREAD
     Column(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -558,7 +570,7 @@ private fun DoughForm(
                 },
             )
 
-            Card(stringResource(R.string.dough_section_dough)) {
+            Card(stringResource(R.string.dough_section_dough), onHelp = { help = "dough" }) {
                 Fields(
                     { m ->
                         NumberField(
@@ -602,7 +614,7 @@ private fun DoughForm(
                 )
             }
 
-            Card(stringResource(R.string.dough_section_yeast)) {
+            Card(stringResource(R.string.dough_section_yeast), onHelp = { help = "yeast" }) {
                 ChoiceField(
                     label = stringResource(R.string.dough_section_yeast),
                     options = YeastKind.entries,
@@ -627,7 +639,7 @@ private fun DoughForm(
                 )
             }
 
-            Card(stringResource(R.string.dough_section_preferment)) {
+            Card(stringResource(R.string.dough_section_preferment), onHelp = { help = "preferment" }) {
                 ChoiceField(
                     label = stringResource(R.string.dough_section_preferment),
                     options = Preferment.entries,

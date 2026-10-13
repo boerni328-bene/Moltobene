@@ -234,6 +234,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Teigrechner: Das neue Fragezeichen an den Karten erklärt in kurzen Hinweisen, was Wasseranteil, Salz, Öl, Hefe, Gehzeit und Vorteig bewirken und welche Werte üblich sind.</item>
         <item>Teigrechner: Voreinstellungen für Pizza und Brot (zum Beispiel Neapolitanisch, Pizza vom Blech, Weißbrot, Brot mit Poolish) lassen sich mit Pfeilen durchschalten oder aus einer Liste wählen. Eigene Werte können mit Namen als Voreinstellung gespeichert werden.</item>
         <item>Teigrechner: Regler lassen sich über den Feldern einschalten („Zahlen | Regler“), mit einer Marke beim Standardwert. Listen wie die Kuchenart und bei großer Schrift auch Hefeart und Vorteig sind jetzt Auswahlfelder.</item>
         <item>Teigrechner: Jeder Wert hat jetzt Plus- und Minus-Knöpfe für die Feineinstellung, Standardwerte sind markiert und ein Knopf setzt einen Wert auf den Standard zurück.</item>
@@ -482,6 +483,35 @@
     <string name="dough_mode_numbers">Zahlen</string>
     <string name="dough_mode_sliders">Regler</string>
     <string name="dough_input_mode">Eingabe</string>
+
+    <!-- Teigwissen (#84): Hinweise zu den Feldern des Teigrechners -->
+    <string name="dough_help_title">Was bewirkt das?</string>
+    <string name="dough_help_open">Was bewirkt das? %1$s</string>
+    <string name="dough_help_effect">Wirkung</string>
+    <string name="dough_help_range">Üblich</string>
+    <string name="dough_help_care">Gut zu wissen</string>
+    <string name="dough_help_close">Schließen</string>
+    <string name="dough_help_values_note">Alle Zahlen sind Richtwerte. Mehl, Raumtemperatur und Ofen verändern das Ergebnis.</string>
+    <string name="dough_help_water">Wasseranteil</string>
+    <string name="dough_help_water_effect">Mehr Wasser macht den Teig weicher und klebriger, die Krume offener und feuchter. Weniger Wasser gibt einen festeren Teig, der sich leichter formen lässt, mit dichterer Krume.</string>
+    <string name="dough_help_water_range">Brot liegt meist bei etwa 60 bis 70 %, sehr feuchte Teige wie Ciabatta erreichen etwa 80 %. Pizza liegt meist bei 55 bis 65 % (neapolitanisch etwa 56 bis 62 %), Pizza vom Blech bei 70 % und mehr. Verschiedene Mehle nehmen verschieden viel Wasser auf.</string>
+    <string name="dough_help_water_care">Feuchte Teige lassen sich schwerer formen. Nasse Hände oder ein Teigschaber helfen, und der Wert wird besser in kleinen Schritten erhöht.</string>
+    <string name="dough_help_salt">Salz</string>
+    <string name="dough_help_salt_effect">Salz gibt Geschmack, festigt das Klebergerüst und bremst die Hefe etwas. Ohne Salz wird der Teig schlaff, die Kruste blass und das Brot fad.</string>
+    <string name="dough_help_salt_range">Brot braucht meist etwa 1,8 bis 2,2 % vom Mehlgewicht, neapolitanische Pizza bis etwa 2,8 %.</string>
+    <string name="dough_help_salt_care">Zu viel Salz macht den Teig fester, bremst die Hefe und schmeckt salzig. Salz und Hefe sollten nicht lange unmittelbar beieinanderliegen.</string>
+    <string name="dough_help_oil">Öl</string>
+    <string name="dough_help_oil_effect">Öl macht Krume und Kruste zarter, den Teig besser dehnbar und das Brot bleibt länger frisch.</string>
+    <string name="dough_help_oil_range">Meist 0 bis 5 %; Pizza vom Blech und weiche Teige gehen bis etwa 10 %.</string>
+    <string name="dough_help_oil_care">Viel Öl verkürzt die Kleberstränge: Der Teig geht langsamer auf und wird dichter. Die Menge schrittweise erhöhen.</string>
+    <string name="dough_help_yeast">Hefe und Gehzeit</string>
+    <string name="dough_help_yeast_effect">Mehr Hefe lässt den Teig schneller aufgehen. Weniger Hefe bei längerer Gehzeit gibt meist mehr Geschmack, weil sich mehr Aromastoffe bilden.</string>
+    <string name="dough_help_yeast_range">Eine lange Gehzeit im Kühlschrank von ein bis drei Tagen braucht nur wenig Hefe; eine kurze Gehzeit von wenigen Stunden deutlich mehr. Frisch-, Instant- und aktive Trockenhefe sind verschieden stark; der Rechner rechnet beim Wechsel der Hefeart um (ungefähr).</string>
+    <string name="dough_help_yeast_care">Warmer Teig geht in Stunden auf, kalter langsam über Tage, denn Kälte bremst die Hefe stärker als die Geschmacksbildung. Zu kurz gibt wenig Geschmack und dichte Krume, zu lang macht den Teig schlaff und sauer. Die Zeit ist nur ein Anhaltspunkt: Der Teig sollte sichtbar größer werden. Raumtemperatur, Mehl und Teigtemperatur verändern die Zeit.</string>
+    <string name="dough_help_preferment">Vorteig</string>
+    <string name="dough_help_preferment_effect">Ein Vorteig bringt mehr Geschmack, macht den Teig je nach Art dehnbarer oder fester und das Brot hält länger frisch.</string>
+    <string name="dough_help_preferment_range">Biga ist fest (etwa 50 bis 60 % Wasser vom Mehl im Vorteig), Poolish flüssig (etwa 100 %). Bis etwa die Hälfte des Mehls kann in den Vorteig gehen; üblich sind 20 bis 50 %.</string>
+    <string name="dough_help_preferment_care">Ein Vorteig braucht Zeit, meist etwa 8 bis 16 Stunden bei kühler Raumtemperatur. Zu lange gereift, wird er schwach. Bei Sauerteig ist die Hefe im Hauptteig freiwillig.</string>
     <string name="dough_preset_title">Voreinstellung</string>
     <string name="dough_preset_custom">Eigene Werte</string>
     <string name="dough_preset_position">%1$d von %2$d</string>

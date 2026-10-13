@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.39.0] – 2026-10-13 (versionCode 68)
+
+### Neu
+- **Teigwissen: „Was bewirkt das?“ im Teigrechner.** An den Karten „Teig“, „Hefe“ und „Vorteig“ steht ein Fragezeichen. Es öffnet kurze Hinweise zu Wasseranteil, Salz, Öl, Hefe und Gehzeit sowie Vorteig: was der Wert bewirkt, welche Werte üblich sind und worauf zu achten ist. Alle Zahlen sind Richtwerte; die Texte sind in beiden Sprachen einzeln geschrieben und lassen sich bei großer Schrift scrollen.
+
 ## [0.38.1] – 2026-10-13 (versionCode 67)
 
 ### Behoben

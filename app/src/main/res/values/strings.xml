@@ -236,6 +236,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Dough calculator: the new question mark on the cards explains in short notes what hydration, salt, oil, yeast, rising time and preferment do and which values are common.</item>
         <item>Dough calculator: presets for pizza and bread (such as Neapolitan, sheet-pan pizza, white bread, bread with poolish) can be flipped through with arrows or picked from a list. Own values can be saved as a preset with a name.</item>
         <item>Dough calculator: sliders can be switched on above the fields (“Numbers | Sliders”), with a mark at the default value. Lists such as the type of cake and, with large text, the yeast type and the preferment are now choice fields.</item>
         <item>Dough calculator: every value now has plus and minus buttons for fine adjustments, default values are marked, and a button sets a value back to its default.</item>
@@ -486,6 +487,35 @@
     <string name="dough_mode_numbers">Numbers</string>
     <string name="dough_mode_sliders">Sliders</string>
     <string name="dough_input_mode">Input</string>
+
+    <!-- Dough know-how (#84): notes on the fields of the dough calculator -->
+    <string name="dough_help_title">What does this do?</string>
+    <string name="dough_help_open">What does this do? %1$s</string>
+    <string name="dough_help_effect">Effect</string>
+    <string name="dough_help_range">Typical range</string>
+    <string name="dough_help_care">Good to know</string>
+    <string name="dough_help_close">Close</string>
+    <string name="dough_help_values_note">All numbers are rules of thumb. Flour, room temperature and oven change the result.</string>
+    <string name="dough_help_water">Hydration</string>
+    <string name="dough_help_water_effect">More water makes the dough softer and stickier and the crumb more open and moist. Less water gives a firmer dough that is easier to shape, with a denser crumb.</string>
+    <string name="dough_help_water_range">Bread is usually around 60 to 70 %, very wet doughs such as ciabatta reach about 80 %. Pizza is usually 55 to 65 % (Neapolitan roughly 56 to 62 %), pan pizza 70 % and more. Different flours absorb different amounts of water.</string>
+    <string name="dough_help_water_care">Wet doughs are harder to shape. Wet hands or a dough scraper help, and it is better to raise the value in small steps.</string>
+    <string name="dough_help_salt">Salt</string>
+    <string name="dough_help_salt_effect">Salt adds flavor, firms up the gluten network and slows the yeast a little. Without salt the dough turns slack, the crust pale and the bread bland.</string>
+    <string name="dough_help_salt_range">Bread usually takes about 1.8 to 2.2 % of the flour weight, Neapolitan pizza up to about 2.8 %.</string>
+    <string name="dough_help_salt_care">Too much salt makes the dough tighter, slows the yeast and tastes salty. Salt and yeast should not sit together directly for long.</string>
+    <string name="dough_help_oil">Oil</string>
+    <string name="dough_help_oil_effect">Oil makes crumb and crust more tender, the dough easier to stretch and the bread stays fresh longer.</string>
+    <string name="dough_help_oil_range">Usually 0 to 5 %; pan pizza and soft doughs go up to about 10 %.</string>
+    <string name="dough_help_oil_care">A lot of oil shortens the gluten strands: the dough rises more slowly and turns denser. Raise the amount step by step.</string>
+    <string name="dough_help_yeast">Yeast and rising time</string>
+    <string name="dough_help_yeast_effect">More yeast makes the dough rise faster. Less yeast with a longer rising time usually gives more flavor, because more aroma compounds form.</string>
+    <string name="dough_help_yeast_range">A long rising time in the refrigerator, one to three days, needs only a small amount of yeast; a short rising time of a few hours needs clearly more. Fresh, instant and active dry yeast differ in strength; the calculator converts when the type changes (approximate).</string>
+    <string name="dough_help_yeast_care">Warm dough rises in hours, cold dough slowly over days, because cold slows the yeast more than the flavor. Too short gives little flavor and a dense crumb; too long makes the dough slack and sour. The time is only a guide: the dough should visibly grow. Room temperature, flour and dough temperature change the time.</string>
+    <string name="dough_help_preferment">Preferment</string>
+    <string name="dough_help_preferment_effect">A preferment adds flavor, makes the dough easier to stretch or firmer (depending on the type) and keeps the bread fresh longer.</string>
+    <string name="dough_help_preferment_range">Biga is stiff (about 50 to 60 % water of its flour), poolish is liquid (about 100 %). Up to about half of the flour can go into the preferment; 20 to 50 % is common.</string>
+    <string name="dough_help_preferment_care">A preferment needs time, usually about 8 to 16 hours at cool room temperature. Left too long, it weakens. With a sourdough starter, the yeast in the final dough is optional.</string>
     <string name="dough_preset_title">Preset</string>
     <string name="dough_preset_custom">Custom values</string>
     <string name="dough_preset_position">%1$d of %2$d</string>
