@@ -1,6 +1,9 @@
 package com.moltobene.app.data.speech
 
 import android.content.Context
+import android.media.AudioAttributes
+import android.media.AudioFormat
+import android.media.AudioTrack
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 
@@ -28,6 +31,7 @@ class HeadsetButtons(context: Context, private val actions: HeadsetActions) {
     private val appContext = context.applicationContext
     private var session: MediaSession? = null
     private var playing = false
+    private var silence: AudioTrack? = null
 
     /** Sitzung anlegen und aktiv schalten; mehrfaches Aufrufen schadet nicht. */
     fun activate() {
@@ -45,12 +49,14 @@ class HeadsetButtons(context: Context, private val actions: HeadsetActions) {
         session = created
         publishState()
         created.isActive = true
+        startSilence()
     }
 
     /** Sitzung beenden; die Tasten gehören wieder der Musik-App. */
     fun deactivate() {
         val current = session ?: return
         session = null
+        stopSilence()
         runCatching {
             current.isActive = false
             current.release()
@@ -61,6 +67,42 @@ class HeadsetButtons(context: Context, private val actions: HeadsetActions) {
     fun update(isPlaying: Boolean) {
         playing = isPlaying
         publishState()
+    }
+
+    /**
+     * Android leitet Kopfhörertasten nur an Apps weiter, die selbst Ton ausgeben. Das Vorlesen kommt aber aus der
+     * Sprachausgabe, nicht aus dieser App; deshalb läuft hier ein stummer Ton (nur Nullen, ohne Lautstärke, ohne
+     * Audiofokus), solange die Sitzung aktiv ist.
+     */
+    private fun startSilence() {
+        if (silence != null) return
+        runCatching {
+            val buffer = ShortArray(SILENCE_FRAMES)
+            val track = AudioTrack.Builder()
+                .setAudioAttributes(
+                    AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build(),
+                )
+                .setAudioFormat(
+                    AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_16BIT).setSampleRate(SILENCE_RATE)
+                        .setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build(),
+                )
+                .setTransferMode(AudioTrack.MODE_STATIC)
+                .setBufferSizeInBytes(buffer.size * 2)
+                .build()
+            track.write(buffer, 0, buffer.size)
+            track.setLoopPoints(0, SILENCE_FRAMES, -1)
+            track.play()
+            silence = track
+        }
+    }
+
+    private fun stopSilence() {
+        val track = silence ?: return
+        silence = null
+        runCatching {
+            track.stop()
+            track.release()
+        }
     }
 
     private fun publishState() {
@@ -74,6 +116,8 @@ class HeadsetButtons(context: Context, private val actions: HeadsetActions) {
 
     private companion object {
         const val TAG = "MoltobeneKochen"
+        const val SILENCE_RATE = 8000
+        const val SILENCE_FRAMES = 8000
         const val ACTIONS = PlaybackState.ACTION_PLAY or PlaybackState.ACTION_PAUSE or PlaybackState.ACTION_PLAY_PAUSE or
             PlaybackState.ACTION_STOP or PlaybackState.ACTION_SKIP_TO_NEXT or PlaybackState.ACTION_SKIP_TO_PREVIOUS
     }
