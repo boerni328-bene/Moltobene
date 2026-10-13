@@ -234,6 +234,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Vorlesen: Kopfhörertasten steuern beim Kochen das Vorlesen – Wiedergabe/Pause, Weiter und Zurück, ein Doppeldruck auf die Kopfhörertaste ist der nächste Schritt. Das gilt, sobald in einem Rezept einmal das Vorlesen gestartet wurde, und lässt sich in den Einstellungen abschalten.</item>
+        <item>Teigwissen: Die Artikel stehen jetzt im Teigrechner, erreichbar über das Info-Symbol oben, nicht mehr als Kachel auf der Startseite.</item>
         <item>Teigwissen: Auf der Startseite gibt es die neue Kachel „Teigwissen“ mit drei Artikeln zum Nachschlagen: Mehltypen in Deutschland, Österreich, der Schweiz und Italien (auch, was das „W“ jeweils bedeutet), Weizen, Dinkel, Roggen und Vollkorn mit groben Nährwerten je 100 g sowie Gluten, Eiweiß und Backkraft.</item>
         <item>Vorlesen: In den Einstellungen lässt sich für Deutsch und Englisch eine Stimme aus den auf dem Handy installierten Stimmen (ohne Internet) wählen, mit Hörprobe für jede. Tempo und Tonhöhe sind einstellbar, mit den Voreinstellungen „Entspannt“, „Normal“ und „Lebhaft“.</item>
         <item>Teigrechner: Bevor eine Voreinstellung geänderte Werte ersetzt, fragt ein kurzes Fenster nach.</item>
@@ -317,7 +319,6 @@
     <string name="home_recent_title">Zuletzt geöffnet</string>
     <!-- Grundrezepte (#82) -->
     <string name="knowhow_title">Teigwissen</string>
-    <string name="home_knowhow_text">Mehltypen in Deutschland, Österreich, der Schweiz und Italien, Gluten und mehr</string>
     <string name="knowhow_intro">Artikel zum Nachschlagen. Zahlen sind gerundete Richtwerte; die Verpackung des Herstellers geht vor.</string>
     <string name="knowhow_error">Die Artikel konnten nicht geladen werden.</string>
     <string name="basics_title">Grundrezepte</string>
@@ -395,6 +396,9 @@
     <string name="speech_preset_normal">Normal</string>
     <string name="speech_preset_lively">Lebhaft</string>
     <string name="speech_sample">Hörprobe</string>
+    <string name="speech_headset_title">Kopfhörertasten</string>
+    <string name="speech_headset_switch">Kopfhörertasten beim Kochen</string>
+    <string name="speech_headset_note">Wurde in einem Rezept einmal das Vorlesen gestartet, steuern Wiedergabe/Pause, Weiter und Zurück am Kopfhörer das Vorlesen. Zwei Drücke auf die Kopfhörertaste sind der nächste Schritt, drei der vorherige. Solange das Rezept offen ist, bekommt eine Musik-App diese Tasten nicht.</string>
     <!-- Einstellungen: Darstellung (Hell/Dunkel und Farbwelt) -->
     <string name="settings_section_appearance">Darstellung</string>
     <string name="appearance_mode">Hell oder dunkel</string>

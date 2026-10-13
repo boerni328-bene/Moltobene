@@ -236,6 +236,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Read aloud: headset buttons control reading aloud while cooking – play/pause, next and previous, and a double press of the headset button is the next step. This applies once reading aloud has been started in a recipe and can be switched off in Settings.</item>
+        <item>Dough know-how: the articles are now in the dough calculator, reached with the info icon at the top, no longer a tile on the home screen.</item>
         <item>Dough know-how: the home screen has a new “Dough know-how” tile with three articles to look things up: flour types in Germany, Austria, Switzerland and Italy (including what the “W” means in each), wheat, spelt, rye and whole grain with rough nutrition values per 100 g, and gluten, protein and baking strength.</item>
         <item>Read aloud: in Settings, a voice can be chosen for German and English from the voices installed on the device (without internet), with a sample for each. Speed and pitch can be adjusted, with the presets “Relaxed”, “Normal” and “Lively”.</item>
         <item>Dough calculator: before a preset replaces changed values, a short window asks first.</item>
@@ -319,7 +321,6 @@
     <string name="home_recent_title">Recently opened</string>
     <!-- Basic recipes (#82) -->
     <string name="knowhow_title">Dough know-how</string>
-    <string name="home_knowhow_text">Flour types in Germany, Austria, Switzerland and Italy, gluten and more</string>
     <string name="knowhow_intro">Articles to look things up. Figures are rounded guides; the maker’s package comes first.</string>
     <string name="knowhow_error">The articles could not be loaded.</string>
     <string name="basics_title">Basic recipes</string>
@@ -397,6 +398,9 @@
     <string name="speech_preset_normal">Normal</string>
     <string name="speech_preset_lively">Lively</string>
     <string name="speech_sample">Sample</string>
+    <string name="speech_headset_title">Headset buttons</string>
+    <string name="speech_headset_switch">Headset buttons while cooking</string>
+    <string name="speech_headset_note">After reading aloud has been started once in a recipe, play/pause, next and previous on the headset control reading aloud. Press the headset button twice for the next step and three times for the previous one. While the recipe is open, a music app does not get these buttons.</string>
     <!-- Einstellungen: Darstellung (Hell/Dunkel und Farbwelt) -->
     <string name="settings_section_appearance">Appearance</string>
     <string name="appearance_mode">Light or dark</string>

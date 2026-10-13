@@ -64,6 +64,8 @@ data class SpeechSettings(
     val voices: Map<String, String> = emptyMap(),
     val rate: Int = 100,
     val pitch: Int = 100,
+    /** Kopfhörertasten beim Kochen (#79); an, bis jemand sie abschaltet. */
+    val headsetButtons: Boolean = true,
 ) {
     fun voiceFor(language: String): String? = voices[language.lowercase()]
 
@@ -75,6 +77,8 @@ data class SpeechSettings(
     fun withRate(value: Int) = copy(rate = value.coerceIn(RATE_MIN, RATE_MAX))
 
     fun withPitch(value: Int) = copy(pitch = value.coerceIn(PITCH_MIN, PITCH_MAX))
+
+    fun withHeadsetButtons(on: Boolean) = copy(headsetButtons = on)
 
     fun withPreset(preset: SpeechPreset) = copy(rate = preset.rate, pitch = preset.pitch)
 
@@ -110,6 +114,7 @@ data class SpeechSettings(
                     .filterNot { (_, name) -> name.any { it.isISOControl() } },
                 rate = parsed.rate.coerceIn(RATE_MIN, RATE_MAX),
                 pitch = parsed.pitch.coerceIn(PITCH_MIN, PITCH_MAX),
+                headsetButtons = parsed.headsetButtons,
             )
         }
     }

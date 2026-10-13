@@ -84,7 +84,6 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                     onOpenCollection = { navController.navigate(CollectionRoute) },
                     onOpenDough = { navController.navigate(DoughRoute) },
                     onOpenBasics = { navController.navigate(BasicsRoute) },
-                    onOpenKnowHow = { navController.navigate(KnowHowRoute) },
                     onOpenRecipe = { id -> navController.navigate(RecipeRoute(id)) },
                     onAddRecipe = { navController.navigate(EditRoute()) },
                     onAddFromPhoto = { navController.navigate(EditRoute(fromPhoto = true)) },
@@ -122,6 +121,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
             val openedId = entry.toRoute<RecipeRoute>().id
             LaunchedEffect(openedId) { runCatching { container.preferences.addRecentRecipe(openedId) } }
             val screenOn by container.preferences.screenOn.collectAsStateWithLifecycle()
+            val speechSettings by container.preferences.speechSettings.collectAsStateWithLifecycle()
             RecipeScreen(
                 viewModel = viewModel {
                     RecipeViewModel(
@@ -134,6 +134,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                 },
                 screenOn = screenOn ?: ScreenOn.STAYS_ON,
                 speech = container.speech,
+                headsetButtons = speechSettings.headsetButtons,
                 snackbarHostState = snackbarHostState,
                 onBack = { navController.popBackStack() },
                 onEdit = { id -> navController.navigate(EditRoute(id)) },
@@ -194,6 +195,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                 viewModel = viewModel { DoughViewModel(context, container.preferences, container.repository) },
                 snackbarHostState = snackbarHostState,
                 onBack = { navController.popBackStack() },
+                onOpenKnowHow = { navController.navigate(KnowHowRoute) },
                 onSaved = { id ->
                     navController.navigate(EditRoute(id)) { popUpTo<DoughRoute> { inclusive = true } }
                     showMessage(resources.getString(R.string.dough_saved))

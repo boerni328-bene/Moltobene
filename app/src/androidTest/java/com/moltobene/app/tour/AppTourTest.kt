@@ -364,6 +364,53 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithText(text(R.string.cook_bar_stop)).performClick()
     }
 
+    /**
+     * Kopfhörertasten (#79): Nach dem ersten Vorlesen meldet die App Android eine aktive Mediensitzung mit Wiedergabe,
+     * Pause, Weiter und Zurück; beim Anhalten steht sie auf „pausiert“. Echte Tastendrücke lassen sich auf dem Emulator
+     * nicht prüfen: Android leitet sie nur an Apps weiter, die wirklich Ton ausgeben, die nachgestellte Stimme tut das nicht.
+     */
+    @Test
+    fun kopfhoerertasten() {
+        val speech = SampleSpeech()
+        container().speech = speech
+        addSampleRecipes()
+        openRecipe(SampleRecipes.TOMATO_SAUCE)
+        waitForText("800 g reife Tomaten")
+        // Vor dem ersten Vorlesen gehört den Kopfhörertasten noch keine Sitzung der App (Musik-Apps behalten sie).
+        composeRule.waitUntil(TIMEOUT_MILLIS) { mediaSession().isEmpty() }
+        composeRule.onNodeWithText(text(R.string.cook_bar_next)).performClick()
+        composeRule.onNodeWithText(text(R.string.cook_bar_read)).performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { speech.spoken.isNotEmpty() }
+        waitForText(text(R.string.cook_bar_stop))
+
+        // Aktiv, spielt, Aktionen: Stopp, Pause, Wiedergabe, Zurück, Weiter und Wiedergabe/Pause (567).
+        composeRule.waitUntil(TIMEOUT_MILLIS) { mediaSession().let { "active=true" in it && "state=PLAYING(3)" in it } }
+        val playing = mediaSession()
+        assertTrue(playing, "actions=567" in playing)
+        screenshot("12p-kopfhoerertasten")
+
+        composeRule.onNodeWithText(text(R.string.cook_bar_stop)).performClick()
+        waitForText(text(R.string.cook_bar_read))
+        composeRule.waitUntil(TIMEOUT_MILLIS) { "state=PAUSED(2)" in mediaSession() }
+    }
+
+    /** Die Zeilen der Mediensitzung „MoltobeneKochen“ aus `dumpsys media_session`; leer, wenn es sie nicht gibt. */
+    private fun mediaSession(): String {
+        val lines = shell("dumpsys media_session").lines()
+        val start = lines.indexOfFirst { it.contains("MoltobeneKochen") }
+        if (start < 0) return ""
+        // Bis zur nächsten Sitzung („… (userId=0)“); dazwischen stehen Eigentümer, Zustand und Aktionen.
+        val rest = lines.drop(start + 1)
+        val end = rest.indexOfFirst { it.contains("(userId=") }.let { if (it < 0) rest.size else it }
+        return (listOf(lines[start]) + rest.take(end)).joinToString("\n")
+    }
+
+    /** Führt einen Shell-Befehl auf dem Emulator aus und liest die Ausgabe bis zum Ende. */
+    private fun shell(command: String): String {
+        val descriptor = InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command)
+        return android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { it.readBytes().decodeToString() }
+    }
+
     /** Ohne Stimme (#79): ehrliche Meldung statt falscher Stimme, mit dem Weg in die Einstellungen. */
     @Test
     fun vorlesenOhneStimme() {
@@ -776,7 +823,7 @@ class AppTourTest(private val variant: DisplayVariant) {
     }
 
     /**
-     * Teigwissen (#84): von der Startseite aus die Artikel öffnen und den ersten (Mehltypen) aufklappen; alle Länder
+     * Teigwissen (#84): aus dem Teigrechner über das Info-Symbol die Artikel öffnen und den ersten (Mehltypen) aufklappen; alle Länder
      * stehen als Überschriften da.
      */
     @Test
@@ -785,7 +832,10 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForDescription(text(R.string.add_short))
         pressBack()
         waitForText(text(R.string.home_recipes_title))
-        composeRule.onNodeWithText(text(R.string.knowhow_title)).performScrollTo().performClick()
+        // Teigwissen liegt im Teigrechner: ein Info-Symbol in der obersten Zeile.
+        composeRule.onNodeWithText(text(R.string.dough_title)).performScrollTo().performClick()
+        waitForText(text(R.string.dough_save))
+        composeRule.onNodeWithContentDescription(text(R.string.knowhow_title)).performClick()
         waitForText(text(R.string.knowhow_intro))
         screenshot("17a-teigwissen")
 

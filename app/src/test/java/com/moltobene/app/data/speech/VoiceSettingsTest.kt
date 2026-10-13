@@ -132,4 +132,14 @@ class VoiceSettingsTest {
         // Steuerzeichen im Namen werden verworfen.
         assertTrue(SpeechSettings.decode("""{"voices":{"de":"a\nb"}}""").voices.isEmpty())
     }
+
+    @Test
+    fun kopfhoerertastenSindStandardmaessigAnUndBleibenAus() {
+        assertTrue(SpeechSettings().headsetButtons)
+        // Ältere gemerkte Einstellungen ohne das Feld haben die Tasten an.
+        assertTrue(SpeechSettings.decode("""{"rate":90}""").headsetButtons)
+        val off = SpeechSettings().withHeadsetButtons(false)
+        assertEquals(off, SpeechSettings.decode(SpeechSettings.encode(off)))
+        assertTrue(!SpeechSettings.decode(SpeechSettings.encode(off)).headsetButtons)
+    }
 }

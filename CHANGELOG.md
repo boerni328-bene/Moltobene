@@ -3,6 +3,14 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.42.0] – 2026-10-13 (versionCode 72)
+
+### Neu
+- **Kopfhörertasten beim Vorlesen.** Wurde in einem Rezept einmal das Vorlesen gestartet, steuern Wiedergabe/Pause, Weiter und Zurück am Kopfhörer (oder an der Smartwatch) das Vorlesen. Ein Doppeldruck auf die Kopfhörertaste ist der nächste Schritt, ein dreifacher der vorherige; „Weiter“ und „Zurück“ lesen den Schritt gleich vor. Das läuft nur, solange das Rezept offen und der Bildschirm an ist, ohne Dienst und ohne neue Berechtigung. Solange das Rezept offen ist, bekommt eine Musik-App diese Tasten nicht. In den Einstellungen unter „Vorlesen“ lässt sich das abschalten.
+
+### Geändert
+- **Teigwissen im Teigrechner.** Die Artikel öffnen sich jetzt über ein Info-Symbol in der obersten Zeile des Teigrechners. Die Kachel „Teigwissen“ auf der Startseite entfällt.
+
 ## [0.41.0] – 2026-10-13 (versionCode 71)
 
 ### Neu
