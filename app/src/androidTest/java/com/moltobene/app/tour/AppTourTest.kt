@@ -398,7 +398,11 @@ class AppTourTest(private val variant: DisplayVariant) {
     private fun mediaSession(): String {
         val lines = shell("dumpsys media_session").lines()
         val start = lines.indexOfFirst { it.contains("MoltobeneKochen") }
-        return if (start < 0) "" else lines.drop(start).take(6).joinToString("\n")
+        if (start < 0) return ""
+        // Bis zur nächsten Sitzung („… (userId=0)“); dazwischen stehen Eigentümer, Zustand und Aktionen.
+        val rest = lines.drop(start + 1)
+        val end = rest.indexOfFirst { it.contains("(userId=") }.let { if (it < 0) rest.size else it }
+        return (listOf(lines[start]) + rest.take(end)).joinToString("\n")
     }
 
     /** Führt einen Shell-Befehl auf dem Emulator aus und liest die Ausgabe bis zum Ende. */
