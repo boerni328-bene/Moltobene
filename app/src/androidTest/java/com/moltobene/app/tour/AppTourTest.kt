@@ -401,7 +401,8 @@ class AppTourTest(private val variant: DisplayVariant) {
     /** Die Zeilen der Mediensitzung „MoltobeneKochen“ aus `dumpsys media_session`; leer, wenn es sie nicht gibt. */
     private fun mediaSession(): String {
         val lines = shell("dumpsys media_session").lines()
-        val start = lines.indexOfFirst { it.contains("MoltobeneKochen") }
+        // „Media button session is …“ nennt nur die Sitzung für die Tasten; gemeint ist der Eintrag der Sitzung selbst.
+        val start = lines.indexOfFirst { it.contains("MoltobeneKochen") && !it.contains("Media button session") }
         if (start < 0) return ""
         // Bis zur nächsten Sitzung („… (userId=0)“); dazwischen stehen Eigentümer, Zustand und Aktionen.
         val rest = lines.drop(start + 1)
