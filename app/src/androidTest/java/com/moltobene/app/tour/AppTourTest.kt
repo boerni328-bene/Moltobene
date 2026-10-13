@@ -553,6 +553,9 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithContentDescription(text(R.string.dough_preset_next)).performScrollTo().performClick()
         waitForText(text(R.string.dough_preset_replace_title))
         composeRule.onNode(hasText(text(R.string.dough_preset_replace_confirm)) and hasClickAction()).performClick()
+        // Von „Eigene Werte“ geht „Weiter“ auf den ersten Eintrag; danach passen die Werte, es kommt keine Nachfrage mehr.
+        waitForText(text(R.string.dough_preset_position, 1, 3))
+        composeRule.onNodeWithContentDescription(text(R.string.dough_preset_next)).performScrollTo().performClick()
         waitForText(text(R.string.dough_preset_neapolitan))
         composeRule.onNodeWithText(text(R.string.dough_preset_position, 2, 3)).assertExists()
         screenshot("14l-teigrechner-voreinstellung")
