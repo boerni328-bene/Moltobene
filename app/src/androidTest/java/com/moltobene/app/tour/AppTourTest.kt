@@ -381,23 +381,31 @@ class AppTourTest(private val variant: DisplayVariant) {
         assertEquals("Schritt 1.", speech.spoken.first().first())
         waitForText(text(R.string.cook_bar_stop))
 
-        // Medientaste „Weiter“ (KEYCODE_MEDIA_NEXT = 87); die Sitzung braucht einen Augenblick, bis Android sie kennt.
+        // Medientaste „Weiter“; die Sitzung braucht einen Augenblick, bis Android sie kennt.
         var attempts = 0
         while (speech.spoken.none { it.firstOrNull() == "Schritt 2." } && attempts < 8) {
-            pressMediaKey(87)
+            shell("cmd media_session dispatch next")
             attempts++
             Thread.sleep(1_000)
         }
-        assertTrue("Medientaste Weiter hat nicht gewirkt", speech.spoken.any { it.firstOrNull() == "Schritt 2." })
+        val worked = speech.spoken.any { it.firstOrNull() == "Schritt 2." }
+        val sessions = if (worked) "" else {
+            shell("dumpsys media_session").lines()
+                .filter { it.contains("Moltobene", ignoreCase = true) || it.contains("state=PlaybackState") || it.contains("Media button session") || it.contains("active") }
+                .take(25).joinToString("\n")
+        }
+        assertTrue("Medientaste Weiter hat nicht gewirkt. Sitzungen:\n$sessions", worked)
         screenshot("12p-kopfhoerertasten")
 
-        // Wiedergabe/Pause (KEYCODE_MEDIA_PLAY_PAUSE = 85) hält das Vorlesen an.
-        pressMediaKey(85)
+        // Wiedergabe/Pause hält das Vorlesen an.
+        shell("cmd media_session dispatch play-pause")
         waitForText(text(R.string.cook_bar_read))
     }
 
-    private fun pressMediaKey(keyCode: Int) {
-        InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand("input keyevent $keyCode").close()
+    /** Führt einen Shell-Befehl auf dem Emulator aus und liest die Ausgabe bis zum Ende. */
+    private fun shell(command: String): String {
+        val descriptor = InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command)
+        return android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { it.readBytes().decodeToString() }
     }
 
     /** Ohne Stimme (#79): ehrliche Meldung statt falscher Stimme, mit dem Weg in die Einstellungen. */
