@@ -70,4 +70,39 @@ class DoughHelpTextsTest {
         val forbidden = Regex("""\b(Gare|Stockgare|Hydration|Bäckerprozente|Stückgare)\b""")
         for ((key, text) in german) assertFalse("$key: $text", forbidden.containsMatchIn(text))
     }
+
+    /** Überprüfung durch Fachleute (13.10.2026): keine pauschalen Regeln, die nur zu einem Verfahren gehören. */
+    @Test
+    fun keinePauschalenRegelnOhneBeleg() {
+        val verboten = listOf(
+            Regex("""Minuten|minutes""", RegexOption.IGNORE_CASE), // Fünf-Minuten-Regel des Pizzaverbands gehört nicht in allgemeine Hinweise
+            Regex("""\b5\s*(bis|–|-|to)\s*6\b"""), // feste Grenze von 5–6 Tagen im Kühlschrank
+            Regex("""länger frisch|stays fresh longer|keeps longer""", RegexOption.IGNORE_CASE), // Frischhaltung nur ohne Garantie
+            Regex("""höhere Säure|higher acidity""", RegexOption.IGNORE_CASE),
+        )
+        for ((key, text) in german + english) {
+            if (key == "dough_help_preferment_care") continue // nennt die Reifezeit der Biga in Stunden, Minuten kommen dort nicht vor
+            for (regex in verboten) assertFalse("$key: $text", regex.containsMatchIn(text))
+        }
+    }
+
+    @Test
+    fun wasseranteilIstDefiniertUndVorteigZaehltMit() {
+        assertTrue(german.getValue("dough_help_water_effect").contains("gesamten Mehl"))
+        assertTrue(german.getValue("dough_help_water_effect").contains("Vorteig"))
+        assertTrue(english.getValue("dough_help_water_effect").contains("total flour"))
+        assertTrue(english.getValue("dough_help_water_effect").contains("preferment"))
+    }
+
+    @Test
+    fun hinweiseSprechenVonOrientierungUndNichtVonNormen() {
+        assertTrue(german.getValue("dough_help_values_note").contains("Orientierung"))
+        assertTrue(english.getValue("dough_help_values_note").contains("guide"))
+        // Der Vorteig-Anteil nennt seine Bezugsgröße.
+        assertTrue(german.getValue("dough_help_preferment_range").contains("gesamten Mehls"))
+        assertTrue(english.getValue("dough_help_preferment_range").contains("total flour"))
+        // Kälte bremst die Gärung nur; sie stoppt sie nicht.
+        assertTrue(german.getValue("dough_help_yeast_care").contains("stoppt sie aber nicht"))
+        assertTrue(english.getValue("dough_help_yeast_care").contains("does not stop it"))
+    }
 }
