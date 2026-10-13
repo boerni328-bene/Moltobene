@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.42.1] – 2026-10-13 (versionCode 73)
+
+### Behoben
+- **Kopfhörertasten reagierten bei manchen Handys gar nicht.** Android leitet die Tasten nur an Apps weiter, die selbst Ton ausgeben. Solange die Kopfhörertasten aktiv sind, läuft jetzt ein stummer Ton im Hintergrund der offenen Rezeptansicht (ohne Lautstärke, ohne Berechtigung). Er endet mit dem Verlassen der Ansicht oder wenn der Bildschirm ausgeht.
+
 ## [0.42.0] – 2026-10-13 (versionCode 72)
 
 ### Neu

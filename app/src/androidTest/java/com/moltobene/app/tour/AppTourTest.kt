@@ -384,7 +384,11 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.cook_bar_stop))
 
         // Aktiv, spielt, Aktionen: Stopp, Pause, Wiedergabe, Zurück, Weiter und Wiedergabe/Pause (567).
-        composeRule.waitUntil(TIMEOUT_MILLIS) { mediaSession().let { "active=true" in it && "state=PLAYING(3)" in it } }
+        try {
+            composeRule.waitUntil(TIMEOUT_MILLIS) { mediaSession().let { "active=true" in it && "state=PLAYING(3)" in it } }
+        } catch (e: androidx.compose.ui.test.ComposeTimeoutException) {
+            throw AssertionError("Mediensitzung: " + mediaSession().replace("\n", " | "), e)
+        }
         val playing = mediaSession()
         assertTrue(playing, "actions=567" in playing)
         screenshot("12p-kopfhoerertasten")
@@ -397,7 +401,8 @@ class AppTourTest(private val variant: DisplayVariant) {
     /** Die Zeilen der Mediensitzung „MoltobeneKochen“ aus `dumpsys media_session`; leer, wenn es sie nicht gibt. */
     private fun mediaSession(): String {
         val lines = shell("dumpsys media_session").lines()
-        val start = lines.indexOfFirst { it.contains("MoltobeneKochen") }
+        // „Media button session is …“ nennt nur die Sitzung für die Tasten; gemeint ist der Eintrag der Sitzung selbst.
+        val start = lines.indexOfFirst { it.contains("MoltobeneKochen") && !it.contains("Media button session") }
         if (start < 0) return ""
         // Bis zur nächsten Sitzung („… (userId=0)“); dazwischen stehen Eigentümer, Zustand und Aktionen.
         val rest = lines.drop(start + 1)
