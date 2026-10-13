@@ -91,4 +91,4 @@ Außerdem ohne eigenen Rang: **Hinzufügen-Auswahl mit Zweitzeile und Gruppe „
 - TalkBack: Die App liest bei eingeschaltetem TalkBack selbst vor (Frage 4); Zusammenspiel auf einem echten Handy prüfen.
 - Baseline-Profil: prüfen (Frage 5), vorher mit dem Projektinhaber abstimmen, weil es ein zusätzliches Gradle-Modul braucht; Messwerte aus #52 abwarten.
 - Marke: „Molto Bene“ vor dem Store-Start im Markenregister prüfen lassen (Frage 7: ja).
-- Noch offen: Frage 6 (eigene Gerichtefotos für die Store-Bilder, Zeitpunkt).
+- Store-Fotos: eigene Gerichtefotos erst ganz am Schluss, nach den Umbauten (#86, #87, #89), im Zug von #73.
