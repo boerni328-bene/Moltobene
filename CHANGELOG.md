@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.40.0] – 2026-10-13 (versionCode 70)
+
+### Neu
+- **Vorlesen: Stimme, Tempo und Tonhöhe.** In den Einstellungen gibt es den Abschnitt „Vorlesen“. Für Deutsch und Englisch lässt sich eine Stimme aus den auf dem Handy installierten Stimmen wählen, die ohne Internet funktionieren; Regionen wie „Deutsch (Österreich)“ ersetzen „mit Akzent“. Zu jeder Stimme gibt es eine Hörprobe. Tempo und Tonhöhe lassen sich mit Plus und Minus einstellen oder mit den Voreinstellungen „Entspannt“, „Normal“ und „Lebhaft“ wählen. Die Auswahl bleibt auf dem Handy und wird beim Vorlesen verwendet; fehlt die gewählte Stimme später, nimmt die App die beste passende und weist in der Kochleiste darauf hin. Hinweis: Die Sprachausgabe von Android meldet weder Geschlecht noch Charakter einer Stimme, dazu gibt es deshalb keine Auswahl.
+- **Teigrechner: Nachfrage vor dem Ersetzen.** Wurden Werte geändert, fragt ein kurzes Fenster nach, bevor eine Voreinstellung sie ersetzt. Zuvor lassen sie sich mit „Als Voreinstellung speichern“ merken.
+
 ## [0.39.1] – 2026-10-13 (versionCode 69)
 
 ### Geändert

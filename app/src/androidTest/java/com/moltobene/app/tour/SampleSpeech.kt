@@ -1,7 +1,9 @@
 package com.moltobene.app.tour
 
 import com.moltobene.app.data.speech.SpeechOutput
+import com.moltobene.app.data.speech.SpeechSettings
 import com.moltobene.app.data.speech.SpeechState
+import com.moltobene.app.data.speech.VoiceInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,13 +20,27 @@ class SampleSpeech(private val noVoice: Boolean = false) : SpeechOutput {
     /** Alles, was zum Vorlesen übergeben wurde, je Aufruf eine Liste von Sätzen. */
     val spoken = CopyOnWriteArrayList<List<String>>()
 
-    override fun speak(language: String, sentences: List<String>) {
+    /** Mit welchen Einstellungen zuletzt gesprochen wurde (Hörprobe), null für die gemerkten. */
+    @Volatile
+    var lastSettings: SpeechSettings? = null
+
+    override fun speak(language: String, sentences: List<String>, settings: SpeechSettings?) {
         if (noVoice) {
             mutableState.value = SpeechState.NoVoice(language)
         } else {
             spoken += sentences
-            mutableState.value = SpeechState.Speaking
+            lastSettings = settings
+            mutableState.value = SpeechState.Speaking()
         }
+    }
+
+    override suspend fun voices(language: String): List<VoiceInfo>? = if (noVoice) {
+        emptyList()
+    } else {
+        listOf(
+            VoiceInfo("${language}-${if (language == "de") "de" else "us"}-x-probe-local", language, if (language == "de") "DE" else "US", 400, false),
+            VoiceInfo("${language}-${if (language == "de") "at" else "gb"}-x-zweite-local", language, if (language == "de") "AT" else "GB", 300, false),
+        )
     }
 
     override fun stop() {

@@ -236,6 +236,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Read aloud: in Settings, a voice can be chosen for German and English from the voices installed on the device (without internet), with a sample for each. Speed and pitch can be adjusted, with the presets “Relaxed”, “Normal” and “Lively”.</item>
+        <item>Dough calculator: before a preset replaces changed values, a short window asks first.</item>
         <item>Dough calculator: the new question mark on the cards explains in short notes what hydration, salt, oil, yeast, rising time and preferment do and which values are common.</item>
         <item>Dough calculator: presets for pizza and bread (such as Neapolitan, sheet-pan pizza, white bread, bread with poolish) can be flipped through with arrows or picked from a list. Own values can be saved as a preset with a name.</item>
         <item>Dough calculator: sliders can be switched on above the fields (“Numbers | Sliders”), with a mark at the default value. Lists such as the type of cake and, with large text, the yeast type and the preferment are now choice fields.</item>
@@ -366,6 +368,30 @@
     <string name="cook_all_checked">All ingredients are checked off</string>
     <string name="speech_no_voice">No offline voice for %1$s. One can be downloaded in the device Settings.</string>
     <string name="speech_unavailable">Reading aloud is not available on this device. No text-to-speech is set up.</string>
+
+    <!-- Reading aloud settings (#85) -->
+    <string name="settings_section_speech">Read aloud</string>
+    <string name="speech_voice_title">Voice</string>
+    <string name="speech_voice_for">Voice for %1$s</string>
+    <string name="speech_voice_auto">Automatic (best match)</string>
+    <string name="speech_voice_chosen">%1$s</string>
+    <string name="speech_note">Voices installed on the device that work without internet are listed. Regions such as Austria or Great Britain stand in for accents. The text-to-speech reports no traits such as gender or character.</string>
+    <string name="speech_voice_loading">Looking for voices …</string>
+    <string name="speech_voice_unavailable">Reading aloud is not set up on this device.</string>
+    <string name="speech_voice_none">No voice that works without internet is installed. More can be downloaded in the device Settings.</string>
+    <string name="speech_voice_more">Download more voices</string>
+    <string name="speech_voice_missing">The chosen voice is no longer installed. The best matching voice is used when reading aloud.</string>
+    <string name="speech_voice_fallback">Chosen voice not found. Using the best matching voice.</string>
+    <string name="speech_tempo_pitch_title">Speed and pitch</string>
+    <string name="speech_tempo">Speed</string>
+    <string name="speech_pitch">Pitch</string>
+    <string name="speech_percent">%1$d %%</string>
+    <string name="speech_less">Decrease %1$s</string>
+    <string name="speech_more">Increase %1$s</string>
+    <string name="speech_preset_relaxed">Relaxed</string>
+    <string name="speech_preset_normal">Normal</string>
+    <string name="speech_preset_lively">Lively</string>
+    <string name="speech_sample">Sample</string>
     <!-- Einstellungen: Darstellung (Hell/Dunkel und Farbwelt) -->
     <string name="settings_section_appearance">Appearance</string>
     <string name="appearance_mode">Light or dark</string>
@@ -535,6 +561,9 @@
     <string name="dough_preset_too_many">Up to %1$d own presets. Delete one to make room.</string>
     <string name="dough_preset_delete">Delete preset</string>
     <string name="dough_preset_delete_title">Really delete preset “%1$s”?</string>
+    <string name="dough_preset_replace_title">Replace custom values?</string>
+    <string name="dough_preset_replace_text">The current values differ from every preset and will be lost. “Save as preset” keeps them first.</string>
+    <string name="dough_preset_replace_confirm">Replace</string>
     <string name="dough_cake_kind_label">Type of cake</string>
     <string name="dough_saved">Saved as a draft. Add the instructions.</string>
     <string name="dough_error_number">Enter a number.</string>

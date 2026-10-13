@@ -82,7 +82,7 @@ class AppContainer(context: Context) {
     val basicRecipes: BasicRecipeStore by lazy { BasicRecipeStore(appContext) }
 
     /** Vorlesen (#79); der Rundgang ersetzt es durch eine nachgestellte Fassung. */
-    var speech: SpeechOutput = AndroidSpeechOutput(appContext)
+    var speech: SpeechOutput = AndroidSpeechOutput(appContext) { preferences.speechSettings.value }
 
     private val http = HttpPageLoader()
 

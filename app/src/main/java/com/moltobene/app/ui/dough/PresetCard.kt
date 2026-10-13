@@ -82,13 +82,22 @@ internal fun PresetCard(
     var menuOpen by rememberSaveable { mutableStateOf(false) }
     var saving by rememberSaveable { mutableStateOf(false) }
     var deleting by rememberSaveable { mutableStateOf(false) }
+    // Sind die Werte keine der Voreinstellungen (eigene Änderungen), wird vor dem Ersetzen nachgefragt.
+    var pending by rememberSaveable { mutableStateOf(-1) }
+    fun choose(i: Int) {
+        when {
+            i < 0 -> Unit
+            index < 0 -> pending = i
+            else -> onSelect(i)
+        }
+    }
     val name = entries.getOrNull(index)?.name ?: stringResource(R.string.dough_preset_custom)
     val position = if (index >= 0) stringResource(R.string.dough_preset_position, index + 1, entries.size) else null
     val description = listOfNotNull(stringResource(R.string.dough_preset_choose, name), position).joinToString(", ")
 
     Card(stringResource(R.string.dough_preset_title)) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            IconButton(onClick = { onSelect(DoughPresets.step(index, entries.size, -1)) }) {
+            IconButton(onClick = { choose(DoughPresets.step(index, entries.size, -1)) }) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.dough_preset_previous))
             }
             Box(modifier = Modifier.weight(1f)) {
@@ -120,13 +129,13 @@ internal fun PresetCard(
                             text = { Text(if (i == index) "✓ ${entry.name}" else entry.name) },
                             onClick = {
                                 menuOpen = false
-                                onSelect(i)
+                                choose(i)
                             },
                         )
                     }
                 }
             }
-            IconButton(onClick = { onSelect(DoughPresets.step(index, entries.size, +1)) }) {
+            IconButton(onClick = { choose(DoughPresets.step(index, entries.size, +1)) }) {
                 Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = stringResource(R.string.dough_preset_next))
             }
         }
@@ -142,6 +151,22 @@ internal fun PresetCard(
                 TextButton(onClick = { deleting = true }) { Text(stringResource(R.string.dough_preset_delete)) }
             }
         }
+    }
+
+    if (pending >= 0) {
+        AlertDialog(
+            onDismissRequest = { pending = -1 },
+            title = { Text(stringResource(R.string.dough_preset_replace_title)) },
+            text = { Text(stringResource(R.string.dough_preset_replace_text)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    val chosen = pending
+                    pending = -1
+                    onSelect(chosen)
+                }) { Text(stringResource(R.string.dough_preset_replace_confirm)) }
+            },
+            dismissButton = { TextButton(onClick = { pending = -1 }) { Text(stringResource(R.string.cancel)) } },
+        )
     }
 
     if (saving) {

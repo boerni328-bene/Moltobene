@@ -16,6 +16,10 @@ import com.moltobene.app.data.StorageFull
 import com.moltobene.app.data.ThemeMode
 import com.moltobene.app.data.backup.BackupManager
 import com.moltobene.app.data.backup.BackupReader
+import com.moltobene.app.data.speech.SpeechOutput
+import com.moltobene.app.data.speech.SpeechSettings
+import com.moltobene.app.data.speech.SpokenText
+import com.moltobene.app.data.speech.VoiceInfo
 import com.moltobene.app.data.translate.LanguagePackManager
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.SharingStarted
@@ -45,6 +49,7 @@ class SettingsViewModel(
     private val backupManager: BackupManager,
     private val preferences: AppPreferences,
     private val languagePack: LanguagePackManager,
+    private val speech: () -> SpeechOutput,
 ) : ViewModel() {
 
     /**
@@ -90,6 +95,29 @@ class SettingsViewModel(
 
     fun setScreenOn(screenOn: ScreenOn) {
         viewModelScope.launch { runCatching { preferences.setScreenOn(screenOn) } }
+    }
+
+    /** Stimme, Tempo und Tonhöhe beim Vorlesen (#85); gilt sofort beim nächsten Vorlesen. */
+    val speechSettings: StateFlow<SpeechSettings> = preferences.speechSettings
+
+    fun changeSpeech(transform: (SpeechSettings) -> SpeechSettings) {
+        viewModelScope.launch { runCatching { preferences.setSpeechSettings(transform(preferences.speechSettings.value)) } }
+    }
+
+    /** Die installierten Stimmen ohne Internet für [language]; null, wenn keine Sprachausgabe eingerichtet ist. */
+    suspend fun voices(language: String): List<VoiceInfo>? = runCatching { speech().voices(language) }.getOrNull()
+
+    /** Hörprobe: nur auf Antippen, mit den gezeigten (noch nicht gemerkten) Einstellungen. */
+    fun playSample(language: String, settings: SpeechSettings) {
+        runCatching { speech().speak(language, listOf(SpokenText.sample(language)), settings) }
+    }
+
+    fun stopSpeech() {
+        runCatching { speech().stop() }
+    }
+
+    override fun onCleared() {
+        runCatching { speech().release() }
     }
 
     /** Letzte geprüfte Sicherung für „Zuletzt gesichert: …“ (#51); null, solange sie lädt oder es keine gibt. */

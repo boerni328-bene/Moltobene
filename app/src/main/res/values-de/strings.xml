@@ -234,6 +234,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Vorlesen: In den Einstellungen lässt sich für Deutsch und Englisch eine Stimme aus den auf dem Handy installierten Stimmen (ohne Internet) wählen, mit Hörprobe für jede. Tempo und Tonhöhe sind einstellbar, mit den Voreinstellungen „Entspannt“, „Normal“ und „Lebhaft“.</item>
+        <item>Teigrechner: Bevor eine Voreinstellung geänderte Werte ersetzt, fragt ein kurzes Fenster nach.</item>
         <item>Teigrechner: Das neue Fragezeichen an den Karten erklärt in kurzen Hinweisen, was Wasseranteil, Salz, Öl, Hefe, Gehzeit und Vorteig bewirken und welche Werte üblich sind.</item>
         <item>Teigrechner: Voreinstellungen für Pizza und Brot (zum Beispiel Neapolitanisch, Pizza vom Blech, Weißbrot, Brot mit Poolish) lassen sich mit Pfeilen durchschalten oder aus einer Liste wählen. Eigene Werte können mit Namen als Voreinstellung gespeichert werden.</item>
         <item>Teigrechner: Regler lassen sich über den Feldern einschalten („Zahlen | Regler“), mit einer Marke beim Standardwert. Listen wie die Kuchenart und bei großer Schrift auch Hefeart und Vorteig sind jetzt Auswahlfelder.</item>
@@ -364,6 +366,30 @@
     <string name="cook_all_checked">Alle Zutaten sind abgehakt</string>
     <string name="speech_no_voice">Keine Stimme für %1$s ohne Internet. Eine lässt sich in den Einstellungen des Handys laden.</string>
     <string name="speech_unavailable">Vorlesen ist auf diesem Handy nicht möglich. Es ist keine Sprachausgabe eingerichtet.</string>
+
+    <!-- Einstellungen zum Vorlesen (#85) -->
+    <string name="settings_section_speech">Vorlesen</string>
+    <string name="speech_voice_title">Stimme</string>
+    <string name="speech_voice_for">Stimme für %1$s</string>
+    <string name="speech_voice_auto">Automatisch (beste passende)</string>
+    <string name="speech_voice_chosen">%1$s</string>
+    <string name="speech_note">Zur Wahl stehen die auf dem Handy installierten Stimmen, die ohne Internet funktionieren. Regionen wie Österreich oder Großbritannien ersetzen „mit Akzent“. Die Sprachausgabe meldet keine Eigenschaften wie Geschlecht oder Charakter einer Stimme.</string>
+    <string name="speech_voice_loading">Stimmen werden gesucht …</string>
+    <string name="speech_voice_unavailable">Vorlesen ist auf diesem Handy nicht eingerichtet.</string>
+    <string name="speech_voice_none">Keine Stimme installiert, die ohne Internet funktioniert. Weitere lassen sich in den Einstellungen des Handys laden.</string>
+    <string name="speech_voice_more">Weitere Stimmen laden</string>
+    <string name="speech_voice_missing">Die gewählte Stimme ist nicht mehr installiert. Beim Vorlesen wird die beste passende genommen.</string>
+    <string name="speech_voice_fallback">Gewählte Stimme nicht gefunden. Beste passende Stimme wird genommen.</string>
+    <string name="speech_tempo_pitch_title">Tempo und Tonhöhe</string>
+    <string name="speech_tempo">Tempo</string>
+    <string name="speech_pitch">Tonhöhe</string>
+    <string name="speech_percent">%1$d %%</string>
+    <string name="speech_less">%1$s verringern</string>
+    <string name="speech_more">%1$s erhöhen</string>
+    <string name="speech_preset_relaxed">Entspannt</string>
+    <string name="speech_preset_normal">Normal</string>
+    <string name="speech_preset_lively">Lebhaft</string>
+    <string name="speech_sample">Hörprobe</string>
     <!-- Einstellungen: Darstellung (Hell/Dunkel und Farbwelt) -->
     <string name="settings_section_appearance">Darstellung</string>
     <string name="appearance_mode">Hell oder dunkel</string>
@@ -531,6 +557,9 @@
     <string name="dough_preset_too_many">Höchstens %1$d eigene Voreinstellungen. Eine löschen, um Platz zu schaffen.</string>
     <string name="dough_preset_delete">Voreinstellung löschen</string>
     <string name="dough_preset_delete_title">Voreinstellung „%1$s“ wirklich löschen?</string>
+    <string name="dough_preset_replace_title">Eigene Werte ersetzen?</string>
+    <string name="dough_preset_replace_text">Die aktuellen Werte weichen von allen Voreinstellungen ab und gehen verloren. Mit „Als Voreinstellung speichern“ lassen sie sich vorher merken.</string>
+    <string name="dough_preset_replace_confirm">Ersetzen</string>
     <string name="dough_cake_kind_label">Kuchenart</string>
     <string name="dough_saved">Als Entwurf gespeichert. Zubereitung ergänzen.</string>
     <string name="dough_error_number">Zahl eingeben.</string>

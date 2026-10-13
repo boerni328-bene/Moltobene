@@ -245,6 +245,52 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("00a-einstellung-start")
     }
 
+    /**
+     * Vorlesen einstellen (#85): Stimme je Sprache wählen, Tempo und Tonhöhe mit Voreinstellungen und Plus, Hörprobe mit
+     * den gezeigten Einstellungen. Die Stimmen sind nachgestellt (zwei je Sprache).
+     */
+    @Test
+    fun vorlesenEinstellungen() {
+        val speech = SampleSpeech()
+        container().speech = speech
+        addSampleRecipes()
+        waitForText(SampleRecipes.POTATO_SALAD)
+        composeRule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        waitForText(text(R.string.settings_section_speech))
+
+        val ui = activity.resources.configuration.locales[0]
+        fun cap(value: String) = value.replaceFirstChar { it.titlecase(ui) }
+        val germanName = cap(java.util.Locale.forLanguageTag("de").getDisplayLanguage(ui))
+        val austria = cap(java.util.Locale.Builder().setLanguage("de").setRegion("AT").build().getDisplayName(ui))
+
+        // Stimme für Deutsch: aus den nachgestellten Stimmen die österreichische wählen.
+        composeRule.onNodeWithText(text(R.string.speech_voice_for, germanName)).performScrollTo().performClick()
+        waitForText(austria)
+        screenshot("16a-vorlesen-stimme")
+        composeRule.onNodeWithText(austria).performScrollTo().performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.speechSettings.value.voiceFor("de") == "de-at-x-zweite-local" }
+        composeRule.onNode(hasText(text(R.string.close)) and hasClickAction()).performClick()
+        waitUntilGone(austria)
+
+        // Tempo und Tonhöhe: „Lebhaft“, dann Tempo um einen Schritt erhöhen.
+        composeRule.onNodeWithText(text(R.string.speech_preset_lively)).performScrollTo().performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.speechSettings.value.rate == 115 }
+        composeRule.onNodeWithContentDescription(text(R.string.speech_more, text(R.string.speech_tempo))).performScrollTo().performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.speechSettings.value.rate == 120 }
+        assertEquals(110, container().preferences.speechSettings.value.pitch)
+        screenshot("16b-vorlesen-tempo")
+
+        // Hörprobe: spricht mit den gezeigten Einstellungen.
+        composeRule.onNodeWithText(text(R.string.speech_sample)).performScrollTo().performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { speech.spoken.isNotEmpty() }
+        assertEquals(120, speech.lastSettings?.rate)
+        assertEquals("de-at-x-zweite-local", speech.lastSettings?.voiceFor("de"))
+
+        // Zurück zu „Normal“.
+        composeRule.onNodeWithText(text(R.string.speech_preset_normal)).performScrollTo().performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.speechSettings.value.rate == 100 }
+    }
+
     /** Kochen (#56): Zutat abhaken, aktueller Schritt, Portionen umrechnen – das gespeicherte Rezept bleibt. */
     @Test
     fun kochen() {
@@ -495,7 +541,18 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithText(text(R.string.dough_reset)).performScrollTo().performClick()
         waitForText(text(R.string.dough_preset_default))
         composeRule.onNodeWithText(text(R.string.dough_preset_position, 1, 3)).assertExists()
+        // Eigene Änderungen: vor dem Ersetzen durch eine Voreinstellung wird nachgefragt.
+        composeRule.onNodeWithContentDescription(text(R.string.dough_step_more, text(R.string.dough_water), "1 %"))
+            .performScrollTo().performClick()
         composeRule.onNodeWithContentDescription(text(R.string.dough_preset_next)).performScrollTo().performClick()
+        waitForText(text(R.string.dough_preset_replace_title))
+        screenshot("14o-teigrechner-voreinstellung-ersetzen")
+        composeRule.onNode(hasText(text(R.string.cancel)) and hasClickAction()).performClick()
+        waitUntilGone(text(R.string.dough_preset_replace_title))
+        composeRule.onNodeWithText(text(R.string.dough_preset_custom)).assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.dough_preset_next)).performScrollTo().performClick()
+        waitForText(text(R.string.dough_preset_replace_title))
+        composeRule.onNode(hasText(text(R.string.dough_preset_replace_confirm)) and hasClickAction()).performClick()
         waitForText(text(R.string.dough_preset_neapolitan))
         composeRule.onNodeWithText(text(R.string.dough_preset_position, 2, 3)).assertExists()
         screenshot("14l-teigrechner-voreinstellung")
