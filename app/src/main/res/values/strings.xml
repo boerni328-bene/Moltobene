@@ -236,6 +236,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Dough know-how: the home screen has a new “Dough know-how” tile with three articles to look things up: flour types in Germany, Austria, Switzerland and Italy (including what the “W” means in each), wheat, spelt, rye and whole grain with rough nutrition values per 100 g, and gluten, protein and baking strength.</item>
         <item>Read aloud: in Settings, a voice can be chosen for German and English from the voices installed on the device (without internet), with a sample for each. Speed and pitch can be adjusted, with the presets “Relaxed”, “Normal” and “Lively”.</item>
         <item>Dough calculator: before a preset replaces changed values, a short window asks first.</item>
         <item>Dough calculator: the new question mark on the cards explains in short notes what hydration, salt, oil, yeast, rising time and preferment do and which values are common.</item>
@@ -317,6 +318,10 @@
     <string name="home_today_another">Another recipe</string>
     <string name="home_recent_title">Recently opened</string>
     <!-- Basic recipes (#82) -->
+    <string name="knowhow_title">Dough know-how</string>
+    <string name="home_knowhow_text">Flour types in Germany, Austria, Switzerland and Italy, gluten and more</string>
+    <string name="knowhow_intro">Articles to look things up. Figures are rounded guides; the maker’s package comes first.</string>
+    <string name="knowhow_error">The articles could not be loaded.</string>
     <string name="basics_title">Basic recipes</string>
     <string name="home_basics_text">Béchamel sauce, vinaigrette and more, ready to import</string>
     <string name="basics_intro">Reliable basic recipes to import into the collection. Afterwards they can be edited, adjusted and translated like any other recipe.</string>

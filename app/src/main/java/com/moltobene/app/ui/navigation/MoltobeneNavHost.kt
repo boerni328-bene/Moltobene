@@ -24,6 +24,8 @@ import com.moltobene.app.data.StartScreen
 import com.moltobene.app.ui.collection.CollectionScreen
 import com.moltobene.app.ui.basics.BasicsViewModel
 import com.moltobene.app.ui.basics.BasicsScreen
+import com.moltobene.app.ui.knowhow.KnowHowScreen
+import com.moltobene.app.ui.knowhow.KnowHowViewModel
 import com.moltobene.app.ui.collection.CollectionViewModel
 import com.moltobene.app.R
 import com.moltobene.app.ui.dough.DoughScreen
@@ -82,6 +84,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                     onOpenCollection = { navController.navigate(CollectionRoute) },
                     onOpenDough = { navController.navigate(DoughRoute) },
                     onOpenBasics = { navController.navigate(BasicsRoute) },
+                    onOpenKnowHow = { navController.navigate(KnowHowRoute) },
                     onOpenRecipe = { id -> navController.navigate(RecipeRoute(id)) },
                     onAddRecipe = { navController.navigate(EditRoute()) },
                     onAddFromPhoto = { navController.navigate(EditRoute(fromPhoto = true)) },
@@ -176,6 +179,12 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                 snackbarHostState = snackbarHostState,
                 onBack = { navController.popBackStack() },
                 onOpenRecipe = { id -> navController.navigate(RecipeRoute(id)) },
+            )
+        }
+        composable<KnowHowRoute> {
+            KnowHowScreen(
+                viewModel = viewModel { KnowHowViewModel(container.knowHow) },
+                onBack = { navController.popBackStack() },
             )
         }
         composable<DoughRoute> {

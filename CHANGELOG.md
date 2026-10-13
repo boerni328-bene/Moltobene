@@ -3,6 +3,15 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.41.0] – 2026-10-13 (versionCode 71)
+
+### Neu
+- **Teigwissen.** Auf der Startseite gibt es die neue Kachel „Teigwissen“ mit drei Artikeln zum Nachschlagen, in Deutsch und Englisch:
+  - **Mehltypen in Deutschland, Österreich, der Schweiz und Italien.** Pro Land eine Liste der gebräuchlichen Bezeichnungen mit Bedeutung und Verwendung. Ausdrücklich ohne Gleichsetzung der Länder („Type 405 gleich 00“ gibt es nicht). Erklärt, dass das „W“ in Österreich für Weizen steht (W480), in Italien dagegen die Backkraft meint.
+  - **Weizen, Dinkel, Roggen und Vollkorn.** Wie sich die Getreidearten im Teig verhalten, dazu grobe Nährwerte je 100 g als gerundete Spannen („Richtwert“, keine Ernährungsberatung).
+  - **Gluten, Eiweiß und Backkraft.** Warum Teig elastisch wird und was Kneten, Wasser, Salz und Gehzeit am Kleber ändern.
+- Die Zahlen und Zuordnungen sind zusammengefasst und gerundet; die Verpackung des Herstellers geht vor. Quellen und offene Punkte stehen unter `docs/recherche/`.
+
 ## [0.40.0] – 2026-10-13 (versionCode 70)
 
 ### Neu
