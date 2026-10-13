@@ -384,7 +384,11 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.cook_bar_stop))
 
         // Aktiv, spielt, Aktionen: Stopp, Pause, Wiedergabe, Zurück, Weiter und Wiedergabe/Pause (567).
-        composeRule.waitUntil(TIMEOUT_MILLIS) { mediaSession().let { "active=true" in it && "state=PLAYING(3)" in it } }
+        try {
+            composeRule.waitUntil(TIMEOUT_MILLIS) { mediaSession().let { "active=true" in it && "state=PLAYING(3)" in it } }
+        } catch (e: androidx.compose.ui.test.ComposeTimeoutException) {
+            throw AssertionError("Mediensitzung: " + mediaSession().replace("\n", " | "), e)
+        }
         val playing = mediaSession()
         assertTrue(playing, "actions=567" in playing)
         screenshot("12p-kopfhoerertasten")
