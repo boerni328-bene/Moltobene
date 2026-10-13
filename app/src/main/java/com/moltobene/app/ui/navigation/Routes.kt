@@ -40,3 +40,6 @@ object DoughRoute
 
 @Serializable
 object BasicsRoute
+
+@Serializable
+object KnowHowRoute

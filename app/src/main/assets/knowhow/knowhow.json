@@ -1,0 +1,338 @@
+{
+  "version": 1,
+  "articles": [
+    {
+      "id": "flour_types",
+      "texts": {
+        "de": {
+          "title": "Mehltypen in Deutschland, Österreich, der Schweiz und Italien",
+          "summary": "Was Zahlen und Namen auf der Packung bedeuten und warum sie sich nicht gleichsetzen lassen.",
+          "sections": [
+            {
+              "heading": "Vorab",
+              "paragraphs": [
+                "Mehlbezeichnungen sind Regeln des jeweiligen Landes, keine gemeinsame Skala. Ähnliche Zahlen oder Namen bedeuten nicht dasselbe Mehl. Eine Gleichsetzung wie „Type 405 gleich 00“ gibt es deshalb bewusst nicht; die Listen zeigen, was in jedem Land gilt.",
+                "Alle Angaben sind zusammengefasst und gerundet. Die Verpackung des Herstellers geht vor."
+              ]
+            },
+            {
+              "heading": "Achtung: zwei verschiedene „W“",
+              "paragraphs": [
+                "In Österreich steht das W vor der Zahl für Weizen, zum Beispiel W480. Die Zahl ist die Type und sagt etwas über den Mineralstoffgehalt.",
+                "In Italien ist W dagegen ein Messwert für die Backkraft, die Festigkeit des Teigs. Er hat nichts mit der Type zu tun (siehe „Gluten, Eiweiß und Backkraft“)."
+              ]
+            },
+            {
+              "heading": "Deutschland",
+              "paragraphs": [
+                "Die Type gibt den Mineralstoffgehalt an: Sie nennt, wie viel Asche 100 g Mehl (Trockenmasse) beim Verbrennen hinterlassen, in Milligramm. Je höher die Zahl, desto mehr Schalenanteile enthält das Mehl, desto dunkler und kräftiger ist es. Mit der Feinheit der Mahlung hat die Zahl nichts zu tun. Üblich ist die Einteilung nach DIN 10355."
+              ],
+              "rows": [
+                {"label": "Weizenmehl Type 405", "text": "Helles, feines Mehl. Häufig für Kuchen, Plätzchen, Rührteig und zum Binden."},
+                {"label": "Weizenmehl Type 550", "text": "Helles Mehl mit mehr Biss. Häufig für Hefeteig, Brötchen und Pizza."},
+                {"label": "Weizenmehl Type 812", "text": "Zwischenstufe, häufig für helle Brote."},
+                {"label": "Weizenmehl Type 1050", "text": "Dunkler, kräftiger im Geschmack. Häufig für Misch- und Vollkornbrote."},
+                {"label": "Weizenvollkornmehl", "text": "Enthält das ganze Korn und hat deshalb keine Type; der Mineralstoffgehalt schwankt mit der Ernte."},
+                {"label": "Dinkelmehl Type 630", "text": "Helles Dinkelmehl. Verwendung ähnlich wie Weizenmehl; der Teig verträgt langes Kneten oft schlechter."},
+                {"label": "Roggenmehl Type 997", "text": "Helleres Roggenmehl, meist für Mischbrot."},
+                {"label": "Roggenmehl Type 1370", "text": "Dunkles Roggenmehl für kräftiges Roggenbrot, meist mit Sauerteig."}
+              ]
+            },
+            {
+              "heading": "Österreich",
+              "paragraphs": [
+                "Die Typenzahl steht hinter einem Buchstaben für das Getreide (W für Weizen). Sie bezieht sich ebenfalls auf den Aschegehalt: Geteilt durch 1.000 ergibt sie den Anteil Asche in Prozent der Trockenmasse.",
+                "Dazu kommt eine zweite, davon getrennte Angabe, die Körnung: glatt ist fein, griffig gröber und rieselfähig, universal liegt dazwischen. Die Type bleibt dabei gleich."
+              ],
+              "rows": [
+                {"label": "W480 glatt", "text": "Feines Weizenmehl. Häufig für Kuchen, Biskuit, Palatschinken und Saucen."},
+                {"label": "W480 griffig", "text": "Gleiche Type, gröber vermahlen. Häufig für Germteig (Hefeteig), Nockerl, Knödel und Nudeln."},
+                {"label": "W480 universal", "text": "Zwischen glatt und griffig, für vieles einsetzbar."},
+                {"label": "W700", "text": "Dunkleres Weizenmehl mit mehr Mineralstoffen, häufig für Brot und herzhafte Teige."},
+                {"label": "W1600", "text": "Weizenbrotmehl, hoch ausgemahlen, für kräftige Brote."},
+                {"label": "Vollkornmehl", "text": "Das ganze Korn."}
+              ]
+            },
+            {
+              "heading": "Schweiz",
+              "paragraphs": [
+                "In der Schweiz tragen Mehle meist Namen statt Zahlen. Je höher ein Mehl ausgemahlen ist, desto mehr vom Korn steckt darin. Die Typenzahlen in Klammern sind übliche Angaben; Mühlen weichen leicht voneinander ab. Die Liste ist kurz, weil sich die Namen nicht genauer festlegen lassen."
+              ],
+              "rows": [
+                {"label": "Weissmehl", "text": "Hell, aus dem Mehlkörper. Für Kuchen, Hefegebäck und alles Helle."},
+                {"label": "Halbweissmehl (häufig um Type 720)", "text": "Etwas dunkler, mit etwas Schalenanteil. Für helles Brot und Teige mit mehr Biss."},
+                {"label": "Ruchmehl (häufig um Type 1100)", "text": "Dunkel und kräftig, für Ruchbrot und Bauernbrot."},
+                {"label": "Vollkornmehl", "text": "Fast das ganze Korn."}
+              ]
+            },
+            {
+              "heading": "Italien",
+              "paragraphs": [
+                "Ein Dekret (DPR 187/2001) teilt Weichweizenmehl in die Klassen 00, 0, 1, 2 und integrale ein. Die Angaben sind Höchstwerte für Asche und Mindestwerte für Eiweiß, bezogen auf die Trockenmasse. 00 ist das hellste, integrale das ganze Korn.",
+                "Die Klasse sagt nichts über die Stärke: Es gibt schwache und sehr starke Mehle der Klasse 00."
+              ],
+              "rows": [
+                {"label": "Tipo 00", "text": "Asche höchstens 0,55 %, Eiweiß mindestens 9 %. Sehr hell und fein; je nach Stärke für Pizza, Pasta oder Kuchen."},
+                {"label": "Tipo 0", "text": "Asche höchstens 0,65 %, Eiweiß mindestens 11 %. Häufig für Brot und Pizza."},
+                {"label": "Tipo 1", "text": "Asche höchstens 0,80 %, Eiweiß mindestens 12 %. Mehr Geschmack, häufig für Brot."},
+                {"label": "Tipo 2", "text": "Asche höchstens 0,95 %, Eiweiß mindestens 12 %. Dunkler, häufig für Brot."},
+                {"label": "Integrale", "text": "Asche 1,30 bis 1,70 %, Eiweiß mindestens 12 %. Das ganze Korn."},
+                {"label": "Semola di grano duro", "text": "Aus Hartweizen, gelblich und körnig; „rimacinata“ ist fein vermahlen. Häufig für Pasta und manches Brot."},
+                {"label": "Manitoba", "text": "Handelsname für sehr starkes, eiweißreiches Mehl, keine gesetzliche Klasse."}
+              ]
+            },
+            {
+              "heading": "Gluten",
+              "paragraphs": [
+                "Weizen-, Dinkel- und Roggenmehl enthalten Gluten."
+              ]
+            }
+          ]
+        },
+        "en": {
+          "title": "Flour types in Germany, Austria, Switzerland and Italy",
+          "summary": "What the numbers and names on the bag mean, and why they cannot be treated as equal.",
+          "sections": [
+            {
+              "heading": "First",
+              "paragraphs": [
+                "Flour names follow the rules of each country; there is no shared scale. Similar numbers or names do not mean the same flour. That is why there is deliberately no “Type 405 equals 00”; the lists show what applies in each country.",
+                "All details are summarized and rounded. The maker’s package comes first."
+              ]
+            },
+            {
+              "heading": "Watch out: two different “W”s",
+              "paragraphs": [
+                "In Austria the W before the number stands for wheat, for example W480. The number is the flour type and relates to mineral content.",
+                "In Italy, W is a measured value for baking strength, the firmness of the dough. It has nothing to do with the flour type (see “Gluten, protein and baking strength”)."
+              ]
+            },
+            {
+              "heading": "Germany",
+              "paragraphs": [
+                "The flour type shows the mineral content: it states how much ash 100 g of flour (dry matter) leaves when burned, in milligrams. The higher the number, the more bran the flour contains, and the darker and stronger-tasting it is. The number says nothing about how finely the flour is milled. The usual grading follows DIN 10355."
+              ],
+              "rows": [
+                {"label": "Wheat flour type 405", "text": "Light, fine flour. Often used for cakes, cookies, batters and thickening."},
+                {"label": "Wheat flour type 550", "text": "Light flour with more bite. Often used for yeast dough, rolls and pizza."},
+                {"label": "Wheat flour type 812", "text": "An intermediate grade, often used for light breads."},
+                {"label": "Wheat flour type 1050", "text": "Darker with a stronger taste. Often used for mixed-grain and whole grain breads."},
+                {"label": "Whole wheat flour", "text": "Contains the whole kernel and therefore has no flour type; the mineral content varies with the harvest."},
+                {"label": "Spelt flour type 630", "text": "Light spelt flour. Used much like wheat flour; the dough often tolerates long kneading less well."},
+                {"label": "Rye flour type 997", "text": "Lighter rye flour, mostly for mixed breads."},
+                {"label": "Rye flour type 1370", "text": "Dark rye flour for hearty rye bread, usually with sourdough starter."}
+              ]
+            },
+            {
+              "heading": "Austria",
+              "paragraphs": [
+                "The type number follows a letter for the grain (W for wheat). It also refers to ash content: divided by 1,000 it gives the percentage of ash in dry matter.",
+                "A second, separate detail is the grind: “glatt” is fine, “griffig” is coarser and free-flowing, “universal” falls in between. The flour type stays the same."
+              ],
+              "rows": [
+                {"label": "W480 glatt", "text": "Fine wheat flour. Often used for cakes, sponge, crêpes (Palatschinken) and sauces."},
+                {"label": "W480 griffig", "text": "Same type, ground coarser. Often used for yeast dough, small dumplings (Nockerl), dumplings and noodles."},
+                {"label": "W480 universal", "text": "Between glatt and griffig, usable for many things."},
+                {"label": "W700", "text": "Darker wheat flour with more minerals, often used for bread and hearty doughs."},
+                {"label": "W1600", "text": "Wheat bread flour, highly extracted, for strong-flavored breads."},
+                {"label": "Whole grain flour", "text": "The whole kernel."}
+              ]
+            },
+            {
+              "heading": "Switzerland",
+              "paragraphs": [
+                "In Switzerland flours mostly carry names instead of numbers. The more a flour is extracted, the more of the kernel it contains. The type numbers in parentheses are common figures; mills differ slightly. The list is short because the names cannot be pinned down more precisely."
+              ],
+              "rows": [
+                {"label": "Weissmehl (white flour)", "text": "Light, from the endosperm. For cakes, yeast baking and everything light."},
+                {"label": "Halbweissmehl (often around type 720)", "text": "Slightly darker, with some bran. For light bread and doughs with more bite."},
+                {"label": "Ruchmehl (often around type 1100)", "text": "Dark and strong, for Ruchbrot and farmhouse bread."},
+                {"label": "Vollkornmehl (whole grain flour)", "text": "Almost the whole kernel."}
+              ]
+            },
+            {
+              "heading": "Italy",
+              "paragraphs": [
+                "A decree (DPR 187/2001) divides soft wheat flour into the classes 00, 0, 1, 2 and integrale. The details are maximum values for ash and minimum values for protein, based on dry matter. 00 is the lightest, integrale the whole kernel.",
+                "The class says nothing about strength: there are weak and very strong flours in class 00."
+              ],
+              "rows": [
+                {"label": "Tipo 00", "text": "Ash at most 0.55%, protein at least 9%. Very light and fine; depending on strength for pizza, pasta or cakes."},
+                {"label": "Tipo 0", "text": "Ash at most 0.65%, protein at least 11%. Often used for bread and pizza."},
+                {"label": "Tipo 1", "text": "Ash at most 0.80%, protein at least 12%. More flavor, often used for bread."},
+                {"label": "Tipo 2", "text": "Ash at most 0.95%, protein at least 12%. Darker, often used for bread."},
+                {"label": "Integrale", "text": "Ash 1.30 to 1.70%, protein at least 12%. The whole kernel."},
+                {"label": "Semola di grano duro", "text": "Made from durum wheat, yellowish and granular; “rimacinata” is finely milled. Often used for pasta and some breads."},
+                {"label": "Manitoba", "text": "A trade name for very strong, high-protein flour, not a legal class."}
+              ]
+            },
+            {
+              "heading": "Gluten",
+              "paragraphs": [
+                "Wheat, spelt and rye flour contain gluten."
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "grains",
+      "texts": {
+        "de": {
+          "title": "Weizen, Dinkel, Roggen und Vollkorn",
+          "summary": "Wie sich die Getreidearten im Teig verhalten, mit groben Nährwerten je 100 g.",
+          "sections": [
+            {
+              "heading": "Im Teig",
+              "rows": [
+                {"label": "Weizen", "text": "Bildet beim Kneten ein elastisches, dehnbares Klebergerüst. Deshalb ist Weizenmehl die Grundlage für Pizza, Brot und Hefegebäck."},
+                {"label": "Dinkel", "text": "Mit Weizen verwandt und ebenfalls klebergebend, der Kleber ist aber empfindlicher. Dinkelteig wird bei zu langem Kneten leicht weich und klebrig."},
+                {"label": "Roggen", "text": "Bildet kaum ein Klebergerüst. Der Teig hält durch Quellstoffe und Säure zusammen und wird deshalb meist mit Sauerteig angesetzt. Er ist klebriger und weniger elastisch."},
+                {"label": "Vollkorn", "text": "Enthält Schale und Keimling. Vollkornmehl nimmt mehr Wasser auf, der Teig wird dichter; viele Rezepte brauchen etwas mehr Wasser oder Zeit zum Quellen."}
+              ]
+            },
+            {
+              "heading": "Nährwerte je 100 g (Richtwert)",
+              "paragraphs": [
+                "Gerundete Spannen aus Herstellerangaben und Nährwertdatenbanken. Die Packung geht vor. Die Zahlen sind eine Orientierung und keine Ernährungsberatung."
+              ],
+              "rows": [
+                {"label": "Weizenmehl Type 405", "text": "etwa 335 bis 345 kcal, Eiweiß 9 bis 11 g, Kohlenhydrate 69 bis 72 g"},
+                {"label": "Weizenmehl Type 1050", "text": "etwa 340 kcal, Eiweiß 11 bis 12 g, Kohlenhydrate etwa 67 g"},
+                {"label": "Dinkelmehl Type 630", "text": "etwa 335 bis 360 kcal, Eiweiß 11 bis 12,5 g, Kohlenhydrate 69 bis 72 g"},
+                {"label": "Weizenvollkornmehl", "text": "etwa 310 bis 330 kcal, Eiweiß 9 bis 13 g, Kohlenhydrate etwa 60 g, Ballaststoffe etwa 10 g"},
+                {"label": "Roggenmehl Type 1370", "text": "etwa 315 bis 320 kcal, Eiweiß 8 bis 9 g, Kohlenhydrate etwa 67 g, Ballaststoffe etwa 9 g"}
+              ]
+            },
+            {
+              "heading": "Gluten",
+              "paragraphs": [
+                "Weizen, Dinkel und Roggen enthalten Gluten und sind für eine glutenfreie Ernährung nicht geeignet. Die App gibt keine Gesundheitsberatung."
+              ]
+            }
+          ]
+        },
+        "en": {
+          "title": "Wheat, spelt, rye and whole grain",
+          "summary": "How the grains behave in dough, with rough nutrition values per 100 g.",
+          "sections": [
+            {
+              "heading": "In dough",
+              "rows": [
+                {"label": "Wheat", "text": "Forms an elastic, stretchy gluten network when kneaded. That is why wheat flour is the basis for pizza, bread and yeast baking."},
+                {"label": "Spelt", "text": "Related to wheat and also forms gluten, but the gluten is more delicate. Spelt dough easily turns soft and sticky when kneaded too long."},
+                {"label": "Rye", "text": "Hardly forms a gluten network. The dough holds together through swelling substances and acid, so it is usually made with sourdough starter. It is stickier and less elastic."},
+                {"label": "Whole grain", "text": "Contains bran and germ. Whole grain flour absorbs more water and the dough becomes denser; many recipes need a little more water or time to soak."}
+              ]
+            },
+            {
+              "heading": "Nutrition per 100 g (guide)",
+              "paragraphs": [
+                "Rounded ranges from makers’ labels and nutrition databases. The package comes first. The figures are a guide, not dietary advice."
+              ],
+              "rows": [
+                {"label": "Wheat flour type 405", "text": "about 335 to 345 kcal, protein 9 to 11 g, carbohydrates 69 to 72 g"},
+                {"label": "Wheat flour type 1050", "text": "about 340 kcal, protein 11 to 12 g, carbohydrates about 67 g"},
+                {"label": "Spelt flour type 630", "text": "about 335 to 360 kcal, protein 11 to 12.5 g, carbohydrates 69 to 72 g"},
+                {"label": "Whole wheat flour", "text": "about 310 to 330 kcal, protein 9 to 13 g, carbohydrates about 60 g, fiber about 10 g"},
+                {"label": "Rye flour type 1370", "text": "about 315 to 320 kcal, protein 8 to 9 g, carbohydrates about 67 g, fiber about 9 g"}
+              ]
+            },
+            {
+              "heading": "Gluten",
+              "paragraphs": [
+                "Wheat, spelt and rye contain gluten and are not suitable for a gluten-free diet. The app does not give health advice."
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "gluten_strength",
+      "texts": {
+        "de": {
+          "title": "Gluten, Eiweiß und Backkraft",
+          "summary": "Warum Teig elastisch wird und was der W-Wert auf italienischem Mehl sagt.",
+          "sections": [
+            {
+              "heading": "Was Gluten ist",
+              "paragraphs": [
+                "Gluten entsteht, wenn zwei Eiweiße des Mehls mit Wasser verbunden und geknetet werden. Das Netz macht den Teig elastisch, er zieht sich zurück, und dehnbar, er lässt sich ziehen. Es hält außerdem das Gas der Hefe im Teig."
+              ]
+            },
+            {
+              "heading": "Eiweißgehalt",
+              "paragraphs": [
+                "Mehr Eiweiß bedeutet meist mehr Kleber. Wichtiger als die Menge ist aber die Qualität des Eiweißes. Der Gehalt steht auf der Packung bei den Nährwerten, in g je 100 g."
+              ]
+            },
+            {
+              "heading": "Backkraft und W-Wert",
+              "paragraphs": [
+                "Die Backkraft beschreibt, wie fest und belastbar ein Teig ist. In Italien steht oft der W-Wert auf dem Mehl, ein Laborwert: Je höher er ist, desto mehr Wasser nimmt das Mehl auf und desto besser hält der Teig lange Gehzeiten aus.",
+                "Schwache Mehle eignen sich eher für Kuchen und Kekse, mittlere für Brot und Pizza mit kurzer Gehzeit, starke für lange Gehzeiten und reichen Hefeteig. Wie die Stufen genau eingeteilt sind, legen Hersteller unterschiedlich fest."
+              ]
+            },
+            {
+              "heading": "Was den Kleber beeinflusst",
+              "rows": [
+                {"label": "Kneten und Ruhen", "text": "Kneten und Ruhezeiten bauen das Netz auf und machen es geschmeidig."},
+                {"label": "Wasser", "text": "Mehr Wasser macht den Teig weicher und dehnbarer."},
+                {"label": "Salz", "text": "Salz festigt das Netz."},
+                {"label": "Gehzeit", "text": "Eine lange Gehzeit lockert das Gerüst nach und nach."}
+              ]
+            },
+            {
+              "heading": "Gluten",
+              "paragraphs": [
+                "Gluten steckt in Weizen, Dinkel und Roggen. Die App gibt keine Gesundheitsberatung."
+              ]
+            }
+          ]
+        },
+        "en": {
+          "title": "Gluten, protein and baking strength",
+          "summary": "Why dough becomes elastic and what the W value on Italian flour means.",
+          "sections": [
+            {
+              "heading": "What gluten is",
+              "paragraphs": [
+                "Gluten forms when two proteins in flour are combined with water and kneaded. The network makes the dough elastic, so it springs back, and extensible, so it can be stretched. It also holds the yeast gas in the dough."
+              ]
+            },
+            {
+              "heading": "Protein content",
+              "paragraphs": [
+                "More protein usually means more gluten. The quality of the protein matters more than the amount. The content is on the package under nutrition facts, in g per 100 g."
+              ]
+            },
+            {
+              "heading": "Baking strength and W value",
+              "paragraphs": [
+                "Baking strength describes how firm and resilient a dough is. In Italy flour often shows a W value, a laboratory figure: the higher it is, the more water the flour absorbs and the better the dough withstands long rising times.",
+                "Weak flours suit cakes and cookies, medium ones bread and pizza with a short rising time, strong ones long rising times and rich yeast dough. Makers define the exact steps differently."
+              ]
+            },
+            {
+              "heading": "What affects the gluten",
+              "rows": [
+                {"label": "Kneading and resting", "text": "Kneading and rests build the network and make it supple."},
+                {"label": "Water", "text": "More water makes the dough softer and more extensible."},
+                {"label": "Salt", "text": "Salt firms up the network."},
+                {"label": "Rising time", "text": "A long rising time gradually loosens the structure."}
+              ]
+            },
+            {
+              "heading": "Gluten",
+              "paragraphs": [
+                "Gluten is found in wheat, spelt and rye. The app does not give health advice."
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

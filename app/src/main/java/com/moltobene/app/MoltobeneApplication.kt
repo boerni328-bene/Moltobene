@@ -16,6 +16,7 @@ import com.moltobene.app.data.photos.PhotoStore
 import com.moltobene.app.data.share.RecipeFileReader
 import com.moltobene.app.data.share.RecipeSharer
 import com.moltobene.app.data.basics.BasicRecipeStore
+import com.moltobene.app.data.knowhow.KnowHowStore
 import com.moltobene.app.data.speech.AndroidSpeechOutput
 import com.moltobene.app.data.speech.SpeechOutput
 import com.moltobene.app.data.translate.LanguagePackManager
@@ -80,6 +81,9 @@ class AppContainer(context: Context) {
 
     /** Mitgelieferte Grundrezepte (#82). */
     val basicRecipes: BasicRecipeStore by lazy { BasicRecipeStore(appContext) }
+
+    /** Mitgeliefertes Teigwissen (#84). */
+    val knowHow: KnowHowStore by lazy { KnowHowStore(appContext) }
 
     /** Vorlesen (#79); der Rundgang ersetzt es durch eine nachgestellte Fassung. */
     var speech: SpeechOutput = AndroidSpeechOutput(appContext) { preferences.speechSettings.value }

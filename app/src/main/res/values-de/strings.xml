@@ -234,6 +234,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Teigwissen: Auf der Startseite gibt es die neue Kachel „Teigwissen“ mit drei Artikeln zum Nachschlagen: Mehltypen in Deutschland, Österreich, der Schweiz und Italien (auch, was das „W“ jeweils bedeutet), Weizen, Dinkel, Roggen und Vollkorn mit groben Nährwerten je 100 g sowie Gluten, Eiweiß und Backkraft.</item>
         <item>Vorlesen: In den Einstellungen lässt sich für Deutsch und Englisch eine Stimme aus den auf dem Handy installierten Stimmen (ohne Internet) wählen, mit Hörprobe für jede. Tempo und Tonhöhe sind einstellbar, mit den Voreinstellungen „Entspannt“, „Normal“ und „Lebhaft“.</item>
         <item>Teigrechner: Bevor eine Voreinstellung geänderte Werte ersetzt, fragt ein kurzes Fenster nach.</item>
         <item>Teigrechner: Das neue Fragezeichen an den Karten erklärt in kurzen Hinweisen, was Wasseranteil, Salz, Öl, Hefe, Gehzeit und Vorteig bewirken und welche Werte üblich sind.</item>
@@ -315,6 +316,10 @@
     <string name="home_today_another">Anderes Rezept</string>
     <string name="home_recent_title">Zuletzt geöffnet</string>
     <!-- Grundrezepte (#82) -->
+    <string name="knowhow_title">Teigwissen</string>
+    <string name="home_knowhow_text">Mehltypen in Deutschland, Österreich, der Schweiz und Italien, Gluten und mehr</string>
+    <string name="knowhow_intro">Artikel zum Nachschlagen. Zahlen sind gerundete Richtwerte; die Verpackung des Herstellers geht vor.</string>
+    <string name="knowhow_error">Die Artikel konnten nicht geladen werden.</string>
     <string name="basics_title">Grundrezepte</string>
     <string name="home_basics_text">Béchamelsauce, Vinaigrette und mehr zum Übernehmen</string>
     <string name="basics_intro">Bewährte Grundrezepte zum Übernehmen in die Sammlung. Danach lassen sie sich wie jedes andere Rezept bearbeiten, umrechnen und übersetzen.</string>

@@ -48,6 +48,7 @@ import com.moltobene.app.data.Palette
 import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.StartScreen
 import com.moltobene.app.data.basics.BasicRecipes
+import com.moltobene.app.data.knowhow.KnowHow
 import com.moltobene.app.data.ThemeMode
 import com.moltobene.app.data.share.RecipeJsonLd
 import com.moltobene.app.ui.whatsnew.WhatsNew
@@ -772,6 +773,30 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.waitUntil(TIMEOUT_MILLIS) {
             runBlocking { container().repository.getAll().count { it.title == title } } == 2
         }
+    }
+
+    /**
+     * Teigwissen (#84): von der Startseite aus die Artikel öffnen und den ersten (Mehltypen) aufklappen; alle Länder
+     * stehen als Überschriften da.
+     */
+    @Test
+    fun teigwissen() {
+        // Der Rundgang startet in der Sammlung; die Startseite liegt darunter.
+        waitForDescription(text(R.string.add_short))
+        pressBack()
+        waitForText(text(R.string.home_recipes_title))
+        composeRule.onNodeWithText(text(R.string.knowhow_title)).performScrollTo().performClick()
+        waitForText(text(R.string.knowhow_intro))
+        screenshot("17a-teigwissen")
+
+        val first = runBlocking { container().knowHow.load() }.first()
+        val article = KnowHow.text(first, variant.language)
+        composeRule.onNodeWithText(article.title).performScrollTo().performClick()
+        waitForText(article.sections.last().heading)
+        for (section in article.sections.filter { it.rows.isNotEmpty() }) {
+            composeRule.onNodeWithText(section.heading).assertExists()
+        }
+        screenshot("17b-teigwissen-artikel")
     }
 
     private fun adoptFirstBasic() {
