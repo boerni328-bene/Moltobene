@@ -31,3 +31,21 @@ Jede Etappe ist eine eigene Version; Etappe 1 verändert für Nutzer nur die Ein
 - Genauigkeit in einer lauten Küche mit kleinem Modell ist nicht gemessen; Tasten und Kopfhörertasten bleiben der gleichwertige Weg.
 - Die App wird um die Bibliothek größer; die Größe steht erst nach dem ersten Bau fest.
 - Der Rundgang auf dem Emulator hat kein echtes Mikrofon; geprüft werden Ablauf und Zuordnung, nicht die Erkennung selbst.
+
+## Ergebnis der Erkundung der Modelle (14.10.2026, GitHub-Lauf „Erkennungspaket“ Nr. 1)
+
+Gemessen auf GitHub, nicht aus dem Gedächtnis (Quelle: `https://alphacephei.com/vosk/models/`, kleine Modelle):
+
+| | Deutsch `vosk-model-small-de-0.15` | Englisch `vosk-model-small-en-us-0.15` |
+|---|---|---|
+| Download (Zip) | 46.499.967 Byte (≈ 46 MB) | 41.205.931 Byte (≈ 41 MB) |
+| Entpackt | ≈ 92 MB | ≈ 68 MB |
+| SHA-256 der Zip-Datei | `b7e53c90b1f0a38456f4cd62b366ecd58803cd97cd42b06438e2c131713d5e43` | `30f26242c4eb449f948e42cb302dd7a686cb29a3423a8367f99ff41780942498` |
+| Lizenz im Paket | `COPYING` = Apache License 2.0 | keine Lizenzdatei im Paket; README nennt nur „Copyright 2020 Alpha Cephei Inc“ |
+| Genauigkeit laut README | Wortfehlerrate 9–11 % (Test, sauberes Sprechen), 27–31 % (Podcast) | 10,4 % (TEDLIUM), 9,9 % (LibriSpeech) |
+
+Offene Punkte:
+- Die Apache-Lizenz des englischen Modells ist nur die Angabe des Herstellers auf der Webseite, im Paket steht sie nicht. Vor dem Veröffentlichen prüfen oder beim Hersteller nachfragen.
+- Die Wortfehlerraten gelten für freies Sprechen. Mit einer auf wenige Befehle begrenzten Erkennung ist mit deutlich besseren Werten zu rechnen; das ist aber nicht gemessen und muss auf dem Handy geprüft werden.
+- Der Speicher auf dem Handy liegt mit 92 MB (Deutsch) und 68 MB (Englisch) über der ersten Schätzung von 40–50 MB; der Download ist etwa so groß wie geschätzt.
+- Die App selbst wächst durch die Vosk-Bibliothek (native Teile für `arm64-v8a` und `armeabi-v7a`); die Größe ist noch nicht gemessen.
