@@ -234,6 +234,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Teigrechner: Jeder Wert hat einen Regler mit antippbarer Zahl; der Umschalter „Zahlen | Regler“ entfällt, Plus und Minus gibt es nur bei kleinen ganzen Zahlen.</item>
+        <item>„Standard 250 g“ mit „Auf Standard“ erscheint nur, wenn ein Wert vom Standard abweicht.</item>
+
         <item>Die Kochleiste zeigt „Schritt 2 von 5“, „Weiter“ ist betont, der aktuelle Schritt hat einen Balken am Rand. Bei großer Schrift stehen die Knöpfe in zwei Reihen, „Zutaten vorlesen“ liegt hinter „Weitere Kochaktionen“.</item>
         <item>Das Foto in der Rezeptansicht ist niedriger, damit Zutaten und Schritte früher kommen.</item>
     </string-array>
@@ -501,13 +504,9 @@
     <string name="dough_reset">Zurücksetzen</string>
     <string name="dough_step_less">%1$s um %2$s verringern</string>
     <string name="dough_step_more">%1$s um %2$s erhöhen</string>
-    <string name="dough_default_marker">Standard</string>
-    <string name="dough_default_value">Standard: %1$s</string>
-    <string name="dough_default_reset">%1$s auf Standard setzen</string>
+    <string name="dough_default_value">Standard %1$s</string>
+    <string name="dough_default_reset_short">Auf Standard</string>
     <string name="dough_totals_title">Gesamtmengen</string>
-    <string name="dough_mode_numbers">Zahlen</string>
-    <string name="dough_mode_sliders">Regler</string>
-    <string name="dough_input_mode">Eingabe</string>
 
     <!-- Teigwissen (#84): Hinweise zu den Feldern des Teigrechners -->
     <string name="dough_help_title">Was bewirkt das?</string>

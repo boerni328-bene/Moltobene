@@ -236,6 +236,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Dough calculator: every value has a slider with a number you can tap and type; the “Numbers | Sliders” switch is gone, plus and minus remain only for small whole numbers.</item>
+        <item>“Default 250 g” with “To default” appears only when a value differs from its default.</item>
+
         <item>The cooking bar shows “Step 2 of 5”, “Next” is emphasized, and the current step has a bar at its edge. With large text three buttons remain; “Read ingredients” moves behind “More cooking actions”.</item>
         <item>The photo in the recipe view is lower so ingredients and steps start earlier.</item>
     </string-array>
@@ -505,13 +508,9 @@
     <string name="dough_reset">Reset</string>
     <string name="dough_step_less">Decrease %1$s by %2$s</string>
     <string name="dough_step_more">Increase %1$s by %2$s</string>
-    <string name="dough_default_marker">Default</string>
-    <string name="dough_default_value">Default: %1$s</string>
-    <string name="dough_default_reset">Set %1$s to default</string>
+    <string name="dough_default_value">Default %1$s</string>
+    <string name="dough_default_reset_short">To default</string>
     <string name="dough_totals_title">Totals</string>
-    <string name="dough_mode_numbers">Numbers</string>
-    <string name="dough_mode_sliders">Sliders</string>
-    <string name="dough_input_mode">Input</string>
 
     <!-- Dough know-how (#84): notes on the fields of the dough calculator -->
     <string name="dough_help_title">What does this do?</string>

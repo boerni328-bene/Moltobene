@@ -601,8 +601,9 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.dough_preset_default))
         composeRule.onNodeWithText(text(R.string.dough_preset_position, 1, 3)).assertExists()
         // Eigene Änderungen: vor dem Ersetzen durch eine Voreinstellung wird nachgefragt.
-        composeRule.onNodeWithContentDescription(text(R.string.dough_step_more, text(R.string.dough_water), "1 %"))
-            .performScrollTo().performClick()
+        // Wasseranteil ändern: Der Wert weicht vom Standard ab (Eingabe per Tippen, Regler und Zahl gehören zusammen, #86).
+        field(R.string.dough_water).performScrollTo().performTextClearance()
+        field(R.string.dough_water).performTextInput("66")
         composeRule.onNodeWithContentDescription(text(R.string.dough_preset_next)).performScrollTo().performClick()
         waitForText(text(R.string.dough_preset_replace_title))
         screenshot("14o-teigrechner-voreinstellung-ersetzen")
@@ -640,21 +641,20 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNode(hasText(text(R.string.dough_help_close)) and hasClickAction()).performClick()
         waitUntilGone(text(R.string.dough_help_water_effect))
 
-        // Plus/Minus und Standard (#83): Wasseranteil um 1 erhöhen, der Standard wird genannt, mit dem Knopf geht es zurück.
-        val waterLabel = text(R.string.dough_water)
-        composeRule.onNodeWithContentDescription(text(R.string.dough_step_more, waterLabel, "1 %")).performScrollTo().performClick()
+        // Eine Bedienung pro Wert (#86): Regler mit antippbarer Zahl. Wasseranteil tippen, der Standard wird genannt,
+        // „Auf Standard“ stellt ihn wieder her.
+        field(R.string.dough_water).performScrollTo().performTextClearance()
+        field(R.string.dough_water).performTextInput("66")
         waitForText(text(R.string.dough_default_value, "65 %"))
-        screenshot("14d-teigrechner-plus-minus")
-        composeRule.onNodeWithContentDescription(text(R.string.dough_default_reset, waterLabel)).performScrollTo().performClick()
+        screenshot("14d-teigrechner-standard")
+        composeRule.onNodeWithText(text(R.string.dough_default_reset_short)).performScrollTo().performClick()
         waitUntilGone(text(R.string.dough_default_value, "65 %"))
 
-        // Regler (#83, Etappe 2): einschalten, es erscheinen Regler unter den Feldern; wieder auf Zahlen.
-        composeRule.onNodeWithText(text(R.string.dough_mode_sliders)).performScrollTo().performClick()
+        // Jeder Wert hat einen Regler.
         composeRule.waitUntil(TIMEOUT_MILLIS) {
             composeRule.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)).fetchSemanticsNodes().isNotEmpty()
         }
         screenshot("14j-teigrechner-regler")
-        composeRule.onNodeWithText(text(R.string.dough_mode_numbers)).performScrollTo().performClick()
 
         if (variant == DisplayVariant.LARGE_TEXT) {
             // Bei großer Schrift sind Hefeart und Vorteig Auswahlfelder statt Chips.

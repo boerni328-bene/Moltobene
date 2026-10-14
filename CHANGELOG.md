@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.46.0] – 2026-10-14 (versionCode 77)
+
+### Neu
+- **Teigrechner: eine Bedienung pro Wert.** Jeder Wert hat jetzt immer einen Regler mit der Zahl darüber, die sich antippen und tippen lässt. Der Umschalter „Zahlen | Regler“ ist weg. Plus und Minus gibt es nur noch bei kleinen ganzen Zahlen wie der Anzahl.
+- **„Standard“ nur, wenn der Wert abweicht:** Weicht ein Wert vom Standard ab, steht eine Zeile „Standard 250 g“ mit „Auf Standard“ darunter. Beim Standardwert bleibt das Feld ruhig, der Standard ist weiter als Marke auf dem Regler zu sehen.
+
 ## [0.45.0] – 2026-10-14 (versionCode 76)
 
 ### Neu

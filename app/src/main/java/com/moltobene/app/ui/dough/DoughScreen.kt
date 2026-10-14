@@ -127,11 +127,10 @@ fun DoughScreen(
         },
         snackbarHost = { AppSnackbarHost(snackbarHostState) },
     ) { padding ->
-        CompositionLocalProvider(LocalDoughSliders provides viewModel.sliders) {
+        CompositionLocalProvider(LocalDoughSliders provides true) {
             Column(modifier = Modifier.padding(padding).fillMaxSize()) {
                 val header: @Composable () -> Unit = {
                     Header(type) { typeKey = it.key }
-                    InputModeToggle(viewModel.sliders, viewModel::chooseSliders)
                 }
                 when (type) {
                     DoughType.PIZZA, DoughType.BREAD -> LeavenedContent(type, viewModel, onSaved, header)
@@ -262,12 +261,6 @@ internal fun NumberField(
     val current = parseNumber(value)
     val default = stepping?.default
     val atDefault = default != null && DoughStepper.isDefault(current, default)
-    val marker = when {
-        default == null -> null
-        atDefault -> stringResource(R.string.dough_default_marker)
-        else -> stringResource(R.string.dough_default_value, show(default) + suffix?.let { " $it" }.orEmpty())
-    }
-    val hint = error ?: marker
     val field: @Composable (Modifier) -> Unit = { m ->
         OutlinedTextField(
             value = value,
@@ -275,7 +268,7 @@ internal fun NumberField(
             label = { Text(label, maxLines = 1) },
             suffix = suffix?.let { { Text(it) } },
             isError = error != null,
-            supportingText = hint?.let { { Text(it) } },
+            supportingText = error?.let { { Text(it) } },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = if (integer) KeyboardType.Number else KeyboardType.Decimal),
             modifier = m,
@@ -286,6 +279,10 @@ internal fun NumberField(
         return
     }
     fun text(number: Double) = if (integer) number.toLong().toString() else show(number)
+    val bounds = if (LocalDoughSliders.current && stepping.field != null) DoughStepper.sliderBounds(stepping.field, stepping.range) else null
+    // Eine Bedienung pro Wert (#86): Regler mit antippbarer Zahl; Plus und Minus nur bei kleinen ganzen Zahlen
+    // (Anzahl) und wo es keinen Regler gibt.
+    val showSteps = integer || bounds == null
     val buttons: @Composable () -> Unit = {
         val stepText = show(stepping.step) + suffix?.let { " $it" }.orEmpty()
         FilledTonalIconButton(
@@ -300,13 +297,7 @@ internal fun NumberField(
         ) {
             Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.dough_step_more, label, stepText))
         }
-        if (default != null) {
-            IconButton(onClick = { onChange(text(default)) }, enabled = !atDefault) {
-                Icon(painterResource(R.drawable.ic_undo), contentDescription = stringResource(R.string.dough_default_reset, label))
-            }
-        }
     }
-    val bounds = if (LocalDoughSliders.current && stepping.field != null) DoughStepper.sliderBounds(stepping.field, stepping.range) else null
     val slider: @Composable () -> Unit = {
         if (bounds != null && stepping.field != null) {
             ValueSlider(
@@ -320,20 +311,40 @@ internal fun NumberField(
             )
         }
     }
+    // „Standard 250 g“ nur, wenn der Wert abweicht – eine Zeile mit „Zurücksetzen“, kein Text bei Standard.
+    val defaultLine: @Composable () -> Unit = {
+        if (default != null && !atDefault) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    stringResource(R.string.dough_default_value, show(default) + suffix?.let { " $it" }.orEmpty()),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f).padding(start = Spacing.m),
+                )
+                TextButton(onClick = { onChange(text(default)) }) { Text(stringResource(R.string.dough_default_reset_short)) }
+            }
+        }
+    }
     if (isLargeText()) {
         // Bei großer Schrift hat das Feld die volle Breite, die Knöpfe stehen darunter.
         Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
             field(Modifier.fillMaxWidth())
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalAlignment = Alignment.CenterVertically) { buttons() }
+            if (showSteps) Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalAlignment = Alignment.CenterVertically) { buttons() }
             slider()
+            defaultLine()
         }
     } else {
         Column(modifier = modifier) {
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                field(Modifier.weight(1f))
-                Row(modifier = Modifier.padding(top = Spacing.xs)) { buttons() }
+            if (showSteps) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                    field(Modifier.weight(1f))
+                    Row(modifier = Modifier.padding(top = Spacing.xs)) { buttons() }
+                }
+            } else {
+                field(Modifier.fillMaxWidth())
             }
             slider()
+            defaultLine()
         }
     }
 }
@@ -441,25 +452,6 @@ internal fun <T> ChoiceField(
 /** Ab so vielen Möglichkeiten gibt es immer ein Auswahlfeld, bei großer Schrift schon ab drei. */
 private const val DROPDOWN_ALWAYS_FROM = 6
 private const val DROPDOWN_LARGE_FROM = 3
-
-/** Wahl zwischen Zahlen und Reglern; gilt für alle Teigarten und bleibt gemerkt. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal fun InputModeToggle(sliders: Boolean, onChange: (Boolean) -> Unit) {
-    val numbers = stringResource(R.string.dough_mode_numbers)
-    val sliderLabel = stringResource(R.string.dough_mode_sliders)
-    val group = stringResource(R.string.dough_input_mode)
-    SingleChoiceSegmentedButtonRow(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m).semantics { contentDescription = group },
-    ) {
-        SegmentedButton(selected = !sliders, onClick = { onChange(false) }, shape = SegmentedButtonDefaults.itemShape(0, 2), icon = {}) {
-            Text(numbers, maxLines = 1)
-        }
-        SegmentedButton(selected = sliders, onClick = { onChange(true) }, shape = SegmentedButtonDefaults.itemShape(1, 2), icon = {}) {
-            Text(sliderLabel, maxLines = 1)
-        }
-    }
-}
 
 @Composable
 internal fun issueText(issue: DoughIssue): String? = when (issue) {
