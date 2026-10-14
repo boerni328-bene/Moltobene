@@ -236,6 +236,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Voice input while cooking: The new microphone button in the cooking bar listens for “Next”, “Previous”, “Repeat”, “Read aloud” and “Stop”; “Microphone off” ends listening. This needs the recognition pack from Settings once.</item>
         <item>Headset buttons: In Settings under “Read aloud”, choose what the play/pause, next and previous buttons do while cooking. This also covers headsets that convert gestures themselves.</item>
         <item>Dough calculator: every value has a slider with a number you can tap and type; the “Numbers | Sliders” switch is gone, plus and minus remain only for small whole numbers.</item>
         <item>“Default 250 g” with “To default” appears only when a value differs from its default.</item>
@@ -252,10 +253,11 @@
     <string name="privacy_title">Privacy</string>
     <string-array name="privacy_paragraphs">
         <item>Recipes, photos and notes are stored only on this device. There is no account, no advertising, no tracking and no sharing with third parties.</item>
-        <item>The app only goes online on request: for “Import from link” and when downloading the language pack for translation. For “Import from link” it loads exactly that one page and, if available, its photo. As with any browser, the page learns the device’s internet address (IP address), the time and the preferred language. No cookies are stored and no details about the device are sent.</item>
+        <item>The app only goes online on request: for “Import from link” and when downloading the language pack for translation or the recognition pack for voice input. For “Import from link” it loads exactly that one page and, if available, its photo. As with any browser, the page learns the device’s internet address (IP address), the time and the preferred language. No cookies are stored and no details about the device are sent.</item>
         <item>Otherwise content only leaves the device when it is shared or backed up. Notes are never shared. The backup file is not encrypted.</item>
-        <item>The language pack comes from the project page on GitHub. GitHub learns the device’s internet address (IP address) and the time. No recipes are sent.</item>
-        <item>Text recognition and translation run entirely on the device, without internet. Android’s automatic cloud backup is turned off.</item>
+        <item>The language pack and the recognition pack for voice input come from the project page on GitHub. GitHub learns the device’s internet address (IP address) and the time. No recipes are sent.</item>
+        <item>The microphone is only needed for voice input in the cooking view and is only requested when the microphone button is tapped for the first time. It only listens while the button is on, the recipe is open and the screen is on. Recognition runs entirely on the device; nothing is recorded, stored or sent.</item>
+        <item>Text recognition, translation and voice input run entirely on the device, without internet. Android’s automatic cloud backup is turned off.</item>
     </string-array>
 
     <!-- Bearbeiten -->
@@ -659,4 +661,27 @@
     <string name="speech_headset_action_next">Next step</string>
     <string name="speech_headset_action_previous">Previous step</string>
     <string name="speech_headset_action_none">Nothing</string>
+    <!-- Spracheingabe (#80) -->
+    <string name="settings_section_voice_input">Voice input</string>
+    <string name="voice_pack_title">Recognition pack German</string>
+    <string name="voice_pack_text">For voice commands while cooking (next, previous, repeat, stop), recognized on the device without internet. Download once: about %1$s, uses about %2$s on the device. Best over Wi-Fi. The microphone only listens while the microphone button in the cooking bar is on.</string>
+    <string name="voice_pack_downloading">Downloading recognition pack …</string>
+    <string name="voice_pack_installed">Installed, uses %1$s. Voice commands work in the cooking view with the microphone button.</string>
+    <string name="voice_pack_delete_title">Delete recognition pack?</string>
+    <string name="voice_pack_delete_text">Voice commands are only possible again after the recognition pack has been downloaded again.</string>
+    <string name="voice_pack_deleted">Recognition pack deleted</string>
+    <string name="voice_pack_error_connection">Download failed: no connection. Check the internet connection and try again.</string>
+    <string name="voice_pack_error_space">Not enough storage space on the device. Free up about %1$s and try again.</string>
+    <string name="voice_pack_error_damaged">The recognition pack did not arrive completely. Try again.</string>
+    <string name="voice_pack_error_unavailable">The recognition pack is not available right now. Try again later.</string>
+    <string name="cook_bar_mic_on_description">Turn on microphone for voice commands</string>
+    <string name="cook_bar_mic_off_description">Turn off microphone</string>
+    <string name="voice_starting">Microphone is starting …</string>
+    <string name="voice_listening">Microphone is on. Commands: “Next”, “Previous”, “Repeat”, “Stop”, “Microphone off”.</string>
+    <string name="voice_needs_pack">Voice input needs the recognition pack from Settings.</string>
+    <string name="voice_open_settings">Settings</string>
+    <string name="voice_permission_denied">The microphone is not allowed. Allow it in the phone settings to use voice commands.</string>
+    <string name="voice_error_microphone">The microphone cannot be used right now. Another app may be using it.</string>
+    <string name="voice_error_memory">Not enough memory for voice input.</string>
+    <string name="voice_error_other">Voice input could not be started.</string>
 </resources>

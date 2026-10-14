@@ -20,6 +20,9 @@ import com.moltobene.app.data.knowhow.KnowHowStore
 import com.moltobene.app.data.speech.AndroidSpeechOutput
 import com.moltobene.app.data.speech.SpeechOutput
 import com.moltobene.app.data.translate.LanguagePackManager
+import com.moltobene.app.data.voice.VoiceInput
+import com.moltobene.app.data.voice.VoicePackManager
+import com.moltobene.app.data.voice.VoskVoiceInput
 import com.moltobene.app.data.translate.MarianEngine
 import com.moltobene.app.data.translate.RecipeTranslations
 import com.moltobene.app.data.translate.TranslationEngine
@@ -113,6 +116,15 @@ class AppContainer(context: Context) {
     val languagePack: LanguagePackManager by lazy {
         LanguagePackManager(appContext.noBackupFilesDir, { downloader }, appScope)
     }
+
+    /** Erkennungspaket für die Spracheingabe (#80); nicht in Sicherungen, lässt sich jederzeit neu laden. */
+    val voicePack: VoicePackManager by lazy {
+        VoicePackManager(appContext.noBackupFilesDir, { downloader }, appScope)
+    }
+
+    /** Spracheingabe in der Kochansicht (#80). Der Rundgang setzt hier eine nachgestellte Fassung ein. */
+    @VisibleForTesting
+    var voice: VoiceInput = VoskVoiceInput({ voicePack.directory }, appScope)
 
     /** Übersetzer aus dem Sprachpaket. Der Rundgang setzt hier einen nachgestellten Übersetzer ein. */
     @VisibleForTesting

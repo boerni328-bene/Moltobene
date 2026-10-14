@@ -17,8 +17,8 @@ android {
         applicationId = "com.moltobene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 81
-        versionName = "0.47.2"
+        versionCode = 83
+        versionName = "0.48.0"
 
         // Rundgang durch die App auf dem Emulator (app/src/androidTest).
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -152,6 +152,9 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.onnxruntime.android)
     implementation(libs.jsoup)
+    // Spracheingabe (#80): Vosk mit seinem Verbindungsbaustein JNA (als aar, so verlangt es Vosk).
+    implementation(libs.vosk.android)
+    implementation("net.java.dev.jna:jna:${libs.versions.jna.get()}@aar")
     debugImplementation(libs.androidx.ui.tooling)
 
     testImplementation(libs.junit)

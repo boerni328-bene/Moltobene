@@ -3,6 +3,21 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.48.0] – 2026-10-14 (versionCode 83)
+
+### Neu
+- **Spracheingabe beim Kochen (Deutsch).** In der Kochleiste gibt es einen Mikrofon-Knopf neben dem Lautsprecher. Antippen schaltet das Zuhören ein, das Mikrofon bleibt dann an, bis es ausgeschaltet wird: mit dem Knopf oder mit „Mikrofon aus“, „Mikro aus“, „ausschalten“, „Ende“, „beenden“ oder „fertig“. Die Befehle sind „Weiter“, „Zurück“, „Wiederholen“, „Vorlesen“ und „Stopp“. Beim Vorlesen gilt nur „Stopp“, weil das Mikrofon das Vorlesen sonst mithört. Es zählt nur ein einzelnes Wort als Befehl; normales Gerede in der Küche soll nichts auslösen.
+- **Erkennungspaket.** Die Spracheingabe braucht einmalig ein Paket (etwa 46 MB, belegt etwa 96 MB), das unter Einstellungen → Spracheingabe heruntergeladen und wieder gelöscht werden kann. Die Erkennung läuft ganz auf dem Handy; es wird nichts aufgenommen, gespeichert oder gesendet.
+- **Neue Berechtigung „Mikrofon“.** Sie wird erst beim ersten Antippen des Mikrofon-Knopfes abgefragt. Das Mikrofon hört nur zu, solange der Knopf an ist, das Rezept offen und der Bildschirm an ist.
+
+### Geändert
+- Die Datenschutzerklärung nennt Mikrofon und Erkennungspaket.
+
+## [0.47.3] – 2026-10-14 (versionCode 82)
+
+### Geändert
+- **Übersetzungsbalken bleibt oben stehen.** Der Fortschritt beim Übersetzen, der Hinweis auf die maschinelle Übersetzung und die Meldungen dazu stehen jetzt fest unter der obersten Zeile und wandern beim Blättern im Rezept nicht mehr mit nach oben weg.
+
 ## [0.47.2] – 2026-10-14 (versionCode 81)
 
 ### Geändert

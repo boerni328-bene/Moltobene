@@ -134,6 +134,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                 },
                 screenOn = screenOn ?: ScreenOn.STAYS_ON,
                 speech = container.speech,
+                voice = container.voice,
                 headsetButtons = speechSettings.headsetButtons,
                 headsetMapping = speechSettings.headsetMapping(),
                 snackbarHostState = snackbarHostState,
@@ -205,7 +206,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
         }
         composable<SettingsRoute> {
             SettingsScreen(
-                viewModel = viewModel { SettingsViewModel(container.backupManager, container.preferences, container.languagePack) { container.speech } },
+                viewModel = viewModel { SettingsViewModel(container.backupManager, container.preferences, container.languagePack, container.voicePack) { container.speech } },
                 snackbarHostState = snackbarHostState,
                 onBack = { navController.popBackStack() },
                 onOpenLicenses = { navController.navigate(LicensesRoute) },

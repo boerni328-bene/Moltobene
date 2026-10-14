@@ -15,6 +15,8 @@ robolectric = "4.17"
 androidxTestRunner = "1.7.0"
 onnxruntime = "1.30.0"
 jsoup = "1.23.2"
+vosk = "0.3.47"
+jna = "5.13.0"
 
 [libraries]
 # Legt die Kotlin-Version fest: Seit AGP 9 bringt das Android-Bauwerkzeug Kotlin selbst mit (siehe build.gradle.kts).
@@ -49,6 +51,9 @@ onnxruntime-android = { group = "com.microsoft.onnxruntime", name = "onnxruntime
 onnxruntime-jvm = { group = "com.microsoft.onnxruntime", name = "onnxruntime", version.ref = "onnxruntime" }
 # „Aus Link übernehmen“: liest HTML von Internetseiten (quelloffen, MIT). Geladen wird mit Android selbst, nicht mit jsoup.
 jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
+# Spracheingabe (#80): Erkennung auf dem Handy, Befehle ohne Internet (Vosk von Alpha Cephei, Apache 2.0). JNA (Apache 2.0)
+# verbindet Vosk mit seinem nativen Teil; die App nimmt es als aar (siehe app/build.gradle.kts).
+vosk-android = { group = "com.alphacephei", name = "vosk-android", version.ref = "vosk" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
