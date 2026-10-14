@@ -53,7 +53,7 @@ fun RecipePhoto(
  * nur sehr lange oder breite Fotos zugeschnitten. Antippen öffnet es als Vollbild zum Vergrößern ([onOpen]).
  */
 @Composable
-fun RecipePhotoLarge(file: File, onOpen: () -> Unit, modifier: Modifier = Modifier) {
+fun RecipePhotoLarge(file: File, onOpen: () -> Unit, modifier: Modifier = Modifier, minRatio: Float = MIN_RATIO) {
     var ratio by rememberSaveable(file) { mutableFloatStateOf(DEFAULT_RATIO) }
     val openLabel = stringResource(R.string.photo_open)
     Box(
@@ -67,7 +67,7 @@ fun RecipePhotoLarge(file: File, onOpen: () -> Unit, modifier: Modifier = Modifi
             contentScale = ContentScale.Crop,
             onSuccess = { state ->
                 val size = state.painter.intrinsicSize
-                if (size.width > 0f && size.height > 0f) ratio = (size.width / size.height).coerceIn(MIN_RATIO, MAX_RATIO)
+                if (size.width > 0f && size.height > 0f) ratio = (size.width / size.height).coerceIn(minRatio, MAX_RATIO)
             },
             modifier = Modifier
                 .fillMaxSize()

@@ -3,6 +3,13 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.45.0] – 2026-10-14 (versionCode 76)
+
+### Neu
+- **Kochleiste zeigt den Schritt:** Über den Knöpfen steht „Schritt 2 von 5“, sobald ein Schritt markiert ist. „Weiter“ ist jetzt der betonte Knopf, denn beim Kochen wird er am häufigsten gebraucht. Der aktuelle Schritt hat zusätzlich einen kräftigen Balken am linken Rand, nicht nur eine Hintergrundfarbe.
+- **Große Schrift:** Bei großer Schrift stehen die Knöpfe in zwei Reihen (Zurück und Weiter, darunter Vorlesen). „Zutaten vorlesen“ liegt dann hinter dem Symbol „Weitere Kochaktionen“.
+- **Niedrigeres Foto:** Das Foto in der Rezeptansicht ist höchstens so hoch wie 3 zu 5 der Breite, höhere Fotos werden zugeschnitten. Zutaten und Schritte rücken dadurch weiter nach oben. Antippen öffnet das ganze Foto wie bisher.
+
 ## [0.44.0] – 2026-10-13 (versionCode 75)
 
 ### Neu

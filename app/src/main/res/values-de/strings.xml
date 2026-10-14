@@ -234,7 +234,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Beim Übernehmen bleibt der Hinweis zum Prüfen oben im Formular; Fehler stehen als Karte da, bei Links mit „Erneut versuchen“.</item>
+        <item>Die Kochleiste zeigt „Schritt 2 von 5“, „Weiter“ ist betont, der aktuelle Schritt hat einen Balken am Rand. Bei großer Schrift stehen die Knöpfe in zwei Reihen, „Zutaten vorlesen“ liegt hinter „Weitere Kochaktionen“.</item>
+        <item>Das Foto in der Rezeptansicht ist niedriger, damit Zutaten und Schritte früher kommen.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Handys) -->
@@ -649,4 +650,8 @@
     <!-- Hinweise beim Übernehmen (#90) -->
     <string name="import_retry">Erneut versuchen</string>
     <string name="notice_dismiss">Schließen</string>
+
+    <!-- Kochleiste (#89) -->
+    <string name="cook_step_of">Schritt %1$d von %2$d</string>
+    <string name="cook_bar_more">Weitere Kochaktionen</string>
 </resources>

@@ -357,8 +357,14 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithText(text(R.string.cook_bar_previous)).performClick()
 
         speech.spoken.clear()
-        // „Zutaten“ steht auch als Überschrift im Rezept; gemeint ist der Knopf.
-        composeRule.onNode(hasText(text(R.string.cook_bar_ingredients)) and hasClickAction()).performClick()
+        // Bei großer Schrift liegt „Zutaten vorlesen“ hinter dem Symbol „Weitere Kochaktionen“ (#89).
+        val ingredientsButton = composeRule.onAllNodes(hasText(text(R.string.cook_bar_ingredients)) and hasClickAction())
+        if (ingredientsButton.fetchSemanticsNodes().isNotEmpty()) {
+            ingredientsButton.onFirst().performClick()
+        } else {
+            composeRule.onNodeWithContentDescription(text(R.string.cook_bar_more)).performClick()
+            composeRule.onNodeWithText(text(R.string.cook_bar_ingredients_description)).performClick()
+        }
         composeRule.waitUntil(TIMEOUT_MILLIS) { speech.spoken.isNotEmpty() }
         assertTrue(speech.spoken.first().any { it.contains("800 Gramm reife Tomaten") })
         composeRule.onNodeWithText(text(R.string.cook_bar_stop)).performClick()
