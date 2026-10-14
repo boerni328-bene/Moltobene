@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Prüft die Befehlserkennung (#80) mit dem echten deutschen Modell aus dem Erkennungspaket.
 
-Die Befehle werden mit einer Computerstimme (espeak-ng) gesprochen und mit der festen Befehlsliste erkannt, so wie die App
-sie benutzt. Das ersetzt keinen Test mit echter Stimme auf dem Handy, zeigt aber, ob die Wörter im Modell vorkommen und ob
-Alltagssätze fälschlich einen Befehl auslösen. Aufruf: sprachtest.py <Modellverzeichnis> <Arbeitsverzeichnis>
+Die Befehle und Alltagssätze werden mit einer Computerstimme (espeak-ng) gesprochen und mit zwei Wortlisten erkannt:
+A) nur die Befehle (+ "[unk]"), B) die Befehle plus häufige Alltagswörter als "Köder", damit normales Gerede dort einen Platz
+findet. Ein Befehl zählt nur, wenn der erkannte Text als Ganzes genau ein Befehl ist (so wie die App es prüft).
+Das ersetzt keinen Test mit echter Stimme auf dem Handy. Aufruf: sprachtest.py <Modellverzeichnis> <Arbeitsverzeichnis>
 """
 import json
 import os
@@ -17,8 +18,14 @@ BEFEHLE = [
     "weiter", "zurück", "wiederholen", "vorlesen", "stopp",
     "mikro aus", "mikrofon aus", "ausschalten", "ende", "beenden", "fertig",
 ]
-GRAMMATIK = BEFEHLE + ["[unk]"]
-# Sätze aus der Küche, die keinen Befehl auslösen dürfen.
+KOEDER = """ich du er sie es wir ihr und oder aber das die der den dem ein eine einen einem ist sind war hat haben wird kann
+muss soll will nicht kein mit ohne für von zu bei nach vor auf an in im am um dann wenn weil auch noch schon nur sehr
+mehr weniger viel wenig alle man mal gleich jetzt später heute morgen hier da dort wo wie was wann warum wer bitte danke
+ja nein gut schön lecker schnell langsam heiß kalt warm groß klein neu alt
+salz pfeffer zwiebel zwiebeln knoblauch öl butter mehl eier ei milch wasser zucker nudeln reis kartoffeln tomaten fleisch
+gemüse suppe soße pfanne topf herd ofen minuten stunde gramm esslöffel teelöffel kochen braten backen rühren schneiden
+mischen geben nehmen brauchen holen gehen kommen machen sagen sehen essen trinken einkaufen telefon licht tür fenster kind
+kinder hunger durst zeit tag abend mittag frühstück musik radio fernseher film nachrichten wetter""".split()
 ALLTAG = [
     "ich brauche noch zwei eier und etwas mehl",
     "die zwiebeln müssen goldbraun werden",
@@ -26,6 +33,20 @@ ALLTAG = [
     "das wasser kocht schon",
     "gleich ist das essen fertig",
     "wir gehen danach weiter einkaufen",
+    "mach bitte das licht aus",
+    "ich habe heute keine zeit",
+    "die kinder haben hunger",
+    "wo ist der große topf",
+    "das ist das ende vom film",
+    "gib mir mal den löffel",
+    "stell die musik leiser",
+    "wir müssen noch milch kaufen",
+    "bis die nudeln fertig sind dauert es zehn minuten",
+    "was gibt es heute zum abendessen",
+    "bitte schneide die tomaten klein",
+    "hast du den schlüssel",
+    "der ofen ist noch nicht heiß",
+    "ich komme gleich zurück",
 ]
 GESCHWINDIGKEITEN = [120, 150, 180]
 
@@ -36,8 +57,8 @@ def sprechen(text, ziel, tempo):
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", roh, "-ar", "16000", "-ac", "1", ziel], check=True)
 
 
-def erkennen(modell, wav):
-    rec = KaldiRecognizer(modell, 16000, json.dumps(GRAMMATIK, ensure_ascii=False))
+def erkennen(modell, wav, grammatik):
+    rec = KaldiRecognizer(modell, 16000, json.dumps(grammatik, ensure_ascii=False))
     rec.SetWords(True)
     with wave.open(wav, "rb") as f:
         while True:
@@ -48,39 +69,49 @@ def erkennen(modell, wav):
     return json.loads(rec.FinalResult())
 
 
-def worte(ergebnis):
-    return [(w["word"], round(w.get("conf", 0), 2)) for w in ergebnis.get("result", [])]
+def ist_befehl(text):
+    """Wie in der App: nur wenn der ganze erkannte Text genau ein Befehl ist."""
+    return " ".join(text.split()) in BEFEHLE
 
 
 def main(modell_pfad, arbeit):
     os.makedirs(arbeit, exist_ok=True)
-    SetLogLevel(0)
+    SetLogLevel(-1)
     modell = Model(modell_pfad)
-    treffer = 0
-    gesamt = 0
-    print("== Befehle (erwartet: genau der gesprochene Befehl)")
+    listen = {
+        "A nur Befehle": BEFEHLE + ["[unk]"],
+        "B Befehle + Köder": BEFEHLE + sorted(set(KOEDER) - {"aus"} | {"aus"}) + ["[unk]"],
+    }
+    # Aufnahmen einmal erzeugen.
+    befehlsaufnahmen = []
     for befehl in BEFEHLE:
         for tempo in GESCHWINDIGKEITEN:
-            wav = os.path.join(arbeit, f"{befehl.replace(' ', '_')}_{tempo}.wav")
+            wav = os.path.join(arbeit, f"b_{befehl.replace(' ', '_')}_{tempo}.wav")
             sprechen(befehl, wav, tempo)
-            ergebnis = erkennen(modell, wav)
-            text = ergebnis.get("text", "")
-            gesamt += 1
+            befehlsaufnahmen.append((befehl, tempo, wav))
+    alltagsaufnahmen = []
+    for nummer, satz in enumerate(ALLTAG):
+        wav = os.path.join(arbeit, f"a_{nummer}.wav")
+        sprechen(satz, wav, 150)
+        alltagsaufnahmen.append((satz, wav))
+    for name, grammatik in listen.items():
+        print(f"\n######## Liste {name} ({len(grammatik)} Einträge)")
+        treffer = 0
+        for befehl, tempo, wav in befehlsaufnahmen:
+            text = erkennen(modell, wav, grammatik).get("text", "")
             richtig = text == befehl
             treffer += richtig
-            print(f"{'OK  ' if richtig else 'FEHL'} {befehl!r} @{tempo}: {text!r} {worte(ergebnis)}")
-    print(f"Befehle erkannt: {treffer} von {gesamt}")
-    print("== Alltagssätze (erwartet: kein Befehl; Wörter aus der Befehlsliste wären ein Fehlalarm)")
-    falsch = 0
-    for satz in ALLTAG:
-        wav = os.path.join(arbeit, "alltag.wav")
-        sprechen(satz, wav, 150)
-        ergebnis = erkennen(modell, wav)
-        text = ergebnis.get("text", "")
-        ausgeloest = [b for b in BEFEHLE if b in text]
-        falsch += bool(ausgeloest)
-        print(f"{'FALSCHALARM' if ausgeloest else 'ruhig     '} {satz!r}: {text!r} {worte(ergebnis)}")
-    print(f"Fehlalarme: {falsch} von {len(ALLTAG)}")
+            if not richtig:
+                print(f"  Befehl verfehlt: {befehl!r} @{tempo}: {text!r}")
+        print(f"Befehle richtig erkannt: {treffer} von {len(befehlsaufnahmen)}")
+        falsch = 0
+        for satz, wav in alltagsaufnahmen:
+            ergebnis = erkennen(modell, wav, grammatik)
+            text = ergebnis.get("text", "")
+            alarm = ist_befehl(text)
+            falsch += alarm
+            print(f"  {'FALSCHALARM' if alarm else 'ruhig     '} {satz!r}: {text!r}")
+        print(f"Fehlalarme (Gesamttext ist genau ein Befehl): {falsch} von {len(alltagsaufnahmen)}")
 
 
 if __name__ == "__main__":
