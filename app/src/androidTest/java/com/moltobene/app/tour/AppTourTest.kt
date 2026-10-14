@@ -422,7 +422,8 @@ class AppTourTest(private val variant: DisplayVariant) {
         addSampleRecipes()
 
         // Ohne Erkennungspaket: Hinweis mit dem Weg in die Einstellungen.
-        container().voice = SampleVoice(available = false)
+        val voice = SampleVoice(available = false)
+        container().voice = voice
         openRecipe(SampleRecipes.TOMATO_SAUCE)
         waitForText("800 g reife Tomaten")
         composeRule.onNodeWithContentDescription(text(R.string.cook_bar_mic_on_description)).performClick()
@@ -435,8 +436,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText("800 g reife Tomaten")
 
         // Mit Erkennungspaket (nachgestellt) und erteilter Berechtigung.
-        val voice = SampleVoice(available = true)
-        container().voice = voice
+        voice.available = true
         TestDevice.shell("pm grant ${activity.packageName} android.permission.RECORD_AUDIO")
         composeRule.onNodeWithContentDescription(text(R.string.cook_bar_mic_on_description)).performClick()
         waitForText(text(R.string.voice_listening))

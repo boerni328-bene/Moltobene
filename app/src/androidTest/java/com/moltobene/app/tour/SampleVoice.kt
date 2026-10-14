@@ -13,9 +13,13 @@ import kotlinx.coroutines.flow.asStateFlow
  * Nachgestellte Spracheingabe für den Rundgang (#80): Es wird nichts gehört. Der Test „spricht“ Befehle mit [say]. Echte
  * Erkennung braucht das Erkennungspaket und ein echtes Mikrofon; sie wird auf GitHub getrennt geprüft (sprachtest.py).
  */
-class SampleVoice(private val available: Boolean = true) : VoiceInput {
+class SampleVoice(available: Boolean = true) : VoiceInput {
     private val mutableState = MutableStateFlow<VoiceState>(VoiceState.Off)
     override val state: StateFlow<VoiceState> = mutableState.asStateFlow()
+
+    /** Ob das Erkennungspaket „vorhanden“ ist; der Test kann es umschalten, ohne die Ansicht neu zu öffnen. */
+    @Volatile
+    var available = available
 
     @Volatile
     private var onCommand: ((VoiceCommand) -> Unit)? = null
