@@ -26,6 +26,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import com.moltobene.app.data.speech.HeadsetAction
+import com.moltobene.app.data.speech.HeadsetMapping
 import com.moltobene.app.data.speech.SpeechOutput
 import com.moltobene.app.data.speech.SpeechState
 import com.moltobene.app.data.speech.SpokenText
@@ -161,6 +163,7 @@ fun RecipeScreen(
     screenOn: ScreenOn,
     speech: SpeechOutput,
     headsetButtons: Boolean = true,
+    headsetMapping: HeadsetMapping = HeadsetMapping(),
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onEdit: (String) -> Unit,
@@ -361,6 +364,7 @@ fun RecipeScreen(
                 ),
                 speech = speech,
                 headsetButtons = headsetButtons,
+                headsetMapping = headsetMapping,
                 snackbarHostState = snackbarHostState,
                 onShowPages = { viewModel.viewer.open(0) },
                 onShowPhoto = { viewModel.photoViewer.open(0) },
@@ -521,6 +525,7 @@ private fun RecipeContent(
     translation: TranslationActions,
     speech: SpeechOutput,
     headsetButtons: Boolean,
+    headsetMapping: HeadsetMapping,
     snackbarHostState: SnackbarHostState,
     onShowPages: () -> Unit,
     onShowPhoto: () -> Unit,
@@ -631,25 +636,31 @@ private fun RecipeContent(
     // behalten. Weiter und Zurück lesen den Schritt gleich vor, denn wer die Tasten benutzt, schaut nicht aufs Handy.
     var headsetArmed by rememberSaveable { mutableStateOf(false) }
     if (speaking) headsetArmed = true
+    fun perform(action: HeadsetAction) {
+        when (action) {
+            HeadsetAction.TOGGLE -> if (speaking) speech.stop() else startReading()
+            HeadsetAction.NEXT -> when (val result = cooking.onNextStep()) {
+                is StepMove.To -> readStep(result.index)
+                StepMove.AtEnd -> barMessage = lastStepMessage
+                StepMove.None -> Unit
+            }
+            HeadsetAction.PREVIOUS -> when (val result = cooking.onPreviousStep()) {
+                is StepMove.To -> readStep(result.index)
+                StepMove.AtEnd -> barMessage = lastStepMessage
+                StepMove.None -> Unit
+            }
+            HeadsetAction.NONE -> Unit
+        }
+    }
+    // Welche Geste hinter „Wiedergabe/Pause“, „Weiter“ und „Zurück“ steckt, entscheidet der Kopfhörer; die Belegung steht
+    // in den Einstellungen. Wiedergabe und Pause sind für Android zwei Befehle, für die Belegung eine Taste.
     HeadsetEffect(
         enabled = headsetButtons && headsetArmed,
         speaking = speaking,
-        onPlay = { if (!speaking) startReading() },
-        onPause = { speech.stop() },
-        onNext = {
-            when (val result = cooking.onNextStep()) {
-                is StepMove.To -> readStep(result.index)
-                StepMove.AtEnd -> barMessage = lastStepMessage
-                StepMove.None -> Unit
-            }
-        },
-        onPrevious = {
-            when (val result = cooking.onPreviousStep()) {
-                is StepMove.To -> readStep(result.index)
-                StepMove.AtEnd -> barMessage = lastStepMessage
-                StepMove.None -> Unit
-            }
-        },
+        onPlay = { perform(headsetMapping.playPause.let { if (it == HeadsetAction.TOGGLE && speaking) HeadsetAction.NONE else it }) },
+        onPause = { perform(headsetMapping.playPause.let { if (it == HeadsetAction.TOGGLE && !speaking) HeadsetAction.NONE else it }) },
+        onNext = { perform(headsetMapping.next) },
+        onPrevious = { perform(headsetMapping.previous) },
     )
 
     Column(modifier = modifier.fillMaxSize()) {

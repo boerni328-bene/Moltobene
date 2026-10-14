@@ -135,6 +135,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                 screenOn = screenOn ?: ScreenOn.STAYS_ON,
                 speech = container.speech,
                 headsetButtons = speechSettings.headsetButtons,
+                headsetMapping = speechSettings.headsetMapping(),
                 snackbarHostState = snackbarHostState,
                 onBack = { navController.popBackStack() },
                 onEdit = { id -> navController.navigate(EditRoute(id)) },

@@ -234,6 +234,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Kopfhörertasten: In den Einstellungen unter „Vorlesen“ lässt sich festlegen, was die Tasten Wiedergabe/Pause, Weiter und Zurück beim Kochen auslösen. So lassen sich auch Kopfhörer anpassen, die Gesten selbst umwandeln.</item>
         <item>Teigrechner: Jeder Wert hat einen Regler mit antippbarer Zahl; der Umschalter „Zahlen | Regler“ entfällt, Plus und Minus gibt es nur bei kleinen ganzen Zahlen.</item>
         <item>„Standard 250 g“ mit „Auf Standard“ erscheint nur, wenn ein Wert vom Standard abweicht.</item>
 
@@ -391,7 +392,7 @@
     <string name="speech_sample">Hörprobe</string>
     <string name="speech_headset_title">Kopfhörertasten</string>
     <string name="speech_headset_switch">Kopfhörertasten beim Kochen</string>
-    <string name="speech_headset_note">Wurde in einem Rezept einmal das Vorlesen gestartet, steuern Wiedergabe/Pause, Weiter und Zurück am Kopfhörer das Vorlesen. Zwei Drücke auf die Kopfhörertaste sind der nächste Schritt, drei der vorherige. Solange das Rezept offen ist, bekommt eine Musik-App diese Tasten nicht.</string>
+    <string name="speech_headset_note">Wurde in einem Rezept einmal das Vorlesen gestartet, steuern Wiedergabe/Pause, Weiter und Zurück am Kopfhörer das Vorlesen. Welche Geste welche Taste sendet (z. B. zwei- oder dreimal tippen), legt der Kopfhörer fest, oft in dessen eigener App. Unten steht, was jede Taste in Moltobene auslöst. Solange das Rezept offen ist, bekommt eine Musik-App diese Tasten nicht.</string>
     <!-- Einstellungen: Darstellung (Hell/Dunkel und Farbwelt) -->
     <string name="settings_section_appearance">Darstellung</string>
     <string name="appearance_mode">Hell oder dunkel</string>
@@ -653,4 +654,11 @@
     <!-- Kochleiste (#89) -->
     <string name="cook_step_of">Schritt %1$d von %2$d</string>
     <string name="cook_bar_more">Weitere Kochaktionen</string>
+    <string name="speech_headset_button_play_pause">Taste Wiedergabe/Pause</string>
+    <string name="speech_headset_button_next">Taste Weiter</string>
+    <string name="speech_headset_button_previous">Taste Zurück</string>
+    <string name="speech_headset_action_toggle">Vorlesen starten/anhalten</string>
+    <string name="speech_headset_action_next">Nächster Schritt</string>
+    <string name="speech_headset_action_previous">Vorheriger Schritt</string>
+    <string name="speech_headset_action_none">Nichts</string>
 </resources>

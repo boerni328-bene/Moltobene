@@ -142,4 +142,24 @@ class VoiceSettingsTest {
         assertEquals(off, SpeechSettings.decode(SpeechSettings.encode(off)))
         assertTrue(!SpeechSettings.decode(SpeechSettings.encode(off)).headsetButtons)
     }
+
+    @Test
+    fun belegungDerKopfhoerertastenIstEinstellbarUndRobust() {
+        val standard = SpeechSettings().headsetMapping()
+        assertEquals(HeadsetAction.TOGGLE, standard.actionFor(HeadsetButton.PLAY_PAUSE))
+        assertEquals(HeadsetAction.NEXT, standard.actionFor(HeadsetButton.NEXT))
+        assertEquals(HeadsetAction.PREVIOUS, standard.actionFor(HeadsetButton.PREVIOUS))
+        // Belegung wie bei Kopfhörern, die Doppeltippen als Wiedergabe/Pause und Dreifachtippen als Weiter senden.
+        val own = SpeechSettings()
+            .withHeadsetAction(HeadsetButton.PLAY_PAUSE, HeadsetAction.NEXT)
+            .withHeadsetAction(HeadsetButton.NEXT, HeadsetAction.PREVIOUS)
+        val back = SpeechSettings.decode(SpeechSettings.encode(own)).headsetMapping()
+        assertEquals(HeadsetAction.NEXT, back.actionFor(HeadsetButton.PLAY_PAUSE))
+        assertEquals(HeadsetAction.PREVIOUS, back.actionFor(HeadsetButton.NEXT))
+        assertEquals(HeadsetAction.PREVIOUS, back.actionFor(HeadsetButton.PREVIOUS))
+        // Ältere Einstellungen ohne Belegung und unbekannte Werte ergeben die Standardbelegung.
+        assertEquals(standard, SpeechSettings.decode("""{"rate":90}""").headsetMapping())
+        assertEquals(standard, SpeechSettings.decode("""{"headsetNext":"explode","headsetPlayPause":"","headsetPrevious":"1"}""").headsetMapping())
+        assertEquals(HeadsetAction.NONE, SpeechSettings().withHeadsetAction(HeadsetButton.NEXT, HeadsetAction.NONE).headsetMapping().next)
+    }
 }
