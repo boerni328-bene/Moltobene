@@ -46,6 +46,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -593,7 +594,6 @@ private fun RecipeContent(
         if ((speechState as? SpeechState.Speaking)?.usedFallback == true) barMessage = fallbackMessage
     }
     val lastStepMessage = stringResource(R.string.cook_last_step)
-    val allCheckedMessage = stringResource(R.string.cook_all_checked)
     fun readStep(index: Int) {
         val sentences = SpokenText.sentences(stepTexts[index], speechLanguage)
         speech.speak(speechLanguage, listOf(SpokenText.stepLabel(speechLanguage, index + 1)) + sentences)
@@ -604,27 +604,6 @@ private fun RecipeContent(
             StepMove.AtEnd -> barMessage = lastStepMessage
             StepMove.None -> Unit
         }
-    }
-    fun readIngredients() {
-        val open = recipe.ingredients.indices.filter { index ->
-            val ingredient = recipe.ingredients[index]
-            !ingredient.isHeading && RecipeViewModel.progressKey(index, ingredient.text) !in cooking.checked
-        }
-        if (open.isEmpty()) {
-            barMessage = allCheckedMessage
-            return
-        }
-        val about = SpokenText.about(speechLanguage)
-        val sentences = recipe.ingredients.indices.flatMap { index ->
-            if (index in open) {
-                SpokenText.sentences(AmountScaling.spoken(lines[index]) { "$about ${it.trim()}" }, speechLanguage)
-            } else if (recipe.ingredients[index].isHeading) {
-                SpokenText.sentences(texts[index], speechLanguage)
-            } else {
-                emptyList()
-            }
-        }
-        speech.speak(speechLanguage, sentences)
     }
     // Ohne Markierung beginnt das Vorlesen beim ersten Schritt.
     fun startReading() {
@@ -855,7 +834,6 @@ private fun RecipeContent(
         if (recipe.steps.isNotEmpty() || recipe.ingredients.any { !it.isHeading }) {
             CookingBar(
                 hasSteps = recipe.steps.isNotEmpty(),
-                hasIngredients = recipe.ingredients.any { !it.isHeading },
                 speaking = speaking,
                 stepNumber = currentIndex?.plus(1),
                 stepCount = recipe.steps.size,
@@ -865,7 +843,6 @@ private fun RecipeContent(
                     if (speaking) speech.stop() else startReading()
                 },
                 onNext = { move(cooking.onNextStep()) },
-                onIngredients = { if (speaking) speech.stop() else readIngredients() },
             )
         }
     }
@@ -1028,15 +1005,14 @@ private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, onClic
 }
 
 /**
- * Kochleiste (#79, #89): „Zurück“, „Vorlesen“ (beim Vorlesen „Anhalten“), „Weiter“ – der häufigste Knopf, deshalb
- * betont – und „Zutaten“ vorlesen. Darüber steht, welcher Schritt gerade dran ist („Schritt 2 von 5“, als Text, nicht nur
- * Farbe). Mindestens 64 dp hoch. Bei großer Schrift bleiben drei Knöpfe, „Zutaten vorlesen“ liegt dann hinter dem
- * Symbol „Weitere Kochaktionen“, damit die Leiste einzeilig bleibt. Das Vorlesen startet nur auf Antippen.
+ * Kochleiste (#79, #89): „Zurück“ und „Weiter“ nebeneinander – „Weiter“ ist der häufigste Knopf, deshalb betont –, davon
+ * getrennt ganz rechts „Vorlesen“ (beim Vorlesen „Anhalten“). Darüber steht, welcher Schritt gerade dran ist
+ * („Schritt 2 von 5“, als Text, nicht nur Farbe). Mindestens 64 dp hoch. Bei großer Schrift stehen „Zurück“ und „Weiter“
+ * oben, „Vorlesen“ darunter rechts, damit kein Wort mitten im Wort umbricht. Das Vorlesen startet nur auf Antippen.
  */
 @Composable
 private fun CookingBar(
     hasSteps: Boolean,
-    hasIngredients: Boolean,
     speaking: Boolean,
     stepNumber: Int?,
     stepCount: Int,
@@ -1044,7 +1020,6 @@ private fun CookingBar(
     onPrevious: () -> Unit,
     onRead: () -> Unit,
     onNext: () -> Unit,
-    onIngredients: () -> Unit,
 ) {
     val previous = stringResource(R.string.cook_bar_previous)
     val previousDescription = stringResource(R.string.cook_bar_previous_description)
@@ -1052,8 +1027,6 @@ private fun CookingBar(
     val readDescription = stringResource(if (speaking) R.string.cook_bar_stop_description else R.string.cook_bar_read_description)
     val next = stringResource(R.string.cook_bar_next)
     val nextDescription = stringResource(R.string.cook_bar_next_description)
-    val ingredients = stringResource(R.string.cook_bar_ingredients)
-    val ingredientsDescription = stringResource(R.string.cook_bar_ingredients_description)
     val compact = isLargeText()
     Surface(color = MaterialTheme.colorScheme.surfaceContainer, tonalElevation = 3.dp, modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -1070,36 +1043,21 @@ private fun CookingBar(
                 )
             }
             if (compact) {
-                // Bei großer Schrift zwei Reihen, damit kein Wort mitten im Wort umbricht: oben Zurück und Weiter,
-                // darunter Vorlesen und das Symbol mit „Zutaten vorlesen“.
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
                     BarButton(previous, previousDescription, hasSteps, onPrevious)
                     BarButton(next, nextDescription, hasSteps, onNext, primary = true)
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalAlignment = Alignment.CenterVertically) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                    Spacer(Modifier.weight(1f))
                     BarButton(read, readDescription, hasSteps, onRead)
-                    var menuOpen by remember { mutableStateOf(false) }
-                    Box {
-                        IconButton(onClick = { menuOpen = true }, enabled = hasIngredients) {
-                            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.cook_bar_more))
-                        }
-                        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                            DropdownMenuItem(
-                                text = { Text(ingredientsDescription) },
-                                onClick = {
-                                    menuOpen = false
-                                    onIngredients()
-                                },
-                            )
-                        }
-                    }
                 }
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
                     BarButton(previous, previousDescription, hasSteps, onPrevious)
-                    BarButton(read, readDescription, hasSteps, onRead)
                     BarButton(next, nextDescription, hasSteps, onNext, primary = true)
-                    BarButton(ingredients, ingredientsDescription, hasIngredients, onIngredients)
+                    // Lücke, damit „Vorlesen“ getrennt von den beiden Schritt-Knöpfen ganz rechts steht.
+                    Spacer(Modifier.width(Spacing.l))
+                    BarButton(read, readDescription, hasSteps, onRead)
                 }
             }
         }

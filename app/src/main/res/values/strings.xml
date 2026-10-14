@@ -240,7 +240,7 @@
         <item>Dough calculator: every value has a slider with a number you can tap and type; the “Numbers | Sliders” switch is gone, plus and minus remain only for small whole numbers.</item>
         <item>“Default 250 g” with “To default” appears only when a value differs from its default.</item>
 
-        <item>The cooking bar shows “Step 2 of 5”, “Next” is emphasized, and the current step has a bar at its edge. With large text three buttons remain; “Read ingredients” moves behind “More cooking actions”.</item>
+        <item>The cooking bar shows “Step 2 of 5”, “Next” is emphasized, and the current step has a bar at its edge. With large text the buttons stand in two rows.</item>
         <item>The photo in the recipe view is lower so ingredients and steps start earlier.</item>
     </string-array>
 
@@ -362,10 +362,7 @@
     <string name="cook_bar_read_description">Read current step aloud</string>
     <string name="cook_bar_stop">Stop</string>
     <string name="cook_bar_stop_description">Stop reading aloud</string>
-    <string name="cook_bar_ingredients">Ingredients</string>
-    <string name="cook_bar_ingredients_description">Read ingredients aloud</string>
     <string name="cook_last_step">Last step</string>
-    <string name="cook_all_checked">All ingredients are checked off</string>
     <string name="speech_no_voice">No offline voice for %1$s. One can be downloaded in the device Settings.</string>
     <string name="speech_unavailable">Reading aloud is not available on this device. No text-to-speech is set up.</string>
 
@@ -657,7 +654,6 @@
 
     <!-- Cooking bar (#89) -->
     <string name="cook_step_of">Step %1$d of %2$d</string>
-    <string name="cook_bar_more">More cooking actions</string>
     <string name="speech_headset_button_play_pause">Play/pause button</string>
     <string name="speech_headset_button_next">Next button</string>
     <string name="speech_headset_button_previous">Previous button</string>
