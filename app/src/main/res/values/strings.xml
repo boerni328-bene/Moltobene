@@ -236,18 +236,11 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Read aloud: headset buttons control reading aloud while cooking – play/pause, next and previous, and a double press of the headset button is the next step. This applies once reading aloud has been started in a recipe and can be switched off in Settings.</item>
-        <item>Dough know-how: the articles are now in the dough calculator, reached with the info icon at the top, no longer a tile on the home screen.</item>
-        <item>Dough know-how: the home screen has a new “Dough know-how” tile with three articles to look things up: flour types in Germany, Austria, Switzerland and Italy (including what the “W” means in each), wheat, spelt, rye and whole grain with rough nutrition values per 100 g, and gluten, protein and baking strength.</item>
-        <item>Read aloud: in Settings, a voice can be chosen for German and English from the voices installed on the device (without internet), with a sample for each. Speed and pitch can be adjusted, with the presets “Relaxed”, “Normal” and “Lively”.</item>
-        <item>Dough calculator: before a preset replaces changed values, a short window asks first.</item>
-        <item>Dough calculator: the new question mark on the cards explains in short notes what hydration, salt, oil, yeast, rising time and preferment do and which values are common.</item>
-        <item>Dough calculator: presets for pizza and bread (such as Neapolitan, sheet-pan pizza, white bread, bread with poolish) can be flipped through with arrows or picked from a list. Own values can be saved as a preset with a name.</item>
-        <item>Dough calculator: sliders can be switched on above the fields (“Numbers | Sliders”), with a mark at the default value. Lists such as the type of cake and, with large text, the yeast type and the preferment are now choice fields.</item>
-        <item>Dough calculator: every value now has plus and minus buttons for fine adjustments, default values are marked, and a button sets a value back to its default.</item>
-        <item>Dough calculator: the totals appear as clear tiles above “Save as recipe”.</item>
-        <item>Basic recipes: ten reliable basics such as béchamel sauce, tomato sauce, vinaigrette or shortcrust pastry can be imported from the home screen into the collection and then edited like any other recipe.</item>
-        <item>Tags: recipes can get bundled tags such as “Sauces”, “Desserts” or “Soups”, plus tags of their own. The collection can be filtered by one or more tags at once, with the number of recipes per tag.</item>
+        <item>Dough calculator: every value has a slider with a number you can tap and type; the “Numbers | Sliders” switch is gone, plus and minus remain only for small whole numbers.</item>
+        <item>“Default 250 g” with “To default” appears only when a value differs from its default.</item>
+
+        <item>The cooking bar shows “Step 2 of 5”, “Next” is emphasized, and the current step has a bar at its edge. With large text three buttons remain; “Read ingredients” moves behind “More cooking actions”.</item>
+        <item>The photo in the recipe view is lower so ingredients and steps start earlier.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->
@@ -306,12 +299,12 @@
     </plurals>
     <string name="screen_on_device">Same as device</string>
     <!-- Startseite (#81) -->
-    <string name="home_recipes_title">Recipes</string>
+    <string name="home_recipes_title">Collection</string>
     <plurals name="home_recipes_count">
         <item quantity="one">%1$d recipe</item>
         <item quantity="other">%1$d recipes</item>
     </plurals>
-    <string name="home_dough_text">Amounts for pizza, bread, pasta and cake</string>
+    <string name="home_dough_text">Pizza, bread, pasta, cake</string>
     <string name="settings_section_start">Start</string>
     <string name="start_title">When opening the app</string>
     <string name="start_home">Home</string>
@@ -324,7 +317,7 @@
     <string name="knowhow_intro">Articles to look things up. Figures are rounded guides; the maker’s package comes first.</string>
     <string name="knowhow_error">The articles could not be loaded.</string>
     <string name="basics_title">Basic recipes</string>
-    <string name="home_basics_text">Béchamel sauce, vinaigrette and more, ready to import</string>
+    <string name="home_basics_text">Béchamel sauce, vinaigrette and more</string>
     <string name="basics_intro">Reliable basic recipes to import into the collection. Afterwards they can be edited, adjusted and translated like any other recipe.</string>
     <string name="basics_adopt">Import</string>
     <string name="basics_added">“%1$s” is now in the collection</string>
@@ -515,13 +508,9 @@
     <string name="dough_reset">Reset</string>
     <string name="dough_step_less">Decrease %1$s by %2$s</string>
     <string name="dough_step_more">Increase %1$s by %2$s</string>
-    <string name="dough_default_marker">Default</string>
-    <string name="dough_default_value">Default: %1$s</string>
-    <string name="dough_default_reset">Set %1$s to default</string>
+    <string name="dough_default_value">Default %1$s</string>
+    <string name="dough_default_reset_short">To default</string>
     <string name="dough_totals_title">Totals</string>
-    <string name="dough_mode_numbers">Numbers</string>
-    <string name="dough_mode_sliders">Sliders</string>
-    <string name="dough_input_mode">Input</string>
 
     <!-- Dough know-how (#84): notes on the fields of the dough calculator -->
     <string name="dough_help_title">What does this do?</string>
@@ -660,4 +649,12 @@
     <string name="dough_pan_width">Width</string>
     <string name="dough_cake_flour_from_pan">Flour for this pan: about %1$s g</string>
     <string name="dough_cake_baking_note">Baking time and temperature change with pan size and depth. For a larger pan, check with a skewer; for deeper batter, bake longer at slightly lower heat.</string>
+
+    <!-- Hinweise beim Übernehmen (#90) -->
+    <string name="import_retry">Try again</string>
+    <string name="notice_dismiss">Dismiss</string>
+
+    <!-- Cooking bar (#89) -->
+    <string name="cook_step_of">Step %1$d of %2$d</string>
+    <string name="cook_bar_more">More cooking actions</string>
 </resources>

@@ -3,6 +3,33 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.46.0] – 2026-10-14 (versionCode 77)
+
+### Neu
+- **Teigrechner: eine Bedienung pro Wert.** Jeder Wert hat jetzt immer einen Regler mit der Zahl darüber, die sich antippen und tippen lässt. Der Umschalter „Zahlen | Regler“ ist weg. Plus und Minus gibt es nur noch bei kleinen ganzen Zahlen wie der Anzahl.
+- **„Standard“ nur, wenn der Wert abweicht:** Weicht ein Wert vom Standard ab, steht eine Zeile „Standard 250 g“ mit „Auf Standard“ darunter. Beim Standardwert bleibt das Feld ruhig, der Standard ist weiter als Marke auf dem Regler zu sehen.
+
+## [0.45.0] – 2026-10-14 (versionCode 76)
+
+### Neu
+- **Kochleiste zeigt den Schritt:** Über den Knöpfen steht „Schritt 2 von 5“, sobald ein Schritt markiert ist. „Weiter“ ist jetzt der betonte Knopf, denn beim Kochen wird er am häufigsten gebraucht. Der aktuelle Schritt hat zusätzlich einen kräftigen Balken am linken Rand, nicht nur eine Hintergrundfarbe.
+- **Große Schrift:** Bei großer Schrift stehen die Knöpfe in zwei Reihen (Zurück und Weiter, darunter Vorlesen). „Zutaten vorlesen“ liegt dann hinter dem Symbol „Weitere Kochaktionen“.
+- **Niedrigeres Foto:** Das Foto in der Rezeptansicht ist höchstens so hoch wie 3 zu 5 der Breite, höhere Fotos werden zugeschnitten. Zutaten und Schritte rücken dadurch weiter nach oben. Antippen öffnet das ganze Foto wie bisher.
+
+## [0.44.0] – 2026-10-13 (versionCode 75)
+
+### Neu
+- **Hinweise beim Übernehmen bleiben sichtbar:** Der Hinweis „Prüfen, ob alles an der richtigen Stelle steht“ steht jetzt ganz oben im Formular, mit Symbol, und nicht mehr unter dem Foto. Er geht erst mit dem Speichern.
+- **Fehler beim Übernehmen als Karte statt kurzer Meldung:** Konnte eine Seite oder Datei nicht gelesen werden, bleibt die Meldung mit Warnsymbol stehen, bis sie geschlossen wird. Bei Links ohne Verbindung, Zeitüberschreitung oder Serverfehler gibt es dazu „Erneut versuchen“. Der Link bleibt als Quelle gespeichert.
+- Die Wege „Aus Link / Foto / Text übernehmen“ im Formular brechen in die nächste Zeile um und sind nicht mehr abgeschnitten.
+
+## [0.43.0] – 2026-10-13 (versionCode 74)
+
+### Neu
+- **Neue Startseite mit Foto:** „Was koche ich heute?“ ist jetzt die größte Kachel und zeigt das Foto des vorgeschlagenen Rezepts (ohne Foto eine ruhige Fläche mit dem Anfangsbuchstaben). Tippen öffnet das Rezept, der Knopf daneben zeigt ein anderes.
+- Die Kachel „Rezepte“ heißt jetzt „Sammlung“ und zeigt darunter die zuletzt geöffneten Rezepte als kleine Bilder. Die doppelte Zeile „Zuletzt geöffnet“ ist weg.
+- Teigrechner und Grundrezepte stehen als zwei schmale Kacheln nebeneinander, jede mit eigenem Symbol und kürzerem Text; bei großer Schrift untereinander.
+
 ## [0.42.1] – 2026-10-13 (versionCode 73)
 
 ### Behoben

@@ -357,8 +357,14 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithText(text(R.string.cook_bar_previous)).performClick()
 
         speech.spoken.clear()
-        // „Zutaten“ steht auch als Überschrift im Rezept; gemeint ist der Knopf.
-        composeRule.onNode(hasText(text(R.string.cook_bar_ingredients)) and hasClickAction()).performClick()
+        // Bei großer Schrift liegt „Zutaten vorlesen“ hinter dem Symbol „Weitere Kochaktionen“ (#89).
+        val ingredientsButton = composeRule.onAllNodes(hasText(text(R.string.cook_bar_ingredients)) and hasClickAction())
+        if (ingredientsButton.fetchSemanticsNodes().isNotEmpty()) {
+            ingredientsButton.onFirst().performClick()
+        } else {
+            composeRule.onNodeWithContentDescription(text(R.string.cook_bar_more)).performClick()
+            composeRule.onNodeWithText(text(R.string.cook_bar_ingredients_description)).performClick()
+        }
         composeRule.waitUntil(TIMEOUT_MILLIS) { speech.spoken.isNotEmpty() }
         assertTrue(speech.spoken.first().any { it.contains("800 Gramm reife Tomaten") })
         composeRule.onNodeWithText(text(R.string.cook_bar_stop)).performClick()
@@ -595,8 +601,9 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.dough_preset_default))
         composeRule.onNodeWithText(text(R.string.dough_preset_position, 1, 3)).assertExists()
         // Eigene Änderungen: vor dem Ersetzen durch eine Voreinstellung wird nachgefragt.
-        composeRule.onNodeWithContentDescription(text(R.string.dough_step_more, text(R.string.dough_water), "1 %"))
-            .performScrollTo().performClick()
+        // Wasseranteil ändern: Der Wert weicht vom Standard ab (Eingabe per Tippen, Regler und Zahl gehören zusammen, #86).
+        field(R.string.dough_water).performScrollTo().performTextClearance()
+        field(R.string.dough_water).performTextInput("66")
         composeRule.onNodeWithContentDescription(text(R.string.dough_preset_next)).performScrollTo().performClick()
         waitForText(text(R.string.dough_preset_replace_title))
         screenshot("14o-teigrechner-voreinstellung-ersetzen")
@@ -634,21 +641,20 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNode(hasText(text(R.string.dough_help_close)) and hasClickAction()).performClick()
         waitUntilGone(text(R.string.dough_help_water_effect))
 
-        // Plus/Minus und Standard (#83): Wasseranteil um 1 erhöhen, der Standard wird genannt, mit dem Knopf geht es zurück.
-        val waterLabel = text(R.string.dough_water)
-        composeRule.onNodeWithContentDescription(text(R.string.dough_step_more, waterLabel, "1 %")).performScrollTo().performClick()
+        // Eine Bedienung pro Wert (#86): Regler mit antippbarer Zahl. Wasseranteil tippen, der Standard wird genannt,
+        // „Auf Standard“ stellt ihn wieder her.
+        field(R.string.dough_water).performScrollTo().performTextClearance()
+        field(R.string.dough_water).performTextInput("66")
         waitForText(text(R.string.dough_default_value, "65 %"))
-        screenshot("14d-teigrechner-plus-minus")
-        composeRule.onNodeWithContentDescription(text(R.string.dough_default_reset, waterLabel)).performScrollTo().performClick()
+        screenshot("14d-teigrechner-standard")
+        composeRule.onNodeWithText(text(R.string.dough_default_reset_short)).performScrollTo().performClick()
         waitUntilGone(text(R.string.dough_default_value, "65 %"))
 
-        // Regler (#83, Etappe 2): einschalten, es erscheinen Regler unter den Feldern; wieder auf Zahlen.
-        composeRule.onNodeWithText(text(R.string.dough_mode_sliders)).performScrollTo().performClick()
+        // Jeder Wert hat einen Regler.
         composeRule.waitUntil(TIMEOUT_MILLIS) {
             composeRule.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)).fetchSemanticsNodes().isNotEmpty()
         }
         screenshot("14j-teigrechner-regler")
-        composeRule.onNodeWithText(text(R.string.dough_mode_numbers)).performScrollTo().performClick()
 
         if (variant == DisplayVariant.LARGE_TEXT) {
             // Bei großer Schrift sind Hefeart und Vorteig Auswahlfelder statt Chips.
@@ -979,6 +985,36 @@ class AppTourTest(private val variant: DisplayVariant) {
         assertEquals(2, recipe.servings)
         assertEquals(4, recipe.ingredients.size)
         assertEquals(3, recipe.steps.size)
+    }
+
+    /**
+     * Übernehmen ohne Verbindung (#90): Die Meldung bleibt als Karte stehen, der Link ist gespeichert, „Erneut
+     * versuchen“ lädt ihn, sobald es wieder geht.
+     */
+    @Test
+    fun ausLinkOhneVerbindung() {
+        val online = SamplePage.loader(activity)
+        var connected = false
+        container().pageLoader = object : com.moltobene.app.data.web.PageLoader {
+            override suspend fun loadPage(url: String) =
+                if (connected) online.loadPage(url) else throw com.moltobene.app.data.web.WebException(com.moltobene.app.data.web.WebException.Problem.NO_CONNECTION)
+
+            override suspend fun loadImage(url: String, target: java.io.File) = online.loadImage(url, target)
+        }
+        openAddMenu()
+        waitForText(text(R.string.import_from_link))
+        composeRule.onNodeWithText(text(R.string.import_from_link)).performClick()
+        waitForField(R.string.import_link_field)
+        field(R.string.import_link_field).performTextInput(SamplePage.URL)
+        composeRule.onNodeWithText(text(R.string.import_text_action)).performClick()
+        waitForText(text(R.string.link_error_offline))
+        screenshot("25a-aus-link-ohne-verbindung")
+
+        connected = true
+        composeRule.onNodeWithText(text(R.string.import_retry)).performClick()
+        waitForText(text(R.string.link_done))
+        waitUntilGone(text(R.string.link_error_offline))
+        screenshot("25b-aus-link-erneut-versucht")
     }
 
     @Test

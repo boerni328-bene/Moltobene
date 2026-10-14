@@ -89,6 +89,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
@@ -655,7 +657,8 @@ private fun RecipeContent(
             modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
         ) {
             if (photo != null) {
-                RecipePhotoLarge(file = photo, onOpen = onShowPhoto, modifier = Modifier.fillMaxWidth().clip(photoShape))
+                // Beim Kochen soll Platz für Zutaten und Schritte bleiben: höchstens etwa 5:3 hoch, höhere Fotos werden zugeschnitten.
+                RecipePhotoLarge(file = photo, onOpen = onShowPhoto, modifier = Modifier.fillMaxWidth().clip(photoShape), minRatio = COOKING_PHOTO_MIN_RATIO)
             } else {
                 RecipePhoto(file = null, placeholderIconSize = 40.dp, modifier = Modifier.fillMaxWidth().height(120.dp).clip(photoShape))
             }
@@ -843,6 +846,8 @@ private fun RecipeContent(
                 hasSteps = recipe.steps.isNotEmpty(),
                 hasIngredients = recipe.ingredients.any { !it.isHeading },
                 speaking = speaking,
+                stepNumber = currentIndex?.plus(1),
+                stepCount = recipe.steps.size,
                 message = barMessage,
                 onPrevious = { move(cooking.onPreviousStep()) },
                 onRead = {
@@ -975,6 +980,9 @@ private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, onClic
     val requester = remember { BringIntoViewRequester() }
     LaunchedEffect(current) { if (current) requester.bringIntoView() }
     val currentLabel = stringResource(R.string.step_current)
+    // Ein kräftiger Balken links zeigt den aktuellen Schritt auch ohne Farbe: zusätzlich zu Symbol, Hintergrund und Text.
+    val barColor = MaterialTheme.colorScheme.primary
+    val accent = if (current) Modifier.drawBehind { drawRect(barColor, size = Size(4.dp.toPx(), size.height)) } else Modifier
     val markLabel = stringResource(R.string.step_mark_current)
     val highlight = if (current) {
         Modifier.background(MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.shapes.medium)
@@ -989,6 +997,7 @@ private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, onClic
             .heightIn(min = 48.dp)
             .clip(MaterialTheme.shapes.medium)
             .then(highlight)
+            .then(accent)
             .clickable(onClickLabel = markLabel, onClick = onClick)
             .padding(Spacing.s)
             .semantics(mergeDescendants = true) { if (current) stateDescription = currentLabel },
@@ -1008,14 +1017,18 @@ private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, onClic
 }
 
 /**
- * Kochleiste (#79): „Zurück“, „Vorlesen“ (beim Vorlesen „Anhalten“), „Weiter“ und „Zutaten“ vorlesen. Mindestens 64 dp
- * hoch; bei großer Schrift in zwei Reihen. Das Vorlesen startet nur auf Antippen.
+ * Kochleiste (#79, #89): „Zurück“, „Vorlesen“ (beim Vorlesen „Anhalten“), „Weiter“ – der häufigste Knopf, deshalb
+ * betont – und „Zutaten“ vorlesen. Darüber steht, welcher Schritt gerade dran ist („Schritt 2 von 5“, als Text, nicht nur
+ * Farbe). Mindestens 64 dp hoch. Bei großer Schrift bleiben drei Knöpfe, „Zutaten vorlesen“ liegt dann hinter dem
+ * Symbol „Weitere Kochaktionen“, damit die Leiste einzeilig bleibt. Das Vorlesen startet nur auf Antippen.
  */
 @Composable
 private fun CookingBar(
     hasSteps: Boolean,
     hasIngredients: Boolean,
     speaking: Boolean,
+    stepNumber: Int?,
+    stepCount: Int,
     message: String?,
     onPrevious: () -> Unit,
     onRead: () -> Unit,
@@ -1030,34 +1043,51 @@ private fun CookingBar(
     val nextDescription = stringResource(R.string.cook_bar_next_description)
     val ingredients = stringResource(R.string.cook_bar_ingredients)
     val ingredientsDescription = stringResource(R.string.cook_bar_ingredients_description)
-    val stacked = LocalDensity.current.fontScale > 1.3f
+    val compact = isLargeText()
     Surface(color = MaterialTheme.colorScheme.surfaceContainer, tonalElevation = 3.dp, modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(horizontal = Spacing.s, vertical = Spacing.s),
-            verticalArrangement = Arrangement.spacedBy(Spacing.s),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
-            if (message != null) {
+            val status = message ?: stepNumber?.let { stringResource(R.string.cook_step_of, it, stepCount) }
+            if (status != null) {
                 Text(
-                    text = message,
+                    text = status,
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
                     textAlign = TextAlign.Center,
                 )
             }
-            if (stacked) {
+            if (compact) {
+                // Bei großer Schrift zwei Reihen, damit kein Wort mitten im Wort umbricht: oben Zurück und Weiter,
+                // darunter Vorlesen und das Symbol mit „Zutaten vorlesen“.
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
                     BarButton(previous, previousDescription, hasSteps, onPrevious)
-                    BarButton(next, nextDescription, hasSteps, onNext)
+                    BarButton(next, nextDescription, hasSteps, onNext, primary = true)
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-                    BarButton(read, readDescription, hasSteps, onRead, primary = true)
-                    BarButton(ingredients, ingredientsDescription, hasIngredients, onIngredients)
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalAlignment = Alignment.CenterVertically) {
+                    BarButton(read, readDescription, hasSteps, onRead)
+                    var menuOpen by remember { mutableStateOf(false) }
+                    Box {
+                        IconButton(onClick = { menuOpen = true }, enabled = hasIngredients) {
+                            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.cook_bar_more))
+                        }
+                        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                            DropdownMenuItem(
+                                text = { Text(ingredientsDescription) },
+                                onClick = {
+                                    menuOpen = false
+                                    onIngredients()
+                                },
+                            )
+                        }
+                    }
                 }
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
                     BarButton(previous, previousDescription, hasSteps, onPrevious)
-                    BarButton(read, readDescription, hasSteps, onRead, primary = true)
-                    BarButton(next, nextDescription, hasSteps, onNext)
+                    BarButton(read, readDescription, hasSteps, onRead)
+                    BarButton(next, nextDescription, hasSteps, onNext, primary = true)
                     BarButton(ingredients, ingredientsDescription, hasIngredients, onIngredients)
                 }
             }
@@ -1323,3 +1353,6 @@ private fun RecipeTags(tags: List<Tag>) {
         }
     }
 }
+
+/** Kleinstes Seitenverhältnis (Breite zu Höhe) des Fotos in der Rezeptansicht: nie höher als 5:3. */
+private const val COOKING_PHOTO_MIN_RATIO = 5f / 3f

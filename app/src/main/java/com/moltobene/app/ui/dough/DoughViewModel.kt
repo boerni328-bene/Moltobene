@@ -127,19 +127,6 @@ class DoughViewModel(
 
     private val texts = AndroidDoughTexts(context.applicationContext)
 
-    /** Regler statt oder neben den Zahlen (#83, Etappe 2); gilt für alle Teigarten, bleibt auf dem Handy gemerkt. */
-    var sliders by mutableStateOf(false)
-        private set
-
-    init {
-        viewModelScope.launch { sliders = runCatching { preferences.doughMemory(SLIDERS_KEY) == "1" }.getOrDefault(false) }
-    }
-
-    fun chooseSliders(on: Boolean) {
-        sliders = on
-        viewModelScope.launch { runCatching { preferences.setDoughMemory(SLIDERS_KEY, if (on) "1" else "0") } }
-    }
-
     /** Eigene Voreinstellungen je Teigart (#83, Etappe 3); nur auf dem Handy, nicht in der Sicherung. */
     private val ownPresets = mutableStateMapOf<String, List<DoughPresets.Own>>()
 
@@ -234,7 +221,6 @@ class DoughViewModel(
     }
 }
 
-private const val SLIDERS_KEY = "sliders"
 
 /** Reihenfolge der Summen: Mehl zuerst, dann Flüssiges, Würze, Treibmittel. */
 private val TOTALS_ORDER = listOf(
