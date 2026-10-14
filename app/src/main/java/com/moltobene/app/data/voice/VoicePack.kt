@@ -27,7 +27,7 @@ object VoicePack {
     const val URL = "https://github.com/boerni328-bene/Moltobene/releases/download/erkennungspaket-de-$VERSION/erkennungspaket-de-$VERSION.zip"
 
     /** Feste Prüfsumme (SHA-256) von [MANIFEST]; das Verzeichnis enthält die Prüfsummen aller anderen Dateien. */
-    const val MANIFEST_SHA256 = ""
+    const val MANIFEST_SHA256 = "6fe4a8186ef41a6cecaecf94d03ee4126fab58ca3901fe64e53d2a9aba4eb9bb"
 
     /** Ungefähre Größen für die Anzeige vor dem Download (gemessen am 14.10.2026). */
     const val DOWNLOAD_BYTES = 46_500_000L

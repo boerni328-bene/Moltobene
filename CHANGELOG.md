@@ -3,6 +3,10 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.46.1] – 2026-10-14 (versionCode 78)
+
+Keine sichtbaren Änderungen an der App. Vorbereitung der Spracheingabe: Das Erkennungspaket für Deutsch lässt sich nachvollziehbar bauen, prüfen und von der App sicher entpacken. Es gibt noch keinen Knopf dafür und noch keine Berechtigung.
+
 ## [0.46.0] – 2026-10-14 (versionCode 77)
 
 ### Neu
