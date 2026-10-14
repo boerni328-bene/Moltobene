@@ -338,15 +338,15 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("12m-kochleiste")
 
         composeRule.onNodeWithText(text(R.string.cook_bar_next)).performClick()
-        composeRule.onNodeWithText(text(R.string.cook_bar_read)).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.cook_bar_read_description)).performClick()
         composeRule.waitUntil(TIMEOUT_MILLIS) { speech.spoken.isNotEmpty() }
         val first = speech.spoken.first()
         assertEquals("Schritt 1.", first.first())
         assertTrue(first.any { it.contains("Zwiebel und Knoblauch") })
-        waitForText(text(R.string.cook_bar_stop))
+        waitForDescription(text(R.string.cook_bar_stop_description))
         screenshot("12n-kochleiste-vorlesen")
-        composeRule.onNodeWithText(text(R.string.cook_bar_stop)).performClick()
-        waitForText(text(R.string.cook_bar_read))
+        composeRule.onNodeWithContentDescription(text(R.string.cook_bar_stop_description)).performClick()
+        waitForDescription(text(R.string.cook_bar_read_description))
 
         // Schritt 2 und 3, danach keine Schleife.
         composeRule.onNodeWithText(text(R.string.cook_bar_next)).performClick()
@@ -372,9 +372,9 @@ class AppTourTest(private val variant: DisplayVariant) {
         // Vor dem ersten Vorlesen gehört den Kopfhörertasten noch keine Sitzung der App (Musik-Apps behalten sie).
         composeRule.waitUntil(TIMEOUT_MILLIS) { mediaSession().isEmpty() }
         composeRule.onNodeWithText(text(R.string.cook_bar_next)).performClick()
-        composeRule.onNodeWithText(text(R.string.cook_bar_read)).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.cook_bar_read_description)).performClick()
         composeRule.waitUntil(TIMEOUT_MILLIS) { speech.spoken.isNotEmpty() }
-        waitForText(text(R.string.cook_bar_stop))
+        waitForDescription(text(R.string.cook_bar_stop_description))
 
         // Aktiv, spielt, Aktionen: Stopp, Pause, Wiedergabe, Zurück, Weiter und Wiedergabe/Pause (567).
         try {
@@ -386,8 +386,8 @@ class AppTourTest(private val variant: DisplayVariant) {
         assertTrue(playing, "actions=567" in playing)
         screenshot("12p-kopfhoerertasten")
 
-        composeRule.onNodeWithText(text(R.string.cook_bar_stop)).performClick()
-        waitForText(text(R.string.cook_bar_read))
+        composeRule.onNodeWithContentDescription(text(R.string.cook_bar_stop_description)).performClick()
+        waitForDescription(text(R.string.cook_bar_read_description))
         composeRule.waitUntil(TIMEOUT_MILLIS) { "state=PAUSED(2)" in mediaSession() }
     }
 
@@ -417,7 +417,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         openRecipe(SampleRecipes.TOMATO_SAUCE)
         waitForText("800 g reife Tomaten")
         composeRule.onNodeWithText(text(R.string.cook_bar_next)).performClick()
-        composeRule.onNodeWithText(text(R.string.cook_bar_read)).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.cook_bar_read_description)).performClick()
         waitForText(text(R.string.settings_title))
         screenshot("12p-vorlesen-ohne-stimme")
     }

@@ -358,9 +358,7 @@
     <string name="cook_bar_previous_description">Previous step</string>
     <string name="cook_bar_next">Next</string>
     <string name="cook_bar_next_description">Next step</string>
-    <string name="cook_bar_read">Read aloud</string>
     <string name="cook_bar_read_description">Read current step aloud</string>
-    <string name="cook_bar_stop">Stop</string>
     <string name="cook_bar_stop_description">Stop reading aloud</string>
     <string name="cook_last_step">Last step</string>
     <string name="speech_no_voice">No offline voice for %1$s. One can be downloaded in the device Settings.</string>
