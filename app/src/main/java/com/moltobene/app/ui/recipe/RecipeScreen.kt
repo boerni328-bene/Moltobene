@@ -643,6 +643,15 @@ private fun RecipeContent(
     )
 
     Column(modifier = modifier.fillMaxSize()) {
+        // Der Übersetzungsbalken (Fortschritt, Hinweis, Fehler) steht fest unter der Leiste und wandert beim Blättern nicht
+        // mit (Wunsch vom 14.10.2026).
+        if (originalLanguage != null && LanguagePack.targets(originalLanguage).isNotEmpty() && translation.state != TranslationState.Original) {
+            Surface(color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.s)) {
+                    TranslationStatus(original = originalLanguage, actions = translation)
+                }
+            }
+        }
         Column(
             modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
         ) {
@@ -669,9 +678,6 @@ private fun RecipeContent(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                }
-                if (originalLanguage != null && LanguagePack.targets(originalLanguage).isNotEmpty()) {
-                    TranslationStatus(original = originalLanguage, actions = translation)
                 }
 
                 var adjusting by rememberSaveable { mutableStateOf(false) }
@@ -1172,7 +1178,7 @@ private fun LanguageSwitch(original: String, selected: String, onSelect: (String
     }
 }
 
-/** Unter dem Titel: Fortschritt, Hinweis auf die maschinelle Übersetzung oder was zu tun ist (#60). */
+/** Fest unter der Leiste: Fortschritt, Hinweis auf die maschinelle Übersetzung oder was zu tun ist (#60). */
 @Composable
 private fun TranslationStatus(original: String, actions: TranslationActions) {
     val state = actions.state

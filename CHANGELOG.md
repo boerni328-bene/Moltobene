@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.47.3] – 2026-10-14 (versionCode 82)
+
+### Geändert
+- **Übersetzungsbalken bleibt oben stehen.** Der Fortschritt beim Übersetzen, der Hinweis auf die maschinelle Übersetzung und die Meldungen dazu stehen jetzt fest unter der obersten Zeile und wandern beim Blättern im Rezept nicht mehr mit nach oben weg.
+
 ## [0.47.2] – 2026-10-14 (versionCode 81)
 
 ### Geändert
