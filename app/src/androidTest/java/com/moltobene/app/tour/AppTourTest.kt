@@ -770,7 +770,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.translation_open_settings))
         screenshot("12e-sprachpaket-fehlt")
 
-        composeRule.onNodeWithText(text(R.string.translation_open_settings)).performScrollTo().performClick()
+        composeRule.onNodeWithText(text(R.string.translation_open_settings)).performClick()
         waitForText(text(R.string.language_pack_title))
         composeRule.onNodeWithText(text(R.string.language_pack_download)).performScrollTo()
         screenshot("12f-einstellungen-sprachpaket")
