@@ -4,6 +4,11 @@ name: Erkennungspaket
 # Läuft nur auf Wunsch („Run workflow“). Lädt die kleinen Modelle für Deutsch und Englisch, listet Größe, Dateien und
 # Lizenztext auf und berechnet die Prüfsummen, damit das Paket danach mit festen Werten gebaut werden kann.
 on:
+  push:
+    branches: ["claude/**"]
+    paths:
+      - ".github/workflows/erkennungspaket.yml"
+      - ".github/erkennungspaket/**"
   workflow_dispatch:
 
 permissions:
