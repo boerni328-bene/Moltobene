@@ -1,0 +1,31 @@
+name: Erkennungspaket
+
+# Erkennungspaket für die Spracheingabe (#80): Erkundung der Vosk-Modelle (Apache 2.0) von alphacephei.com.
+# Läuft nur auf Wunsch („Run workflow“). Lädt die kleinen Modelle für Deutsch und Englisch, listet Größe, Dateien und
+# Lizenztext auf und berechnet die Prüfsummen, damit das Paket danach mit festen Werten gebaut werden kann.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  erkunden:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Modelle laden und untersuchen
+        run: |
+          set -e
+          mkdir -p "$RUNNER_TEMP/modelle" && cd "$RUNNER_TEMP/modelle"
+          for NAME in vosk-model-small-de-0.15 vosk-model-small-en-us-0.15; do
+            curl -fsSL -o "$NAME.zip" "https://alphacephei.com/vosk/models/$NAME.zip"
+            echo "=== $NAME"
+            ls -l "$NAME.zip"
+            sha256sum "$NAME.zip"
+            unzip -q "$NAME.zip"
+            du -sh "$NAME"
+            find "$NAME" -type f -exec ls -l {} \; | awk '{print $5, $9}' | sort -k2
+            for F in "$NAME"/README* "$NAME"/LICENSE* "$NAME"/COPYING*; do
+              [ -f "$F" ] && { echo "--- $F"; head -c 3000 "$F"; echo; }
+            done
+          done
