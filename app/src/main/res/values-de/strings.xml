@@ -238,7 +238,7 @@
         <item>Teigrechner: Jeder Wert hat einen Regler mit antippbarer Zahl; der Umschalter „Zahlen | Regler“ entfällt, Plus und Minus gibt es nur bei kleinen ganzen Zahlen.</item>
         <item>„Standard 250 g“ mit „Auf Standard“ erscheint nur, wenn ein Wert vom Standard abweicht.</item>
 
-        <item>Die Kochleiste zeigt „Schritt 2 von 5“, „Weiter“ ist betont, der aktuelle Schritt hat einen Balken am Rand. Bei großer Schrift stehen die Knöpfe in zwei Reihen, „Zutaten vorlesen“ liegt hinter „Weitere Kochaktionen“.</item>
+        <item>Die Kochleiste zeigt „Schritt 2 von 5“, „Weiter“ ist betont, der aktuelle Schritt hat einen Balken am Rand. Bei großer Schrift stehen die Knöpfe in zwei Reihen.</item>
         <item>Das Foto in der Rezeptansicht ist niedriger, damit Zutaten und Schritte früher kommen.</item>
     </string-array>
 
@@ -360,10 +360,7 @@
     <string name="cook_bar_read_description">Aktuellen Schritt vorlesen</string>
     <string name="cook_bar_stop">Anhalten</string>
     <string name="cook_bar_stop_description">Vorlesen anhalten</string>
-    <string name="cook_bar_ingredients">Zutaten</string>
-    <string name="cook_bar_ingredients_description">Zutaten vorlesen</string>
     <string name="cook_last_step">Letzter Schritt</string>
-    <string name="cook_all_checked">Alle Zutaten sind abgehakt</string>
     <string name="speech_no_voice">Keine Stimme für %1$s ohne Internet. Eine lässt sich in den Einstellungen des Handys laden.</string>
     <string name="speech_unavailable">Vorlesen ist auf diesem Handy nicht möglich. Es ist keine Sprachausgabe eingerichtet.</string>
 
@@ -653,7 +650,6 @@
 
     <!-- Kochleiste (#89) -->
     <string name="cook_step_of">Schritt %1$d von %2$d</string>
-    <string name="cook_bar_more">Weitere Kochaktionen</string>
     <string name="speech_headset_button_play_pause">Taste Wiedergabe/Pause</string>
     <string name="speech_headset_button_next">Taste Weiter</string>
     <string name="speech_headset_button_previous">Taste Zurück</string>

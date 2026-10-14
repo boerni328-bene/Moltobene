@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.47.1] – 2026-10-14 (versionCode 80)
+
+### Geändert
+- **Kochleiste aufgeräumt.** „Zurück“ und „Weiter“ stehen nebeneinander, „Vorlesen“ steht getrennt davon ganz rechts. Der Knopf „Zutaten“ zum Vorlesen der Zutaten ist entfallen; bei großer Schrift entfällt auch das Symbol „Weitere Kochaktionen“. „Zurück“ und „Weiter“ stehen dann oben, „Vorlesen“ darunter rechts.
+
 ## [0.47.0] – 2026-10-14 (versionCode 79)
 
 ### Neu

@@ -355,19 +355,6 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.cook_last_step))
         screenshot("12o-kochleiste-letzter-schritt")
         composeRule.onNodeWithText(text(R.string.cook_bar_previous)).performClick()
-
-        speech.spoken.clear()
-        // Bei großer Schrift liegt „Zutaten vorlesen“ hinter dem Symbol „Weitere Kochaktionen“ (#89).
-        val ingredientsButton = composeRule.onAllNodes(hasText(text(R.string.cook_bar_ingredients)) and hasClickAction())
-        if (ingredientsButton.fetchSemanticsNodes().isNotEmpty()) {
-            ingredientsButton.onFirst().performClick()
-        } else {
-            composeRule.onNodeWithContentDescription(text(R.string.cook_bar_more)).performClick()
-            composeRule.onNodeWithText(text(R.string.cook_bar_ingredients_description)).performClick()
-        }
-        composeRule.waitUntil(TIMEOUT_MILLIS) { speech.spoken.isNotEmpty() }
-        assertTrue(speech.spoken.first().any { it.contains("800 Gramm reife Tomaten") })
-        composeRule.onNodeWithText(text(R.string.cook_bar_stop)).performClick()
     }
 
     /**
