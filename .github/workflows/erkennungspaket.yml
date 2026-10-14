@@ -155,3 +155,31 @@ jobs:
             --notes "Erkennungspaket für die Spracheingabe in Moltobene. Wird in der App unter Einstellungen heruntergeladen, nicht von Hand installieren. Enthält unverändert das kleine Modell für Deutsch von Alpha Cephei (Vosk, Apache 2.0)." \
             --latest=false \
             --target "$GITHUB_SHA"
+
+  sprachtest:
+    # Prüft die Befehlserkennung mit dem echten deutschen Modell und einer Computerstimme (kein Ersatz für einen Test mit
+    # echter Stimme). Das Ergebnis steht im Protokoll; ein Fehlschlag der Erkennung bricht den Lauf nicht ab.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Werkzeuge einrichten
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq espeak-ng ffmpeg > /dev/null
+          python3 -m venv "$RUNNER_TEMP/sprachtest"
+          "$RUNNER_TEMP/sprachtest/bin/pip" install -q "vosk==0.3.45"
+
+      - name: Modell laden und Prüfsumme prüfen
+        run: |
+          cd "$RUNNER_TEMP"
+          curl -fsSL -o modell.zip https://alphacephei.com/vosk/models/vosk-model-small-de-0.15.zip
+          echo "b7e53c90b1f0a38456f4cd62b366ecd58803cd97cd42b06438e2c131713d5e43  modell.zip" | sha256sum -c -
+          unzip -q modell.zip
+
+      - name: Befehle erkennen lassen
+        run: |
+          "$RUNNER_TEMP/sprachtest/bin/python" .github/erkennungspaket/sprachtest.py "$RUNNER_TEMP/vosk-model-small-de-0.15" "$RUNNER_TEMP/sprachtest-wav" 2>&1 | tee "$RUNNER_TEMP/sprachtest.txt" | grep -v "^LOG\|^VLOG" || true
+          echo "--- Warnungen des Modells (Wörter, die es nicht kennt)"
+          grep -i "missing in vocabulary\|unknown word\|OOV" "$RUNNER_TEMP/sprachtest.txt" | sort -u || true
