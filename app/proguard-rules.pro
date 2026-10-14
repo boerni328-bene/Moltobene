@@ -23,3 +23,10 @@
 -dontwarn com.google.re2j.**
 -dontwarn org.jspecify.**
 -dontwarn java.net.http.**
+
+# Spracheingabe (Vosk, JNA): JNA findet die Klassen und Methoden des nativen Teils über feste Namen.
+-keep class com.sun.jna.** { *; }
+-keep class * implements com.sun.jna.** { *; }
+-keep class org.vosk.** { *; }
+-dontwarn java.awt.**
+-dontwarn javax.swing.**

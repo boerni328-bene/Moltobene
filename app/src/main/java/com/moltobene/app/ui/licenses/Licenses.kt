@@ -39,6 +39,8 @@ internal val LICENSE_GROUPS = listOf(
             Component("JetBrains Java Annotations", "JetBrains s.r.o."),
             Component("Coil", "Coil Contributors"),
             Component("Okio", "Square, Inc."),
+            Component("Vosk, Vosk-Modell Deutsch (vosk-model-small-de-0.15)", "Alpha Cephei Inc"),
+            Component("JNA (Java Native Access)", "Java Native Access contributors"),
         ),
     ),
     LicenseGroup(

@@ -1,6 +1,7 @@
 package com.moltobene.app.data.voice
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -14,7 +15,7 @@ class VoiceCommandsTest {
         assertEquals(VoiceCommand.PREVIOUS, VoiceCommands.parse("zurück"))
         assertEquals(VoiceCommand.REPEAT, VoiceCommands.parse("wiederholen"))
         assertEquals(VoiceCommand.READ, VoiceCommands.parse("vorlesen"))
-        assertEquals(VoiceCommand.STOP, VoiceCommands.parse("stopp"))
+        for (text in listOf("stopp", "stop", "halt")) assertEquals(text, VoiceCommand.STOP, VoiceCommands.parse(text))
     }
 
     @Test
@@ -31,31 +32,40 @@ class VoiceCommandsTest {
     }
 
     @Test
-    fun keinBefehlBleibtLeer() {
+    fun nurDerGanzeSatzAlsBefehlZaehlt() {
         assertNull(VoiceCommands.parse(null))
         assertNull(VoiceCommands.parse(""))
         assertNull(VoiceCommands.parse("[unk]"))
         // „aus“ allein ist kein Befehl, nur zusammen mit „mikro“ oder „mikrofon“.
         assertNull(VoiceCommands.parse("aus"))
         assertNull(VoiceCommands.parse("mikro"))
+        // Ein Befehl mitten im Gerede löst nichts aus, auch nicht mit einem unbekannten Wort davor.
+        assertNull(VoiceCommands.parse("wir gehen weiter einkaufen"))
+        assertNull(VoiceCommands.parse("[unk] weiter"))
+        assertNull(VoiceCommands.parse("weiter weiter"))
+        assertNull(VoiceCommands.parse("mikrofon weiter aus ende"))
         // Ein Wort, das nur Teil eines anderen ist, zählt nicht.
         assertNull(VoiceCommands.parse("weitere"))
         assertNull(VoiceCommands.parse("endlich"))
     }
 
     @Test
-    fun mehrereBefehleZaehlenAlsEinerDerErsteGewinnt() {
-        assertEquals(VoiceCommand.NEXT, VoiceCommands.parse("weiter weiter"))
-        assertEquals(VoiceCommand.PREVIOUS, VoiceCommands.parse("zurück weiter"))
-        assertEquals(VoiceCommand.NEXT, VoiceCommands.parse("[unk] weiter"))
+    fun grammatikEnthaeltBefehleKoederUndPlatzhalter() {
+        val grammar = VoiceCommands.GERMAN_GRAMMAR
+        assertTrue(grammar.startsWith("[") && grammar.endsWith("]"))
+        for (word in listOf("weiter", "zurück", "wiederholen", "vorlesen", "stopp", "halt", "mikro aus", "mikrofon aus", "ausschalten", "ende", "beenden", "fertig", "[unk]", "ich", "salz")) {
+            assertTrue(word, "\"$word\"" in grammar)
+        }
     }
 
     @Test
-    fun grammatikEnthaeltAlleBefehleUndDenPlatzhalter() {
-        val grammar = VoiceCommands.GERMAN_GRAMMAR
-        assertTrue(grammar.startsWith("[") && grammar.endsWith("]"))
-        for (word in listOf("weiter", "zurück", "wiederholen", "vorlesen", "stopp", "mikro aus", "mikrofon aus", "ausschalten", "ende", "beenden", "fertig", "[unk]")) {
-            assertTrue(word, "\"$word\"" in grammar)
+    fun keinKoederIstEinBefehlswort() {
+        val decoys = VoiceCommands.DECOY_WORDS.trim().split(Regex("\\s+"))
+        assertTrue(decoys.size > 100)
+        for (word in decoys) assertNull("Köder $word ist ein Befehl", VoiceCommands.parse(word))
+        // Auch kein Köder ist ein Teil eines Befehlsworts, das so mehrdeutig würde.
+        for (command in listOf("weiter", "zurück", "wiederholen", "vorlesen", "stopp", "stop", "halt", "mikro", "mikrofon", "ausschalten", "ende", "beenden", "fertig")) {
+            assertFalse(command, command in decoys)
         }
     }
 }

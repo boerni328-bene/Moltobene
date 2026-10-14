@@ -21,6 +21,7 @@ import com.moltobene.app.data.speech.SpeechSettings
 import com.moltobene.app.data.speech.SpokenText
 import com.moltobene.app.data.speech.VoiceInfo
 import com.moltobene.app.data.translate.LanguagePackManager
+import com.moltobene.app.data.voice.VoicePackManager
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -43,12 +44,14 @@ sealed interface SettingsEvent {
     data class RestoreProblem(val problem: BackupReader.Problem) : SettingsEvent
     data object RestoreFailed : SettingsEvent
     data object LanguagePackDeleted : SettingsEvent
+    data object VoicePackDeleted : SettingsEvent
 }
 
 class SettingsViewModel(
     private val backupManager: BackupManager,
     private val preferences: AppPreferences,
     private val languagePack: LanguagePackManager,
+    private val voicePack: VoicePackManager,
     private val speech: () -> SpeechOutput,
 ) : ViewModel() {
 
@@ -67,6 +70,21 @@ class SettingsViewModel(
         viewModelScope.launch {
             languagePack.delete()
             event = SettingsEvent.LanguagePackDeleted
+        }
+    }
+
+    /** Erkennungspaket für die Spracheingabe (#80); gleiche Regeln wie beim Sprachpaket. */
+    val voicePackState: StateFlow<LanguagePackManager.State> =
+        voicePack.state.stateIn(viewModelScope, SharingStarted.Eagerly, voicePack.state.value)
+
+    fun downloadVoicePack() = voicePack.download()
+
+    fun cancelVoicePack() = voicePack.cancel()
+
+    fun deleteVoicePack() {
+        viewModelScope.launch {
+            voicePack.delete()
+            event = SettingsEvent.VoicePackDeleted
         }
     }
 
@@ -123,6 +141,7 @@ class SettingsViewModel(
     init {
         viewModelScope.launch { lastBackup = runCatching { preferences.lastBackup() }.getOrNull() }
         viewModelScope.launch { languagePack.refresh() }
+        viewModelScope.launch { voicePack.refresh() }
     }
 
     var state by mutableStateOf<SettingsUiState>(SettingsUiState.Idle)

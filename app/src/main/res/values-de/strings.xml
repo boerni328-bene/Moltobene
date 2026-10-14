@@ -234,6 +234,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Spracheingabe beim Kochen: Der neue Mikrofon-Knopf in der Kochleiste hört zu und versteht „Weiter“, „Zurück“, „Wiederholen“, „Vorlesen“ und „Stopp“; „Mikrofon aus“ beendet das Zuhören. Nötig ist einmalig das Erkennungspaket aus den Einstellungen.</item>
         <item>Kopfhörertasten: In den Einstellungen unter „Vorlesen“ lässt sich festlegen, was die Tasten Wiedergabe/Pause, Weiter und Zurück beim Kochen auslösen. So lassen sich auch Kopfhörer anpassen, die Gesten selbst umwandeln.</item>
         <item>Teigrechner: Jeder Wert hat einen Regler mit antippbarer Zahl; der Umschalter „Zahlen | Regler“ entfällt, Plus und Minus gibt es nur bei kleinen ganzen Zahlen.</item>
         <item>„Standard 250 g“ mit „Auf Standard“ erscheint nur, wenn ein Wert vom Standard abweicht.</item>
@@ -250,10 +251,11 @@
     <string name="privacy_title">Datenschutz</string>
     <string-array name="privacy_paragraphs">
         <item>Rezepte, Fotos und Notizen liegen nur auf diesem Handy. Es gibt kein Konto, keine Werbung, kein Tracking und keine Weitergabe an Dritte.</item>
-        <item>Ins Internet geht die App nur auf Wunsch: bei „Aus Link übernehmen“ und beim Herunterladen des Sprachpakets für die Übersetzung. Bei „Aus Link übernehmen“ wird genau diese eine Seite geladen und, falls vorhanden, ihr Foto. Die Seite erfährt dabei – wie bei jedem Browser – die Internetadresse (IP-Adresse) des Handys, die Uhrzeit und die eingestellte Sprache. Cookies werden nicht gespeichert, Angaben zum Handy werden nicht mitgeschickt.</item>
+        <item>Ins Internet geht die App nur auf Wunsch: bei „Aus Link übernehmen“ und beim Herunterladen des Sprachpakets für die Übersetzung und des Erkennungspakets für die Spracheingabe. Bei „Aus Link übernehmen“ wird genau diese eine Seite geladen und, falls vorhanden, ihr Foto. Die Seite erfährt dabei – wie bei jedem Browser – die Internetadresse (IP-Adresse) des Handys, die Uhrzeit und die eingestellte Sprache. Cookies werden nicht gespeichert, Angaben zum Handy werden nicht mitgeschickt.</item>
         <item>Sonst verlassen Inhalte das Handy nur, wenn sie selbst geteilt oder gesichert werden. Notizen werden nie geteilt. Die Sicherungsdatei ist nicht verschlüsselt.</item>
-        <item>Das Sprachpaket kommt von der Projektseite auf GitHub. GitHub erfährt dabei die Internetadresse (IP-Adresse) des Handys und die Uhrzeit. Rezepte werden dabei nicht gesendet.</item>
-        <item>Texterkennung und Übersetzung laufen vollständig auf dem Handy, ohne Internet. Die automatische Cloud-Sicherung von Android ist abgeschaltet.</item>
+        <item>Das Sprachpaket und das Erkennungspaket für die Spracheingabe kommen von der Projektseite auf GitHub. GitHub erfährt dabei die Internetadresse (IP-Adresse) des Handys und die Uhrzeit. Rezepte werden dabei nicht gesendet.</item>
+        <item>Das Mikrofon wird nur für die Spracheingabe in der Kochansicht gebraucht und erst abgefragt, wenn der Mikrofon-Knopf zum ersten Mal angetippt wird. Es hört nur zu, solange der Knopf an ist, das Rezept offen und der Bildschirm an ist. Die Erkennung läuft vollständig auf dem Handy; es wird nichts aufgenommen, gespeichert oder gesendet.</item>
+        <item>Texterkennung, Übersetzung und Spracheingabe laufen vollständig auf dem Handy, ohne Internet. Die automatische Cloud-Sicherung von Android ist abgeschaltet.</item>
     </string-array>
 
     <!-- Bearbeiten -->
@@ -655,4 +657,27 @@
     <string name="speech_headset_action_next">Nächster Schritt</string>
     <string name="speech_headset_action_previous">Vorheriger Schritt</string>
     <string name="speech_headset_action_none">Nichts</string>
+    <!-- Spracheingabe (#80) -->
+    <string name="settings_section_voice_input">Spracheingabe</string>
+    <string name="voice_pack_title">Erkennungspaket Deutsch</string>
+    <string name="voice_pack_text">Für Sprachbefehle beim Kochen (Weiter, Zurück, Wiederholen, Stopp), erkannt auf dem Handy ohne Internet. Einmal herunterladen: etwa %1$s, belegt etwa %2$s auf dem Handy. Am besten über WLAN. Das Mikrofon hört nur zu, solange der Mikrofon-Knopf in der Kochleiste an ist.</string>
+    <string name="voice_pack_downloading">Erkennungspaket wird heruntergeladen …</string>
+    <string name="voice_pack_installed">Installiert, belegt %1$s. Sprachbefehle gehen in der Kochansicht über den Mikrofon-Knopf.</string>
+    <string name="voice_pack_delete_title">Erkennungspaket löschen?</string>
+    <string name="voice_pack_delete_text">Sprachbefehle gehen erst wieder, nachdem das Erkennungspaket neu heruntergeladen wurde.</string>
+    <string name="voice_pack_deleted">Erkennungspaket gelöscht</string>
+    <string name="voice_pack_error_connection">Download fehlgeschlagen: keine Verbindung. Internetverbindung prüfen und noch einmal versuchen.</string>
+    <string name="voice_pack_error_space">Nicht genug Speicherplatz auf dem Handy. Etwa %1$s freigeben und noch einmal versuchen.</string>
+    <string name="voice_pack_error_damaged">Das Erkennungspaket ist nicht vollständig angekommen. Noch einmal versuchen.</string>
+    <string name="voice_pack_error_unavailable">Das Erkennungspaket ist gerade nicht erreichbar. Später noch einmal versuchen.</string>
+    <string name="cook_bar_mic_on_description">Mikrofon für Sprachbefehle einschalten</string>
+    <string name="cook_bar_mic_off_description">Mikrofon ausschalten</string>
+    <string name="voice_starting">Mikrofon startet …</string>
+    <string name="voice_listening">Mikrofon ist an. Befehle: „Weiter“, „Zurück“, „Wiederholen“, „Stopp“, „Mikrofon aus“.</string>
+    <string name="voice_needs_pack">Die Spracheingabe braucht das Erkennungspaket aus den Einstellungen.</string>
+    <string name="voice_open_settings">Einstellungen</string>
+    <string name="voice_permission_denied">Das Mikrofon ist nicht erlaubt. In den Einstellungen des Handys freigeben, um Sprachbefehle zu nutzen.</string>
+    <string name="voice_error_microphone">Das Mikrofon lässt sich gerade nicht benutzen. Vielleicht verwendet es eine andere App.</string>
+    <string name="voice_error_memory">Nicht genug Arbeitsspeicher für die Spracheingabe.</string>
+    <string name="voice_error_other">Die Spracheingabe konnte nicht gestartet werden.</string>
 </resources>

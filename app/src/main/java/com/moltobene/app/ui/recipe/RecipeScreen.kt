@@ -1,9 +1,11 @@
 package com.moltobene.app.ui.recipe
 
+import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.icu.text.MeasureFormat
 import android.icu.util.Measure
@@ -11,34 +13,20 @@ import android.icu.util.MeasureUnit
 import android.net.Uri
 import android.os.SystemClock
 import android.text.format.Formatter
-import androidx.compose.foundation.background
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.relocation.BringIntoViewRequester
-import androidx.compose.foundation.relocation.bringIntoViewRequester
-import androidx.compose.material3.Button
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarResult
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.style.TextAlign
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
-import com.moltobene.app.data.speech.HeadsetAction
-import com.moltobene.app.data.speech.HeadsetMapping
-import com.moltobene.app.data.speech.SpeechOutput
-import com.moltobene.app.data.speech.SpeechState
-import com.moltobene.app.data.speech.SpokenText
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -48,10 +36,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -62,20 +53,23 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Scaffold
-import com.moltobene.app.ui.components.AppSnackbarHost
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -87,6 +81,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -98,6 +93,8 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
@@ -117,9 +114,14 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.LocaleList
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moltobene.app.R
@@ -136,26 +138,36 @@ import com.moltobene.app.data.ocr.TextLanguage
 import com.moltobene.app.data.share.PreparedShare
 import com.moltobene.app.data.share.RecipeShareText
 import com.moltobene.app.data.share.ShareLabels
+import com.moltobene.app.data.speech.HeadsetAction
+import com.moltobene.app.data.speech.HeadsetMapping
+import com.moltobene.app.data.speech.SpeechOutput
+import com.moltobene.app.data.speech.SpeechState
+import com.moltobene.app.data.speech.SpokenText
 import com.moltobene.app.data.translate.LanguagePack
 import com.moltobene.app.data.translate.RecipeTranslations
+import com.moltobene.app.data.voice.VoiceCommand
+import com.moltobene.app.data.voice.VoiceInput
+import com.moltobene.app.data.voice.VoiceProblem
+import com.moltobene.app.data.voice.VoiceState
+import com.moltobene.app.ui.components.AppSnackbarHost
 import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.components.CenteredMessage
-import com.moltobene.app.ui.components.TagLabels
 import com.moltobene.app.ui.components.DraftLabel
 import com.moltobene.app.ui.components.PageViewer
 import com.moltobene.app.ui.components.RecipePhoto
-import com.moltobene.app.ui.components.isLargeText
 import com.moltobene.app.ui.components.RecipePhotoLarge
+import com.moltobene.app.ui.components.TagLabels
+import com.moltobene.app.ui.components.isLargeText
 import com.moltobene.app.ui.theme.Spacing
+import java.io.File
+import java.util.Locale
+import kotlin.math.abs
+import kotlin.math.roundToInt
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlin.math.abs
-import kotlin.math.roundToInt
-import java.io.File
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -163,6 +175,7 @@ fun RecipeScreen(
     viewModel: RecipeViewModel,
     screenOn: ScreenOn,
     speech: SpeechOutput,
+    voice: VoiceInput,
     headsetButtons: Boolean = true,
     headsetMapping: HeadsetMapping = HeadsetMapping(),
     snackbarHostState: SnackbarHostState,
@@ -364,6 +377,7 @@ fun RecipeScreen(
                     onOpenSettings = onOpenSettings,
                 ),
                 speech = speech,
+                voice = voice,
                 headsetButtons = headsetButtons,
                 headsetMapping = headsetMapping,
                 snackbarHostState = snackbarHostState,
@@ -525,6 +539,7 @@ private fun RecipeContent(
     cooking: CookingState,
     translation: TranslationActions,
     speech: SpeechOutput,
+    voice: VoiceInput,
     headsetButtons: Boolean,
     headsetMapping: HeadsetMapping,
     snackbarHostState: SnackbarHostState,
@@ -641,6 +656,71 @@ private fun RecipeContent(
         onNext = { perform(headsetMapping.next) },
         onPrevious = { perform(headsetMapping.previous) },
     )
+
+    // Spracheingabe (#80): Der Mikrofon-Knopf in der Kochleiste schaltet das Zuhören an und aus. Das Mikrofon hört dauerhaft
+    // zu, bis es ausgeschaltet wird (Knopf oder Sprachbefehl), die Ansicht verlassen wird oder der Bildschirm ausgeht.
+    // Beim Vorlesen hört es das Vorlesen mit; deshalb gilt dann nur „Stopp“.
+    val voiceState by voice.state.collectAsStateWithLifecycle()
+    val listening = voiceState is VoiceState.Listening
+    val micBusy = voiceState is VoiceState.Starting || listening
+    fun onVoiceCommand(command: VoiceCommand) {
+        if (speaking && command != VoiceCommand.STOP) return
+        when (command) {
+            VoiceCommand.NEXT -> perform(HeadsetAction.NEXT)
+            VoiceCommand.PREVIOUS -> perform(HeadsetAction.PREVIOUS)
+            VoiceCommand.REPEAT -> currentIndex?.let { readStep(it) } ?: startReading()
+            VoiceCommand.READ -> startReading()
+            VoiceCommand.STOP -> speech.stop()
+            VoiceCommand.MICROPHONE_OFF -> voice.stop()
+        }
+    }
+    val latestVoiceCommand = rememberUpdatedState({ command: VoiceCommand -> onVoiceCommand(command) })
+    val context = LocalContext.current
+    val voiceScope = rememberCoroutineScope()
+    val microphoneDenied = stringResource(R.string.voice_permission_denied)
+    val voiceNeedsPack = stringResource(R.string.voice_needs_pack)
+    val voiceOpenSettings = stringResource(R.string.voice_open_settings)
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) voice.start { latestVoiceCommand.value(it) } else barMessage = microphoneDenied
+    }
+    fun toggleMicrophone() {
+        when {
+            micBusy -> voice.stop()
+            !voice.isAvailable() -> voiceScope.launch {
+                val result = snackbarHostState.showSnackbar(voiceNeedsPack, actionLabel = voiceOpenSettings)
+                if (result == SnackbarResult.ActionPerformed) translation.onOpenSettings()
+            }
+            ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED ->
+                voice.start { latestVoiceCommand.value(it) }
+            else -> permission.launch(Manifest.permission.RECORD_AUDIO)
+        }
+    }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_STOP) voice.stop() }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            voice.stop()
+        }
+    }
+    val voiceErrorMicrophone = stringResource(R.string.voice_error_microphone)
+    val voiceErrorMemory = stringResource(R.string.voice_error_memory)
+    val voiceErrorOther = stringResource(R.string.voice_error_other)
+    LaunchedEffect(voiceState) {
+        val failed = voiceState as? VoiceState.Failed ?: return@LaunchedEffect
+        barMessage = when (failed.problem) {
+            VoiceProblem.NO_PACK -> voiceNeedsPack
+            VoiceProblem.MICROPHONE -> voiceErrorMicrophone
+            VoiceProblem.LOW_MEMORY -> voiceErrorMemory
+            VoiceProblem.OTHER -> voiceErrorOther
+        }
+    }
+    val voiceHint = when (voiceState) {
+        VoiceState.Starting -> stringResource(R.string.voice_starting)
+        VoiceState.Listening -> stringResource(R.string.voice_listening)
+        else -> null
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
         // Der Übersetzungsbalken (Fortschritt, Hinweis, Fehler) steht fest unter der Leiste und wandert beim Blättern nicht
@@ -844,6 +924,9 @@ private fun RecipeContent(
                 stepNumber = currentIndex?.plus(1),
                 stepCount = recipe.steps.size,
                 message = barMessage,
+                voiceHint = voiceHint,
+                microphoneOn = micBusy,
+                onMicrophone = { toggleMicrophone() },
                 onPrevious = { move(cooking.onPreviousStep()) },
                 onRead = {
                     if (speaking) speech.stop() else startReading()
@@ -1012,7 +1095,7 @@ private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, onClic
 
 /**
  * Kochleiste (#79, #89): „Zurück“ und „Weiter“ nebeneinander – „Weiter“ ist der häufigste Knopf, deshalb betont –, davon
- * getrennt ganz rechts „Vorlesen“ als Lautsprecher-Symbol (beim Vorlesen als „Anhalten“-Symbol, Wunsch vom 14.10.2026). Darüber steht, welcher Schritt gerade dran ist
+ * getrennt ganz rechts das Mikrofon (Spracheingabe, #80) und „Vorlesen“ als Lautsprecher-Symbol (beim Vorlesen als „Anhalten“-Symbol, Wunsch vom 14.10.2026). Darüber steht, welcher Schritt gerade dran ist
  * („Schritt 2 von 5“, als Text, nicht nur Farbe). Mindestens 64 dp hoch. Bei großer Schrift stehen „Zurück“ und „Weiter“
  * oben, „Vorlesen“ darunter rechts, damit kein Wort mitten im Wort umbricht. Das Vorlesen startet nur auf Antippen.
  */
@@ -1023,6 +1106,9 @@ private fun CookingBar(
     stepNumber: Int?,
     stepCount: Int,
     message: String?,
+    voiceHint: String?,
+    microphoneOn: Boolean,
+    onMicrophone: () -> Unit,
     onPrevious: () -> Unit,
     onRead: () -> Unit,
     onNext: () -> Unit,
@@ -1033,6 +1119,8 @@ private fun CookingBar(
     val readDescription = stringResource(if (speaking) R.string.cook_bar_stop_description else R.string.cook_bar_read_description)
     val next = stringResource(R.string.cook_bar_next)
     val nextDescription = stringResource(R.string.cook_bar_next_description)
+    val microphoneIcon = if (microphoneOn) R.drawable.ic_mic_off else R.drawable.ic_mic
+    val microphoneDescription = stringResource(if (microphoneOn) R.string.cook_bar_mic_off_description else R.string.cook_bar_mic_on_description)
     val compact = isLargeText()
     Surface(color = MaterialTheme.colorScheme.surfaceContainer, tonalElevation = 3.dp, modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -1048,6 +1136,15 @@ private fun CookingBar(
                     textAlign = TextAlign.Center,
                 )
             }
+            if (voiceHint != null) {
+                Text(
+                    text = voiceHint,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
+                    textAlign = TextAlign.Center,
+                )
+            }
             if (compact) {
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
                     BarButton(previous, previousDescription, hasSteps, onPrevious)
@@ -1055,6 +1152,7 @@ private fun CookingBar(
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
                     Spacer(Modifier.weight(1f))
+                    BarIconButton(microphoneIcon, microphoneDescription, true, onMicrophone, active = microphoneOn)
                     BarIconButton(readIcon, readDescription, hasSteps, onRead)
                 }
             } else {
@@ -1062,7 +1160,8 @@ private fun CookingBar(
                     BarButton(previous, previousDescription, hasSteps, onPrevious)
                     BarButton(next, nextDescription, hasSteps, onNext, primary = true)
                     // Lücke, damit „Vorlesen“ getrennt von den beiden Schritt-Knöpfen ganz rechts steht.
-                    Spacer(Modifier.width(Spacing.l))
+                    Spacer(Modifier.width(Spacing.m))
+                    BarIconButton(microphoneIcon, microphoneDescription, true, onMicrophone, active = microphoneOn)
                     BarIconButton(readIcon, readDescription, hasSteps, onRead)
                 }
             }
@@ -1090,14 +1189,14 @@ private fun RowScope.BarButton(text: String, description: String, enabled: Boole
 
 /** Knopf nur mit Symbol (z. B. „Vorlesen“ als Lautsprecher); die Beschreibung für den Screenreader steht in strings.xml. */
 @Composable
-private fun BarIconButton(icon: Int, description: String, enabled: Boolean, onClick: () -> Unit) {
-    FilledTonalButton(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = Modifier.width(72.dp).heightIn(min = 64.dp).semantics { contentDescription = description },
-        contentPadding = PaddingValues(Spacing.xs),
-    ) {
-        Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(28.dp))
+private fun BarIconButton(icon: Int, description: String, enabled: Boolean, onClick: () -> Unit, active: Boolean = false) {
+    val modifier = Modifier.width(64.dp).heightIn(min = 64.dp).semantics { contentDescription = description }
+    val content: @Composable () -> Unit = { Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(28.dp)) }
+    if (active) {
+        // Eingeschaltet (z. B. das Mikrofon hört zu): betont und mit anderem Symbol, nicht nur durch die Farbe.
+        Button(onClick = onClick, enabled = enabled, modifier = modifier, contentPadding = PaddingValues(Spacing.xs)) { content() }
+    } else {
+        FilledTonalButton(onClick = onClick, enabled = enabled, modifier = modifier, contentPadding = PaddingValues(Spacing.xs)) { content() }
     }
 }
 

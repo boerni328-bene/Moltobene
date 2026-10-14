@@ -13,11 +13,15 @@ enum class VoiceCommand {
 }
 
 /**
- * Die Befehle der Spracheingabe (#80) auf Deutsch und ihre Zuordnung. Die Erkennung kennt nur diese Wörter
- * ([GERMAN_GRAMMAR]); alles andere wird als „[unk]“ verworfen. Reines Kotlin, per Unit-Test prüfbar.
+ * Die Befehle der Spracheingabe (#80) auf Deutsch und ihre Zuordnung. Die Erkennung kennt die Befehle und zusätzlich häufige
+ * Alltagswörter als „Köder“ ([DECOY_WORDS]): Ohne sie presst eine Erkennung, die nur ein paar Wörter kennt, normales Gerede
+ * auf die nächstliegenden Befehle (Test mit dem echten Modell: 9 von 20 Alltagssätzen lösten einen Befehl aus, mit Ködern
+ * keiner). Ein Befehl zählt nur, wenn der **ganze** erkannte Satz genau dieser Befehl ist. Reines Kotlin, per Unit-Test
+ * prüfbar.
  *
  * Die Wörter stehen hier und nicht in `strings.xml`: Sie hängen an der Sprache des Erkennungspakets, nicht an der
- * Oberfläche (wie die gesprochenen Wörter beim Vorlesen).
+ * Oberfläche (wie die gesprochenen Wörter beim Vorlesen). Die Befehle und Köder liest auch der Sprachtest in
+ * `.github/erkennungspaket/sprachtest.py` aus dieser Datei.
  */
 object VoiceCommands {
     /** Sprechweise → Befehl, genau so, wie sie in der Grammatik der Erkennung steht. */
@@ -27,6 +31,8 @@ object VoiceCommands {
         "wiederholen" to VoiceCommand.REPEAT,
         "vorlesen" to VoiceCommand.READ,
         "stopp" to VoiceCommand.STOP,
+        "stop" to VoiceCommand.STOP,
+        "halt" to VoiceCommand.STOP,
         "mikro aus" to VoiceCommand.MICROPHONE_OFF,
         "mikrofon aus" to VoiceCommand.MICROPHONE_OFF,
         "ausschalten" to VoiceCommand.MICROPHONE_OFF,
@@ -35,27 +41,35 @@ object VoiceCommands {
         "fertig" to VoiceCommand.MICROPHONE_OFF,
     )
 
-    /** Der Platzhalter der Erkennung für alles, was kein Befehl ist. */
+    /**
+     * Häufige Alltags- und Küchenwörter, die die Erkennung kennen soll, damit normales Gerede nicht zum Befehl wird. Keines
+     * davon darf selbst ein Befehlswort sein ([GERMAN]).
+     */
+    internal const val DECOY_WORDS: String = """
+        ich du er sie es wir ihr und oder aber das die der den dem ein eine einen einem ist sind war hat haben wird kann
+        muss soll will nicht kein mit ohne für von zu bei nach vor auf an in im am um aus dann wenn weil auch noch schon nur
+        sehr mehr weniger viel wenig alle man mal gleich jetzt später heute morgen hier da dort wo wie was wann warum wer
+        bitte danke ja nein gut schön lecker schnell langsam heiß kalt warm groß klein neu alt
+        salz pfeffer zwiebel zwiebeln knoblauch öl butter mehl eier ei milch wasser zucker nudeln reis kartoffeln tomaten
+        fleisch gemüse suppe soße pfanne topf herd ofen minuten stunde gramm esslöffel teelöffel kochen braten backen rühren
+        schneiden mischen geben nehmen brauchen holen gehen kommen machen sagen sehen essen trinken einkaufen telefon licht
+        tür fenster kind kinder hunger durst zeit tag abend mittag frühstück musik radio fernseher film nachrichten wetter
+    """
+
+    /** Der Platzhalter der Erkennung für alles, was weder Befehl noch Köder ist. */
     private const val UNKNOWN = "[unk]"
 
-    /** Grammatik für die Erkennung als JSON-Liste, z. B. `["weiter", "zurück", …, "[unk]"]`. */
-    val GERMAN_GRAMMAR: String = (GERMAN.keys + UNKNOWN).joinToString(prefix = "[", postfix = "]") { "\"$it\"" }
+    /** Grammatik für die Erkennung als JSON-Liste, z. B. `["weiter", "zurück", …, "ich", …, "[unk]"]`. */
+    val GERMAN_GRAMMAR: String = (GERMAN.keys + DECOY_WORDS.trim().split(Regex("\\s+")).distinct() + UNKNOWN)
+        .joinToString(prefix = "[", postfix = "]") { "\"$it\"" }
 
     /**
-     * Der erste Befehl im erkannten Text; null, wenn keiner dabei ist. Mehrere Befehle in einem Satz („weiter weiter“)
-     * zählen als einer, damit ein Wort, das die Erkennung doppelt hört, nicht zwei Schritte weiterschaltet. Längere
-     * Wendungen („mikrofon aus“) haben Vorrang vor Teilwörtern.
+     * Der Befehl, wenn der **ganze** erkannte Text genau ein Befehl ist; sonst null. Groß-/Kleinschreibung und
+     * überzählige Leerzeichen sind egal. Alles andere – auch ein Befehl mitten in einem Satz („wir gehen weiter
+     * einkaufen“) – gilt als Gerede und löst nichts aus.
      */
     fun parse(text: String?): VoiceCommand? {
         val normalized = text?.trim()?.lowercase()?.replace(Regex("\\s+"), " ").orEmpty()
-        if (normalized.isEmpty()) return null
-        // Vom Anfang her: das erste Vorkommen, bei gleicher Stelle die längere Wendung.
-        return GERMAN.entries
-            .mapNotNull { (phrase, command) ->
-                val at = Regex("(^| )${Regex.escape(phrase)}( |$)").find(normalized)?.range?.first
-                if (at == null) null else Triple(at, phrase.length, command)
-            }
-            .minWithOrNull(compareBy<Triple<Int, Int, VoiceCommand>> { it.first }.thenByDescending { it.second })
-            ?.third
+        return GERMAN[normalized]
     }
 }

@@ -84,7 +84,9 @@ fun SettingsScreen(
     var showWhatsNew by rememberSaveable { mutableStateOf(false) }
     var showPrivacy by rememberSaveable { mutableStateOf(false) }
     var confirmDeletePack by rememberSaveable { mutableStateOf(false) }
+    var confirmDeleteVoicePack by rememberSaveable { mutableStateOf(false) }
     val languagePack by viewModel.languagePackState.collectAsStateWithLifecycle()
+    val voicePack by viewModel.voicePackState.collectAsStateWithLifecycle()
     val appearance by viewModel.appearance.collectAsStateWithLifecycle()
     val screenOn by viewModel.screenOn.collectAsStateWithLifecycle()
     val startScreen by viewModel.startScreen.collectAsStateWithLifecycle()
@@ -173,6 +175,13 @@ fun SettingsScreen(
                 onSample = viewModel::playSample,
                 onStopSpeech = viewModel::stopSpeech,
             )
+            SectionHeader(stringResource(R.string.settings_section_voice_input))
+            VoicePackItem(
+                state = voicePack,
+                onDownload = viewModel::downloadVoicePack,
+                onCancel = viewModel::cancelVoicePack,
+                onDelete = { confirmDeleteVoicePack = true },
+            )
             SectionHeader(stringResource(R.string.settings_section_appearance))
             AppearanceSection(
                 appearance = appearance ?: Appearance(),
@@ -219,6 +228,25 @@ fun SettingsScreen(
             },
             dismissButton = {
                 TextButton(onClick = { confirmDeletePack = false }) { Text(stringResource(R.string.cancel)) }
+            },
+        )
+    }
+
+    if (confirmDeleteVoicePack) {
+        AlertDialog(
+            onDismissRequest = { confirmDeleteVoicePack = false },
+            title = { Text(stringResource(R.string.voice_pack_delete_title)) },
+            text = { Text(stringResource(R.string.voice_pack_delete_text)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirmDeleteVoicePack = false
+                        viewModel.deleteVoicePack()
+                    },
+                ) { Text(stringResource(R.string.delete)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmDeleteVoicePack = false }) { Text(stringResource(R.string.cancel)) }
             },
         )
     }
@@ -283,6 +311,7 @@ private fun eventText(event: SettingsEvent): String = when (event) {
     )
     SettingsEvent.RestoreFailed -> stringResource(R.string.restore_error_failed)
     SettingsEvent.LanguagePackDeleted -> stringResource(R.string.language_pack_deleted)
+    SettingsEvent.VoicePackDeleted -> stringResource(R.string.voice_pack_deleted)
 }
 
 /** Sprachpaket für „Rezept übersetzen“ (#60): Größe vorab, Fortschritt, Fehler mit dem nächsten Schritt. */

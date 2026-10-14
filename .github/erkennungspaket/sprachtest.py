@@ -14,18 +14,17 @@ import wave
 
 from vosk import KaldiRecognizer, Model, SetLogLevel
 
-BEFEHLE = [
-    "weiter", "zurück", "wiederholen", "vorlesen", "stopp",
-    "mikro aus", "mikrofon aus", "ausschalten", "ende", "beenden", "fertig",
-]
-KOEDER = """ich du er sie es wir ihr und oder aber das die der den dem ein eine einen einem ist sind war hat haben wird kann
-muss soll will nicht kein mit ohne für von zu bei nach vor auf an in im am um dann wenn weil auch noch schon nur sehr
-mehr weniger viel wenig alle man mal gleich jetzt später heute morgen hier da dort wo wie was wann warum wer bitte danke
-ja nein gut schön lecker schnell langsam heiß kalt warm groß klein neu alt
-salz pfeffer zwiebel zwiebeln knoblauch öl butter mehl eier ei milch wasser zucker nudeln reis kartoffeln tomaten fleisch
-gemüse suppe soße pfanne topf herd ofen minuten stunde gramm esslöffel teelöffel kochen braten backen rühren schneiden
-mischen geben nehmen brauchen holen gehen kommen machen sagen sehen essen trinken einkaufen telefon licht tür fenster kind
-kinder hunger durst zeit tag abend mittag frühstück musik radio fernseher film nachrichten wetter""".split()
+def _lese_app_listen():
+    """Befehle und Köder stehen nur in VoiceCommands.kt; der Test liest sie von dort."""
+    import re
+    quelle = open(os.path.join(os.path.dirname(__file__), "..", "..", "app", "src", "main", "java", "com", "moltobene", "app",
+                               "data", "voice", "VoiceCommands.kt"), encoding="utf-8").read()
+    befehle = re.findall(r'^\s+"([^"]+)" to VoiceCommand\.', quelle, re.M)
+    koeder = re.search(r'DECOY_WORDS: String = """(.*?)"""', quelle, re.S).group(1).split()
+    return befehle, koeder
+
+
+BEFEHLE, KOEDER = _lese_app_listen()
 ALLTAG = [
     "ich brauche noch zwei eier und etwas mehl",
     "die zwiebeln müssen goldbraun werden",
@@ -80,7 +79,7 @@ def main(modell_pfad, arbeit):
     modell = Model(modell_pfad)
     listen = {
         "A nur Befehle": BEFEHLE + ["[unk]"],
-        "B Befehle + Köder": BEFEHLE + sorted(set(KOEDER) - {"aus"} | {"aus"}) + ["[unk]"],
+        "B Befehle + Köder (wie in der App)": BEFEHLE + list(dict.fromkeys(KOEDER)) + ["[unk]"],
     }
     # Aufnahmen einmal erzeugen.
     befehlsaufnahmen = []

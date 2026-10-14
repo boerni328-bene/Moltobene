@@ -43,6 +43,7 @@ import androidx.test.runner.lifecycle.Stage
 import com.moltobene.app.MainActivity
 import com.moltobene.app.MoltobeneApplication
 import com.moltobene.app.R
+import com.moltobene.app.data.voice.VoiceCommand
 import com.moltobene.app.data.Appearance
 import com.moltobene.app.data.Palette
 import com.moltobene.app.data.ScreenOn
@@ -407,6 +408,65 @@ class AppTourTest(private val variant: DisplayVariant) {
     private fun shell(command: String): String {
         val descriptor = InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command)
         return android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { it.readBytes().decodeToString() }
+    }
+
+    /**
+     * Spracheingabe (#80): Ohne Erkennungspaket weist der Mikrofon-Knopf auf die Einstellungen hin. Mit Paket (nachgestellt)
+     * und erteilter Berechtigung hört das Mikrofon zu; „Weiter“ liest den ersten Schritt vor, beim Vorlesen gilt nur „Stopp“,
+     * „Mikrofon aus“ schaltet wieder ab.
+     */
+    @Test
+    fun spracheingabe() {
+        val speech = SampleSpeech()
+        container().speech = speech
+        addSampleRecipes()
+
+        // Ohne Erkennungspaket: Hinweis mit dem Weg in die Einstellungen.
+        container().voice = SampleVoice(available = false)
+        openRecipe(SampleRecipes.TOMATO_SAUCE)
+        waitForText("800 g reife Tomaten")
+        composeRule.onNodeWithContentDescription(text(R.string.cook_bar_mic_on_description)).performClick()
+        waitForText(text(R.string.voice_needs_pack))
+        screenshot("12q-spracheingabe-ohne-paket")
+        composeRule.onNodeWithText(text(R.string.voice_open_settings)).performClick()
+        waitForText(text(R.string.settings_section_voice_input))
+        screenshot("12r-spracheingabe-einstellungen")
+        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+        waitForText("800 g reife Tomaten")
+
+        // Mit Erkennungspaket (nachgestellt) und erteilter Berechtigung.
+        val voice = SampleVoice(available = true)
+        container().voice = voice
+        TestDevice.shell("pm grant ${activity.packageName} android.permission.RECORD_AUDIO")
+        composeRule.onNodeWithContentDescription(text(R.string.cook_bar_mic_on_description)).performClick()
+        waitForText(text(R.string.voice_listening))
+        waitForDescription(text(R.string.cook_bar_mic_off_description))
+        screenshot("12s-spracheingabe-hoert-zu")
+
+        voice.say(VoiceCommand.NEXT)
+        composeRule.waitUntil(TIMEOUT_MILLIS) { speech.spoken.isNotEmpty() }
+        assertEquals("Schritt 1.", speech.spoken.first().first())
+        waitForDescription(text(R.string.cook_bar_stop_description))
+
+        // Beim Vorlesen hört das Mikrofon das Vorlesen mit: „Weiter“ wird ignoriert, „Stopp“ gilt.
+        val before = speech.spoken.size
+        voice.say(VoiceCommand.NEXT)
+        Thread.sleep(500)
+        assertEquals(before, speech.spoken.size)
+        voice.say(VoiceCommand.STOP)
+        waitForDescription(text(R.string.cook_bar_read_description))
+
+        // „Weiter“ nach dem Vorlesen liest den nächsten Schritt.
+        voice.say(VoiceCommand.NEXT)
+        composeRule.waitUntil(TIMEOUT_MILLIS) { speech.spoken.size > before }
+        assertEquals("Schritt 2.", speech.spoken.last().first())
+        voice.say(VoiceCommand.STOP)
+        waitForDescription(text(R.string.cook_bar_read_description))
+
+        // „Mikrofon aus“ schaltet das Zuhören ab.
+        voice.say(VoiceCommand.MICROPHONE_OFF)
+        waitForDescription(text(R.string.cook_bar_mic_on_description))
+        composeRule.onAllNodesWithText(text(R.string.voice_listening)).assertCountEquals(0)
     }
 
     /** Ohne Stimme (#79): ehrliche Meldung statt falscher Stimme, mit dem Weg in die Einstellungen. */
