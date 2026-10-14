@@ -55,6 +55,36 @@ enum class SpeechPreset(val key: String, val rate: Int, val pitch: Int) {
     LIVELY("lively", rate = 115, pitch = 110),
 }
 
+/** Was eine Kopfhörertaste in der Kochansicht auslösen kann (#79); feste englische Kennung zum Merken. */
+enum class HeadsetAction(val key: String) {
+    /** Vorlesen starten, wenn gerade nicht vorgelesen wird, sonst anhalten. */
+    TOGGLE("toggle"),
+    NEXT("next"),
+    PREVIOUS("previous"),
+    NONE("none"),
+    ;
+
+    companion object {
+        fun fromKey(key: String?): HeadsetAction? = entries.firstOrNull { it.key == key }
+    }
+}
+
+/** Die drei Befehle, die Kopfhörer an Android schicken; welche Geste dahinter steckt, entscheidet der Kopfhörer. */
+enum class HeadsetButton { PLAY_PAUSE, NEXT, PREVIOUS }
+
+/** Belegung der Kopfhörertasten (#79): Standard wie bei Musik-Apps, in den Einstellungen änderbar. */
+data class HeadsetMapping(
+    val playPause: HeadsetAction = HeadsetAction.TOGGLE,
+    val next: HeadsetAction = HeadsetAction.NEXT,
+    val previous: HeadsetAction = HeadsetAction.PREVIOUS,
+) {
+    fun actionFor(button: HeadsetButton): HeadsetAction = when (button) {
+        HeadsetButton.PLAY_PAUSE -> playPause
+        HeadsetButton.NEXT -> next
+        HeadsetButton.PREVIOUS -> previous
+    }
+}
+
 /**
  * Einstellungen des Vorlesens (#85): die gewählte Stimme je Sprache (leer = beste passende), Tempo und Tonhöhe in Prozent
  * von „normal“. Nur auf dem Handy gemerkt, nicht in der Sicherung.
@@ -66,7 +96,23 @@ data class SpeechSettings(
     val pitch: Int = 100,
     /** Kopfhörertasten beim Kochen (#79); an, bis jemand sie abschaltet. */
     val headsetButtons: Boolean = true,
+    /** Belegung der Kopfhörertasten (#79) als Kennungen von [HeadsetAction]; Unbekanntes ergibt die Standardbelegung. */
+    val headsetPlayPause: String = HeadsetAction.TOGGLE.key,
+    val headsetNext: String = HeadsetAction.NEXT.key,
+    val headsetPrevious: String = HeadsetAction.PREVIOUS.key,
 ) {
+    fun headsetMapping() = HeadsetMapping(
+        playPause = HeadsetAction.fromKey(headsetPlayPause) ?: HeadsetAction.TOGGLE,
+        next = HeadsetAction.fromKey(headsetNext) ?: HeadsetAction.NEXT,
+        previous = HeadsetAction.fromKey(headsetPrevious) ?: HeadsetAction.PREVIOUS,
+    )
+
+    fun withHeadsetAction(button: HeadsetButton, action: HeadsetAction) = when (button) {
+        HeadsetButton.PLAY_PAUSE -> copy(headsetPlayPause = action.key)
+        HeadsetButton.NEXT -> copy(headsetNext = action.key)
+        HeadsetButton.PREVIOUS -> copy(headsetPrevious = action.key)
+    }
+
     fun voiceFor(language: String): String? = voices[language.lowercase()]
 
     fun withVoice(language: String, name: String?): SpeechSettings {
@@ -115,6 +161,9 @@ data class SpeechSettings(
                 rate = parsed.rate.coerceIn(RATE_MIN, RATE_MAX),
                 pitch = parsed.pitch.coerceIn(PITCH_MIN, PITCH_MAX),
                 headsetButtons = parsed.headsetButtons,
+                headsetPlayPause = (HeadsetAction.fromKey(parsed.headsetPlayPause) ?: HeadsetAction.TOGGLE).key,
+                headsetNext = (HeadsetAction.fromKey(parsed.headsetNext) ?: HeadsetAction.NEXT).key,
+                headsetPrevious = (HeadsetAction.fromKey(parsed.headsetPrevious) ?: HeadsetAction.PREVIOUS).key,
             )
         }
     }

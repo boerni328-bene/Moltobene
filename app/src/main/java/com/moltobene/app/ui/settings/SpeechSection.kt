@@ -3,6 +3,8 @@ package com.moltobene.app.ui.settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -41,6 +43,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import com.moltobene.app.R
+import com.moltobene.app.data.speech.HeadsetAction
+import com.moltobene.app.data.speech.HeadsetButton
 import com.moltobene.app.data.speech.SpeechPreset
 import com.moltobene.app.data.speech.SpeechSettings
 import com.moltobene.app.data.speech.VoiceInfo
@@ -132,6 +136,16 @@ internal fun SpeechSection(
             onValueChange = { on -> onChange { it.withHeadsetButtons(on) } },
         ),
     )
+    if (settings.headsetButtons) {
+        val mapping = settings.headsetMapping()
+        HeadsetButton.entries.forEach { button ->
+            HeadsetMappingRow(
+                label = stringResource(headsetButtonLabel(button)),
+                selected = mapping.actionFor(button),
+                onSelect = { action -> onChange { it.withHeadsetAction(button, action) } },
+            )
+        }
+    }
 
     choosing?.let { language ->
         VoiceDialog(
@@ -149,6 +163,37 @@ internal fun SpeechSection(
 }
 
 @Composable
+private fun headsetButtonLabel(button: HeadsetButton): Int = when (button) {
+    HeadsetButton.PLAY_PAUSE -> R.string.speech_headset_button_play_pause
+    HeadsetButton.NEXT -> R.string.speech_headset_button_next
+    HeadsetButton.PREVIOUS -> R.string.speech_headset_button_previous
+}
+
+private fun headsetActionLabel(action: HeadsetAction): Int = when (action) {
+    HeadsetAction.TOGGLE -> R.string.speech_headset_action_toggle
+    HeadsetAction.NEXT -> R.string.speech_headset_action_next
+    HeadsetAction.PREVIOUS -> R.string.speech_headset_action_previous
+    HeadsetAction.NONE -> R.string.speech_headset_action_none
+}
+
+/** Eine Kopfhörertaste und die Wahl, was sie in der Kochansicht auslöst; die Wahl bricht bei großer Schrift um. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun HeadsetMappingRow(label: String, selected: HeadsetAction, onSelect: (HeadsetAction) -> Unit) {
+    Column(modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.xs)) {
+        Text(label, style = MaterialTheme.typography.bodyLarge)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+            HeadsetAction.entries.forEach { action ->
+                FilterChip(
+                    selected = selected == action,
+                    onClick = { onSelect(action) },
+                    label = { Text(stringResource(headsetActionLabel(action))) },
+                )
+            }
+        }
+    }
+}
+
 private fun presetLabel(preset: SpeechPreset): Int = when (preset) {
     SpeechPreset.RELAXED -> R.string.speech_preset_relaxed
     SpeechPreset.NORMAL -> R.string.speech_preset_normal

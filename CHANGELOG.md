@@ -3,6 +3,14 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.47.0] – 2026-10-14 (versionCode 79)
+
+### Neu
+- **Kopfhörertasten einstellbar.** In den Einstellungen unter „Vorlesen“ steht jetzt, was die Tasten Wiedergabe/Pause, Weiter und Zurück beim Kochen auslösen: Vorlesen starten/anhalten, nächster Schritt, vorheriger Schritt oder nichts. Das hilft bei Kopfhörern, die Tipp-Gesten selbst umwandeln: Welche Geste welchen Befehl sendet, legt der Kopfhörer fest, oft in dessen eigener App; in Moltobene lässt sich jetzt wählen, was dieser Befehl bewirkt.
+
+### Geändert
+- Der Hinweistext zu den Kopfhörertasten sagt nicht mehr, dass zwei Drücke „Weiter“ und drei „Zurück“ sind. Das gilt nur für manche Kopfhörer mit Kabel.
+
 ## [0.46.1] – 2026-10-14 (versionCode 78)
 
 Keine sichtbaren Änderungen an der App. Vorbereitung der Spracheingabe: Das Erkennungspaket für Deutsch lässt sich nachvollziehbar bauen, prüfen und von der App sicher entpacken. Es gibt noch keinen Knopf dafür und noch keine Berechtigung.

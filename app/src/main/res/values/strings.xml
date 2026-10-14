@@ -236,6 +236,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Headset buttons: In Settings under “Read aloud”, choose what the play/pause, next and previous buttons do while cooking. This also covers headsets that convert gestures themselves.</item>
         <item>Dough calculator: every value has a slider with a number you can tap and type; the “Numbers | Sliders” switch is gone, plus and minus remain only for small whole numbers.</item>
         <item>“Default 250 g” with “To default” appears only when a value differs from its default.</item>
 
@@ -393,7 +394,7 @@
     <string name="speech_sample">Sample</string>
     <string name="speech_headset_title">Headset buttons</string>
     <string name="speech_headset_switch">Headset buttons while cooking</string>
-    <string name="speech_headset_note">After reading aloud has been started once in a recipe, play/pause, next and previous on the headset control reading aloud. Press the headset button twice for the next step and three times for the previous one. While the recipe is open, a music app does not get these buttons.</string>
+    <string name="speech_headset_note">After reading aloud has been started once in a recipe, play/pause, next and previous on the headset control reading aloud. Which gesture sends which button (for example tapping twice or three times) is decided by the headset, often in its own app. Below, choose what each button does in Moltobene. While the recipe is open, a music app does not get these buttons.</string>
     <!-- Einstellungen: Darstellung (Hell/Dunkel und Farbwelt) -->
     <string name="settings_section_appearance">Appearance</string>
     <string name="appearance_mode">Light or dark</string>
@@ -657,4 +658,11 @@
     <!-- Cooking bar (#89) -->
     <string name="cook_step_of">Step %1$d of %2$d</string>
     <string name="cook_bar_more">More cooking actions</string>
+    <string name="speech_headset_button_play_pause">Play/pause button</string>
+    <string name="speech_headset_button_next">Next button</string>
+    <string name="speech_headset_button_previous">Previous button</string>
+    <string name="speech_headset_action_toggle">Start/stop reading</string>
+    <string name="speech_headset_action_next">Next step</string>
+    <string name="speech_headset_action_previous">Previous step</string>
+    <string name="speech_headset_action_none">Nothing</string>
 </resources>
