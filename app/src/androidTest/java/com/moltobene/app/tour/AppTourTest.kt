@@ -772,7 +772,7 @@ class AppTourTest(private val variant: DisplayVariant) {
 
         composeRule.onNodeWithText(text(R.string.translation_open_settings)).performClick()
         waitForText(text(R.string.language_pack_title))
-        composeRule.onNodeWithText(text(R.string.language_pack_download)).performScrollTo()
+        composeRule.onNodeWithText(text(R.string.language_pack_title)).performScrollTo()
         screenshot("12f-einstellungen-sprachpaket")
     }
 
