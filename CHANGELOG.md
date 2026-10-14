@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.47.2] – 2026-10-14 (versionCode 81)
+
+### Geändert
+- **„Vorlesen“ als Lautsprecher-Symbol.** In der Kochleiste steht rechts statt des Texts „Vorlesen“ ein Lautsprecher; beim Vorlesen wird daraus ein „Anhalten“-Symbol. Der Screenreader sagt weiterhin „Aktuellen Schritt vorlesen“ bzw. „Vorlesen anhalten“.
+
 ## [0.47.1] – 2026-10-14 (versionCode 80)
 
 ### Geändert

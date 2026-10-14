@@ -1006,7 +1006,7 @@ private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, onClic
 
 /**
  * Kochleiste (#79, #89): „Zurück“ und „Weiter“ nebeneinander – „Weiter“ ist der häufigste Knopf, deshalb betont –, davon
- * getrennt ganz rechts „Vorlesen“ (beim Vorlesen „Anhalten“). Darüber steht, welcher Schritt gerade dran ist
+ * getrennt ganz rechts „Vorlesen“ als Lautsprecher-Symbol (beim Vorlesen als „Anhalten“-Symbol, Wunsch vom 14.10.2026). Darüber steht, welcher Schritt gerade dran ist
  * („Schritt 2 von 5“, als Text, nicht nur Farbe). Mindestens 64 dp hoch. Bei großer Schrift stehen „Zurück“ und „Weiter“
  * oben, „Vorlesen“ darunter rechts, damit kein Wort mitten im Wort umbricht. Das Vorlesen startet nur auf Antippen.
  */
@@ -1023,7 +1023,7 @@ private fun CookingBar(
 ) {
     val previous = stringResource(R.string.cook_bar_previous)
     val previousDescription = stringResource(R.string.cook_bar_previous_description)
-    val read = stringResource(if (speaking) R.string.cook_bar_stop else R.string.cook_bar_read)
+    val readIcon = if (speaking) R.drawable.ic_stop else R.drawable.ic_volume_up
     val readDescription = stringResource(if (speaking) R.string.cook_bar_stop_description else R.string.cook_bar_read_description)
     val next = stringResource(R.string.cook_bar_next)
     val nextDescription = stringResource(R.string.cook_bar_next_description)
@@ -1049,7 +1049,7 @@ private fun CookingBar(
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
                     Spacer(Modifier.weight(1f))
-                    BarButton(read, readDescription, hasSteps, onRead)
+                    BarIconButton(readIcon, readDescription, hasSteps, onRead)
                 }
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
@@ -1057,7 +1057,7 @@ private fun CookingBar(
                     BarButton(next, nextDescription, hasSteps, onNext, primary = true)
                     // Lücke, damit „Vorlesen“ getrennt von den beiden Schritt-Knöpfen ganz rechts steht.
                     Spacer(Modifier.width(Spacing.l))
-                    BarButton(read, readDescription, hasSteps, onRead)
+                    BarIconButton(readIcon, readDescription, hasSteps, onRead)
                 }
             }
         }
@@ -1079,6 +1079,19 @@ private fun RowScope.BarButton(text: String, description: String, enabled: Boole
         FilledTonalButton(onClick = onClick, enabled = enabled, modifier = modifier, contentPadding = padding) {
             Text(text, textAlign = TextAlign.Center)
         }
+    }
+}
+
+/** Knopf nur mit Symbol (z. B. „Vorlesen“ als Lautsprecher); die Beschreibung für den Screenreader steht in strings.xml. */
+@Composable
+private fun BarIconButton(icon: Int, description: String, enabled: Boolean, onClick: () -> Unit) {
+    FilledTonalButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier.width(72.dp).heightIn(min = 64.dp).semantics { contentDescription = description },
+        contentPadding = PaddingValues(Spacing.xs),
+    ) {
+        Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(28.dp))
     }
 }
 

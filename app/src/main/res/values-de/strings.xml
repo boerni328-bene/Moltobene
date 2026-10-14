@@ -356,9 +356,7 @@
     <string name="cook_bar_previous_description">Vorheriger Schritt</string>
     <string name="cook_bar_next">Weiter</string>
     <string name="cook_bar_next_description">Nächster Schritt</string>
-    <string name="cook_bar_read">Vorlesen</string>
     <string name="cook_bar_read_description">Aktuellen Schritt vorlesen</string>
-    <string name="cook_bar_stop">Anhalten</string>
     <string name="cook_bar_stop_description">Vorlesen anhalten</string>
     <string name="cook_last_step">Letzter Schritt</string>
     <string name="speech_no_voice">Keine Stimme für %1$s ohne Internet. Eine lässt sich in den Einstellungen des Handys laden.</string>
