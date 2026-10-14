@@ -1,36 +1,157 @@
 name: Erkennungspaket
 
-# Erkennungspaket für die Spracheingabe (#80): Erkundung der Vosk-Modelle (Apache 2.0) von alphacephei.com.
-# Läuft nur auf Wunsch („Run workflow“). Lädt die kleinen Modelle für Deutsch und Englisch, listet Größe, Dateien und
-# Lizenztext auf und berechnet die Prüfsummen, damit das Paket danach mit festen Werten gebaut werden kann.
+# Erkennungspaket für die Spracheingabe (#80): baut es nachvollziehbar aus dem Originalmodell von Alpha Cephei (Vosk,
+# Apache 2.0) und prüft, ob die App das Paket annimmt. Veröffentlicht wird es nur auf ausdrücklichen Wunsch
+# (Run workflow auf main) als eigenes Release, das die App auf Wunsch einmal herunterlädt.
 on:
   push:
     branches: ["claude/**"]
     paths:
-      - ".github/workflows/erkennungspaket.yml"
       - ".github/erkennungspaket/**"
+      - ".github/workflows/erkennungspaket.yml"
+      - "app/src/main/java/com/moltobene/app/data/voice/**"
+      - "app/src/test/java/com/moltobene/app/data/voice/**"
   workflow_dispatch:
+    inputs:
+      veroeffentlichen:
+        description: "Als Release veröffentlichen (nur auf main)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
+concurrency:
+  group: erkennungspaket-${{ github.ref }}
+  cancel-in-progress: true
+
+# Alle Actions sind auf feste Commit-Kennungen angepinnt (Schutz vor veränderten Versionen).
 jobs:
-  erkunden:
+  paket:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.paket.outputs.version }}
+      manifest: ${{ steps.paket.outputs.manifest }}
+
     steps:
-      - name: Modelle laden und untersuchen
+      - name: Code auschecken
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Erkennungspaket bauen
+        id: paket
         run: |
-          set -e
-          mkdir -p "$RUNNER_TEMP/modelle" && cd "$RUNNER_TEMP/modelle"
-          for NAME in vosk-model-small-de-0.15 vosk-model-small-en-us-0.15; do
-            curl -fsSL -o "$NAME.zip" "https://alphacephei.com/vosk/models/$NAME.zip"
-            echo "=== $NAME"
-            ls -l "$NAME.zip"
-            sha256sum "$NAME.zip"
-            unzip -q "$NAME.zip"
-            du -sh "$NAME"
-            find "$NAME" -type f -exec ls -l {} \; | awk '{print $5, $9}' | sort -k2
-            for F in "$NAME"/README* "$NAME"/LICENSE* "$NAME"/COPYING*; do
-              [ -f "$F" ] && { echo "--- $F"; head -c 3000 "$F"; echo; }
-            done
-          done
+          OUT="$RUNNER_TEMP/erkennungspaket"
+          python3 .github/erkennungspaket/build_pack.py "$OUT" | tee "$RUNNER_TEMP/bau.txt"
+          VERSION=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['version'])" "$OUT/pack/erkennungspaket.json")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "manifest=$(sha256sum "$OUT/pack/erkennungspaket.json" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          echo "OUT=$OUT" >> "$GITHUB_ENV"
+
+      # Zweimal bauen: Das Paket muss jedes Mal Byte für Byte gleich entstehen.
+      - name: Gleiches Ergebnis beim zweiten Bau prüfen
+        run: |
+          ERSTES=$(sha256sum "$OUT"/erkennungspaket-de-*.zip | cut -d' ' -f1)
+          python3 .github/erkennungspaket/build_pack.py "$RUNNER_TEMP/zweiter-bau" > /dev/null
+          ZWEITES=$(sha256sum "$RUNNER_TEMP"/zweiter-bau/erkennungspaket-de-*.zip | cut -d' ' -f1)
+          if [ "$ERSTES" != "$ZWEITES" ]; then
+            echo "::error::Das Paket entsteht nicht reproduzierbar ($ERSTES gegen $ZWEITES)."
+            exit 1
+          fi
+          echo "Beide Bauten gleich: $ERSTES"
+
+      # Die App nimmt nur ein Paket an, dessen Verzeichnis genau diese Prüfsumme hat.
+      - name: Prüfsumme mit der App vergleichen
+        env:
+          MANIFEST: ${{ steps.paket.outputs.manifest }}
+        run: |
+          APP=$(grep -oP 'MANIFEST_SHA256\s*=\s*"\K[0-9a-f]+' app/src/main/java/com/moltobene/app/data/voice/VoicePack.kt || true)
+          if [ "$APP" != "$MANIFEST" ]; then
+            echo "::warning::Die App erwartet '$APP', das Paket hat $MANIFEST. Vor dem Veröffentlichen in VoicePack.kt eintragen."
+          else
+            echo "Prüfsumme stimmt mit der App überein: $MANIFEST"
+          fi
+
+      - name: Java 17 einrichten
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Gradle einrichten
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+
+      - name: Paket mit dem Entpacker der App prüfen
+        run: |
+          export VOICE_PACK_ARCHIVE="$(ls "$OUT"/erkennungspaket-de-*.zip)"
+          export VOICE_PACK_MANIFEST_SHA256="${{ steps.paket.outputs.manifest }}"
+          # Ohne Zwischenspeicher: Das Ergebnis hängt vom Paket ab, das Gradle nicht kennt.
+          ./gradlew testDebugUnitTest --tests "com.moltobene.app.data.voice.*" --no-daemon --no-build-cache
+
+      - name: Erkennungspaket speichern
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: erkennungspaket-de-${{ steps.paket.outputs.version }}
+          path: |
+            ${{ env.OUT }}/erkennungspaket-de-*.zip
+            ${{ env.OUT }}/pack/erkennungspaket.json
+          retention-days: 30
+          compression-level: 0
+
+  veroeffentlichen:
+    # Nur auf ausdrücklichen Wunsch und nur vom Hauptzweig; als eigenes Release, das nie als „neueste Version“ gilt.
+    needs: paket
+    if: github.event_name == 'workflow_dispatch' && inputs.veroeffentlichen && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Prüfsumme mit der App vergleichen
+        env:
+          MANIFEST: ${{ needs.paket.outputs.manifest }}
+        run: |
+          APP=$(grep -oP 'MANIFEST_SHA256\s*=\s*"\K[0-9a-f]+' app/src/main/java/com/moltobene/app/data/voice/VoicePack.kt || true)
+          if [ "$APP" != "$MANIFEST" ]; then
+            echo "::error::Die App erwartet '$APP', das Paket hat $MANIFEST – so ließe es sich nicht installieren."
+            exit 1
+          fi
+
+      - name: Erkennungspaket aus dem Build holen
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: erkennungspaket-de-${{ needs.paket.outputs.version }}
+          path: dist
+
+      - name: Prüfsumme erzeugen
+        env:
+          VERSION: ${{ needs.paket.outputs.version }}
+        run: |
+          cd dist
+          sha256sum "erkennungspaket-de-$VERSION.zip" | tee "erkennungspaket-de-$VERSION.zip.sha256"
+
+      - name: Herkunftsnachweis anlegen
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: dist/erkennungspaket-de-${{ needs.paket.outputs.version }}.zip
+
+      - name: Release anlegen
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ needs.paket.outputs.version }}
+        run: |
+          TAG="erkennungspaket-de-$VERSION"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "::error::Release $TAG gibt es schon. Ein geändertes Paket braucht eine neue Version (PACK_VERSION)."
+            exit 1
+          fi
+          gh release create "$TAG" "dist/$TAG.zip" "dist/$TAG.zip.sha256" \
+            --title "Erkennungspaket Deutsch ($VERSION)" \
+            --notes "Erkennungspaket für die Spracheingabe in Moltobene. Wird in der App unter Einstellungen heruntergeladen, nicht von Hand installieren. Enthält unverändert das kleine Modell für Deutsch von Alpha Cephei (Vosk, Apache 2.0)." \
+            --latest=false \
+            --target "$GITHUB_SHA"

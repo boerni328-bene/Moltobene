@@ -40,16 +40,23 @@ object LanguagePackInstaller {
      * Liest das Archiv aus [input] und legt die Dateien in [target] ab (wird vorher geleert).
      * Fehler beim Lesen aus [input], z. B. eine abgebrochene Verbindung, kommen unverändert als [IOException].
      */
-    fun unpack(input: InputStream, target: File, manifestSha256: String) {
+    fun unpack(
+        input: InputStream,
+        target: File,
+        manifestSha256: String,
+        manifestName: String = LanguagePack.MANIFEST,
+        safeName: Regex = SAFE_NAME,
+        maxUnpackedBytes: Long = MAX_UNPACKED_BYTES,
+    ) {
         target.deleteRecursively()
         if (!target.mkdirs()) throw InstallException(Problem.NO_SPACE)
         val zip = ZipInputStream(input)
         try {
             val first = zip.nextEntry ?: throw InstallException(Problem.DAMAGED)
-            if (first.name != LanguagePack.MANIFEST) throw InstallException(Problem.DAMAGED)
+            if (first.name != manifestName) throw InstallException(Problem.DAMAGED)
             val manifestBytes = readSmall(zip)
             if (sha256(manifestBytes) != manifestSha256) throw InstallException(Problem.DAMAGED)
-            val entries = parseManifest(manifestBytes)
+            val entries = parseManifest(manifestBytes, safeName, maxUnpackedBytes)
             val written = HashSet<String>()
             while (true) {
                 val entry = zip.nextEntry ?: break
@@ -60,14 +67,14 @@ object LanguagePackInstaller {
             }
             if (written != entries.keys) throw InstallException(Problem.DAMAGED)
             // Zuletzt: Erst mit dem Verzeichnis gilt das Paket als vollständig (LanguagePack.isComplete).
-            write(File(target, LanguagePack.MANIFEST)) { it.write(manifestBytes) }
+            write(File(target, manifestName)) { it.write(manifestBytes) }
         } catch (e: ZipException) {
             throw InstallException(Problem.DAMAGED)
         }
     }
 
     /** Name → (Prüfsumme, Größe); nur einfache Namen in einem Verzeichnis je Richtung, nicht zu groß. */
-    private fun parseManifest(bytes: ByteArray): Map<String, Entry> {
+    private fun parseManifest(bytes: ByteArray, safeName: Regex, maxUnpackedBytes: Long): Map<String, Entry> {
         val files = runCatching {
             Json.parseToJsonElement(bytes.decodeToString()).jsonObject.getValue("files").jsonObject.mapValues { (_, value) ->
                 val entry = value.jsonObject
@@ -75,7 +82,7 @@ object LanguagePackInstaller {
             }
         }.getOrNull() ?: throw InstallException(Problem.DAMAGED)
         val total = files.values.sumOf { it.size }
-        if (files.isEmpty() || files.keys.any { !SAFE_NAME.matches(it) } || files.values.any { it.size < 0 } || total > MAX_UNPACKED_BYTES) {
+        if (files.isEmpty() || files.keys.any { !safeName.matches(it) } || files.values.any { it.size < 0 } || total > maxUnpackedBytes) {
             throw InstallException(Problem.DAMAGED)
         }
         return files
