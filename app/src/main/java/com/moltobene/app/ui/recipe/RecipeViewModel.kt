@@ -275,6 +275,13 @@ class RecipeViewModel(
         viewModelScope.launch { repository.save(recipe.copy(favorite = !recipe.favorite)) }
     }
 
+    /** Eigene Notiz zum Rezept speichern (#61); zählt als Änderung, damit der Hinweis zum Sichern sie mitzählt. */
+    fun saveNotes(notes: String) {
+        val recipe = (state.value as? RecipeUiState.Content)?.recipe ?: return
+        if (notes == recipe.notes) return
+        viewModelScope.launch { repository.save(recipe.copy(notes = notes, updatedAt = System.currentTimeMillis())) }
+    }
+
     fun delete(onDeleted: () -> Unit) {
         viewModelScope.launch {
             repository.delete(recipeId)

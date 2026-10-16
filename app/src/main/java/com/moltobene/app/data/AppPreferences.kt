@@ -164,6 +164,13 @@ class AppPreferences(context: Context) {
         prefs.edit { putBoolean(KEY_COLLECTION_GRID, grid) }
     }
 
+    /** „Große Schrift beim Kochen“ (#61): Zutaten, Schritte und Notizen größer; aus ist der Standard. */
+    suspend fun cookingLargeText(): Boolean = withContext(Dispatchers.IO) { prefs.getBoolean(KEY_COOKING_LARGE, false) }
+
+    suspend fun setCookingLargeText(large: Boolean) = withContext(Dispatchers.IO) {
+        prefs.edit { putBoolean(KEY_COOKING_LARGE, large) }
+    }
+
     /** Reihenfolge der Sammlung (#57): nach Titel (Standard) oder zuletzt hinzugefügt. */
     suspend fun collectionSort(): CollectionSort = withContext(Dispatchers.IO) {
         CollectionSort.fromName(prefs.getString(KEY_COLLECTION_SORT, null))
@@ -216,6 +223,7 @@ class AppPreferences(context: Context) {
         const val KEY_RECENT_RECIPES = "recent_recipes"
         const val KEY_COLLECTION_GRID = "collection_grid"
         const val KEY_COLLECTION_SORT = "collection_sort"
+        const val KEY_COOKING_LARGE = "cooking_large_text"
         const val KEY_DOUGH_PREFIX = "dough_values_"
     }
 }

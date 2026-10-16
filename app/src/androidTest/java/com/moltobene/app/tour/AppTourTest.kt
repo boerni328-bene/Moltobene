@@ -34,6 +34,7 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.test.filters.SdkSuppress
@@ -310,6 +311,40 @@ class AppTourTest(private val variant: DisplayVariant) {
     }
 
     /** Kochen (#56): Zutat abhaken, aktueller Schritt, Portionen umrechnen – das gespeicherte Rezept bleibt. */
+    @Test
+    fun notizUndGrosseSchriftBeimKochen() {
+        addSampleRecipes()
+        openRecipe(SampleRecipes.TOMATO_SAUCE)
+        waitForText("800 g reife Tomaten")
+
+        // „Große Schrift beim Kochen“ (#61) im Menü ⋮: an, Häkchen und größere Schrift, die Wahl bleibt gemerkt.
+        composeRule.onNodeWithContentDescription(text(R.string.more_options)).performClick()
+        waitForText(text(R.string.cooking_large_text))
+        composeRule.onNodeWithText(text(R.string.cooking_large_text)).performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { runBlocking { container().preferences.cookingLargeText() } }
+        waitForText("800 g reife Tomaten")
+        screenshot("12t-grosse-schrift-kochen")
+
+        // Notiz hinzufügen direkt in der Rezeptansicht (#61).
+        // Das Beispielrezept hat schon eine Notiz, deshalb heißt der Knopf „Notiz bearbeiten“; der Text ist vorausgefüllt.
+        composeRule.onNodeWithText(text(R.string.note_edit)).performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
+        composeRule.waitUntil(TIMEOUT_MILLIS) { composeRule.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty() }
+        composeRule.onNode(hasSetTextAction()).performTextReplacement("Nächstes Mal weniger Salz")
+        screenshot("12u-notiz-hinzufuegen")
+        composeRule.onNodeWithText(text(R.string.save)).performClick()
+        waitForText("Nächstes Mal weniger Salz")
+        composeRule.onNodeWithText(text(R.string.note_edit)).performScrollTo()
+        screenshot("12v-notiz-gespeichert")
+        val stored = runBlocking { container().repository.getAll().first { it.title == SampleRecipes.TOMATO_SAUCE } }
+        assertEquals("Nächstes Mal weniger Salz", stored.notes)
+
+        // Wieder ausschalten, damit andere Tests in normaler Schrift laufen.
+        composeRule.onNodeWithContentDescription(text(R.string.more_options)).performClick()
+        waitForText(text(R.string.cooking_large_text))
+        composeRule.onNodeWithText(text(R.string.cooking_large_text)).performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { !runBlocking { container().preferences.cookingLargeText() } }
+    }
+
     @Test
     fun kochen() {
         addSampleRecipes()

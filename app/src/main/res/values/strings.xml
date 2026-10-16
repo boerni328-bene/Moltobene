@@ -33,6 +33,9 @@
     <string name="ingredients">Ingredients</string>
     <string name="instructions">Instructions</string>
     <string name="notes">Notes</string>
+    <string name="note_add">Add note</string>
+    <string name="note_edit">Edit note</string>
+    <string name="cooking_large_text">Large text for cooking</string>
     <string name="source">Source</string>
     <string name="video">Video</string>
     <string name="servings">Servings</string>
@@ -234,6 +237,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Cooking: “Large text for cooking” in the ⋮ menu of the recipe view enlarges ingredients, steps and notes. Notes can now be added right in the recipe view with “Add note”.</item>
         <item>Sorting the collection: The new icon next to search switches between “Title A–Z” and “Recently added”. Umlauts and accents sort with their letter, and the choice is remembered.</item>
         <item>Recipe view: The photo now extends up behind the top bar.</item>
         <item>Voice input while cooking: The new microphone button in the cooking bar listens for “Next”, “Previous”, “Repeat”, “Read aloud” and “Stop”; “Microphone off” ends listening. This needs the recognition pack from Settings once.</item>

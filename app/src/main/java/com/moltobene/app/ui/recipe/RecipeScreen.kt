@@ -51,6 +51,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreVert
@@ -69,6 +70,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -81,7 +83,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -114,12 +118,14 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.LocaleList
@@ -189,6 +195,8 @@ fun RecipeScreen(
     voice: VoiceInput,
     headsetButtons: Boolean = true,
     headsetMapping: HeadsetMapping = HeadsetMapping(),
+    cookingLarge: Boolean = false,
+    onCookingLargeChange: (Boolean) -> Unit = {},
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onEdit: (String) -> Unit,
@@ -368,6 +376,15 @@ fun RecipeScreen(
                                             viewModel.share(asFile = true, labels = shareLabels(resources))
                                         },
                                     )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.cooking_large_text)) },
+                                    leadingIcon = { if (cookingLarge) Icon(Icons.Filled.Check, contentDescription = null) },
+                                    modifier = Modifier.semantics { selected = cookingLarge },
+                                    onClick = {
+                                        menuOpen = false
+                                        onCookingLargeChange(!cookingLarge)
+                                    },
+                                )
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.cooking_reset)) },
                                         enabled = checked.isNotEmpty() || currentStep != null,
@@ -395,7 +412,7 @@ fun RecipeScreen(
         val current = state
         when {
             deleting -> CenteredMessage(text = "", modifier = Modifier.padding(padding)) { CircularProgressIndicator() }
-            current is RecipeUiState.Content -> RecipeContent(
+            current is RecipeUiState.Content -> CompositionLocalProvider(LocalCookingLarge provides cookingLarge) { RecipeContent(
                 recipe = current.recipe,
                 photo = current.photo,
                 cooking = CookingState(
@@ -422,9 +439,10 @@ fun RecipeScreen(
                 onShowPages = { viewModel.viewer.open(0) },
                 onShowPhoto = { viewModel.photoViewer.open(0) },
                 scrollState = scrollState,
+                onSaveNotes = viewModel::saveNotes,
                 barInset = if (barOverPhoto) WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + BAR_HEIGHT else 0.dp,
                 modifier = if (barOverPhoto) Modifier.padding(bottom = padding.calculateBottomPadding()) else Modifier.padding(padding),
-            )
+            ) }
             current is RecipeUiState.Loading ->
                 CenteredMessage(text = "", modifier = Modifier.padding(padding)) { CircularProgressIndicator() }
             current is RecipeUiState.NotFound ->
@@ -585,6 +603,7 @@ private fun RecipeContent(
     snackbarHostState: SnackbarHostState,
     onShowPages: () -> Unit,
     onShowPhoto: () -> Unit,
+    onSaveNotes: (String) -> Unit,
     scrollState: ScrollState,
     barInset: Dp,
     modifier: Modifier = Modifier,
@@ -920,10 +939,7 @@ private fun RecipeContent(
                     }
                 }
 
-                if (recipe.notes.isNotBlank()) {
-                    SectionTitle(stringResource(R.string.notes))
-                    Text(recipe.notes, style = MaterialTheme.typography.bodyLarge)
-                }
+                NotesSection(notes = recipe.notes, onSave = onSaveNotes)
 
                 recipe.source?.let { source ->
                     SectionTitle(stringResource(R.string.source))
@@ -1083,7 +1099,7 @@ private fun IngredientRow(parts: List<AmountScaling.Part>, locale: LocaleList?, 
                         }
                     }
                 },
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = cookingTextStyle().copy(
                     textDecoration = if (checked) TextDecoration.LineThrough else TextDecoration.None,
                 ),
                 color = if (checked) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
@@ -1134,11 +1150,11 @@ private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, barIns
         }
         Text(
             text = "$number.",
-            style = MaterialTheme.typography.bodyLarge,
+            style = cookingTextStyle(),
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.widthIn(min = 24.dp),
         )
-        Text(text, style = MaterialTheme.typography.bodyLarge, color = color)
+        Text(text, style = cookingTextStyle(), color = color)
     }
 }
 
@@ -1378,7 +1394,7 @@ private fun TranslationStatus(original: String, actions: TranslationActions) {
 private fun SectionTitle(text: String) {
     Text(
         text = text,
-        style = MaterialTheme.typography.titleLarge,
+        style = if (LocalCookingLarge.current) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.titleLarge,
         modifier = Modifier
             .padding(top = Spacing.m)
             .semantics { heading() },
@@ -1502,3 +1518,56 @@ private fun translationBarShown(recipe: Recipe, state: TranslationState): Boolea
 /** Deckkraft des Verlaufs oben auf dem Foto, damit Titel und Symbole der durchsichtigen Leiste lesbar bleiben. */
 private const val BAR_GRADIENT_ALPHA = 0.9f
 private val BAR_HEIGHT = 64.dp
+
+/** „Große Schrift beim Kochen“ (#61): Zutaten, Schritte und Notizen größer, unabhängig von der Schriftgröße des Handys. */
+private val LocalCookingLarge = compositionLocalOf { false }
+
+/** Schrift für Zutaten, Schritte und Notizen; größer, wenn „Große Schrift beim Kochen“ an ist. */
+@Composable
+private fun cookingTextStyle(): TextStyle =
+    if (LocalCookingLarge.current) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.bodyLarge
+
+/**
+ * Notizen zum Rezept (#61) mit „Notiz hinzufügen“ bzw. „Notiz bearbeiten“ direkt in der Rezeptansicht. Die angefangene
+ * Notiz übersteht das Drehen des Handys und das Beenden der App durch Android (`rememberSaveable`).
+ */
+@Composable
+private fun NotesSection(notes: String, onSave: (String) -> Unit) {
+    var editing by rememberSaveable { mutableStateOf(false) }
+    var draft by rememberSaveable { mutableStateOf("") }
+    if (notes.isNotBlank()) {
+        SectionTitle(stringResource(R.string.notes))
+        Text(notes, style = cookingTextStyle())
+    }
+    OutlinedButton(
+        onClick = {
+            draft = notes
+            editing = true
+        },
+        modifier = Modifier.padding(top = if (notes.isBlank()) Spacing.m else 0.dp),
+    ) {
+        Text(stringResource(if (notes.isBlank()) R.string.note_add else R.string.note_edit))
+    }
+    if (editing) {
+        AlertDialog(
+            onDismissRequest = { editing = false },
+            title = { Text(stringResource(R.string.notes)) },
+            text = {
+                OutlinedTextField(
+                    value = draft,
+                    onValueChange = { draft = it },
+                    label = { Text(stringResource(R.string.notes)) },
+                    minLines = 3,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    onSave(draft.trim())
+                    editing = false
+                }) { Text(stringResource(R.string.save)) }
+            },
+            dismissButton = { TextButton(onClick = { editing = false }) { Text(stringResource(R.string.cancel)) } },
+        )
+    }
+}

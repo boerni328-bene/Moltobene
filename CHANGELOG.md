@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.50.0] – 2026-10-16 (versionCode 89)
+
+### Neu
+- **Große Schrift beim Kochen.** Im Menü ⋮ der Rezeptansicht schaltet „Große Schrift beim Kochen“ größere Schrift für Zutaten, Schritte und Notizen ein, unabhängig von der Schriftgröße des Handys, zum Lesen aus Armlänge. Die Wahl bleibt gemerkt und ist mit einem Häkchen sichtbar.
+- **Notiz direkt in der Rezeptansicht.** Mit „Notiz hinzufügen“ bzw. „Notiz bearbeiten“ lässt sich beim Kochen festhalten, was beim nächsten Mal anders sein soll, ohne in „Bearbeiten“ zu wechseln. Eine angefangene Notiz bleibt beim Drehen des Handys erhalten. Notizen werden wie bisher nie geteilt oder übersetzt.
+
 ## [0.49.1] – 2026-10-16 (versionCode 88)
 
 ### Geändert

@@ -122,6 +122,10 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
             LaunchedEffect(openedId) { runCatching { container.preferences.addRecentRecipe(openedId) } }
             val screenOn by container.preferences.screenOn.collectAsStateWithLifecycle()
             val speechSettings by container.preferences.speechSettings.collectAsStateWithLifecycle()
+            // „Große Schrift beim Kochen“ (#61): gemerkt in den kleinen Merkwerten.
+            var cookingLarge by remember { mutableStateOf(false) }
+            val scope = rememberCoroutineScope()
+            LaunchedEffect(Unit) { runCatching { container.preferences.cookingLargeText() }.getOrNull()?.let { cookingLarge = it } }
             RecipeScreen(
                 viewModel = viewModel {
                     RecipeViewModel(
@@ -137,6 +141,11 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                 voice = container.voice,
                 headsetButtons = speechSettings.headsetButtons,
                 headsetMapping = speechSettings.headsetMapping(),
+                cookingLarge = cookingLarge,
+                onCookingLargeChange = { large ->
+                    cookingLarge = large
+                    scope.launch { runCatching { container.preferences.setCookingLargeText(large) } }
+                },
                 snackbarHostState = snackbarHostState,
                 onBack = { navController.popBackStack() },
                 onEdit = { id -> navController.navigate(EditRoute(id)) },

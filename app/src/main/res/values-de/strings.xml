@@ -32,6 +32,9 @@
     <string name="ingredients">Zutaten</string>
     <string name="instructions">Zubereitung</string>
     <string name="notes">Notizen</string>
+    <string name="note_add">Notiz hinzufügen</string>
+    <string name="note_edit">Notiz bearbeiten</string>
+    <string name="cooking_large_text">Große Schrift beim Kochen</string>
     <string name="source">Quelle</string>
     <string name="video">Video</string>
     <string name="servings">Portionen</string>
@@ -234,6 +237,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Beim Kochen: „Große Schrift beim Kochen“ im Menü ⋮ der Rezeptansicht vergrößert Zutaten, Schritte und Notizen. Neue Notizen lassen sich direkt in der Rezeptansicht mit „Notiz hinzufügen“ festhalten.</item>
         <item>Sammlung sortieren: Das neue Symbol neben der Suche wechselt zwischen „Titel A–Z“ und „Zuletzt hinzugefügt“. Umlaute stehen bei ihrem Buchstaben, die Wahl bleibt gemerkt.</item>
         <item>Rezeptansicht: Das Foto reicht bis unter die Leiste oben.</item>
         <item>Spracheingabe beim Kochen: Der neue Mikrofon-Knopf in der Kochleiste hört zu und versteht „Weiter“, „Zurück“, „Wiederholen“, „Vorlesen“ und „Stopp“; „Mikrofon aus“ beendet das Zuhören. Nötig ist einmalig das Erkennungspaket aus den Einstellungen.</item>

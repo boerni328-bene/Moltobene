@@ -65,5 +65,6 @@ class DeviceSetupRule(private val variant: DisplayVariant) : ExternalResource() 
         // Der Rundgang beginnt in der Sammlung (Start: Rezepte); die Startseite liegt darunter und hat ihren eigenen Test.
         container.preferences.setStartScreen(StartScreen.COLLECTION)
         container.preferences.setCollectionSort(CollectionSort.DEFAULT)
+        container.preferences.setCookingLargeText(false)
     }
 }
