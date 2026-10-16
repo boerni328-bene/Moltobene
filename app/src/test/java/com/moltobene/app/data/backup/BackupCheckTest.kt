@@ -36,7 +36,7 @@ class BackupCheckTest {
     @Test
     fun vollstaendigeSicherung() {
         val (file, entries) = writeBackup(recipes = 3)
-        assertEquals(2 + 3 * 2, entries)
+        assertEquals(3 + 3 * 2, entries)
         val names = RandomAccessFile(file, "r").channel.use { BackupCheck.entryNames(it) }
         assertEquals(entries, names.size)
         assertTrue(BackupFormat.RECIPES_ENTRY in names)

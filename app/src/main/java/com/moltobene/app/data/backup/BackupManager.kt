@@ -5,7 +5,10 @@ import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.provider.DocumentsContract
 import com.moltobene.app.BuildConfig
+import com.moltobene.app.data.AppPreferences
 import com.moltobene.app.data.RecipeRepository
+import com.moltobene.app.data.dough.DoughPresets
+import com.moltobene.app.data.dough.DoughType
 import com.moltobene.app.data.StorageFull
 import com.moltobene.app.data.photos.PhotoStore
 import kotlinx.coroutines.CancellationException
@@ -19,6 +22,7 @@ class BackupManager(
     private val context: Context,
     private val repository: RecipeRepository,
     private val photoStore: PhotoStore,
+    private val preferences: AppPreferences,
 ) {
 
     /** Vorschau vor dem Wiederherstellen – es ist noch nichts verändert. */
@@ -30,6 +34,7 @@ class BackupManager(
         val skipped: Int,
         internal val recipes: List<BackupRecipe>,
         internal val photoDir: File,
+        internal val presets: Map<String, List<DoughPresets.Own>> = emptyMap(),
     )
 
     sealed interface PrepareResult {
@@ -66,6 +71,12 @@ class BackupManager(
         val recipes = repository.getAll()
         val photos = recipes.flatMap { it.photoIds + it.pageIds }.distinct()
             .associateWith { photoStore.photoFile(it) to photoStore.thumbFile(it) }
+        val presets = BackupPresets(
+            DoughType.entries.mapNotNull { type ->
+                val list = DoughPresets.decode(preferences.doughMemory(DoughPresets.key(type)))
+                if (list.isEmpty()) null else type.key to list
+            }.toMap(),
+        )
         val manifest = BackupManifest(
             appVersion = BuildConfig.VERSION_NAME,
             createdAt = System.currentTimeMillis(),
@@ -73,7 +84,7 @@ class BackupManager(
         )
         try {
             val out = context.contentResolver.openOutputStream(uri, "wt") ?: throw IOException("Datei nicht beschreibbar")
-            val entries = out.use { BackupWriter.write(it, manifest, recipes.map { recipe -> recipe.toBackup() }, photos) }
+            val entries = out.use { BackupWriter.write(it, manifest, recipes.map { recipe -> recipe.toBackup() }, photos, presets) }
             try {
                 check(uri, entries, recipes.size)
             } catch (e: IOException) {
@@ -154,6 +165,7 @@ class BackupManager(
                         skipped = result.skippedRecipes,
                         recipes = result.recipes,
                         photoDir = result.photoDir,
+                        presets = result.presets,
                     )
                 )
             }
@@ -199,6 +211,7 @@ class BackupManager(
                     backup.copy(photos = adoptAvailable(backup.photos), pages = adoptAvailable(backup.pages)).toRecipe()
                 }
                 repository.saveAll(recipes)
+                restorePresets(preview.presets)
 
                 val newPhotoIds = recipes.flatMap { it.photoIds + it.pageIds }.toSet()
                 oldPhotoIds.filter { it !in newPhotoIds }.forEach { photoStore.delete(it) }
@@ -214,6 +227,20 @@ class BackupManager(
             )
         } finally {
             preview.photoDir.deleteRecursively()
+        }
+    }
+
+    /** Fügt Voreinstellungen hinzu, die es auf dem Handy noch nicht gibt (gleicher Name = vorhanden); nichts wird ersetzt oder gelöscht. */
+    private suspend fun restorePresets(backup: Map<String, List<DoughPresets.Own>>) {
+        DoughType.entries.forEach { type ->
+            val incoming = backup[type.key].orEmpty()
+            if (incoming.isEmpty()) return@forEach
+            val current = DoughPresets.decode(preferences.doughMemory(DoughPresets.key(type)))
+            val names = current.map { it.name.lowercase() }.toMutableSet()
+            val merged = current + incoming.filter { names.add(it.name.lowercase()) }
+            if (merged.size > current.size) {
+                preferences.setDoughMemory(DoughPresets.key(type), DoughPresets.encode(merged.take(DoughPresets.MAX_OWN)))
+            }
         }
     }
 

@@ -2,6 +2,8 @@ package com.moltobene.app.data.backup
 
 import com.moltobene.app.data.RecipeIds
 import com.moltobene.app.data.StorageFull
+import com.moltobene.app.data.dough.DoughPresets
+import com.moltobene.app.data.dough.DoughType
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -37,6 +39,7 @@ class BackupReader(private val limits: Limits = Limits()) {
             val recipes: List<BackupRecipe>,
             val skippedRecipes: Int,
             val photoDir: File,
+            val presets: Map<String, List<DoughPresets.Own>> = emptyMap(),
         ) : Result
 
         data class Failed(val problem: Problem) : Result
@@ -48,6 +51,7 @@ class BackupReader(private val limits: Limits = Limits()) {
         extractDir.mkdirs()
         var manifestText: String? = null
         var recipesText: String? = null
+        var presetsText: String? = null
         var entries = 0
         var total = 0L
 
@@ -68,6 +72,11 @@ class BackupReader(private val limits: Limits = Limits()) {
                         name == BackupFormat.RECIPES_ENTRY -> {
                             val bytes = readLimited(zip, limits.maxJsonBytes) ?: return Result.Failed(Problem.TOO_LARGE)
                             recipesText = bytes.toString(Charsets.UTF_8)
+                            bytes.size.toLong()
+                        }
+                        name == BackupFormat.PRESETS_ENTRY -> {
+                            val bytes = readLimited(zip, limits.maxJsonBytes) ?: return Result.Failed(Problem.TOO_LARGE)
+                            presetsText = bytes.toString(Charsets.UTF_8)
                             bytes.size.toLong()
                         }
                         else -> {
@@ -101,7 +110,24 @@ class BackupReader(private val limits: Limits = Limits()) {
         } ?: return Result.Failed(Problem.DAMAGED)
 
         val (recipes, skipped) = decodeRecipes(recipeElements)
-        return Result.Ok(manifest = manifest, recipes = recipes, skippedRecipes = skipped, photoDir = extractDir)
+        return Result.Ok(
+            manifest = manifest,
+            recipes = recipes,
+            skippedRecipes = skipped,
+            photoDir = extractDir,
+            presets = decodePresets(presetsText),
+        )
+    }
+
+    /** Eigene Voreinstellungen: Unlesbares ergibt nichts, jede Liste wird wie beim Laden auf dem Handy bereinigt. */
+    private fun decodePresets(text: String?): Map<String, List<DoughPresets.Own>> {
+        val parsed = text?.let {
+            runCatching { BackupFormat.json.decodeFromString(BackupPresets.serializer(), it) }.getOrNull()
+        } ?: return emptyMap()
+        return DoughType.entries.mapNotNull { type ->
+            val list = parsed.presets[type.key]?.let { DoughPresets.decode(DoughPresets.encode(it)) }.orEmpty()
+            if (list.isEmpty()) null else type.key to list
+        }.toMap()
     }
 
     /** Jedes Rezept einzeln lesen: Ein beschädigtes Rezept wird übersprungen, statt alles scheitern zu lassen. */

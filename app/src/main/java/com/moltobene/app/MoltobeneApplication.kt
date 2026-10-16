@@ -74,7 +74,7 @@ class AppContainer(context: Context) {
     private val database: MoltobeneDatabase by lazy { MoltobeneDatabase.create(appContext) }
     val photoStore: PhotoStore by lazy { PhotoStore(appContext) }
     val repository: RecipeRepository by lazy { RecipeRepository(database.recipeDao(), photoStore) }
-    val backupManager: BackupManager by lazy { BackupManager(appContext, repository, photoStore) }
+    val backupManager: BackupManager by lazy { BackupManager(appContext, repository, photoStore, preferences) }
     val recipeSharer: RecipeSharer by lazy { RecipeSharer(appContext, photoStore) }
     val preferences: AppPreferences by lazy { AppPreferences(appContext) }
     val textRecognizer: TextRecognizer by lazy { TextRecognizer(appContext) }

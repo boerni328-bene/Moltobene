@@ -5,6 +5,7 @@ import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeSource
 import com.moltobene.app.data.SourceType
 import com.moltobene.app.data.Tag
+import com.moltobene.app.data.dough.DoughPresets
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -17,6 +18,8 @@ import kotlinx.serialization.json.Json
  * Seit 0.7.0 nennt ein Rezept seine Originalseiten in „pages“. Ältere Sicherungen haben das Feld nicht
  * und bleiben lesbar; ältere App-Versionen übergehen es und übernehmen die Rezepte ohne Originalseiten.
  * Seit 0.25.0 kann ein Rezept einen Link zu einem Video haben („video“), ebenso mit Standardwert.
+ * Seit 0.52.0 liegen die eigenen Voreinstellungen des Teigrechners in presets.json; ältere Sicherungen haben die Datei
+ * nicht (dann bleiben die Voreinstellungen auf dem Handy, wie sie sind), ältere App-Versionen übergehen sie.
  *
  * Regel: Alte Sicherungen müssen immer lesbar bleiben. Neue Felder nur mit Standardwert ergänzen;
  * bei einer inkompatiblen Änderung [CURRENT_FORMAT_VERSION] erhöhen und das alte Format weiter lesen.
@@ -26,6 +29,7 @@ object BackupFormat {
     const val CURRENT_FORMAT_VERSION = 1
     const val MANIFEST_ENTRY = "manifest.json"
     const val RECIPES_ENTRY = "recipes.json"
+    const val PRESETS_ENTRY = "presets.json"
     const val PHOTO_FOLDER = "photos/"
 
     val json = Json {
@@ -140,3 +144,7 @@ fun BackupRecipe.toRecipe() = Recipe(
     createdAt = createdAt,
     updatedAt = updatedAt,
 )
+
+/** Eigene Voreinstellungen des Teigrechners je Teigart (Kennung wie [com.moltobene.app.data.dough.DoughType.key]). */
+@Serializable
+data class BackupPresets(val presets: Map<String, List<DoughPresets.Own>> = emptyMap())

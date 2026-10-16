@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.52.0] – 2026-10-16 (versionCode 91)
+
+### Neu
+- **Eigene Voreinstellungen des Teigrechners in der Sicherung.** Beim Sichern der Sammlung kommen die eigenen Voreinstellungen mit in die Sicherungsdatei. Beim Wiederherstellen, auch auf einem neuen Handy, werden sie ergänzt; vorhandene mit gleichem Namen bleiben, nichts wird gelöscht. Ältere Sicherungen lassen sich weiter wiederherstellen.
+
 ## [0.51.0] – 2026-10-16 (versionCode 90)
 
 ### Neu

@@ -166,6 +166,29 @@ class BackupTest {
         assertEquals(BackupReader.Result.Failed(BackupReader.Problem.TOO_LARGE), result)
     }
 
+
+    @Test
+    fun voreinstellungenWerdenGesichertUndBereinigtGelesen() {
+        val own = com.moltobene.app.data.dough.DoughPresets.Own("Meine Pizza", "x")
+        val out = ByteArrayOutputStream()
+        BackupWriter.write(
+            out, BackupManifest(appVersion = "0.52.0"), emptyList(), emptyMap(),
+            BackupPresets(mapOf("pizza" to listOf(own), "unbekannt" to listOf(own))),
+        )
+        val result = BackupReader().read(ByteArrayInputStream(out.toByteArray()), temp.newFolder("vor")) as BackupReader.Result.Ok
+        assertEquals(listOf(own), result.presets["pizza"])
+        assertFalse(result.presets.containsKey("unbekannt"))
+    }
+
+    @Test
+    fun sicherungOhneVoreinstellungenBleibtLesbar() {
+        val bytes = zip(
+            BackupFormat.MANIFEST_ENTRY to resource("backup/v1/manifest.json"),
+            BackupFormat.RECIPES_ENTRY to resource("backup/v1/recipes.json"),
+        )
+        val result = BackupReader().read(ByteArrayInputStream(bytes), temp.newFolder("ohne")) as BackupReader.Result.Ok
+        assertTrue(result.presets.isEmpty())
+    }
     private fun resource(path: String): ByteArray =
         requireNotNull(javaClass.classLoader?.getResourceAsStream(path)) { "Testdatei fehlt: $path" }.use { it.readBytes() }
 

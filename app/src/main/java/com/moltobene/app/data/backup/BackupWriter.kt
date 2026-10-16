@@ -17,8 +17,9 @@ object BackupWriter {
         manifest: BackupManifest,
         recipes: List<BackupRecipe>,
         photos: Map<String, Pair<File, File>>,
+        presets: BackupPresets = BackupPresets(),
     ): Int {
-        var entries = 2
+        var entries = 3
         ZipOutputStream(out.buffered()).use { zip ->
             zip.putNextEntry(ZipEntry(BackupFormat.MANIFEST_ENTRY))
             zip.write(BackupFormat.json.encodeToString(BackupManifest.serializer(), manifest).toByteArray())
@@ -26,6 +27,10 @@ object BackupWriter {
 
             zip.putNextEntry(ZipEntry(BackupFormat.RECIPES_ENTRY))
             zip.write(BackupFormat.json.encodeToString(BackupRecipes.serializer(), BackupRecipes(recipes)).toByteArray())
+            zip.closeEntry()
+
+            zip.putNextEntry(ZipEntry(BackupFormat.PRESETS_ENTRY))
+            zip.write(BackupFormat.json.encodeToString(BackupPresets.serializer(), presets).toByteArray())
             zip.closeEntry()
 
             photos.forEach { (photoId, files) ->
