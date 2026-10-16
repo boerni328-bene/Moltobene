@@ -234,6 +234,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Sammlung sortieren: Das neue Symbol neben der Suche wechselt zwischen „Titel A–Z“ und „Zuletzt hinzugefügt“. Umlaute stehen bei ihrem Buchstaben, die Wahl bleibt gemerkt.</item>
+        <item>Rezeptansicht: Das Foto reicht bis unter die Leiste oben.</item>
         <item>Spracheingabe beim Kochen: Der neue Mikrofon-Knopf in der Kochleiste hört zu und versteht „Weiter“, „Zurück“, „Wiederholen“, „Vorlesen“ und „Stopp“; „Mikrofon aus“ beendet das Zuhören. Nötig ist einmalig das Erkennungspaket aus den Einstellungen.</item>
         <item>Kopfhörertasten: In den Einstellungen unter „Vorlesen“ lässt sich festlegen, was die Tasten Wiedergabe/Pause, Weiter und Zurück beim Kochen auslösen. So lassen sich auch Kopfhörer anpassen, die Gesten selbst umwandeln.</item>
         <item>Teigrechner: Jeder Wert hat einen Regler mit antippbarer Zahl; der Umschalter „Zahlen | Regler“ entfällt, Plus und Minus gibt es nur bei kleinen ganzen Zahlen.</item>
@@ -580,6 +582,9 @@
     <string name="filter_favorites">Favoriten</string>
     <string name="filter_drafts">Entwürfe</string>
     <string name="view_as_list">Als Liste anzeigen</string>
+    <string name="sort_menu">Sortieren</string>
+    <string name="sort_title">Titel A–Z</string>
+    <string name="sort_recent">Zuletzt hinzugefügt</string>
     <string name="view_as_grid">Als Raster anzeigen</string>
     <string name="favorite_label">Favorit</string>
     <string name="favorite_add">Als Favorit markieren</string>

@@ -43,6 +43,7 @@ import androidx.test.runner.lifecycle.Stage
 import com.moltobene.app.MainActivity
 import com.moltobene.app.MoltobeneApplication
 import com.moltobene.app.R
+import com.moltobene.app.data.CollectionSort
 import com.moltobene.app.data.voice.VoiceCommand
 import com.moltobene.app.data.Appearance
 import com.moltobene.app.data.Palette
@@ -136,6 +137,21 @@ class AppTourTest(private val variant: DisplayVariant) {
         addSampleRecipes()
         waitForText(SampleRecipes.POTATO_SALAD)
         screenshot("08-sammlung")
+
+        // Sortieren (#57): Menü zeigen, „Zuletzt hinzugefügt“ wählen, der Merkwert folgt, dann wieder nach Titel.
+        composeRule.onNodeWithContentDescription(text(R.string.sort_menu)).performClick()
+        waitForText(text(R.string.sort_recent))
+        screenshot("08b-sortieren-menue")
+        composeRule.onNodeWithText(text(R.string.sort_recent)).performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { runBlocking { container().preferences.collectionSort() } == CollectionSort.RECENT }
+        screenshot("08c-sortiert-zuletzt")
+        // Bei großer Schrift sind nur wenige Karten sichtbar; die Liste lädt träge, daher zum Rezept scrollen.
+        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(SampleRecipes.POTATO_SALAD))
+        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(SampleRecipes.TOMATO_SAUCE))
+        composeRule.onNodeWithContentDescription(text(R.string.sort_menu)).performClick()
+        waitForText(text(R.string.sort_title))
+        composeRule.onNodeWithText(text(R.string.sort_title)).performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { runBlocking { container().preferences.collectionSort() } == CollectionSort.TITLE }
 
         composeRule.onNode(hasSetTextAction()).performTextInput("Tomate")
         waitUntilGone(SampleRecipes.POTATO_SALAD)

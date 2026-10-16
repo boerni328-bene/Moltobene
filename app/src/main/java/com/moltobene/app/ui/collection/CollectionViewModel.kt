@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moltobene.app.data.AppPreferences
 import com.moltobene.app.data.RecipeRepository
+import java.util.Locale
 import kotlinx.coroutines.flow.Flow
+import com.moltobene.app.data.CollectionSort
 import com.moltobene.app.data.TagFilter
 import com.moltobene.app.data.TagCount
 import com.moltobene.app.data.Tag
@@ -71,18 +73,28 @@ class CollectionViewModel(
     /** Raster (true) oder Liste; die Wahl bleibt gemerkt. */
     val grid: StateFlow<Boolean> = _grid.asStateFlow()
 
+    private val _sort = MutableStateFlow(CollectionSort.DEFAULT)
+
+    /** Reihenfolge der Sammlung; die Wahl bleibt gemerkt (#57). */
+    val sort: StateFlow<CollectionSort> = _sort.asStateFlow()
+
     private val _selectedTags = MutableStateFlow<Set<String>>(emptySet())
 
     private val tagsByRecipe: Flow<Map<String, List<Tag>>> = repository.observeTagsByRecipe().catch { emit(emptyMap()) }
 
-    val state: StateFlow<CollectionUiState> = combine(_query, _filter, _selectedTags) { query, filter, tags -> Triple(query, filter, tags) }
-        .flatMapLatest { (query, filter, chosen) ->
+    val state: StateFlow<CollectionUiState> = combine(_query, _filter, _selectedTags, _sort) { query, filter, tags, sort -> listOf(query, filter, tags, sort) }
+        .flatMapLatest { values ->
+            @Suppress("UNCHECKED_CAST")
+            val query = values[0] as String
+            val filter = values[1] as CollectionFilter
+            val chosen = values[2] as Set<String>
+            val sort = values[3] as CollectionSort
             combine(repository.observeSummaries(query), tagsByRecipe) { summaries, tagsOf ->
                 val tagCounts = TagFilter.counts(tagsOf)
                 // Ein Schlagwort, das kein Rezept mehr hat, zählt nicht mehr als gewählt.
                 val selected = chosen.filterTo(HashSet()) { name -> tagCounts.any { it.tag.name == name } }
                 CollectionUiState.Content(
-                    items = summaries.filter {
+                    items = CollectionSort.order(summaries, sort, Locale.getDefault(), { it.title }, { it.createdAt }).filter {
                         when (filter) {
                             CollectionFilter.ALL -> true
                             CollectionFilter.FAVORITES -> it.favorite
@@ -111,6 +123,7 @@ class CollectionViewModel(
 
     init {
         viewModelScope.launch { runCatching { preferences.collectionGrid() }.getOrNull()?.let { _grid.value = it } }
+        viewModelScope.launch { runCatching { preferences.collectionSort() }.getOrNull()?.let { _sort.value = it } }
         viewModelScope.launch {
             runCatching { repository.cleanUpUnusedPhotos() }
             runCatching { pendingRecognition.deleteLeftovers() }
@@ -125,6 +138,11 @@ class CollectionViewModel(
     /** Schlagwort im Filter wählen oder abwählen (#57). */
     fun onToggleTag(name: String) {
         _selectedTags.value = _selectedTags.value.let { if (name in it) it - name else it + name }
+    }
+
+    fun onSortChange(value: CollectionSort) {
+        _sort.value = value
+        viewModelScope.launch { runCatching { preferences.setCollectionSort(value) } }
     }
 
     fun onGridChange(value: Boolean) {

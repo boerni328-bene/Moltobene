@@ -88,6 +88,7 @@ fun CollectionScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val query by viewModel.query.collectAsStateWithLifecycle()
     val grid by viewModel.grid.collectAsStateWithLifecycle()
+    val sort by viewModel.sort.collectAsStateWithLifecycle()
     val backupHint by viewModel.backupHint.collectAsStateWithLifecycle()
     // Beim Zurückkehren neu lesen, z. B. nachdem in den Einstellungen gesichert wurde (#51).
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshBackupHint() }
@@ -157,7 +158,14 @@ fun CollectionScreen(
                     if (collectionIsEmpty) {
                         EmptyCollection()
                     } else {
-                        SearchRow(query = query, onQueryChange = viewModel::onQueryChange, grid = grid, onGridChange = viewModel::onGridChange)
+                        SearchRow(
+                            query = query,
+                            onQueryChange = viewModel::onQueryChange,
+                            grid = grid,
+                            onGridChange = viewModel::onGridChange,
+                            sort = sort,
+                            onSortChange = viewModel::onSortChange,
+                        )
                         FilterRow(
                             filter = current.filter,
                             hasFavorites = current.hasFavorites,

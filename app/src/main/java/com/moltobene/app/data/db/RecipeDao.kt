@@ -13,7 +13,7 @@ abstract class RecipeDao {
     // Die Liste zeigt nur Fotos des Gerichts, nie eine Originalseite.
     @Query(
         """
-        SELECT id, title, isDraft, favorite,
+        SELECT id, title, isDraft, favorite, createdAt,
             (SELECT photoId FROM recipe_photos WHERE recipe_photos.recipeId = recipes.id AND kind = 'photo'
              ORDER BY position LIMIT 1) AS photoId
         FROM recipes
@@ -24,7 +24,7 @@ abstract class RecipeDao {
 
     @Query(
         """
-        SELECT id, title, isDraft, favorite,
+        SELECT id, title, isDraft, favorite, createdAt,
             (SELECT photoId FROM recipe_photos WHERE recipe_photos.recipeId = recipes.id AND kind = 'photo'
              ORDER BY position LIMIT 1) AS photoId
         FROM recipes
@@ -36,7 +36,7 @@ abstract class RecipeDao {
 
     @Query(
         """
-        SELECT id, title, isDraft, favorite,
+        SELECT id, title, isDraft, favorite, createdAt,
             (SELECT photoId FROM recipe_photos WHERE recipe_photos.recipeId = recipes.id AND kind = 'photo'
              ORDER BY position LIMIT 1) AS photoId
         FROM recipes
@@ -48,7 +48,7 @@ abstract class RecipeDao {
     // „Was koche ich heute?“: ein zufälliges Rezept, keine Entwürfe; ohne Auswahl ist :exclude leer.
     @Query(
         """
-        SELECT id, title, isDraft, favorite,
+        SELECT id, title, isDraft, favorite, createdAt,
             (SELECT photoId FROM recipe_photos WHERE recipe_photos.recipeId = recipes.id AND kind = 'photo'
              ORDER BY position LIMIT 1) AS photoId
         FROM recipes

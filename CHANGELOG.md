@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.49.0] – 2026-10-16 (versionCode 87)
+
+### Neu
+- **Sammlung sortieren.** Neben der Suche gibt es ein Symbol „Sortieren“ mit zwei Möglichkeiten: „Titel A–Z“ (bisher, jetzt mit richtiger Einordnung von Umlauten und Akzenten, „Äpfel“ steht also bei A statt hinter „Zwiebelkuchen“) und „Zuletzt hinzugefügt“ (neueste Rezepte zuerst). Die Wahl bleibt gemerkt, gilt auch für Suche und Filter und ist nicht Teil der Sicherung.
+
 ## [0.48.3] – 2026-10-16 (versionCode 86)
 
 Keine sichtbaren Änderungen an der App. Der Rundgang auf dem Emulator prüft zusätzlich eine Darstellung mit künstlich verlängerten Texten („Pseudosprache“), damit abgeschnittene Texte früher auffallen.

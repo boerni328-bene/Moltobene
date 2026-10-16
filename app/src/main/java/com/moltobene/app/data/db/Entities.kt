@@ -140,6 +140,7 @@ data class RecipeSummaryRow(
     val title: String,
     val isDraft: Boolean,
     val favorite: Boolean,
+    val createdAt: Long,
     val photoId: String?,
 )
 

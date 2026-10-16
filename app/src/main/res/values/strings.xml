@@ -236,6 +236,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Sorting the collection: The new icon next to search switches between “Title A–Z” and “Recently added”. Umlauts and accents sort with their letter, and the choice is remembered.</item>
+        <item>Recipe view: The photo now extends up behind the top bar.</item>
         <item>Voice input while cooking: The new microphone button in the cooking bar listens for “Next”, “Previous”, “Repeat”, “Read aloud” and “Stop”; “Microphone off” ends listening. This needs the recognition pack from Settings once.</item>
         <item>Headset buttons: In Settings under “Read aloud”, choose what the play/pause, next and previous buttons do while cooking. This also covers headsets that convert gestures themselves.</item>
         <item>Dough calculator: every value has a slider with a number you can tap and type; the “Numbers | Sliders” switch is gone, plus and minus remain only for small whole numbers.</item>
@@ -584,6 +586,9 @@
     <string name="filter_favorites">Favorites</string>
     <string name="filter_drafts">Drafts</string>
     <string name="view_as_list">Show as list</string>
+    <string name="sort_menu">Sort</string>
+    <string name="sort_title">Title A–Z</string>
+    <string name="sort_recent">Recently added</string>
     <string name="view_as_grid">Show as grid</string>
     <string name="favorite_label">Favorite</string>
     <string name="favorite_add">Mark as favorite</string>

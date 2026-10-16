@@ -33,6 +33,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -59,11 +61,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.moltobene.app.R
+import com.moltobene.app.data.CollectionSort
 import com.moltobene.app.data.TagCount
 import com.moltobene.app.ui.components.DraftLabel
 import com.moltobene.app.ui.components.OptionButton
@@ -78,6 +83,8 @@ internal fun SearchRow(
     onQueryChange: (String) -> Unit,
     grid: Boolean,
     onGridChange: (Boolean) -> Unit,
+    sort: CollectionSort,
+    onSortChange: (CollectionSort) -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(start = Spacing.m, end = Spacing.xs, top = Spacing.xs),
@@ -106,6 +113,7 @@ internal fun SearchRow(
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             modifier = Modifier.weight(1f),
         )
+        SortMenu(sort = sort, onSortChange = onSortChange)
         IconButton(onClick = { onGridChange(!grid) }) {
             Icon(
                 painterResource(if (grid) R.drawable.ic_view_list else R.drawable.ic_grid_view),
@@ -353,3 +361,33 @@ internal fun AddChooser(
     )
 }
 
+
+/** Knopf mit Menü „Sortieren“: Titel A–Z oder zuletzt hinzugefügt; die gewählte Reihenfolge trägt ein Häkchen (#57). */
+@Composable
+private fun SortMenu(sort: CollectionSort, onSortChange: (CollectionSort) -> Unit) {
+    var open by rememberSaveable { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { open = true }) {
+            Icon(painterResource(R.drawable.ic_sort), contentDescription = stringResource(R.string.sort_menu))
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            for (option in CollectionSort.entries) {
+                val selected = option == sort
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            stringResource(if (option == CollectionSort.TITLE) R.string.sort_title else R.string.sort_recent),
+                            fontWeight = if (selected) FontWeight.Bold else null,
+                        )
+                    },
+                    leadingIcon = { if (selected) Icon(Icons.Filled.Check, contentDescription = null) },
+                    modifier = Modifier.semantics { this.selected = selected },
+                    onClick = {
+                        open = false
+                        onSortChange(option)
+                    },
+                )
+            }
+        }
+    }
+}

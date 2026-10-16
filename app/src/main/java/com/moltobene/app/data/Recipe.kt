@@ -73,6 +73,8 @@ data class RecipeSummary(
     val isDraft: Boolean,
     val favorite: Boolean,
     val photoId: String?,
+    /** Wann das Rezept hinzugefügt wurde; für „Zuletzt hinzugefügt“. */
+    val createdAt: Long = 0L,
 )
 
 object RecipeIds {

@@ -164,6 +164,15 @@ class AppPreferences(context: Context) {
         prefs.edit { putBoolean(KEY_COLLECTION_GRID, grid) }
     }
 
+    /** Reihenfolge der Sammlung (#57): nach Titel (Standard) oder zuletzt hinzugefügt. */
+    suspend fun collectionSort(): CollectionSort = withContext(Dispatchers.IO) {
+        CollectionSort.fromName(prefs.getString(KEY_COLLECTION_SORT, null))
+    }
+
+    suspend fun setCollectionSort(sort: CollectionSort) = withContext(Dispatchers.IO) {
+        prefs.edit { putString(KEY_COLLECTION_SORT, sort.name) }
+    }
+
     /** Zuletzt benutzte Werte des Teigrechners je Teigart (#69); geprüft wird beim Lesen in [DoughMemory]. */
     suspend fun doughValues(type: DoughType): LeavenedInput = withContext(Dispatchers.IO) {
         DoughMemory.decode(type, prefs.getString(KEY_DOUGH_PREFIX + type.key, null))
@@ -206,6 +215,7 @@ class AppPreferences(context: Context) {
         const val KEY_START_SCREEN = "start_screen"
         const val KEY_RECENT_RECIPES = "recent_recipes"
         const val KEY_COLLECTION_GRID = "collection_grid"
+        const val KEY_COLLECTION_SORT = "collection_sort"
         const val KEY_DOUGH_PREFIX = "dough_values_"
     }
 }

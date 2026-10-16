@@ -11,6 +11,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.moltobene.app.BuildConfig
 import com.moltobene.app.MoltobeneApplication
 import com.moltobene.app.data.Appearance
+import com.moltobene.app.data.CollectionSort
 import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.StartScreen
 import kotlinx.coroutines.runBlocking
@@ -63,5 +64,6 @@ class DeviceSetupRule(private val variant: DisplayVariant) : ExternalResource() 
         container.preferences.setScreenOn(ScreenOn.STAYS_ON)
         // Der Rundgang beginnt in der Sammlung (Start: Rezepte); die Startseite liegt darunter und hat ihren eigenen Test.
         container.preferences.setStartScreen(StartScreen.COLLECTION)
+        container.preferences.setCollectionSort(CollectionSort.DEFAULT)
     }
 }
