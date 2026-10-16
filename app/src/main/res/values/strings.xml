@@ -673,6 +673,7 @@
     <string name="speech_headset_action_none">Nothing</string>
     <!-- Spracheingabe (#80) -->
     <string name="settings_section_voice_input">Voice input</string>
+    <string name="voice_beta_note">Beta: Voice input has not been tested on all devices yet and can be unreliable in a noisy kitchen. The buttons in the cooking bar always work.</string>
     <string name="voice_pack_title">Recognition pack German</string>
     <string name="voice_pack_text">For voice commands while cooking (next, previous, repeat, stop), recognized on the device without internet. Download once: about %1$s, uses about %2$s on the device. Best over Wi-Fi. The microphone only listens while the microphone button in the cooking bar is on.</string>
     <string name="voice_pack_downloading">Downloading recognition pack …</string>

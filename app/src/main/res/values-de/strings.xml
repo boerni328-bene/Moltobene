@@ -671,6 +671,7 @@
     <string name="speech_headset_action_none">Nichts</string>
     <!-- Spracheingabe (#80) -->
     <string name="settings_section_voice_input">Spracheingabe</string>
+    <string name="voice_beta_note">Beta: Die Spracheingabe ist noch nicht auf allen Handys getestet und kann in einer lauten Küche unzuverlässig sein. Die Tasten in der Kochleiste gehen immer.</string>
     <string name="voice_pack_title">Erkennungspaket Deutsch</string>
     <string name="voice_pack_text">Für Sprachbefehle beim Kochen (Weiter, Zurück, Wiederholen, Stopp), erkannt auf dem Handy ohne Internet. Einmal herunterladen: etwa %1$s, belegt etwa %2$s auf dem Handy. Am besten über WLAN. Das Mikrofon hört nur zu, solange der Mikrofon-Knopf in der Kochleiste an ist.</string>
     <string name="voice_pack_downloading">Erkennungspaket wird heruntergeladen …</string>

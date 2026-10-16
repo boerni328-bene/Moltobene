@@ -211,7 +211,6 @@ class BackupManager(
                     backup.copy(photos = adoptAvailable(backup.photos), pages = adoptAvailable(backup.pages)).toRecipe()
                 }
                 repository.saveAll(recipes)
-                restorePresets(preview.presets)
 
                 val newPhotoIds = recipes.flatMap { it.photoIds + it.pageIds }.toSet()
                 oldPhotoIds.filter { it !in newPhotoIds }.forEach { photoStore.delete(it) }
@@ -219,6 +218,9 @@ class BackupManager(
                 adopted.forEach { photoStore.delete(it) }
                 throw e
             }
+
+            // Die Voreinstellungen sind eine Zugabe: Scheitert ihr Speichern, bleiben Rezepte und Fotos trotzdem erhalten.
+            runCatching { restorePresets(preview.presets) }
 
             RestoreResult(
                 added = toWrite.size - replacedIds.size,

@@ -3,6 +3,14 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.52.1] – 2026-10-16 (versionCode 92)
+
+### Geändert
+- **Spracheingabe als Beta gekennzeichnet.** Unter Einstellungen → Spracheingabe steht jetzt ein Hinweis: Die Spracheingabe ist noch nicht auf allen Handys getestet und kann in einer lauten Küche unzuverlässig sein. Die Tasten in der Kochleiste gehen immer.
+
+### Behoben
+- **Wiederherstellen: Fotos bleiben auch dann erhalten, wenn die eigenen Voreinstellungen des Teigrechners nicht gespeichert werden können.** Zuvor konnten in diesem seltenen Fall (z. B. Speicher voll) die gerade wiederhergestellten Rezepte ihre Fotos verlieren.
+
 ## [0.52.0] – 2026-10-16 (versionCode 91)
 
 ### Neu

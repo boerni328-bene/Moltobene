@@ -59,6 +59,8 @@ import com.moltobene.app.data.backup.BackupReader
 import com.moltobene.app.data.translate.LanguagePack
 import com.moltobene.app.data.translate.LanguagePackManager
 import com.moltobene.app.ui.components.AppTitle
+import com.moltobene.app.ui.components.NoticeCard
+import com.moltobene.app.ui.components.NoticeKind
 import com.moltobene.app.ui.components.ScreenTitle
 import com.moltobene.app.ui.components.ScreenTitlePadding
 import com.moltobene.app.ui.theme.Spacing
@@ -176,6 +178,11 @@ fun SettingsScreen(
                 onStopSpeech = viewModel::stopSpeech,
             )
             SectionHeader(stringResource(R.string.settings_section_voice_input))
+            NoticeCard(
+                text = stringResource(R.string.voice_beta_note),
+                kind = NoticeKind.INFO,
+                modifier = Modifier.padding(horizontal = Spacing.m),
+            )
             VoicePackItem(
                 state = voicePack,
                 onDownload = viewModel::downloadVoicePack,
