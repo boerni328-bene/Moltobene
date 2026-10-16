@@ -132,7 +132,7 @@
     <string name="clipboard_empty">The clipboard contains no text.</string>
     <string name="text_done">Text added to the recipe. Check that everything is in the right place.</string>
     <string name="import_from_link">Import from link</string>
-    <string name="import_link_hint">Paste a link to a recipe page or a YouTube video, e.g. from the browser. Only this one page is loaded.</string>
+    <string name="import_link_hint">Paste a link to a recipe page or a YouTube video, e.g. from the browser. Only this one page is loaded, without cookies and without signing in.</string>
     <string name="import_link_field">Link</string>
     <string name="link_loading">Loading page …</string>
     <string name="link_done">Recipe imported from the page. Check that everything is in the right place.</string>

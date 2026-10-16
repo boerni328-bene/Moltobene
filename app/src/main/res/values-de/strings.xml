@@ -131,7 +131,7 @@
     <string name="clipboard_empty">Die Zwischenablage enthält keinen Text.</string>
     <string name="text_done">Text ins Rezept übernommen. Prüfen, ob alles an der richtigen Stelle steht.</string>
     <string name="import_from_link">Aus Link übernehmen</string>
-    <string name="import_link_hint">Link zu einer Rezeptseite oder einem YouTube-Video einfügen, z. B. aus dem Browser. Dafür wird genau diese eine Seite geladen.</string>
+    <string name="import_link_hint">Link zu einer Rezeptseite oder einem YouTube-Video einfügen, z. B. aus dem Browser. Dafür wird genau diese eine Seite geladen, ohne Cookies und ohne Anmeldung.</string>
     <string name="import_link_field">Link</string>
     <string name="link_loading">Seite wird geladen …</string>
     <string name="link_done">Rezept von der Seite übernommen. Prüfen, ob alles an der richtigen Stelle steht.</string>

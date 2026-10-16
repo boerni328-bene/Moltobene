@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.48.1] – 2026-10-16 (versionCode 84)
+
+### Geändert
+- **Hinweis im Dialog „Aus Link übernehmen“.** Der Dialog sagt jetzt zusätzlich, dass die Seite ohne Cookies und ohne Anmeldung geladen wird.
+
 ## [0.48.0] – 2026-10-14 (versionCode 83)
 
 ### Neu
