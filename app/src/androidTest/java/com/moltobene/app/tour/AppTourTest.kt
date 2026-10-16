@@ -307,7 +307,8 @@ class AppTourTest(private val variant: DisplayVariant) {
 
         // Von 4 auf 5 Portionen: Nur die Anzeige ändert sich, das Häkchen bleibt. Stück werden auf ½ gerundet und
         // bekommen „≈“, der Screenreader liest „etwa …, umgerechnet“ (#65).
-        composeRule.onNodeWithContentDescription(text(R.string.servings_more)).performScrollTo().performClick()
+        // Nach dem Scrollen liegt das Ziel oben unter der Leiste; der Test löst die Aktion deshalb ohne Berührungspunkt aus.
+        composeRule.onNodeWithContentDescription(text(R.string.servings_more)).performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
         val tomatoes = text(R.string.ingredient_adjusted, "1000 g reife Tomaten")
         waitForText(tomatoes)
         composeRule.onNodeWithText(tomatoes).assertIsOn()
@@ -317,7 +318,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         val stored = runBlocking { container().repository.getAll().first { it.title == SampleRecipes.TOMATO_SAUCE } }
         assertEquals("800 g reife Tomaten", stored.ingredients.first().text)
 
-        composeRule.onNodeWithText(text(R.string.servings_reset)).performScrollTo().performClick()
+        composeRule.onNodeWithText(text(R.string.servings_reset)).performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
         waitForText("800 g reife Tomaten")
         composeRule.onNodeWithContentDescription(text(R.string.more_options)).performClick()
         composeRule.onNodeWithText(text(R.string.cooking_reset)).performClick()
@@ -514,7 +515,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         val stored = runBlocking { container().repository.getAll().first { it.title == "Lemon drizzle cake" } }
         assertEquals("200 g self-raising flour", stored.ingredients[3].text)
 
-        composeRule.onNodeWithText(text(R.string.servings_reset)).performScrollTo().performClick()
+        composeRule.onNodeWithText(text(R.string.servings_reset)).performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
         waitForText("200 g self-raising flour")
     }
 
@@ -558,7 +559,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         val stored = runBlocking { container().repository.getAll().first { it.title == "Apfelkuchen" } }
         assertEquals("200 g Mehl", stored.ingredients.first().text)
 
-        composeRule.onNodeWithText(text(R.string.servings_reset)).performScrollTo().performClick()
+        composeRule.onNodeWithText(text(R.string.servings_reset)).performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
         waitForText("200 g Mehl")
     }
 

@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.48.2] – 2026-10-16 (versionCode 85)
+
+### Geändert
+- **Rezeptansicht: Foto reicht bis unter die Leiste.** Oben in der Rezeptansicht ist die Leiste durchsichtig, das Foto läuft darunter, und ein weicher Verlauf hält Schriftzug und Symbole lesbar. Beim Blättern wird die Leiste wie bisher deckend. Rezepte ohne Foto und die Ansicht mit Übersetzungsbalken bleiben unverändert.
+
 ## [0.48.1] – 2026-10-16 (versionCode 84)
 
 ### Geändert

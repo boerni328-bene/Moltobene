@@ -17,6 +17,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +33,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -73,6 +77,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -86,6 +91,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
@@ -117,6 +126,8 @@ import androidx.compose.ui.text.intl.LocaleList
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -192,6 +203,8 @@ fun RecipeScreen(
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
+    // Das Blättern liegt hier, damit die Leiste über dem Foto erst beim Blättern deckend wird (Rang 9).
+    val scrollState = rememberScrollState()
     val deletedMessage = stringResource(R.string.recipe_deleted)
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -269,88 +282,113 @@ fun RecipeScreen(
         return
     }
 
+    // Mit Foto und ohne Übersetzungsbalken liegt das Foto unter der Leiste, der Inhalt nutzt dann die Höhe der Leiste mit.
+    val barOverPhoto = !deleting && (state as? RecipeUiState.Content)?.let {
+        it.photo != null && !translationBarShown(it.recipe, translation)
+    } == true
     Scaffold(
         // Jede Berührung, auch beim Blättern, startet die Frist für den Bildschirm neu (#68); sie wird nur beobachtet.
         modifier = Modifier.observeTouches(onTouch),
         topBar = {
-            TopAppBar(
-                // Name der App und Umschalter „DE | EN“ bleiben beim Blättern oben stehen (Wunsch vom 08.10.2026).
-                title = { AppTitle(style = MaterialTheme.typography.titleMedium) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
-                    }
-                },
-                actions = {
-                    val content = state as? RecipeUiState.Content
-                    if (content != null && !deleting) {
-                        val original = remember(content.recipe) { RecipeTranslations.languageOf(content.recipe) }
-                        if (original != null && LanguagePack.targets(original).isNotEmpty()) {
-                            LanguageSwitch(
-                                original = original,
-                                selected = translation.selectedLanguage(original),
-                                onSelect = { viewModel.showLanguage(it, original) },
-                            )
+            // Foto bis unter die Leiste (Rang 9): Solange oben nichts gescrollt ist, ist die Leiste durchsichtig, mit einem
+            // einfachen Verlauf in der Farbe des Hintergrunds für die Lesbarkeit; beim Blättern wird sie deckend.
+            val overPhoto = barOverPhoto && scrollState.value == 0
+            Box {
+                if (overPhoto) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(MaterialTheme.colorScheme.surface.copy(alpha = BAR_GRADIENT_ALPHA), Color.Transparent),
+                                ),
+                            ),
+                    )
+                }
+                TopAppBar(
+                    colors = if (overPhoto) {
+                        TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                    } else {
+                        TopAppBarDefaults.topAppBarColors()
+                    },
+                    // Name der App und Umschalter „DE | EN“ bleiben beim Blättern oben stehen (Wunsch vom 08.10.2026).
+                    title = { AppTitle(style = MaterialTheme.typography.titleMedium) },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                         }
-                        IconButton(onClick = { onEdit(viewModel.recipeId) }) {
-                            Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.edit_recipe))
-                        }
-                        Box {
-                            IconButton(onClick = { menuOpen = true }) {
-                                Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options))
-                            }
-                            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            stringResource(
-                                                if (content.recipe.favorite) R.string.favorite_remove else R.string.favorite_add,
-                                            ),
-                                        )
-                                    },
-                                    leadingIcon = { Icon(Icons.Filled.Favorite, contentDescription = null) },
-                                    onClick = {
-                                        menuOpen = false
-                                        viewModel.toggleFavorite()
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.share_recipe)) },
-                                    leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
-                                    enabled = !viewModel.preparingShare,
-                                    onClick = {
-                                        menuOpen = false
-                                        viewModel.share(asFile = false, labels = shareLabels(resources))
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.share_as_file)) },
-                                    enabled = !viewModel.preparingShare,
-                                    onClick = {
-                                        menuOpen = false
-                                        viewModel.share(asFile = true, labels = shareLabels(resources))
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.cooking_reset)) },
-                                    enabled = checked.isNotEmpty() || currentStep != null,
-                                    onClick = {
-                                        menuOpen = false
-                                        viewModel.resetProgress()
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.delete_recipe)) },
-                                    onClick = {
-                                        menuOpen = false
-                                        confirmDelete = true
-                                    },
+                    },
+                    actions = {
+                        val content = state as? RecipeUiState.Content
+                        if (content != null && !deleting) {
+                            val original = remember(content.recipe) { RecipeTranslations.languageOf(content.recipe) }
+                            if (original != null && LanguagePack.targets(original).isNotEmpty()) {
+                                LanguageSwitch(
+                                    original = original,
+                                    selected = translation.selectedLanguage(original),
+                                    onSelect = { viewModel.showLanguage(it, original) },
                                 )
                             }
+                            IconButton(onClick = { onEdit(viewModel.recipeId) }) {
+                                Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.edit_recipe))
+                            }
+                            Box {
+                                IconButton(onClick = { menuOpen = true }) {
+                                    Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options))
+                                }
+                                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                stringResource(
+                                                    if (content.recipe.favorite) R.string.favorite_remove else R.string.favorite_add,
+                                                ),
+                                            )
+                                        },
+                                        leadingIcon = { Icon(Icons.Filled.Favorite, contentDescription = null) },
+                                        onClick = {
+                                            menuOpen = false
+                                            viewModel.toggleFavorite()
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.share_recipe)) },
+                                        leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
+                                        enabled = !viewModel.preparingShare,
+                                        onClick = {
+                                            menuOpen = false
+                                            viewModel.share(asFile = false, labels = shareLabels(resources))
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.share_as_file)) },
+                                        enabled = !viewModel.preparingShare,
+                                        onClick = {
+                                            menuOpen = false
+                                            viewModel.share(asFile = true, labels = shareLabels(resources))
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.cooking_reset)) },
+                                        enabled = checked.isNotEmpty() || currentStep != null,
+                                        onClick = {
+                                            menuOpen = false
+                                            viewModel.resetProgress()
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.delete_recipe)) },
+                                        onClick = {
+                                            menuOpen = false
+                                            confirmDelete = true
+                                        },
+                                    )
+                                }
+                            }
                         }
-                    }
-                },
-            )
+                    },
+                )
+            }
         },
         snackbarHost = { AppSnackbarHost(snackbarHostState) },
     ) { padding ->
@@ -383,7 +421,9 @@ fun RecipeScreen(
                 snackbarHostState = snackbarHostState,
                 onShowPages = { viewModel.viewer.open(0) },
                 onShowPhoto = { viewModel.photoViewer.open(0) },
-                modifier = Modifier.padding(padding),
+                scrollState = scrollState,
+                barInset = if (barOverPhoto) WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + BAR_HEIGHT else 0.dp,
+                modifier = if (barOverPhoto) Modifier.padding(bottom = padding.calculateBottomPadding()) else Modifier.padding(padding),
             )
             current is RecipeUiState.Loading ->
                 CenteredMessage(text = "", modifier = Modifier.padding(padding)) { CircularProgressIndicator() }
@@ -545,6 +585,8 @@ private fun RecipeContent(
     snackbarHostState: SnackbarHostState,
     onShowPages: () -> Unit,
     onShowPhoto: () -> Unit,
+    scrollState: ScrollState,
+    barInset: Dp,
     modifier: Modifier = Modifier,
 ) {
     // Das Foto läuft oben bündig unter die Leiste; unten sind die Ecken weich.
@@ -725,7 +767,7 @@ private fun RecipeContent(
     Column(modifier = modifier.fillMaxSize()) {
         // Der Übersetzungsbalken (Fortschritt, Hinweis, Fehler) steht fest unter der Leiste und wandert beim Blättern nicht
         // mit (Wunsch vom 14.10.2026).
-        if (originalLanguage != null && LanguagePack.targets(originalLanguage).isNotEmpty() && translation.state != TranslationState.Original) {
+        if (translationBarShown(recipe, translation.state) && originalLanguage != null) {
             Surface(color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.s)) {
                     TranslationStatus(original = originalLanguage, actions = translation)
@@ -733,7 +775,7 @@ private fun RecipeContent(
             }
         }
         Column(
-            modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
+            modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(scrollState),
         ) {
             if (photo != null) {
                 // Beim Kochen soll Platz für Zutaten und Schritte bleiben: höchstens etwa 5:3 hoch, höhere Fotos werden zugeschnitten.
@@ -872,6 +914,7 @@ private fun RecipeContent(
                             number = index + 1,
                             text = localized(steps[index], textLocale),
                             current = cooking.currentStep == RecipeViewModel.progressKey(index, step),
+                            barInset = barInset,
                             onClick = { cooking.onToggleStep(index, step) },
                         )
                     }
@@ -1052,10 +1095,15 @@ private fun IngredientRow(parts: List<AmountScaling.Part>, locale: LocaleList?, 
 /** Ein Schritt; antippen markiert ihn als aktuellen Schritt – mit Symbol und Hintergrund, nicht nur über die Farbe. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, onClick: () -> Unit) {
+private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, barInset: Dp, onClick: () -> Unit) {
     // „Weiter“ und „Zurück“ (#79) scrollen den aktuellen Schritt in den sichtbaren Bereich.
     val requester = remember { BringIntoViewRequester() }
-    LaunchedEffect(current) { if (current) requester.bringIntoView() }
+    // Liegt die Leiste über dem Inhalt, bleibt Platz in Höhe der Leiste frei, damit der Schritt nicht darunter landet.
+    var rowSize by remember { mutableStateOf(IntSize.Zero) }
+    val insetPx = with(LocalDensity.current) { barInset.toPx() }
+    LaunchedEffect(current) {
+        if (current) requester.bringIntoView(Rect(0f, -insetPx, rowSize.width.toFloat(), rowSize.height.toFloat()))
+    }
     val currentLabel = stringResource(R.string.step_current)
     // Ein kräftiger Balken links zeigt den aktuellen Schritt auch ohne Farbe: zusätzlich zu Symbol, Hintergrund und Text.
     val barColor = MaterialTheme.colorScheme.primary
@@ -1071,6 +1119,7 @@ private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, onClic
         modifier = Modifier
             .fillMaxWidth()
             .bringIntoViewRequester(requester)
+            .onSizeChanged { rowSize = it }
             .heightIn(min = 48.dp)
             .clip(MaterialTheme.shapes.medium)
             .then(highlight)
@@ -1443,3 +1492,13 @@ private fun RecipeTags(tags: List<Tag>) {
 
 /** Kleinstes Seitenverhältnis (Breite zu Höhe) des Fotos in der Rezeptansicht: nie höher als 5:3. */
 private const val COOKING_PHOTO_MIN_RATIO = 5f / 3f
+
+/** Ob unter der Leiste der Übersetzungsbalken steht (Rezept mit möglicher Übersetzung, die gerade nicht das Original zeigt). */
+private fun translationBarShown(recipe: Recipe, state: TranslationState): Boolean {
+    val original = RecipeTranslations.languageOf(recipe)
+    return original != null && LanguagePack.targets(original).isNotEmpty() && state != TranslationState.Original
+}
+
+/** Deckkraft des Verlaufs oben auf dem Foto, damit Titel und Symbole der durchsichtigen Leiste lesbar bleiben. */
+private const val BAR_GRADIENT_ALPHA = 0.9f
+private val BAR_HEIGHT = 64.dp
