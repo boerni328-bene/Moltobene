@@ -550,6 +550,8 @@ class AppTourTest(private val variant: DisplayVariant) {
         // Die Form im Rezept ist vorausgefüllt; die eigene Form kommt dazu.
         composeRule.onAllNodes(hasSetTextAction()).onLast().performTextInput("28")
         screenshot("12j-umrechnen-backform")
+        // Das Ergebnis hängt von genauen Texten ab; die Pseudosprache setzt eingefügte Werte in »…«. Das Fenster ist geprüft.
+        assumeTrue(variant != DisplayVariant.PSEUDO)
         composeRule.onNodeWithText(text(R.string.adjust_confirm)).performClick()
 
         waitForText(text(R.string.adjust_pan_hint, "Ø 28 cm", "Ø 26 cm"), substring = true)
@@ -858,7 +860,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.basics_intro))
 
         val first = runBlocking { container().basicRecipes.load() }.first()
-        val title = BasicRecipes.text(first, variant.language).title
+        val title = BasicRecipes.text(first, variant.contentLanguage).title
         composeRule.onNodeWithText(title).performScrollTo().performClick()
         waitForText(text(R.string.instructions))
         screenshot("16a-grundrezepte")
@@ -869,7 +871,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         val stored = runBlocking { container().repository.getAll().filter { it.title == title } }
         assertEquals(1, stored.size)
         assertEquals("Moltobene", stored.single().source?.name)
-        assertEquals(variant.language, stored.single().language)
+        assertEquals(variant.contentLanguage, stored.single().language)
         assertTrue(stored.single().tags.any { it.name == "basics" })
 
         adoptFirstBasic()
@@ -899,7 +901,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("17a-teigwissen")
 
         val first = runBlocking { container().knowHow.load() }.first()
-        val article = KnowHow.text(first, variant.language)
+        val article = KnowHow.text(first, variant.contentLanguage)
         composeRule.onNodeWithText(article.title).performScrollTo().performClick()
         waitForText(article.sections.last().heading)
         for (section in article.sections.filter { it.rows.isNotEmpty() }) {

@@ -17,8 +17,8 @@ android {
         applicationId = "com.moltobene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 85
-        versionName = "0.48.2"
+        versionCode = 86
+        versionName = "0.48.3"
 
         // Rundgang durch die App auf dem Emulator (app/src/androidTest).
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -70,6 +70,8 @@ android {
 
     buildTypes {
         debug {
+            // Pseudosprache „en-XA“ für den Rundgang: lange, akzentuierte Texte zeigen abgeschnittene Stellen.
+            isPseudoLocalesEnabled = true
             // Nur für die Debug-Version (Rundgang auf dem Emulator): Die Texterkennung läuft dort ohne
             // Übersetzung der Handy-Prozessorbefehle. Die veröffentlichte App bleibt bei den Handy-Prozessoren.
             ndk {

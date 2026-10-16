@@ -3,6 +3,10 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.48.3] – 2026-10-16 (versionCode 86)
+
+Keine sichtbaren Änderungen an der App. Der Rundgang auf dem Emulator prüft zusätzlich eine Darstellung mit künstlich verlängerten Texten („Pseudosprache“), damit abgeschnittene Texte früher auffallen.
+
 ## [0.48.2] – 2026-10-16 (versionCode 85)
 
 ### Geändert
