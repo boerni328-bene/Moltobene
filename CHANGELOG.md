@@ -3,6 +3,14 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.49.1] – 2026-10-16 (versionCode 88)
+
+### Geändert
+- **Leere Sammlung:** Der Text sagt jetzt, was möglich ist: Rezepte selbst eintippen oder aus Link, Foto oder Text übernehmen, und dass alles nur auf dem Handy bleibt.
+- **Kernsatz in der App:** Unter Einstellungen → Info steht jetzt der Satz „Moltobene sammelt Kochrezepte aus allen Quellen an einem Ort, gespeichert nur auf dem eigenen Handy.“
+- **Wiederherstellen:** Bei der Sicherung heißt es jetzt „Rezepte aus einer Sicherungsdatei wiederherstellen“ statt „übernehmen“; „übernehmen“ bleibt den Quellen vorbehalten.
+- Die Beschreibung jedes Releases auf GitHub enthält jetzt einen kurzen englischen Absatz.
+
 ## [0.49.0] – 2026-10-16 (versionCode 87)
 
 ### Neu

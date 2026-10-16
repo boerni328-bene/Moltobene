@@ -20,7 +20,7 @@
     <string name="search_clear">Suche löschen</string>
     <string name="search_no_results">Keine passenden Rezepte gefunden</string>
     <string name="collection_empty_title">Noch keine Rezepte vorhanden</string>
-    <string name="collection_empty_text">Mit dem ersten Rezept beginnt die Sammlung.</string>
+    <string name="collection_empty_text">Rezepte selbst eintippen oder aus Link, Foto oder Text übernehmen. Alles bleibt nur auf dem Handy.</string>
     <string name="collection_error">Die Sammlung konnte nicht geladen werden.</string>
     <string name="untitled_recipe">Ohne Titel</string>
     <string name="draft_label">Entwurf</string>
@@ -289,6 +289,7 @@
     <!-- Einstellungen -->
     <string name="settings_title">Einstellungen</string>
     <string name="settings_section_about">Info</string>
+    <string name="app_tagline">Moltobene sammelt Kochrezepte aus allen Quellen an einem Ort, gespeichert nur auf dem eigenen Handy.</string>
     <string name="license_note_moltobene">Moltobene selbst ist freie Software und darf unter den Bedingungen dieser Lizenz genutzt, weitergegeben und verändert werden, ohne jede Gewährleistung. Quelltext: github.com/boerni328-bene/Moltobene</string>
     <string name="license_note_opus_mt">Modelle des Sprachpakets für die Übersetzung, nur auf Wunsch heruntergeladen. Für Moltobene geändert: nach ONNX umgewandelt und auf 8 Bit verkleinert. Quelle: huggingface.co/Helsinki-NLP</string>
     <string name="settings_section_translation">Übersetzung</string>
@@ -441,7 +442,7 @@
     <string name="backup_hint_hide">Hinweis ausblenden</string>
     <string name="restore_error_space">Nicht genug Speicherplatz auf dem Handy, um die Sicherung zu lesen. Platz schaffen und erneut versuchen.</string>
     <string name="restore_title">Sammlung wiederherstellen</string>
-    <string name="restore_text">Rezepte aus einer Sicherungsdatei übernehmen. Vorhandene Rezepte bleiben erhalten.</string>
+    <string name="restore_text">Rezepte aus einer Sicherungsdatei wiederherstellen. Vorhandene Rezepte bleiben erhalten.</string>
     <string name="restore_checking">Sicherung wird geprüft …</string>
     <string name="restore_running">Rezepte werden wiederhergestellt …</string>
     <string name="restore_confirm_title">Sammlung wiederherstellen?</string>

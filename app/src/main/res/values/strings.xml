@@ -21,7 +21,7 @@
     <string name="search_clear">Clear search</string>
     <string name="search_no_results">No matching recipes found</string>
     <string name="collection_empty_title">No recipes yet</string>
-    <string name="collection_empty_text">The collection starts with the first recipe.</string>
+    <string name="collection_empty_text">Type recipes in or import them from a link, photo or text. Everything stays on the device.</string>
     <string name="collection_error">The collection could not be loaded.</string>
     <string name="untitled_recipe">Untitled</string>
     <string name="draft_label">Draft</string>
@@ -231,8 +231,6 @@
     <string name="license_text_show">Show license text</string>
     <string name="license_text_hide">Hide license text</string>
     <string name="licenses_error">The license texts could not be loaded.</string>
-    <!-- Pflichthinweis der IJG-Lizenz, wörtlich vorgeschrieben -->
-
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
@@ -291,6 +289,7 @@
     <!-- Einstellungen -->
     <string name="settings_title">Settings</string>
     <string name="settings_section_about">About</string>
+    <string name="app_tagline">Moltobene collects recipes from every source in one place, stored only on the phone itself.</string>
     <string name="license_note_moltobene">Moltobene itself is free software and may be used, shared and changed under the terms of this license, without any warranty. Source code: github.com/boerni328-bene/Moltobene</string>
     <string name="license_note_opus_mt">Models of the language pack for translation, downloaded only on request. Changed for Moltobene: converted to ONNX and reduced to 8 bit. Source: huggingface.co/Helsinki-NLP</string>
     <string name="settings_section_translation">Translation</string>
@@ -443,7 +442,7 @@
     <string name="backup_hint_hide">Hide hint</string>
     <string name="restore_error_space">Not enough storage space on the device to read the backup. Free up space and try again.</string>
     <string name="restore_title">Restore collection</string>
-    <string name="restore_text">Imports recipes from a backup file. Existing recipes are kept.</string>
+    <string name="restore_text">Restores recipes from a backup file. Existing recipes are kept.</string>
     <string name="restore_checking">Checking backup …</string>
     <string name="restore_running">Restoring recipes …</string>
     <string name="restore_confirm_title">Restore collection?</string>

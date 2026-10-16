@@ -196,6 +196,7 @@ fun SettingsScreen(
                 headlineContent = { Text(stringResource(R.string.app_name)) },
                 supportingContent = { Text(stringResource(R.string.version_label, BuildConfig.VERSION_NAME)) },
             )
+            ListItem(headlineContent = { Text(stringResource(R.string.app_tagline)) })
             ListItem(
                 headlineContent = { Text(stringResource(R.string.whats_new_title, WhatsNew.VERSION_NAME)) },
                 modifier = Modifier.clickable { showWhatsNew = true },

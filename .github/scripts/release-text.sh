@@ -23,6 +23,10 @@ echo "### Installation"
 echo
 echo "Die Datei \`moltobene-$VERSION.apk\` herunterladen und auf dem Handy öffnen (ab Android 8.0)."
 echo "Ein Update wird einfach über die vorhandene App installiert, die Sammlung bleibt dabei erhalten."
+echo
+echo "### In English"
+echo
+echo "_Moltobene collects recipes from every source in one place, stored only on the phone itself._ Free, no ads, no account, no tracking. Download \`moltobene-$VERSION.apk\` and open it on a phone with Android 8.0 or newer; updates install over the existing app and keep the collection. The app is in German and English."
 
 if [ -f "$APK" ]; then
   PRUEFSUMME=$(sha256sum "$APK" | cut -d' ' -f1)
