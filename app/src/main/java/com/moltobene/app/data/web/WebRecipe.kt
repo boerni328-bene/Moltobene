@@ -25,6 +25,10 @@ data class WebRecipe(
     val sourceName: String? = null,
     /** Link zu einem Video des Rezepts (schema.org video), z. B. auf YouTube. */
     val videoUrl: String? = null,
+    /** Stichwörter der Seite bzw. Datei (schema.org keywords), höchstens 20, jedes höchstens 30 Zeichen. */
+    val keywords: List<String> = emptyList(),
+    /** Kategorien der Seite (schema.org recipeCategory), z. B. „Dessert“; gleiche Grenzen wie [keywords]. */
+    val categories: List<String> = emptyList(),
 ) {
     /** Steht genug da, um daraus einen Entwurf zu machen? */
     val hasContent: Boolean get() = ingredients.isNotEmpty() || steps.isNotEmpty()

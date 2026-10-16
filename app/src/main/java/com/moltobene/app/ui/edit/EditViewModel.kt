@@ -125,6 +125,12 @@ class EditViewModel(
     private val videoField = SavedField(handle, "video", "")
     /** Schlagwörter (#57) als Text, siehe [TagCodec]. */
     private val tagsField = SavedField(handle, "tags", "")
+
+    /** Vorschläge für Schlagwörter aus Kategorien und Stichwörtern einer übernommenen Seite (eines je Zeile); nie automatisch gesetzt. */
+    private val suggestedTagsField = SavedField(handle, "suggested_tags", "")
+
+    /** Angezeigte Namen der mitgelieferten Schlagwörter in allen Sprachen der App; setzt der Bildschirm (zum Erkennen von „Dessert“, „Hauptgerichte“ …). */
+    var tagLabelSets: List<Map<String, String>> = emptyList()
     /** Bei der Texterkennung gefundene Seitenzahl – als Vorschlag für „Seite“. */
     private val suggestedPageField = SavedField(handle, "suggestedPage", "")
     private val notesField = SavedField(handle, "notes", "")
@@ -235,6 +241,35 @@ class EditViewModel(
 
     fun removeTag(tag: Tag) {
         change(tagsField, TagCodec.encode(tags.filterNot { it.name == tag.name }))
+    }
+
+    /** Meint [text] ein mitgeliefertes Schlagwort (Kennung oder Name in einer Sprache der App), wird dieses gewählt. */
+    private fun resolveTag(text: String): Tag {
+        for (labels in tagLabelSets) {
+            val tag = PredefinedTags.resolve(text, labels)
+            if (tag.predefinedKey != null) return tag
+        }
+        return PredefinedTags.resolve(text)
+    }
+
+    private fun addTag(tag: Tag) {
+        if (tag.name.isEmpty() || tag.name.length > TagCodec.MAX_NAME) return
+        val current = tags
+        if (current.size >= TagCodec.MAX_TAGS || current.any { it.name.equals(tag.name, ignoreCase = true) }) return
+        change(tagsField, TagCodec.encode(current + tag))
+    }
+
+    /** Vorschläge der übernommenen Seite, die noch nicht gewählt sind (#57); antippen wählt, nie automatisch. */
+    val suggestedTags: List<String>
+        get() {
+            val chosen = tags.map { it.name.lowercase() }.toSet()
+            return suggestedTagsField.value.lines().filter { it.isNotBlank() && resolveTag(it).name.lowercase() !in chosen }
+        }
+
+    /** Wählt einen Vorschlag; er verschwindet aus der Liste. */
+    fun addSuggestedTag(text: String) {
+        addTag(resolveTag(text))
+        suggestedTagsField.value = suggestedTagsField.value.lines().filterNot { it == text }.joinToString("\n")
     }
 
     var video: String
@@ -1164,6 +1199,9 @@ class EditViewModel(
         if (totalMinutesField.value == 0) totalMinutesField.value = recipe.totalMinutes ?: 0
         checkHintField.value = hint
         if (video.isBlank()) recipe.videoUrl?.let { video = it }
+        // Schlagwörter (#57): Aus einer Datei kommen sie dazu (die Datei hat der Nutzer gewählt), von einer Seite nur als Vorschlag.
+        val words = (recipe.categories + recipe.keywords).distinctBy { it.lowercase() }
+        if (fromFile) words.forEach { addTag(resolveTag(it)) } else if (words.isNotEmpty()) suggestedTagsField.value = words.joinToString("\n")
         if (!hasPhoto) recipe.imageUrls.firstOrNull { isUsablePhoto(it, fromFile) }?.let { loadPhoto(it, fromFile) }
     }
 

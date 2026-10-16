@@ -1,10 +1,13 @@
 package com.moltobene.app.ui.components
 
+import android.content.Context
+import android.content.res.Configuration
 import android.content.res.Resources
 import androidx.annotation.StringRes
 import com.moltobene.app.R
 import com.moltobene.app.data.PredefinedTags
 import com.moltobene.app.data.Tag
+import java.util.Locale
 
 /** Angezeigte Namen der mitgelieferten Schlagwörter (#57) aus strings.xml; eigene zeigen ihren Namen. */
 object TagLabels {
@@ -33,4 +36,14 @@ object TagLabels {
     /** Kennung → Text für alle mitgelieferten Schlagwörter, in der Sprache der Oberfläche. */
     fun all(resources: Resources): Map<String, String> =
         PredefinedTags.KEYS.mapNotNull { key -> resId(key)?.let { key to resources.getString(it) } }.toMap()
+
+    /**
+     * Kennung → Text je Sprache der App (Deutsch und Englisch), um Schlagwörter aus Rezeptdateien in der Sprache der
+     * Absender wiederzuerkennen („Hauptgerichte“ und „Main courses“ meinen dasselbe Schlagwort).
+     */
+    fun allLanguages(context: Context): List<Map<String, String>> =
+        listOf("de", "en").map { language ->
+            val configuration = Configuration(context.resources.configuration).apply { setLocale(Locale.forLanguageTag(language)) }
+            all(context.createConfigurationContext(configuration).resources)
+        }
 }

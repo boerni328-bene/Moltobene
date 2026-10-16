@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.51.0] – 2026-10-16 (versionCode 90)
+
+### Neu
+- **Schlagwörter beim Übernehmen.** Hat eine Rezeptseite eine Kategorie oder Stichwörter, erscheinen sie im Entwurf unter „Schlagwörter“ als Vorschläge zum Antippen; nichts wird von selbst gesetzt. Aus einer Rezeptdatei von Moltobene kommen die Schlagwörter jetzt wieder mit, auch wenn sie in der anderen Sprache (Deutsch oder Englisch) geteilt wurden: „Hauptgerichte“ und „Main courses“ werden zum selben mitgelieferten Schlagwort.
+
 ## [0.50.0] – 2026-10-16 (versionCode 89)
 
 ### Neu

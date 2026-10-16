@@ -237,6 +237,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Schlagwörter beim Übernehmen: Kategorie und Stichwörter einer Rezeptseite erscheinen im Entwurf als Vorschläge zum Antippen; aus einer Rezeptdatei kommen die Schlagwörter wieder mit.</item>
         <item>Beim Kochen: „Große Schrift beim Kochen“ im Menü ⋮ der Rezeptansicht vergrößert Zutaten, Schritte und Notizen. Neue Notizen lassen sich direkt in der Rezeptansicht mit „Notiz hinzufügen“ festhalten.</item>
         <item>Sammlung sortieren: Das neue Symbol neben der Suche wechselt zwischen „Titel A–Z“ und „Zuletzt hinzugefügt“. Umlaute stehen bei ihrem Buchstaben, die Wahl bleibt gemerkt.</item>
         <item>Rezeptansicht: Das Foto reicht bis unter die Leiste oben.</item>
@@ -346,6 +347,7 @@
     <string name="tag_filter_title">Nach Schlagwort filtern</string>
     <string name="tags_custom">Eigenes Schlagwort</string>
     <string name="tags_add">Hinzufügen</string>
+    <string name="tags_suggestions">Vorschläge der Seite zum Antippen</string>
     <string name="tags_remove">Schlagwort %1$s entfernen</string>
     <string name="tag_main_course">Hauptgerichte</string>
     <string name="tag_side_dish">Beilagen</string>

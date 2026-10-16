@@ -27,6 +27,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -54,6 +55,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -117,6 +119,10 @@ fun EditScreen(
     onClose: () -> Unit,
     onSaved: (id: String, wasNew: Boolean, message: String) -> Unit,
 ) {
+    // Damit Schlagwörter aus Dateien in jeder Sprache der App erkannt werden (z. B. „Hauptgerichte“ und „Main courses“).
+    val appContext = LocalContext.current
+    val tagLabelSets = remember(appContext) { TagLabels.allLanguages(appContext) }
+    SideEffect { viewModel.tagLabelSets = tagLabelSets }
     var confirmDiscard by rememberSaveable { mutableStateOf(false) }
     val savedMessage = stringResource(R.string.recipe_saved)
     val onRecipeSaved: (String, Boolean) -> Unit = { id, wasNew -> onSaved(id, wasNew, savedMessage) }
@@ -1096,6 +1102,24 @@ private fun TagsSection(viewModel: EditViewModel) {
                         null
                     },
                 )
+            }
+        }
+        // Vorschläge der übernommenen Seite (Kategorie, Stichwörter): nie automatisch gesetzt, nur auf Antippen.
+        val suggestions = viewModel.suggestedTags
+        if (suggestions.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.tags_suggestions),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                for (text in suggestions) {
+                    SuggestionChip(
+                        onClick = { viewModel.addSuggestedTag(text) },
+                        label = { Text(text) },
+                        icon = { Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp)) },
+                    )
+                }
             }
         }
         val own = selected.filter { it.predefinedKey == null }

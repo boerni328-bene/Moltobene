@@ -87,7 +87,26 @@ object RecipeJsonLdReader {
             sourceName = HtmlText.inline(text(item["isBasedOn"]))
                 .takeIf { it.isNotEmpty() && !it.startsWith("http", ignoreCase = true) },
             videoUrl = video(item["video"], listOfNotNull(url, baseUrl), 0),
+            keywords = tagWords(item["keywords"]),
+            categories = tagWords(item["recipeCategory"]),
         )
+    }
+
+    /**
+     * Stichwörter oder Kategorien (schema.org keywords, recipeCategory): ein Text mit Kommas oder Semikolons, ein Feld
+     * oder eine Liste. Höchstens [MAX_TAG_WORDS], jedes höchstens [MAX_TAG_LENGTH] Zeichen, ohne Doppelte.
+     */
+    internal fun tagWords(element: JsonElement?): List<String> {
+        val parts: List<String> = when (element) {
+            is JsonPrimitive -> listOf(element.content)
+            is JsonArray -> element.mapNotNull { (it as? JsonPrimitive)?.content }
+            else -> emptyList()
+        }
+        return parts.flatMap { it.split(',', ';') }
+            .map { HtmlText.inline(it).trim() }
+            .filter { it.isNotEmpty() && it.length <= MAX_TAG_LENGTH }
+            .distinctBy { it.lowercase() }
+            .take(MAX_TAG_WORDS)
     }
 
     /**
@@ -219,6 +238,8 @@ object RecipeJsonLdReader {
     private const val MAX_ITEMS = 300
     private const val MAX_INGREDIENTS = 200
     private const val MAX_STEPS = 100
+    private const val MAX_TAG_WORDS = 20
+    private const val MAX_TAG_LENGTH = 30
     private const val MAX_IMAGES = 5
     private val TRAILING_COMMA = Regex(",\\s*([}\\]])")
     private val TEXT_COMMENT = Regex("<!--[^{\\[]*?-->")

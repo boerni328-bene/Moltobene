@@ -1136,6 +1136,13 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNode(hasSetTextAction() and hasText(SamplePage.TITLE)).performScrollTo().assertIsDisplayed()
         screenshot("26-aus-link-uebernommen")
 
+        // Schlagwörter (#57): Kategorie und Stichwörter der Seite nur als Vorschläge; „Reis“ wird angetippt.
+        composeRule.onNodeWithText(text(R.string.tags_suggestions)).performScrollTo()
+        screenshot("26a-schlagwort-vorschlaege")
+        composeRule.onNodeWithText("Reis").performSemanticsAction(SemanticsActions.OnClick)
+        waitForDescription(text(R.string.tags_remove, "Reis"))
+        composeRule.onNodeWithText("Zitrone").performScrollTo().assertIsDisplayed()
+
         composeRule.onNodeWithText(text(R.string.save)).performClick()
         waitForText("320 g Risottoreis")
         screenshot("27-aus-link-rezept")
@@ -1148,6 +1155,8 @@ class AppTourTest(private val variant: DisplayVariant) {
         assertEquals(35, recipe.totalMinutes)
         // Ohne Zählzusatz (utm_…) gespeichert.
         assertEquals(SamplePage.CLEAN_URL, recipe.source?.url)
+        // Nur das angetippte Schlagwort ist gesetzt, die Kategorie „Hauptgerichte“ wurde nicht automatisch übernommen.
+        assertEquals(listOf("Reis"), recipe.tags.map { it.name })
         assertEquals("de", recipe.language)
         assertEquals(1, recipe.photoIds.size)
     }
@@ -1196,6 +1205,8 @@ class AppTourTest(private val variant: DisplayVariant) {
         assertEquals(5, recipe.ingredients.size)
         assertEquals(3, recipe.steps.size)
         assertEquals(SamplePage.CLEAN_URL, recipe.source?.url)
+        // Die Vorschläge der Seite wurden nicht angetippt, also ist auch nichts gesetzt.
+        assertEquals(emptyList<String>(), recipe.tags.map { it.name })
         assertEquals(SamplePage.VIDEO_WATCH_URL, recipe.videoUrl)
         assertEquals(1, recipe.photoIds.size)
 
@@ -1236,6 +1247,8 @@ class AppTourTest(private val variant: DisplayVariant) {
             // Buch und Seite aus „Familienkochbuch, S. 12“ getrennt.
             assertEquals("Familienkochbuch", recipe.source?.name)
             assertEquals("12", recipe.source?.page)
+            // Schlagwörter aus der Rezeptdatei (#57): „Hauptgerichte“ wird wieder zum mitgelieferten Schlagwort.
+            assertEquals(listOf("main_course", "Vegetarisch"), recipe.tags.map { it.name })
             assertEquals(1, recipe.photoIds.size)
         } finally {
             SamplePage.deleteRecipeFile(activity, file)

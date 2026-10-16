@@ -5,10 +5,12 @@ import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import com.moltobene.app.data.Ingredient
+import com.moltobene.app.data.PredefinedTags
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeIds
 import com.moltobene.app.data.RecipeSource
 import com.moltobene.app.data.SourceType
+import com.moltobene.app.data.Tag
 import com.moltobene.app.data.share.RecipeJsonLd
 import com.moltobene.app.data.web.PageLoader
 import com.moltobene.app.data.web.WebPage
@@ -34,6 +36,7 @@ object SamplePage {
             {"@type":"Recipe","name":"Zitronen-Risotto","inLanguage":"de",
              "description":"Cremig, frisch und in einer halben Stunde fertig.",
              "recipeYield":["4","4 Portionen"],"prepTime":"PT10M","totalTime":"PT35M",
+             "recipeCategory":"Hauptgerichte","keywords":"Reis, Zitrone",
              "image":{"@type":"ImageObject","url":"/bilder/zitronen-risotto.jpg","width":1200},
              "recipeIngredient":["320 g Risottoreis","1 Zwiebel","1 l Gemüsebrühe","1 Bio-Zitrone","50 g Parmesan"],
              "recipeInstructions":[
@@ -105,11 +108,12 @@ object SamplePage {
             source = RecipeSource(SourceType.BOOK, name = "Familienkochbuch", page = "12"),
             ingredients = listOf(Ingredient(FILE_INGREDIENT), Ingredient("1 Dose Kokosmilch"), Ingredient("2 EL Currypaste")),
             steps = listOf("Gemüse klein schneiden.", "Mit Currypaste anbraten.", "Kokosmilch angießen und köcheln lassen."),
+            tags = listOf(PredefinedTags.tag("main_course"), Tag(name = "Vegetarisch")),
             createdAt = 0,
             updatedAt = 0,
         )
         val json = try {
-            RecipeJsonLd.build(recipe, untitled = FILE_TITLE, photoJpeg = photo.readBytes()) { "S. $it" }
+            RecipeJsonLd.build(recipe, untitled = FILE_TITLE, photoJpeg = photo.readBytes(), tag = { if (it.predefinedKey == "main_course") "Hauptgerichte" else it.name }, page = { "S. $it" })
         } finally {
             photo.delete()
         }

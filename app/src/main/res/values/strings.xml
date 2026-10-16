@@ -237,6 +237,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Tags when importing: the category and keywords of a recipe page appear in the draft as suggestions to tap; tags come back with a recipe file.</item>
         <item>Cooking: “Large text for cooking” in the ⋮ menu of the recipe view enlarges ingredients, steps and notes. Notes can now be added right in the recipe view with “Add note”.</item>
         <item>Sorting the collection: The new icon next to search switches between “Title A–Z” and “Recently added”. Umlauts and accents sort with their letter, and the choice is remembered.</item>
         <item>Recipe view: The photo now extends up behind the top bar.</item>
@@ -346,6 +347,7 @@
     <string name="tag_filter_title">Filter by tag</string>
     <string name="tags_custom">Custom tag</string>
     <string name="tags_add">Add</string>
+    <string name="tags_suggestions">Suggestions from the page, tap to add</string>
     <string name="tags_remove">Remove tag %1$s</string>
     <string name="tag_main_course">Main courses</string>
     <string name="tag_side_dish">Side dishes</string>
