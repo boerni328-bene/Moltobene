@@ -258,6 +258,7 @@ class AppTourTest(private val variant: DisplayVariant) {
 
         composeRule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
         waitForText(text(R.string.settings_section_start))
+        openSettingsGroup(R.string.settings_section_start)
         composeRule.onNodeWithText(text(R.string.start_home)).performScrollTo().performClick()
         composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.startScreen.value == StartScreen.HOME }
         composeRule.onNodeWithText(text(R.string.start_home)).assertIsSelected()
@@ -276,6 +277,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(SampleRecipes.POTATO_SALAD)
         composeRule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
         waitForText(text(R.string.settings_section_speech))
+        openSettingsGroup(R.string.settings_section_speech)
 
         val ui = activity.resources.configuration.locales[0]
         fun cap(value: String) = value.replaceFirstChar { it.titlecase(ui) }
@@ -292,7 +294,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitUntilGone(austria)
 
         // Tempo und Tonhöhe: „Lebhaft“, dann Tempo um einen Schritt erhöhen.
-        composeRule.onNodeWithText(text(R.string.speech_preset_lively)).performScrollTo().performClick()
+        composeRule.onNodeWithText(text(R.string.speech_preset_lively)).performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
         composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.speechSettings.value.rate == 115 }
         composeRule.onNodeWithContentDescription(text(R.string.speech_more, text(R.string.speech_tempo))).performScrollTo().performClick()
         composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.speechSettings.value.rate == 120 }
@@ -306,7 +308,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         assertEquals("de-at-x-zweite-local", speech.lastSettings?.voiceFor("de"))
 
         // Zurück zu „Normal“.
-        composeRule.onNodeWithText(text(R.string.speech_preset_normal)).performScrollTo().performClick()
+        composeRule.onNodeWithText(text(R.string.speech_preset_normal)).performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
         composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.speechSettings.value.rate == 100 }
     }
 
@@ -483,6 +485,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("12q-spracheingabe-ohne-paket")
         composeRule.onNodeWithText(text(R.string.voice_open_settings)).performClick()
         waitForText(text(R.string.settings_section_voice_input))
+        openSettingsGroup(R.string.settings_section_voice_input)
         screenshot("12r-spracheingabe-einstellungen")
         composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
         waitForText("800 g reife Tomaten")
@@ -825,6 +828,8 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("12e-sprachpaket-fehlt")
 
         composeRule.onNodeWithText(text(R.string.translation_open_settings)).performClick()
+        waitForText(text(R.string.settings_section_translation))
+        openSettingsGroup(R.string.settings_section_translation)
         waitForText(text(R.string.language_pack_title))
         composeRule.onNodeWithText(text(R.string.language_pack_title)).performScrollTo()
         screenshot("12f-einstellungen-sprachpaket")
@@ -1262,6 +1267,8 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.backup_title))
         screenshot("29-einstellungen")
 
+        openSettingsGroup(R.string.settings_section_about)
+        screenshot("29d-einstellungen-info")
         composeRule.onNodeWithText(text(R.string.whats_new_title, WhatsNew.VERSION_NAME)).performScrollTo().performClick()
         waitForText(text(R.string.close))
         screenshot("30-neu-in-version")
@@ -1287,6 +1294,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(SampleRecipes.POTATO_SALAD)
         composeRule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
         waitForText(text(R.string.settings_section_appearance))
+        openSettingsGroup(R.string.settings_section_appearance)
 
         composeRule.onNodeWithText(text(R.string.palette_terracotta)).performScrollTo().performClick()
         val mode = if (variant.dark) ThemeMode.DARK else ThemeMode.LIGHT
@@ -1311,6 +1319,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(SampleRecipes.POTATO_SALAD)
         composeRule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
         waitForText(text(R.string.settings_section_cooking))
+        openSettingsGroup(R.string.settings_section_cooking)
 
         val fifteen = activity.resources.getQuantityString(R.plurals.screen_on_off_after, 15, 15)
         composeRule.onNodeWithText(fifteen).performScrollTo().performClick()
@@ -1326,6 +1335,7 @@ class AppTourTest(private val variant: DisplayVariant) {
 
         composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
         composeRule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        openSettingsGroup(R.string.settings_section_cooking)
         // „Wie das Handy“ steht auch unter „Hell oder dunkel“; der Abschnitt „Kochen“ kommt zuerst.
         composeRule.onAllNodesWithText(text(R.string.screen_on_device)).onFirst().performScrollTo().performClick()
         composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.screenOn.value == ScreenOn.DEVICE }
@@ -1340,6 +1350,12 @@ class AppTourTest(private val variant: DisplayVariant) {
     }
 
     // --- Hilfsfunktionen ---
+
+    /** Klappt eine zugeklappte Gruppe der Einstellungen auf (nur aufrufen, wenn sie zu ist). */
+    private fun openSettingsGroup(@StringRes title: Int) {
+        composeRule.onNodeWithText(text(title)).performScrollTo().performClick()
+        composeRule.waitForIdle()
+    }
 
     private val activity get() = composeRule.activity
 

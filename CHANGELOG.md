@@ -3,6 +3,13 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.53.0] – 2026-10-17 (versionCode 93)
+
+### Neu
+- **Teigrechner kompakter.** Werte stehen jetzt paarweise nebeneinander (z. B. Teigkugeln und Gewicht, Wasseranteil und Salz), die Karte „Voreinstellung“ braucht weniger Platz, und es muss weniger gescrollt werden. Bei Biga, Poolish oder Sauerteig zeigt die Leiste unten jetzt auch Mehl, Wasser und Hefe des Vorteigs. Bei großer Schrift bleibt alles untereinander.
+- **Einstellungen aufgeräumt.** Die Gruppen sind jetzt Karten, die sich auf- und zuklappen lassen. Zugeklappt passen alle auf einen Bildschirm; „Sammlung“ ist beim Öffnen aufgeklappt.
+- **Beim Kochen größere Schrift.** Zutaten, Schritte und Notizen sind etwas größer, die Überschriften ebenso. „Große Schrift beim Kochen“ vergrößert weiter.
+
 ## [0.52.1] – 2026-10-16 (versionCode 92)
 
 ### Geändert

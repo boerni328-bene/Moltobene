@@ -95,7 +95,7 @@ internal fun PresetCard(
     val position = if (index >= 0) stringResource(R.string.dough_preset_position, index + 1, entries.size) else null
     val description = listOfNotNull(stringResource(R.string.dough_preset_choose, name), position).joinToString(", ")
 
-    Card(stringResource(R.string.dough_preset_title)) {
+    Card("") {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             IconButton(onClick = { choose(DoughPresets.step(index, entries.size, -1)) }) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.dough_preset_previous))
@@ -139,11 +139,6 @@ internal fun PresetCard(
                 Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = stringResource(R.string.dough_preset_next))
             }
         }
-        Text(
-            stringResource(R.string.dough_preset_note),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
         // Bei großer Schrift passen die Knöpfe nicht nebeneinander; sie rutschen in die nächste Zeile.
         FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
             TextButton(onClick = { saving = true }, enabled = canSave) { Text(stringResource(R.string.dough_preset_save)) }

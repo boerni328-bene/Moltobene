@@ -1394,7 +1394,7 @@ private fun TranslationStatus(original: String, actions: TranslationActions) {
 private fun SectionTitle(text: String) {
     Text(
         text = text,
-        style = if (LocalCookingLarge.current) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.titleLarge,
+        style = if (LocalCookingLarge.current) MaterialTheme.typography.headlineLarge else MaterialTheme.typography.headlineMedium,
         modifier = Modifier
             .padding(top = Spacing.m)
             .semantics { heading() },
@@ -1522,10 +1522,10 @@ private val BAR_HEIGHT = 64.dp
 /** „Große Schrift beim Kochen“ (#61): Zutaten, Schritte und Notizen größer, unabhängig von der Schriftgröße des Handys. */
 private val LocalCookingLarge = compositionLocalOf { false }
 
-/** Schrift für Zutaten, Schritte und Notizen; größer, wenn „Große Schrift beim Kochen“ an ist. */
+/** Schrift für Zutaten, Schritte und Notizen (Standard etwa 22 sp, seit 0.53.0 größer als zuvor); noch größer mit „Große Schrift beim Kochen“. */
 @Composable
 private fun cookingTextStyle(): TextStyle =
-    if (LocalCookingLarge.current) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.bodyLarge
+    if (LocalCookingLarge.current) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.titleLarge
 
 /**
  * Notizen zum Rezept (#61) mit „Notiz hinzufügen“ bzw. „Notiz bearbeiten“ direkt in der Rezeptansicht. Die angefangene

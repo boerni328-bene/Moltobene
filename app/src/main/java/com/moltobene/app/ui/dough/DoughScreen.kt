@@ -207,8 +207,11 @@ internal fun Card(title: String, onHelp: (() -> Unit)? = null, content: @Composa
         shape = MaterialTheme.shapes.large,
         modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m),
     ) {
-        Column(modifier = Modifier.padding(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(
+            modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.s),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+        ) {
+            if (title.isNotEmpty()) Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     title,
                     style = MaterialTheme.typography.titleSmall,
@@ -226,11 +229,34 @@ internal fun Card(title: String, onHelp: (() -> Unit)? = null, content: @Composa
     }
 }
 
-/** Felder untereinander, jedes über die volle Breite, damit Platz für Plus und Minus bleibt (#83). */
+/**
+ * Felder des Teigrechners (#83): bei normaler Schrift je zwei nebeneinander (kompakter, weniger Scrollen), bei großer
+ * Schrift untereinander über die volle Breite. In der Zweierreihe fehlen Plus und Minus; der Regler bleibt.
+ */
 @Composable
 internal fun Fields(vararg fields: @Composable (Modifier) -> Unit, weights: List<Float>? = null) {
-    Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) { fields.forEach { it(Modifier.fillMaxWidth()) } }
+    if (isLargeText()) {
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) { fields.forEach { it(Modifier.fillMaxWidth()) } }
+        return
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+        // Drei Felder (Wasser, Salz, Öl) passen in eine Reihe, sonst je zwei.
+        fields.toList().chunked(if (fields.size == 3) 3 else 2).forEach { pair ->
+            if (pair.size == 1) {
+                pair[0](Modifier.fillMaxWidth())
+            } else {
+                CompositionLocalProvider(LocalDoughCompactField provides true) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                        pair.forEach { it(Modifier.weight(1f)) }
+                    }
+                }
+            }
+        }
+    }
 }
+
+/** Steht das Feld in einer Zweierreihe? Dann ohne Plus und Minus. */
+internal val LocalDoughCompactField = compositionLocalOf { false }
 
 /** Plus, Minus und die Markierung „Standard“ eines Felds (#83): Schrittweite, Standardwert, Grenzen. */
 internal class Stepping(
@@ -282,7 +308,8 @@ internal fun NumberField(
     val bounds = if (LocalDoughSliders.current && stepping.field != null) DoughStepper.sliderBounds(stepping.field, stepping.range) else null
     // Eine Bedienung pro Wert (#86): Regler mit antippbarer Zahl; Plus und Minus nur bei kleinen ganzen Zahlen
     // (Anzahl) und wo es keinen Regler gibt.
-    val showSteps = integer || bounds == null
+    val compact = LocalDoughCompactField.current
+    val showSteps = !compact && (integer || bounds == null)
     val buttons: @Composable () -> Unit = {
         val stepText = show(stepping.step) + suffix?.let { " $it" }.orEmpty()
         FilledTonalIconButton(
@@ -314,14 +341,24 @@ internal fun NumberField(
     // „Standard 250 g“ nur, wenn der Wert abweicht – eine Zeile mit „Zurücksetzen“, kein Text bei Standard.
     val defaultLine: @Composable () -> Unit = {
         if (default != null && !atDefault) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    stringResource(R.string.dough_default_value, show(default) + suffix?.let { " $it" }.orEmpty()),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f).padding(start = Spacing.m),
-                )
-                TextButton(onClick = { onChange(text(default)) }) { Text(stringResource(R.string.dough_default_reset_short)) }
+            val value = stringResource(R.string.dough_default_value, show(default) + suffix?.let { " $it" }.orEmpty())
+            val reset = stringResource(R.string.dough_default_reset_short)
+            if (compact) {
+                // In der Zweierreihe ist wenig Breite: der Text und darunter der Knopf.
+                Column(modifier = Modifier.fillMaxWidth().padding(start = Spacing.xs)) {
+                    Text(value, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    TextButton(onClick = { onChange(text(default)) }) { Text(reset) }
+                }
+            } else {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        value,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f).padding(start = Spacing.m),
+                    )
+                    TextButton(onClick = { onChange(text(default)) }) { Text(reset) }
+                }
             }
         }
     }
@@ -734,10 +771,17 @@ private fun DoughForm(
 
         val success = result as? DoughResult.Success
         val draft = success?.let { viewModel.draft(it, input) }
+        val prefermentItems = success?.let { viewModel.prefermentItems(it, input) }.orEmpty()
+        val prefermentBar = if (prefermentItems.isEmpty()) null else stringResource(
+            R.string.dough_bar_preferment,
+            stringResource(prefermentLabel(preferment)),
+            prefermentItems.joinToString(", ") { "${it.amount} ${it.name}" },
+        )
         ResultBar(
             summary = if (success != null && draft != null) summaryLine(success, draft) else null,
             totals = success?.let { viewModel.totals(it, input) },
             onSave = { viewModel.saveAsRecipe(input, onSaved) },
+            preferment = prefermentBar,
         )
     }
 }
@@ -771,7 +815,7 @@ internal fun summaryLine(result: DoughResult.Success, draft: DoughDraft): String
  * stehen die Gesamtmengen als Karte im Formular ([TotalsCard]), damit die Leiste klein bleibt (#83).
  */
 @Composable
-internal fun ResultBar(summary: String?, totals: List<TotalItem>?, onSave: () -> Unit) {
+internal fun ResultBar(summary: String?, totals: List<TotalItem>?, onSave: () -> Unit, preferment: String? = null) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         tonalElevation = 3.dp,
@@ -779,7 +823,7 @@ internal fun ResultBar(summary: String?, totals: List<TotalItem>?, onSave: () ->
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m, vertical = Spacing.s),
-            verticalArrangement = Arrangement.spacedBy(Spacing.s),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
             Column(modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }) {
                 if (summary != null) {
@@ -799,6 +843,10 @@ internal fun ResultBar(summary: String?, totals: List<TotalItem>?, onSave: () ->
                 ) {
                     for (item in totals) TotalTile(item)
                 }
+            }
+            // Biga, Poolish, Sauerteig: was für den Vorteig am Abend vorher angesetzt wird.
+            if (summary != null && preferment != null) {
+                Text(preferment, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.semantics(mergeDescendants = true) {})
             }
             Button(onClick = onSave, enabled = summary != null, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.dough_save))

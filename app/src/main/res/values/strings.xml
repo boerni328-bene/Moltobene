@@ -237,6 +237,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Compact dough calculator: values sit side by side, the preset takes less room, and the bar at the bottom also shows the preferment for biga or poolish.</item>
+        <item>Tidier settings: groups can be expanded and collapsed, so everything fits on one screen.</item>
+        <item>While cooking, the text for ingredients and steps is a little larger.</item>
         <item>Tags when importing: the category and keywords of a recipe page appear in the draft as suggestions to tap; tags come back with a recipe file.</item>
         <item>Cooking: “Large text for cooking” in the ⋮ menu of the recipe view enlarges ingredients, steps and notes. Notes can now be added right in the recipe view with “Add note”.</item>
         <item>Sorting the collection: The new icon next to search switches between “Title A–Z” and “Recently added”. Umlauts and accents sort with their letter, and the choice is remembered.</item>
@@ -294,6 +297,8 @@
     <!-- Einstellungen -->
     <string name="settings_title">Settings</string>
     <string name="settings_section_about">About</string>
+    <string name="settings_group_expanded">Expanded</string>
+    <string name="settings_group_collapsed">Collapsed</string>
     <string name="app_tagline">Moltobene collects recipes from every source in one place, stored only on the phone itself.</string>
     <string name="license_note_moltobene">Moltobene itself is free software and may be used, shared and changed under the terms of this license, without any warranty. Source code: github.com/boerni328-bene/Moltobene</string>
     <string name="license_note_opus_mt">Models of the language pack for translation, downloaded only on request. Changed for Moltobene: converted to ONNX and reduced to 8 bit. Source: huggingface.co/Helsinki-NLP</string>
@@ -503,6 +508,7 @@
     <string name="dough_preferment_flour">Flour (% of total)</string>
     <string name="dough_preferment_water">Water (% of its flour)</string>
     <string name="dough_section_result">Result</string>
+    <string name="dough_bar_preferment">%1$s: %2$s</string>
     <string name="dough_total_line">%1$s g dough · %2$s</string>
     <string name="dough_percent_note">Salt, oil and hydration in % of flour</string>
     <string name="dough_yeast_item">%1$s g %2$s</string>
@@ -545,13 +551,11 @@
     <string name="dough_help_preferment_effect">A preferment can improve flavor and dough properties; biga tends to make the dough firmer, poolish more extensible. Flour and water of the preferment count toward the totals in the calculator.</string>
     <string name="dough_help_preferment_range">Biga is typically stiff (about 50 to 60 % water of its flour), poolish liquid (about 100 %). About 20 to 50 % of the total flour in the preferment is common.</string>
     <string name="dough_help_preferment_care">Ripening time depends on temperature: a biga usually needs 8 to 16 hours at about 15 to 20 °C. Left too long, the preferment collapses and smells sharply sour. Biga and poolish are made with yeast and are not sourdough; with sourdough, the yeast in the final dough is optional.</string>
-    <string name="dough_preset_title">Preset</string>
     <string name="dough_preset_custom">Custom values</string>
     <string name="dough_preset_position">%1$d of %2$d</string>
     <string name="dough_preset_previous">Previous preset</string>
     <string name="dough_preset_next">Next preset</string>
     <string name="dough_preset_choose">Choose preset: %1$s</string>
-    <string name="dough_preset_note">A preset is a starting point, not a guaranteed recipe. It sets hydration, salt, oil, yeast and preferment; number and weight stay as they are.</string>
     <string name="dough_preset_default">Default values</string>
     <string name="dough_preset_neapolitan">Neapolitan</string>
     <string name="dough_preset_sheet_pan">Sheet-pan pizza</string>

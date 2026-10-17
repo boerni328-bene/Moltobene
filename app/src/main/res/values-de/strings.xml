@@ -237,6 +237,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Teigrechner kompakter: Werte stehen paarweise nebeneinander, die Voreinstellung braucht weniger Platz, und die Leiste unten zeigt bei Biga oder Poolish auch den Vorteig.</item>
+        <item>Einstellungen aufgeräumt: Die Gruppen lassen sich auf- und zuklappen, so passt alles auf einen Bildschirm.</item>
+        <item>Beim Kochen ist die Schrift für Zutaten und Schritte etwas größer.</item>
         <item>Schlagwörter beim Übernehmen: Kategorie und Stichwörter einer Rezeptseite erscheinen im Entwurf als Vorschläge zum Antippen; aus einer Rezeptdatei kommen die Schlagwörter wieder mit.</item>
         <item>Beim Kochen: „Große Schrift beim Kochen“ im Menü ⋮ der Rezeptansicht vergrößert Zutaten, Schritte und Notizen. Neue Notizen lassen sich direkt in der Rezeptansicht mit „Notiz hinzufügen“ festhalten.</item>
         <item>Sammlung sortieren: Das neue Symbol neben der Suche wechselt zwischen „Titel A–Z“ und „Zuletzt hinzugefügt“. Umlaute stehen bei ihrem Buchstaben, die Wahl bleibt gemerkt.</item>
@@ -294,6 +297,8 @@
     <!-- Einstellungen -->
     <string name="settings_title">Einstellungen</string>
     <string name="settings_section_about">Info</string>
+    <string name="settings_group_expanded">Aufgeklappt</string>
+    <string name="settings_group_collapsed">Zugeklappt</string>
     <string name="app_tagline">Moltobene sammelt Kochrezepte aus allen Quellen an einem Ort, gespeichert nur auf dem eigenen Handy.</string>
     <string name="license_note_moltobene">Moltobene selbst ist freie Software und darf unter den Bedingungen dieser Lizenz genutzt, weitergegeben und verändert werden, ohne jede Gewährleistung. Quelltext: github.com/boerni328-bene/Moltobene</string>
     <string name="license_note_opus_mt">Modelle des Sprachpakets für die Übersetzung, nur auf Wunsch heruntergeladen. Für Moltobene geändert: nach ONNX umgewandelt und auf 8 Bit verkleinert. Quelle: huggingface.co/Helsinki-NLP</string>
@@ -501,6 +506,7 @@
     <string name="dough_preferment_flour">Mehl (% vom gesamten)</string>
     <string name="dough_preferment_water">Wasser (% von dessen Mehl)</string>
     <string name="dough_section_result">Ergebnis</string>
+    <string name="dough_bar_preferment">%1$s: %2$s</string>
     <string name="dough_total_line">%1$s g Teig · %2$s</string>
     <string name="dough_percent_note">Wasseranteil, Salz und Öl in % vom Mehl</string>
     <string name="dough_yeast_item">%1$s g %2$s</string>
@@ -543,13 +549,11 @@
     <string name="dough_help_preferment_effect">Ein Vorteig kann Geschmack und Teigeigenschaften verbessern; Biga macht den Teig tendenziell fester, Poolish dehnbarer. Mehl und Wasser des Vorteigs zählen im Rechner zur Gesamtmenge.</string>
     <string name="dough_help_preferment_range">Biga ist typischerweise fest (etwa 50 bis 60 % Wasser vom Mehl im Vorteig), Poolish flüssig (etwa 100 %). Üblich sind etwa 20 bis 50 % des gesamten Mehls im Vorteig.</string>
     <string name="dough_help_preferment_care">Die Reifezeit hängt von der Temperatur ab: Eine Biga braucht bei etwa 15 bis 20 °C meist 8 bis 16 Stunden. Zu lange gereift, fällt der Vorteig zusammen und riecht stechend sauer. Biga und Poolish werden mit Hefe angesetzt und sind kein Sauerteig; bei Sauerteig ist die Hefe im Hauptteig freiwillig.</string>
-    <string name="dough_preset_title">Voreinstellung</string>
     <string name="dough_preset_custom">Eigene Werte</string>
     <string name="dough_preset_position">%1$d von %2$d</string>
     <string name="dough_preset_previous">Vorherige Voreinstellung</string>
     <string name="dough_preset_next">Nächste Voreinstellung</string>
     <string name="dough_preset_choose">Voreinstellung wählen: %1$s</string>
-    <string name="dough_preset_note">Eine Voreinstellung ist ein Startpunkt, keine garantierte Rezeptur. Sie setzt Wasseranteil, Salz, Öl, Hefe und Vorteig; Anzahl und Gewicht bleiben, wie sie sind.</string>
     <string name="dough_preset_default">Standardwerte</string>
     <string name="dough_preset_neapolitan">Neapolitanisch</string>
     <string name="dough_preset_sheet_pan">Pizza vom Blech</string>

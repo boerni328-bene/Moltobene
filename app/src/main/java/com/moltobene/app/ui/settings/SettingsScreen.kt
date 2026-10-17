@@ -3,10 +3,14 @@ package com.moltobene.app.ui.settings
 import android.text.format.Formatter
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,9 +18,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -26,6 +33,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import com.moltobene.app.ui.components.AppSnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -43,9 +51,12 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -129,93 +140,104 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState()),
         ) {
             ScreenTitle(stringResource(R.string.settings_title), modifier = Modifier.padding(ScreenTitlePadding))
-            SectionHeader(stringResource(R.string.collection_title))
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.backup_title)) },
-                supportingContent = {
-                    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                        Text(stringResource(R.string.backup_text))
-                        // Wann zuletzt geprüft gesichert wurde (#51) – im Format des Handys.
-                        val last = viewModel.lastBackup
-                        Text(
-                            text = if (last == null) {
-                                stringResource(R.string.backup_never)
-                            } else {
-                                val date = DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(last.at))
-                                pluralStringResource(R.plurals.backup_last, last.recipes, last.recipes, date)
-                            },
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                },
-                modifier = Modifier.clickable {
-                    createBackup.launch(resources.getString(R.string.backup_file_name, LocalDate.now().toString()))
-                },
-            )
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.restore_title)) },
-                supportingContent = { Text(stringResource(R.string.restore_text)) },
-                modifier = Modifier.clickable { openBackup.launch(BACKUP_MIME_TYPES) },
-            )
-            SectionHeader(stringResource(R.string.settings_section_translation))
-            LanguagePackItem(
-                state = languagePack,
-                onDownload = viewModel::downloadLanguagePack,
-                onCancel = viewModel::cancelLanguagePack,
-                onDelete = { confirmDeletePack = true },
-            )
-            SectionHeader(stringResource(R.string.settings_section_start))
-            StartSection(startScreen = startScreen ?: StartScreen.HOME, onStartScreen = viewModel::setStartScreen)
-            SectionHeader(stringResource(R.string.settings_section_cooking))
-            CookingSection(screenOn = screenOn ?: ScreenOn.STAYS_ON, onScreenOn = viewModel::setScreenOn)
-            SectionHeader(stringResource(R.string.settings_section_speech))
-            SpeechSection(
-                settings = speechSettings,
-                onChange = viewModel::changeSpeech,
-                loadVoices = viewModel::voices,
-                onSample = viewModel::playSample,
-                onStopSpeech = viewModel::stopSpeech,
-            )
-            SectionHeader(stringResource(R.string.settings_section_voice_input))
-            NoticeCard(
-                text = stringResource(R.string.voice_beta_note),
-                kind = NoticeKind.INFO,
-                modifier = Modifier.padding(horizontal = Spacing.m),
-            )
-            VoicePackItem(
-                state = voicePack,
-                onDownload = viewModel::downloadVoicePack,
-                onCancel = viewModel::cancelVoicePack,
-                onDelete = { confirmDeleteVoicePack = true },
-            )
-            SectionHeader(stringResource(R.string.settings_section_appearance))
-            AppearanceSection(
-                appearance = appearance ?: Appearance(),
-                onMode = { mode ->
-                    viewModel.setThemeMode(mode)
-                    applyNightMode(context, mode)
-                },
-                onPalette = viewModel::setPalette,
-            )
-            SectionHeader(stringResource(R.string.settings_section_about))
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.app_name)) },
-                supportingContent = { Text(stringResource(R.string.version_label, BuildConfig.VERSION_NAME)) },
-            )
-            ListItem(headlineContent = { Text(stringResource(R.string.app_tagline)) })
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.whats_new_title, WhatsNew.VERSION_NAME)) },
-                modifier = Modifier.clickable { showWhatsNew = true },
-            )
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.privacy_title)) },
-                modifier = Modifier.clickable { showPrivacy = true },
-            )
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.licenses_title)) },
-                modifier = Modifier.clickable(onClick = onOpenLicenses),
-            )
+            SettingsGroup(stringResource(R.string.collection_title), initiallyExpanded = true) {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.backup_title)) },
+                    supportingContent = {
+                        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                            Text(stringResource(R.string.backup_text))
+                            // Wann zuletzt geprüft gesichert wurde (#51) – im Format des Handys.
+                            val last = viewModel.lastBackup
+                            Text(
+                                text = if (last == null) {
+                                    stringResource(R.string.backup_never)
+                                } else {
+                                    val date = DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(last.at))
+                                    pluralStringResource(R.plurals.backup_last, last.recipes, last.recipes, date)
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    },
+                    modifier = Modifier.clickable {
+                        createBackup.launch(resources.getString(R.string.backup_file_name, LocalDate.now().toString()))
+                    },
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.restore_title)) },
+                    supportingContent = { Text(stringResource(R.string.restore_text)) },
+                    modifier = Modifier.clickable { openBackup.launch(BACKUP_MIME_TYPES) },
+                )
+            }
+            SettingsGroup(stringResource(R.string.settings_section_translation)) {
+                LanguagePackItem(
+                    state = languagePack,
+                    onDownload = viewModel::downloadLanguagePack,
+                    onCancel = viewModel::cancelLanguagePack,
+                    onDelete = { confirmDeletePack = true },
+                )
+            }
+            SettingsGroup(stringResource(R.string.settings_section_start)) {
+                StartSection(startScreen = startScreen ?: StartScreen.HOME, onStartScreen = viewModel::setStartScreen)
+            }
+            SettingsGroup(stringResource(R.string.settings_section_cooking)) {
+                CookingSection(screenOn = screenOn ?: ScreenOn.STAYS_ON, onScreenOn = viewModel::setScreenOn)
+            }
+            SettingsGroup(stringResource(R.string.settings_section_speech)) {
+                SpeechSection(
+                    settings = speechSettings,
+                    onChange = viewModel::changeSpeech,
+                    loadVoices = viewModel::voices,
+                    onSample = viewModel::playSample,
+                    onStopSpeech = viewModel::stopSpeech,
+                )
+            }
+            SettingsGroup(stringResource(R.string.settings_section_voice_input)) {
+                NoticeCard(
+                    text = stringResource(R.string.voice_beta_note),
+                    kind = NoticeKind.INFO,
+                    modifier = Modifier.padding(Spacing.m),
+                )
+                VoicePackItem(
+                    state = voicePack,
+                    onDownload = viewModel::downloadVoicePack,
+                    onCancel = viewModel::cancelVoicePack,
+                    onDelete = { confirmDeleteVoicePack = true },
+                )
+            }
+            SettingsGroup(stringResource(R.string.settings_section_appearance)) {
+                AppearanceSection(
+                    appearance = appearance ?: Appearance(),
+                    onMode = { mode ->
+                        viewModel.setThemeMode(mode)
+                        applyNightMode(context, mode)
+                    },
+                    onPalette = viewModel::setPalette,
+                )
+            }
+            SettingsGroup(stringResource(R.string.settings_section_about)) {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.app_name)) },
+                    supportingContent = { Text(stringResource(R.string.version_label, BuildConfig.VERSION_NAME)) },
+                )
+                ListItem(headlineContent = { Text(stringResource(R.string.app_tagline)) })
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.whats_new_title, WhatsNew.VERSION_NAME)) },
+                    modifier = Modifier.clickable { showWhatsNew = true },
+                )
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.privacy_title)) },
+                    modifier = Modifier.clickable { showPrivacy = true },
+                )
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.licenses_title)) },
+                    modifier = Modifier.clickable(onClick = onOpenLicenses),
+                )
+            }
+            Spacer(Modifier.height(Spacing.m))
         }
     }
 
@@ -381,17 +403,56 @@ private fun LanguagePackItem(
     )
 }
 
+/**
+ * Eine Gruppe der Einstellungen als Karte, die sich auf- und zuklappen lässt: zugeklappt steht nur die Überschrift,
+ * so passen alle Gruppen auf einen Bildschirm. Der Zustand überlebt das Drehen ([rememberSaveable]).
+ */
 @Composable
-private fun SectionHeader(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier
-            .padding(start = Spacing.m, end = Spacing.m, top = Spacing.l, bottom = Spacing.s)
-            .semantics { heading() },
-    )
+private fun SettingsGroup(
+    title: String,
+    initiallyExpanded: Boolean = false,
+    content: @Composable () -> Unit,
+) {
+    var expanded by rememberSaveable(title) { mutableStateOf(initiallyExpanded) }
+    val state = stringResource(if (expanded) R.string.settings_group_expanded else R.string.settings_group_collapsed)
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = MaterialTheme.shapes.large,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m, vertical = Spacing.xs),
+    ) {
+        Column {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 56.dp)
+                    .clickable(role = Role.Button) { expanded = !expanded }
+                    .padding(horizontal = Spacing.m)
+                    .semantics(mergeDescendants = true) {
+                        heading()
+                        stateDescription = state
+                    },
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f),
+                )
+                Icon(
+                    imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (expanded) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                content()
+            }
+        }
+    }
 }
+
 
 /** Hinweis, solange gesichert oder wiederhergestellt wird – lässt sich nicht wegtippen. */
 @Composable

@@ -163,6 +163,14 @@ class DoughViewModel(
     /** Summen über Vorteig und Hauptteig, z. B. „594 g“ – „Mehl“; für die Leiste unten und die Karte bei großer Schrift. */
     fun totals(result: DoughResult.Success, input: LeavenedInput): List<TotalItem> = totalItems(result, input.yeastKind)
 
+    /** Mehl, Wasser und Hefe des Vorteigs (Biga, Poolish, Sauerteig) für die Leiste unten; leer ohne Vorteig. */
+    fun prefermentItems(result: DoughResult.Success, input: LeavenedInput): List<TotalItem> {
+        val lines = result.sections.firstOrNull { it.kind == SectionKind.PREFERMENT }?.lines.orEmpty()
+        return lines.filter { it.grams > 0 }.map {
+            TotalItem("${DoughNumbers.grams(it.grams, it.role, language)} g", texts.ingredient(it.role, input.yeastKind))
+        }
+    }
+
     private fun totalItems(result: DoughResult.Success, yeastKind: YeastKind): List<TotalItem> {
         val lines = result.sections.flatMap { it.lines }
         return TOTALS_ORDER.mapNotNull { role ->
