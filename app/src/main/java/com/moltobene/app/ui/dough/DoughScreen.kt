@@ -2,7 +2,10 @@ package com.moltobene.app.ui.dough
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -413,14 +416,38 @@ private fun ValueSlider(
         onValueChange = { onChange(DoughStepper.valueAt(it, bounds, curved, step, stepping.range)) },
         valueRange = 0f..1f,
         steps = steps,
+        // Schlanker Regler: dünne Leiste, kleiner Daumen, keine Rastpunkte; die Höhe bleibt zum Treffen bei 36 dp.
+        thumb = {
+            Box(
+                Modifier
+                    .size(18.dp)
+                    .background(MaterialTheme.colorScheme.primary, androidx.compose.foundation.shape.CircleShape),
+            )
+        },
+        track = {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(4.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, androidx.compose.foundation.shape.CircleShape),
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxWidth(position.coerceIn(0f, 1f))
+                        .height(4.dp)
+                        .background(MaterialTheme.colorScheme.primary, androidx.compose.foundation.shape.CircleShape),
+                )
+            }
+        },
         modifier = Modifier
             .fillMaxWidth()
+            .height(36.dp)
             .drawBehind {
-                // Marke für den Standardwert auf der Leiste (der Daumen des Reglers ist etwa 20 dp breit).
+                // Kleine Marke für den Standardwert auf der Leiste (der Daumen ist 18 dp breit).
                 if (defaultPosition != null) {
-                    val inset = 10.dp.toPx()
+                    val inset = 9.dp.toPx()
                     val x = inset + (size.width - 2 * inset) * defaultPosition
-                    drawLine(markColor, Offset(x, size.height / 2 - 14.dp.toPx()), Offset(x, size.height / 2 + 14.dp.toPx()), strokeWidth = 3.dp.toPx())
+                    drawLine(markColor, Offset(x, size.height / 2 - 6.dp.toPx()), Offset(x, size.height / 2 + 6.dp.toPx()), strokeWidth = 2.dp.toPx())
                 }
             }
             .semantics {
