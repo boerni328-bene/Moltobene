@@ -393,6 +393,7 @@ internal fun NumberField(
  * aus [DoughLimits] ein. Eine Marke zeigt den Standardwert; die Zahl im Feld bleibt die Wahrheit. Hefe läuft auf einer
  * gestauchten Skala, damit kleine Mengen treffbar sind.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ValueSlider(
     label: String,
