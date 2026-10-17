@@ -24,6 +24,8 @@ import com.moltobene.app.data.dough.DoughNumbers
 import com.moltobene.app.data.dough.DoughPresets
 import com.moltobene.app.data.dough.DoughResult
 import com.moltobene.app.data.dough.DoughTexts
+import com.moltobene.app.data.dough.PhaseKind
+import com.moltobene.app.data.PhasePlace
 import com.moltobene.app.data.dough.DoughType
 import com.moltobene.app.data.dough.LeavenedInput
 import com.moltobene.app.data.dough.LineRole
@@ -99,6 +101,21 @@ class AndroidDoughTexts(private val context: Context) : DoughTexts {
         YieldKind.PAN -> context.getString(R.string.dough_unit_pan, detail)
         YieldKind.DOUGH -> context.getString(R.string.dough_unit_dough)
     }
+
+    override fun phase(kind: PhaseKind, preferment: Preferment): String = when (kind) {
+        PhaseKind.PREFERMENT_MIX -> context.getString(R.string.phase_preferment_mix, prefermentName(preferment))
+        PhaseKind.PREFERMENT_RIPEN -> context.getString(R.string.phase_preferment_ripen, prefermentName(preferment))
+        PhaseKind.KNEAD -> context.getString(R.string.phase_knead)
+        PhaseKind.BULK -> context.getString(R.string.phase_bulk)
+        PhaseKind.SHAPE -> context.getString(R.string.phase_shape)
+        PhaseKind.PROOF -> context.getString(R.string.phase_proof)
+        PhaseKind.WARM_UP -> context.getString(R.string.phase_warm_up)
+        PhaseKind.BAKE -> context.getString(R.string.phase_bake)
+    }
+
+    override fun duration(minMinutes: Int, maxMinutes: Int): String = AndroidDurationText.format(context, minMinutes, maxMinutes)
+
+    override fun place(place: PhasePlace): String = AndroidDurationText.place(context, place)
 
     companion object {
         fun cakeKindName(kind: CakeKind): Int = when (kind) {

@@ -43,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -58,6 +59,7 @@ import com.moltobene.app.ui.collection.RecipeListItem
 import com.moltobene.app.ui.collection.Thumbnail
 import com.moltobene.app.ui.components.isLargeText
 import com.moltobene.app.ui.components.AppTitle
+import com.moltobene.app.ui.schedule.formatMoment
 import com.moltobene.app.ui.theme.Spacing
 
 /**
@@ -84,6 +86,7 @@ fun HomeScreen(
     val count by viewModel.recipeCount.collectAsStateWithLifecycle()
     val suggestion by viewModel.suggestion.collectAsStateWithLifecycle()
     val recent by viewModel.recent.collectAsStateWithLifecycle()
+    val running by viewModel.running.collectAsStateWithLifecycle()
     var chooseAdd by rememberSaveable { mutableStateOf(false) }
     if (chooseAdd) {
         AddChooser(
@@ -145,6 +148,7 @@ fun HomeScreen(
                 .padding(horizontal = Spacing.m),
             verticalArrangement = Arrangement.spacedBy(Spacing.s),
         ) {
+            if (running.isNotEmpty()) RunningTile(running, onOpenRecipe)
             if (count == 0) {
                 // Noch keine Rezepte: statt eines Vorschlags der Weg zum ersten Rezept.
                 HomeTile(
@@ -319,6 +323,65 @@ private fun ToolTile(@DrawableRes icon: Int, title: String, subtitle: String, on
             Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(28.dp))
             Text(title, style = MaterialTheme.typography.titleMedium)
             Text(subtitle, style = MaterialTheme.typography.bodySmall)
+        }
+    }
+}
+
+/**
+ * „Laufende Teige“ (#71): je Teig der Titel, die aktuelle Phase und wann es weitergeht. Steht ganz oben, weil die Zeit
+ * drängt, und fehlt, solange kein Teig läuft. Tippen öffnet das Rezept mit dem ganzen Zeitplan.
+ */
+@Composable
+private fun RunningTile(items: List<RunningDough>, onOpenRecipe: (String) -> Unit) {
+    val context = LocalContext.current
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(vertical = Spacing.s)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.m),
+                modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.xs),
+            ) {
+                Icon(painterResource(R.drawable.ic_restaurant), contentDescription = null, modifier = Modifier.size(32.dp))
+                Text(
+                    stringResource(R.string.home_running_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.semantics { heading() },
+                )
+            }
+            items.forEach { item ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onOpenRecipe(item.recipeId) }
+                        .heightIn(min = 48.dp)
+                        .padding(horizontal = Spacing.m, vertical = Spacing.s),
+                ) {
+                    Text(item.title.ifBlank { stringResource(R.string.untitled_recipe) }, style = MaterialTheme.typography.titleMedium)
+                    if (item.phase == null) {
+                        Text(stringResource(R.string.schedule_finished), style = MaterialTheme.typography.bodyMedium)
+                    } else {
+                        Text(stringResource(R.string.schedule_now, item.phase), style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            if (item.earliest == item.latest) {
+                                stringResource(R.string.schedule_next_at, formatMoment(context, item.earliest))
+                            } else {
+                                stringResource(
+                                    R.string.schedule_next_range,
+                                    formatMoment(context, item.earliest),
+                                    formatMoment(context, item.latest),
+                                )
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                }
+            }
         }
     }
 }

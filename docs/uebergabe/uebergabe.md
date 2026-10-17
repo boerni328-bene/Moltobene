@@ -1,12 +1,12 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 17.10.2026 · App-Version 0.53.0 (versionCode 93) · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 17.10.2026 · App-Version 0.54.0 (versionCode 94) · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, nur auf dem Handy. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
 
 ## Git-Stand
-- `origin/main` = Version 0.52.1 (Commit `ce4a375`). Arbeitszweig `kochen-teig-einstellungen` liegt 2 Commits davor: 0.53.0 (Kochschrift größer, Teigrechner kompakter mit Vorteig in der Leiste, Einstellungen als aufklappbare Gruppen) und Rundgang-Anpassung. **Noch nicht nach `main` gemergt**; Build-/Rundgangsergebnis des Zweigs prüfen, dann Squash-Merge mit Bildschirmfotos-Sichtung.
+- `main` = Version 0.54.0 (Squash-Merge von `teig-zeitplan`, Build grün, Release folgt aus dem Build auf main). Zweig `teig-zeitplan` ist erledigt.
 - Parallele Sitzungen im selben Ordner kommen vor (am 17.10. erschien während der Sitzung ein neuer Commit): vor Commit, Push und Versionssprung `git fetch origin`, Zweig und `origin/main` prüfen.
 
 ## Arbeitsweise (bewährt)
@@ -38,5 +38,7 @@ Nicht nötig für 1.0: PDF (#47), Umzug aus Apps (#76), Fassungen/Vergleichen (#
 ## Bekannte kleine Mängel
 Nach Umschalten der Sortierung bleibt die Liste an der Scrollposition. Gesamtmengen-Kacheln im Teigrechner werden bei langen Texten am Rand abgeschnitten (wischbar). Bildschirmfoto „26a-schlagwort-vorschlaege“ zeigt die Chips nicht. Pseudosprache-Fotos der Rezeptansicht nicht ausführlich gesichtet.
 
-## Laufende Arbeit dieser Sitzung (17.10.2026)
-`CLAUDE.md` verschlankt (Codeaufbau nach `docs/aufbau.md`), Regel „Übergabe lesen und pflegen“ eingeführt, alte Übergabedateien in diese Datei zusammengeführt. **Noch nicht committet.** Nächster Schritt: committen (reine Dokumentation, keine Version), dann Zweig `kochen-teig-einstellungen` prüfen und mergen.
+## Zuletzt erledigt (17.10.2026): Version 0.54.0
+Zeitplan für Teige (#71, Stufe 1, Issue bleibt offen): „Teig starten“, Stand und nächster Zeitpunkt im Rezept und als Kachel auf der Startseite, nur Anzeige. Dazu: schlankere Regler im Teigrechner, Rezeptansicht wieder in normaler Schrift (nur aktueller Schritt groß), gestrichelte Linien zwischen Zutaten.
+- Ideen für Stufe 2: Startzeit wählbar, Übersetzung der Phasentexte, fertige Läufe ausblenden, Zeitplan bearbeiten.
+- Nächster Schritt: Build/Release auf main prüfen, dann Weg zu 1.0 (Abnahmeliste oben).

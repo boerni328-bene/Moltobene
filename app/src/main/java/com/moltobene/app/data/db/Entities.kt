@@ -154,6 +154,8 @@ data class RecipeWithDetails(
     val photos: List<RecipePhotoEntity>,
     @Relation(parentColumn = "id", entityColumn = "recipeId")
     val tags: List<RecipeTagEntity>,
+    @Relation(parentColumn = "id", entityColumn = "recipeId")
+    val phases: List<PhaseEntity>,
 )
 
 /** Alles, was zu einem Rezept gespeichert wird – für das Schreiben in einem Schritt. */
@@ -163,5 +165,49 @@ data class RecipeRows(
     val steps: List<StepEntity>,
     val photos: List<RecipePhotoEntity>,
     val tags: List<RecipeTagEntity>,
+    val phases: List<PhaseEntity>,
     val search: RecipeSearchEntity,
+)
+
+/** Phase im Zeitplan eines Teigs (#71), seit Datenbank-Version 4. */
+@Entity(
+    tableName = "recipe_phases",
+    foreignKeys = [
+        ForeignKey(
+            entity = RecipeEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["recipeId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
+    indices = [Index("recipeId")],
+)
+data class PhaseEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val recipeId: String,
+    val position: Int,
+    val text: String,
+    val minMinutes: Int,
+    val maxMinutes: Int,
+    val place: String,
+)
+
+/** Laufender Teig (#71), seit Datenbank-Version 4. [doneAt] sind die Abschlusszeiten der Phasen, durch Komma getrennt. */
+@Entity(
+    tableName = "dough_runs",
+    foreignKeys = [
+        ForeignKey(
+            entity = RecipeEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["recipeId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
+    indices = [Index("recipeId")],
+)
+data class DoughRunEntity(
+    @PrimaryKey val id: String,
+    val recipeId: String,
+    val startedAt: Long,
+    val doneAt: String,
 )

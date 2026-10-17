@@ -1,6 +1,8 @@
 package com.moltobene.app.data
 
+import com.moltobene.app.data.db.DoughRunEntity
 import com.moltobene.app.data.db.IngredientEntity
+import com.moltobene.app.data.db.PhaseEntity
 import com.moltobene.app.data.db.RecipeDao
 import com.moltobene.app.data.db.RecipeEntity
 import com.moltobene.app.data.db.RecipePhotoEntity
@@ -80,6 +82,13 @@ class RecipeRepository(
     /** Speichert alle Rezepte in einem Schritt – schlägt einer fehl, bleibt die Sammlung unverändert. */
     suspend fun saveAll(recipes: List<Recipe>) = dao.saveAll(recipes.map { it.toRows() })
 
+    /** Laufende Teige (#71), die zuletzt gestarteten zuerst. */
+    fun observeRuns(): Flow<List<DoughRun>> = dao.observeRuns().map { rows -> rows.map { it.toRun() } }
+
+    suspend fun saveRun(run: DoughRun) = dao.upsertRun(run.toRow())
+
+    suspend fun deleteRun(id: String) = dao.deleteRun(id)
+
     /** Löscht das Rezept und seine Fotodateien. */
     suspend fun delete(id: String) {
         val photoIds = dao.getDetails(id)?.photos?.map { it.photoId }.orEmpty()
@@ -124,6 +133,8 @@ private fun RecipeWithDetails.toRecipe() = Recipe(
     ingredients = ingredients.sortedBy { it.position }
         .map { Ingredient(text = it.text, isHeading = it.isHeading, quantity = it.quantity, unit = it.unit) },
     steps = steps.sortedBy { it.position }.map { it.text },
+    timeline = phases.sortedBy { it.position }.take(TimelinePhase.MAX_PHASES)
+        .map { TimelinePhase.lenient(it.text, it.minMinutes, it.maxMinutes, PhasePlace.fromKey(it.place)) },
     tags = tags.map { Tag(name = it.name, predefinedKey = it.predefinedKey) },
     photoIds = photos.filter { it.kind != RecipePhotoEntity.KIND_PAGE }.sortedBy { it.position }.map { it.photoId },
     pageIds = photos.filter { it.kind == RecipePhotoEntity.KIND_PAGE }.sortedBy { it.position }.map { it.photoId },
@@ -163,6 +174,16 @@ private fun Recipe.toRows(): RecipeRows = RecipeRows(
         )
     },
     steps = steps.mapIndexed { index, text -> StepEntity(recipeId = id, position = index, text = text) },
+    phases = timeline.mapIndexed { index, it ->
+        PhaseEntity(
+            recipeId = id,
+            position = index,
+            text = it.text,
+            minMinutes = it.minMinutes,
+            maxMinutes = it.maxMinutes,
+            place = it.place.key,
+        )
+    },
     photos = photoIds.distinct().mapIndexed { index, photoId ->
         RecipePhotoEntity(photoId = photoId, recipeId = id, position = index, kind = RecipePhotoEntity.KIND_PHOTO)
     } + pageIds.distinct().filter { it !in photoIds }.mapIndexed { index, photoId ->
@@ -176,3 +197,12 @@ private fun Recipe.toRows(): RecipeRows = RecipeRows(
         notes = notes,
     ),
 )
+
+private fun DoughRunEntity.toRun() = DoughRun(
+    id = id,
+    recipeId = recipeId,
+    startedAt = startedAt,
+    doneAt = doneAt.split(',').mapNotNull { it.trim().toLongOrNull() }.take(TimelinePhase.MAX_PHASES),
+)
+
+private fun DoughRun.toRow() = DoughRunEntity(id = id, recipeId = recipeId, startedAt = startedAt, doneAt = doneAt.joinToString(","))

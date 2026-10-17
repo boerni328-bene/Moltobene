@@ -237,6 +237,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Dough schedule: for pizza and bread the dough calculator creates a schedule (for example biga 1 to 3 days in the refrigerator). In the recipe, “Start dough” begins the process; the app shows where the dough stands and when to continue, also on Home.</item>
         <item>Compact dough calculator: values sit side by side, the preset takes less room, and the bar at the bottom also shows the preferment for biga or poolish.</item>
         <item>Tidier settings: groups can be expanded and collapsed, so everything fits on one screen.</item>
         <item>While cooking, the text for ingredients and steps is a little larger.</item>
@@ -699,4 +700,63 @@
     <string name="voice_error_microphone">The microphone cannot be used right now. Another app may be using it.</string>
     <string name="voice_error_memory">Not enough memory for voice input.</string>
     <string name="voice_error_other">Voice input could not be started.</string>
+
+    <!-- Schedule of a dough (#71) -->
+    <string name="phase_preferment_mix">Mix the %1$s</string>
+    <string name="phase_preferment_ripen">Let the %1$s ripen</string>
+    <string name="phase_knead">Knead the dough</string>
+    <string name="phase_bulk">Let the dough rise</string>
+    <string name="phase_shape">Shape the dough</string>
+    <string name="phase_proof">Let the shaped dough rise</string>
+    <string name="phase_warm_up">Bring the dough to room temperature</string>
+    <string name="phase_bake">Bake</string>
+    <plurals name="duration_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">%1$d hour</item>
+        <item quantity="other">%1$d hours</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <plurals name="duration_range_minutes">
+        <item quantity="one">%1$d to %2$d minute</item>
+        <item quantity="other">%1$d to %2$d minutes</item>
+    </plurals>
+    <plurals name="duration_range_hours">
+        <item quantity="one">%1$d to %2$d hour</item>
+        <item quantity="other">%1$d to %2$d hours</item>
+    </plurals>
+    <plurals name="duration_range_days">
+        <item quantity="one">%1$d to %2$d day</item>
+        <item quantity="other">%1$d to %2$d days</item>
+    </plurals>
+    <string name="place_room">at room temperature</string>
+    <string name="place_fridge">in the refrigerator</string>
+    <string name="place_oven">in the oven</string>
+    <string name="schedule_title">Schedule</string>
+    <string name="schedule_hint">Times are guidelines. Temperature and flour change them. The dough itself shows when it is ready.</string>
+    <string name="schedule_start">Start dough</string>
+    <string name="schedule_now">Now: %1$s</string>
+    <string name="schedule_next_range">Next step from %1$s, at the latest %2$s</string>
+    <string name="schedule_next_at">Next step at %1$s</string>
+    <string name="schedule_ready">Ready for the next step. At the latest %1$s</string>
+    <string name="schedule_overdue">Latest time (%1$s) has passed. Check the dough.</string>
+    <string name="schedule_finished">Finished. The dough is done.</string>
+    <string name="schedule_complete">Phase done</string>
+    <string name="schedule_undo">Undo</string>
+    <string name="schedule_remove">Remove from running doughs</string>
+    <string name="schedule_state_done">Done</string>
+    <string name="schedule_state_current">Current</string>
+    <string name="schedule_state_upcoming">Upcoming</string>
+    <string name="schedule_done_at">Done %1$s</string>
+    <string name="schedule_phase_range">%1$s to %2$s</string>
+    <string name="schedule_phase_line">%1$s · %2$s</string>
+    <string name="schedule_started">Started %1$s</string>
+    <string name="schedule_remove_confirm">Remove this dough from the running doughs? The recipe stays.</string>
+    <string name="schedule_phase_semantics">%1$s. %2$s. %3$s</string>
+    <string name="home_running_title">Running doughs</string>
 </resources>

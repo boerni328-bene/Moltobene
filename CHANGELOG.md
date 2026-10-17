@@ -3,6 +3,17 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.54.0] – 2026-10-17 (versionCode 94)
+
+### Neu
+- **Zeitplan für Teige.** Der Teigrechner legt bei Pizza und Brot einen Zeitplan an: Vorteig ansetzen, reifen lassen (z. B. Biga 1 bis 3 Tage im Kühlschrank), Teig kneten, gehen lassen, formen, backen. Die Phasen stehen im Rezept als Zeitplan und zusätzlich als Zubereitung.
+- **„Teig starten“.** Im Rezept startet der Knopf den Ablauf. Für jede Phase zeigt die App, ob sie erledigt, aktuell oder noch offen ist, und wann es frühestens und spätestens weitergeht (im Zeitformat des Handys). „Phase abschließen“ rechnet alle folgenden Zeiten ab diesem Zeitpunkt neu; ein Irrtum lässt sich zurücknehmen.
+- **Laufende Teige auf der Startseite.** Eine Kachel ganz oben zeigt jeden laufenden Teig mit der aktuellen Phase und dem nächsten Zeitpunkt. Tippen öffnet das Rezept.
+- Die App meldet sich nicht von selbst (kein Wecker, keine Benachrichtigung, keine neue Berechtigung): Der Stand ist immer sichtbar, sobald die App geöffnet wird. Die Zeiten sind Richtwerte.
+- Teigrechner: Die Regler sind schlanker (dünne Leiste, kleiner Daumen, kleine Marke für den Standardwert, keine Rastpunkte) und brauchen weniger Höhe.
+- Rezeptansicht: Zutaten, Zubereitung und Notizen sind wieder in normaler Schrift; nur der aktuelle Schritt beim Kochen ist groß. Die Zutaten sind durch dünne gestrichelte Linien getrennt.
+- Der Zeitplan ist Teil der Sicherung; ältere Sicherungen lassen sich weiter wiederherstellen. Laufende Teige bleiben auf dem Handy und kommen nicht in die Sicherung.
+
 ## [0.53.0] – 2026-10-17 (versionCode 93)
 
 ### Neu

@@ -60,7 +60,10 @@ class DoughDraftTest {
         assertTrue(recipe.isDraft)
         assertEquals("Pizzateig mit biga", recipe.title)
         assertEquals(SourceType.OWN, recipe.source?.type)
-        assertTrue(recipe.steps.isEmpty())
+        // Der Zeitplan steht auch als Zubereitung im Rezept, damit Teilen und Vorlesen ihn kennen (#71).
+        assertEquals(recipe.timeline.size, recipe.steps.size)
+        assertTrue(recipe.steps.first().startsWith("PREFERMENT_MIX:biga (5-15 min)"))
+        assertTrue(recipe.steps.any { it.contains("1440-4320 min, fridge") })
         assertEquals("de", recipe.language)
     }
 

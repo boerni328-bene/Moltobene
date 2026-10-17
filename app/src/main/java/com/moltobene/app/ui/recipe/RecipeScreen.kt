@@ -143,6 +143,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moltobene.app.R
 import com.moltobene.app.data.Adjustment
+import com.moltobene.app.data.DoughRun
 import com.moltobene.app.data.AmountScaling
 import com.moltobene.app.data.Pan
 import com.moltobene.app.data.PanScaling
@@ -175,6 +176,9 @@ import com.moltobene.app.ui.components.RecipePhoto
 import com.moltobene.app.ui.components.RecipePhotoLarge
 import com.moltobene.app.ui.components.TagLabels
 import com.moltobene.app.ui.components.isLargeText
+import com.moltobene.app.ui.schedule.ScheduleActions
+import com.moltobene.app.ui.schedule.ScheduleCard
+import com.moltobene.app.ui.schedule.rememberNow
 import com.moltobene.app.ui.theme.Spacing
 import java.io.File
 import java.util.Locale
@@ -208,6 +212,7 @@ fun RecipeScreen(
     val checked by viewModel.checkedIngredients.collectAsStateWithLifecycle()
     val currentStep by viewModel.currentStep.collectAsStateWithLifecycle()
     val adjustment by viewModel.adjustment.collectAsStateWithLifecycle()
+    val runs by viewModel.runs.collectAsStateWithLifecycle()
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
@@ -425,6 +430,13 @@ fun RecipeScreen(
                     onPreviousStep = viewModel::previousStep,
                     onNextStep = viewModel::nextStep,
                 ),
+                schedule = ScheduleActions(
+                    onStart = viewModel::startRun,
+                    onComplete = viewModel::completePhase,
+                    onUndo = viewModel::undoPhase,
+                    onRemove = viewModel::removeRun,
+                ),
+                runs = runs,
                 translation = TranslationActions(
                     state = translation,
                     onShowLanguage = viewModel::showLanguage,
@@ -596,6 +608,8 @@ private fun RecipeContent(
     photo: File?,
     cooking: CookingState,
     translation: TranslationActions,
+    schedule: ScheduleActions,
+    runs: List<DoughRun>,
     speech: SpeechOutput,
     voice: VoiceInput,
     headsetButtons: Boolean,
@@ -896,6 +910,10 @@ private fun RecipeContent(
                 RecipeTimes(recipe.prepMinutes, recipe.totalMinutes)
                 if (recipe.tags.isNotEmpty()) RecipeTags(recipe.tags)
 
+                if (recipe.timeline.isNotEmpty()) {
+                    ScheduleCard(timeline = recipe.timeline, runs = runs, now = rememberNow(), actions = schedule)
+                }
+
                 if (recipe.ingredients.isNotEmpty()) {
                     SectionTitle(stringResource(R.string.ingredients))
                     Surface(
@@ -913,6 +931,7 @@ private fun RecipeContent(
                                 modifier = Modifier.padding(top = Spacing.s).semantics { heading() },
                             )
                         } else {
+                            if (index > 0 && !recipe.ingredients[index - 1].isHeading) DashedDivider()
                             IngredientRow(
                                 parts = lines[index],
                                 locale = textLocale,
@@ -1057,6 +1076,26 @@ private fun servingsText(servings: Int, unit: String?): String =
         stringResource(R.string.servings_with_unit, servings, unit)
     }
 
+/** Dünne gestrichelte Trennlinie zwischen zwei Zutaten. */
+@Composable
+private fun DashedDivider() {
+    val color = MaterialTheme.colorScheme.outlineVariant
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .drawBehind {
+                drawLine(
+                    color,
+                    androidx.compose.ui.geometry.Offset(0f, size.height / 2),
+                    androidx.compose.ui.geometry.Offset(size.width, size.height / 2),
+                    strokeWidth = 1.dp.toPx(),
+                    pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 4.dp.toPx())),
+                )
+            },
+    )
+}
+
 /**
  * Eine Zutat zum Abhaken: Die ganze Zeile ist antippbar, abgehakt heißt Häkchen und durchgestrichen.
  * Umgerechnete Mengen sind fett, damit sie nicht nur an der Farbe zu erkennen sind.
@@ -1150,11 +1189,11 @@ private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, barIns
         }
         Text(
             text = "$number.",
-            style = cookingTextStyle(),
+            style = cookingTextStyle(current),
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.widthIn(min = 24.dp),
         )
-        Text(text, style = cookingTextStyle(), color = color)
+        Text(text, style = cookingTextStyle(current), color = color)
     }
 }
 
@@ -1522,10 +1561,16 @@ private val BAR_HEIGHT = 64.dp
 /** „Große Schrift beim Kochen“ (#61): Zutaten, Schritte und Notizen größer, unabhängig von der Schriftgröße des Handys. */
 private val LocalCookingLarge = compositionLocalOf { false }
 
-/** Schrift für Zutaten, Schritte und Notizen (Standard etwa 22 sp, seit 0.53.0 größer als zuvor); noch größer mit „Große Schrift beim Kochen“. */
+/**
+ * Schrift für Zutaten, Schritte und Notizen: normal in der Rezeptansicht, nur der aktuelle Schritt (Einzelschritt beim
+ * Kochen) ist groß, noch größer mit „Große Schrift beim Kochen“.
+ */
 @Composable
-private fun cookingTextStyle(): TextStyle =
-    if (LocalCookingLarge.current) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.titleLarge
+private fun cookingTextStyle(current: Boolean = false): TextStyle = when {
+    !current -> MaterialTheme.typography.bodyLarge
+    LocalCookingLarge.current -> MaterialTheme.typography.headlineMedium
+    else -> MaterialTheme.typography.titleLarge
+}
 
 /**
  * Notizen zum Rezept (#61) mit „Notiz hinzufügen“ bzw. „Notiz bearbeiten“ direkt in der Rezeptansicht. Die angefangene

@@ -14,19 +14,22 @@ import androidx.room.RoomDatabase
  *  - 1: erste Version (0.3.0)
  *  - 2: Fotos haben eine Art – Foto des Gerichts oder Originalseite (#38). Vorhandene Fotos bleiben Fotos des Gerichts.
  *  - 3: Rezepte haben einen Link zu einem Video (0.25.0), getrennt von der Quelle. Vorhandene Rezepte haben keinen.
+ *  - 4: Zeitplan der Teige (#71): Phasen je Rezept und laufende Teige als neue Tabellen. Vorhandene Rezepte haben keinen Zeitplan.
  */
 @Database(
     entities = [
         RecipeEntity::class,
         IngredientEntity::class,
         StepEntity::class,
+        PhaseEntity::class,
+        DoughRunEntity::class,
         RecipePhotoEntity::class,
         RecipeTagEntity::class,
         RecipeSearchEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3)],
+    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(from = 3, to = 4)],
 )
 abstract class MoltobeneDatabase : RoomDatabase() {
 

@@ -1,9 +1,11 @@
 package com.moltobene.app.data.dough
 
 import com.moltobene.app.data.Ingredient
+import com.moltobene.app.data.PhasePlace
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeSource
 import com.moltobene.app.data.SourceType
+import com.moltobene.app.data.TimelinePhase
 import java.util.Locale
 import kotlin.math.roundToLong
 
@@ -53,12 +55,21 @@ interface DoughTexts {
 
     /** Einheit der Portionen ohne Anzahl, z. B. „Teigkugeln (je 250 g)“; [detail] ist das Gewicht, bei einer Form ihr Maß. */
     fun servingsUnit(kind: YieldKind, detail: String): String
+
+    /** Text einer Phase im Zeitplan (#71), z. B. „Vorteig (Biga) reifen lassen“. */
+    fun phase(kind: PhaseKind, preferment: Preferment): String
+
+    /** Dauer als Text, z. B. „12 bis 72 Stunden“ oder „1 Stunde“ (bei gleicher [minMinutes] und [maxMinutes]). */
+    fun duration(minMinutes: Int, maxMinutes: Int): String
+
+    /** Ort der Phase als Zusatz zur Dauer, z. B. „im Kühlschrank“; leer ohne Ort. */
+    fun place(place: PhasePlace): String
 }
 
 /**
  * Das Ergebnis des Teigrechners als normales Rezept (#69, „Als Rezept speichern“): Zutaten als Textzeilen mit der Menge
  * vorn und dem Anteil vom Mehl in Klammern, Zwischenüberschriften für Vorteig und Hauptteig, Portionsangabe wie
- * „6 Teigkugeln (je 250 g)“, damit „Umrechnen …“ und das Teilen sie verstehen. Die Zubereitung bleibt leer.
+ * „6 Teigkugeln (je 250 g)“, damit „Umrechnen …“ und das Teilen sie verstehen. Bei Pizza und Brot kommt der Zeitplan (#71) dazu, auch als Zubereitung; bei Pasta und Kuchen bleibt die Zubereitung leer.
  */
 data class DoughDraft(
     val title: String,
@@ -66,6 +77,9 @@ data class DoughDraft(
     val servings: Int,
     val servingsUnit: String,
     val ingredients: List<Ingredient>,
+    /** Zeitplan (#71) und seine Schritte als Text; leer für Pasta und Kuchen. */
+    val timeline: List<TimelinePhase> = emptyList(),
+    val steps: List<String> = emptyList(),
 ) {
     /** Ein Entwurf mit der Quelle „eigenes Rezept“. */
     fun toRecipe(id: String, now: Long): Recipe = Recipe(
@@ -76,6 +90,8 @@ data class DoughDraft(
         servingsUnit = servingsUnit,
         source = RecipeSource(SourceType.OWN),
         ingredients = ingredients,
+        steps = steps,
+        timeline = timeline,
         isDraft = true,
         createdAt = now,
         updatedAt = now,
@@ -88,10 +104,21 @@ data class DoughDraft(
             input: LeavenedInput,
             texts: DoughTexts,
             language: String,
-        ): DoughDraft = build(
-            result, texts, language, input.yeastKind, texts.title(input.type, input.preferment),
-            DoughNumbers.separator(DoughNumbers.plain(result.yield.pieceGrams, 1), language),
-        )
+        ): DoughDraft {
+            val draft = build(
+                result, texts, language, input.yeastKind, texts.title(input.type, input.preferment),
+                DoughNumbers.separator(DoughNumbers.plain(result.yield.pieceGrams, 1), language),
+            )
+            val timeline = DoughTimeline.build(input, texts)
+            return draft.copy(timeline = timeline, steps = timeline.map { stepText(it, texts) })
+        }
+
+        /** Eine Phase als Schritt der Zubereitung, z. B. „Biga reifen lassen (1 bis 3 Tage, im Kühlschrank)“. */
+        fun stepText(phase: TimelinePhase, texts: DoughTexts): String {
+            val place = texts.place(phase.place)
+            val detail = texts.duration(phase.minMinutes, phase.maxMinutes) + if (place.isEmpty()) "" else ", $place"
+            return "${phase.text} ($detail)"
+        }
 
         fun fromPasta(result: DoughResult.Success, input: PastaInput, texts: DoughTexts, language: String): DoughDraft = build(
             result, texts, language, YeastKind.FRESH, texts.pastaTitle(input.kind),

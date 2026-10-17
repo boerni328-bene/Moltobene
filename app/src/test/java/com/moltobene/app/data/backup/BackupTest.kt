@@ -1,10 +1,12 @@
 package com.moltobene.app.data.backup
 
 import com.moltobene.app.data.Ingredient
+import com.moltobene.app.data.PhasePlace
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeSource
 import com.moltobene.app.data.SourceType
 import com.moltobene.app.data.Tag
+import com.moltobene.app.data.TimelinePhase
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -76,6 +78,24 @@ class BackupTest {
         )
         val result = BackupReader().read(ByteArrayInputStream(bytes), temp.newFolder("seiten")) as BackupReader.Result.Ok
         assertEquals(listOf(pageId), result.recipes.single().toRecipe().pageIds)
+    }
+
+    @Test
+    fun zeitplanUebersteht_HinUndRueckwegUndAlteSicherungenHabenKeinen() {
+        val teig = recipe.copy(
+            timeline = listOf(
+                TimelinePhase("Biga reifen lassen", 24 * 60, 72 * 60, PhasePlace.FRIDGE),
+                TimelinePhase("Backen", 8, 15, PhasePlace.OVEN),
+            ),
+        )
+        assertEquals(teig, teig.toBackup().toRecipe())
+        // Die Beispiel-Sicherung stammt aus der Zeit vor dem Zeitplan.
+        assertTrue(recipe.toBackup().timeline.isEmpty())
+        val unmoeglich = teig.toBackup().copy(timeline = listOf(BackupPhase("Kaputt", minMinutes = -5, maxMinutes = 999_999_999, place = "x")))
+        val phase = unmoeglich.toRecipe().timeline.single()
+        assertEquals(0, phase.minMinutes)
+        assertEquals(TimelinePhase.MAX_MINUTES, phase.maxMinutes)
+        assertEquals(PhasePlace.NONE, phase.place)
     }
 
     @Test

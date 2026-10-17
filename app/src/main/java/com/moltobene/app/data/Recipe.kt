@@ -25,6 +25,8 @@ data class Recipe(
     val originalText: String? = null,
     val ingredients: List<Ingredient> = emptyList(),
     val steps: List<String> = emptyList(),
+    /** Zeitplan eines Teigs (#71): Phasen mit Dauer, aus denen ein laufender Teig entsteht. Meist leer. */
+    val timeline: List<TimelinePhase> = emptyList(),
     val tags: List<Tag> = emptyList(),
     /** Kennungen der Fotos; das erste ist das Hauptfoto. */
     val photoIds: List<String> = emptyList(),

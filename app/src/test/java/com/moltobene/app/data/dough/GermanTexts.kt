@@ -1,5 +1,7 @@
 package com.moltobene.app.data.dough
 
+import com.moltobene.app.data.PhasePlace
+
 /** Feste deutsche Texte für die Tests des Teigrechners (statt strings.xml). */
 internal object GermanTexts : DoughTexts {
     override fun title(type: DoughType, preferment: Preferment) =
@@ -36,4 +38,10 @@ internal object GermanTexts : DoughTexts {
         YieldKind.PAN -> "Backform ($detail)"
         YieldKind.DOUGH -> "Teig"
     }
+
+    override fun phase(kind: PhaseKind, preferment: Preferment) = "${kind.name}:${preferment.key}"
+
+    override fun duration(minMinutes: Int, maxMinutes: Int) = "$minMinutes-$maxMinutes min"
+
+    override fun place(place: PhasePlace) = if (place == PhasePlace.NONE) "" else place.key
 }

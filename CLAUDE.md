@@ -23,7 +23,7 @@ Festgelegt vom Projektinhaber am 29.09.2026 (siehe `docs/besprechungen/2026-09-2
    3. YouTube (Videobeschreibung; nur als bestmöglicher Versuch ohne Zusage) sowie Dateien oder andere Rezept-Apps.
    Weitere Erfassungswege sind erwünscht und werden von den Spezialisten vorgeschlagen.
 3. **Sammlung finden und ordnen:** suchen, sortieren, einordnen.
-4. **Mit dem Rezept kochen:** Bildschirm bleibt an (in den Einstellungen änderbar), aus Armlänge lesbar, Zutaten und Schritte abhakbar, Portionen umrechnen (auch nach einer Zutat oder Backform), eigene Notizen zum Rezept. Beim Kochen hilft die Sprache: Vorlesen (#79) und Spracheingabe (#80, Mikrofon-Knopf in der Kochleiste; Befehle „Weiter“, „Zurück“, „Wiederholen“, „Vorlesen“, „Stopp“, ausschalten mit „Mikrofon aus“; vom Projektinhaber am 13.10.2026 freigegeben, Deutsch zuerst). Dazu ein **Teigrechner** für Pizza, Brot, Pasta und Kuchen, jede Teigart mit eigenen Angaben (z. B. Vorteig wie Biga oder Poolish, verschiedene Hefen); das Ergebnis wird ein Rezept. (Ergänzt am 08.10.2026, siehe `docs/besprechungen/2026-10-08-teige-pizza-pasta-kuchen.md`.)
+4. **Mit dem Rezept kochen:** Bildschirm bleibt an (in den Einstellungen änderbar), aus Armlänge lesbar, Zutaten und Schritte abhakbar, Portionen umrechnen (auch nach einer Zutat oder Backform), eigene Notizen zum Rezept. Beim Kochen hilft die Sprache: Vorlesen (#79) und Spracheingabe (#80, Mikrofon-Knopf in der Kochleiste; Befehle „Weiter“, „Zurück“, „Wiederholen“, „Vorlesen“, „Stopp“, ausschalten mit „Mikrofon aus“; vom Projektinhaber am 13.10.2026 freigegeben, Deutsch zuerst). Dazu ein **Teigrechner** für Pizza, Brot, Pasta und Kuchen, jede Teigart mit eigenen Angaben (z. B. Vorteig wie Biga oder Poolish, verschiedene Hefen); das Ergebnis wird ein Rezept; bei Pizza und Brot mit **Zeitplan** (z. B. Biga 1 bis 3 Tage im Kühlschrank), den „Teig starten“ im Rezept in einen laufenden Teig verwandelt: Stand, nächster Zeitpunkt und Startseiten-Kachel, nur Anzeige, kein Wecker (#71, Wunsch des Projektinhabers vom 17.10.2026). (Ergänzt am 08.10.2026, siehe `docs/besprechungen/2026-10-08-teige-pizza-pasta-kuchen.md`.)
 5. **Teilen, sichern und umziehen:** einzelne Rezepte teilen; die ganze Sammlung inklusive Fotos als Datei sichern, wiederherstellen und auf ein neues Handy umziehen.
 
 ### Bewusst nicht
@@ -97,6 +97,10 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 | Regler (Teigrechner, #83) | slider | Schieberegler, Schiebebalken |
 | Voreinstellung (Teigrechner, #83: fertiger Satz Werte zum Durchschalten, auch eigene) | preset | Vorlage (belegt für die Originalseite), Profil |
 | Teigrechner | dough calculator | Pizzarechner, Assistent |
+| Zeitplan (Phasen eines Teigs mit Dauer, #71) | schedule | Zeitleiste, Timer |
+| Teig starten (Zeitplan beginnt) | start dough | Timer starten |
+| laufender Teig (gestarteter Zeitplan) | running dough | aktiver Teig |
+| Phase abschließen | phase done | Schritt beenden |
 | Teigwissen (Hinweise und Artikel zum Teig, #84) | dough know-how | Wiki, Lexikon, Ratgeber |
 | Type (Mehl; Mineralstoffgehalt, z. B. Type 405) | flour type | Typ, Sorte |
 | Backkraft (W-Wert auf italienischem Mehl) | baking strength (W value) | Stärke, Triebkraft |
