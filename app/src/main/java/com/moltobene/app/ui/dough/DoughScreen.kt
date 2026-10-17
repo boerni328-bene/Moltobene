@@ -240,8 +240,7 @@ internal fun Fields(vararg fields: @Composable (Modifier) -> Unit, weights: List
         return
     }
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-        // Drei Felder (Wasser, Salz, Öl) passen in eine Reihe, sonst je zwei.
-        fields.toList().chunked(if (fields.size == 3) 3 else 2).forEach { pair ->
+        fields.toList().chunked(2).forEach { pair ->
             if (pair.size == 1) {
                 pair[0](Modifier.fillMaxWidth())
             } else {

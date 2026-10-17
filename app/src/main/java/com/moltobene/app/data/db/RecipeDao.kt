@@ -117,6 +117,9 @@ abstract class RecipeDao {
     abstract suspend fun insertSteps(rows: List<StepEntity>)
 
     @Insert
+    abstract suspend fun insertPhases(rows: List<PhaseEntity>)
+
+    @Insert
     abstract suspend fun insertPhotos(rows: List<RecipePhotoEntity>)
 
     @Insert
@@ -130,6 +133,9 @@ abstract class RecipeDao {
 
     @Query("DELETE FROM steps WHERE recipeId = :id")
     abstract suspend fun deleteSteps(id: String)
+
+    @Query("DELETE FROM recipe_phases WHERE recipeId = :id")
+    abstract suspend fun deletePhases(id: String)
 
     @Query("DELETE FROM recipe_photos WHERE recipeId = :id")
     abstract suspend fun deletePhotos(id: String)
@@ -161,16 +167,28 @@ abstract class RecipeDao {
         deleteRecipeRow(id)
     }
 
+    /** Laufende Teige (#71), die zuletzt gestarteten zuerst. */
+    @Query("SELECT * FROM dough_runs ORDER BY startedAt DESC")
+    abstract fun observeRuns(): Flow<List<DoughRunEntity>>
+
+    @Upsert
+    abstract suspend fun upsertRun(run: DoughRunEntity)
+
+    @Query("DELETE FROM dough_runs WHERE id = :id")
+    abstract suspend fun deleteRun(id: String)
+
     private suspend fun writeRows(rows: RecipeRows) {
         val id = rows.recipe.id
         upsertRecipe(rows.recipe)
         deleteIngredients(id)
         deleteSteps(id)
+        deletePhases(id)
         deletePhotos(id)
         deleteTags(id)
         deleteSearch(id)
         insertIngredients(rows.ingredients)
         insertSteps(rows.steps)
+        insertPhases(rows.phases)
         insertPhotos(rows.photos)
         insertTags(rows.tags)
         insertSearch(rows.search)

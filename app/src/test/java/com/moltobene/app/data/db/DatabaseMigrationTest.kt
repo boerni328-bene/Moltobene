@@ -2,9 +2,12 @@ package com.moltobene.app.data.db
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import com.moltobene.app.data.DoughRun
+import com.moltobene.app.data.PhasePlace
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeRepository
 import com.moltobene.app.data.SourceType
+import com.moltobene.app.data.TimelinePhase
 import com.moltobene.app.data.photos.PhotoStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -101,6 +104,41 @@ class DatabaseMigrationTest {
             repository.save(risotto.copy(videoUrl = "https://www.youtube.com/watch?v=AbCdEfGhIjK"))
             assertEquals("https://www.youtube.com/watch?v=AbCdEfGhIjK", repository.getRecipe(KUCHEN)!!.videoUrl)
             assertEquals(listOf(KUCHEN), repository.observeSummaries("risottoreis").first().map { it.id })
+        }
+    }
+
+    @Test
+    fun version3WirdOhneVerlustUebernommenUndKannZeitplanSpeichern() = runBlocking {
+        createDatabase(version = 3) { db ->
+            db.execSQL(
+                "INSERT INTO recipes (id, title, language, videoUrl, notes, favorite, isDraft, createdAt, updatedAt) VALUES " +
+                    "('$KUCHEN', 'Pizzateig', 'de', 'https://www.youtube.com/watch?v=AbCdEfGhIjK', '', 0, 0, 1000, 2000)",
+            )
+            db.execSQL("INSERT INTO ingredients (recipeId, position, text, isHeading) VALUES ('$KUCHEN', 0, '500 g Mehl', 0)")
+            db.execSQL("INSERT INTO steps (recipeId, position, text) VALUES ('$KUCHEN', 0, 'Kneten.')")
+            db.execSQL("INSERT INTO recipe_search (recipeId, title, ingredients, notes) VALUES ('$KUCHEN', 'Pizzateig', '500 g Mehl', '')")
+        }
+
+        withRepository { repository ->
+            val teig = repository.getRecipe(KUCHEN)!!
+            assertEquals("Pizzateig", teig.title)
+            assertEquals(listOf("500 g Mehl"), teig.ingredients.map { it.text })
+            assertEquals(listOf("Kneten."), teig.steps)
+            assertEquals("https://www.youtube.com/watch?v=AbCdEfGhIjK", teig.videoUrl)
+            // Vorhandene Rezepte haben keinen Zeitplan; einer lässt sich danach speichern und bleibt in der Reihenfolge.
+            assertTrue(teig.timeline.isEmpty())
+            val phases = listOf(
+                TimelinePhase("Biga reifen lassen", 24 * 60, 3 * 24 * 60, PhasePlace.FRIDGE),
+                TimelinePhase("Backen", 8, 15, PhasePlace.OVEN),
+            )
+            repository.save(teig.copy(timeline = phases))
+            assertEquals(phases, repository.getRecipe(KUCHEN)!!.timeline)
+
+            // Ein laufender Teig bleibt erhalten und verschwindet mit seinem Rezept.
+            repository.saveRun(DoughRun(id = "run-1", recipeId = KUCHEN, startedAt = 5000, doneAt = listOf(6000, 7000)))
+            assertEquals(listOf(6000L, 7000L), repository.observeRuns().first().single().doneAt)
+            repository.delete(KUCHEN)
+            assertTrue(repository.observeRuns().first().isEmpty())
         }
     }
 

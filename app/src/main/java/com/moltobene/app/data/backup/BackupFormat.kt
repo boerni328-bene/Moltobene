@@ -1,10 +1,12 @@
 package com.moltobene.app.data.backup
 
 import com.moltobene.app.data.Ingredient
+import com.moltobene.app.data.PhasePlace
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeSource
 import com.moltobene.app.data.SourceType
 import com.moltobene.app.data.Tag
+import com.moltobene.app.data.TimelinePhase
 import com.moltobene.app.data.dough.DoughPresets
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -72,6 +74,8 @@ data class BackupRecipe(
     val originalText: String? = null,
     val ingredients: List<BackupIngredient> = emptyList(),
     val steps: List<String> = emptyList(),
+    /** Zeitplan eines Teigs (seit 0.54.0); ältere Sicherungen haben ihn nicht. */
+    val timeline: List<BackupPhase> = emptyList(),
     val tags: List<BackupTag> = emptyList(),
     val photos: List<String> = emptyList(),
     val pages: List<String> = emptyList(),
@@ -115,6 +119,7 @@ fun Recipe.toBackup() = BackupRecipe(
     originalText = originalText,
     ingredients = ingredients.map { BackupIngredient(text = it.text, heading = it.isHeading, quantity = it.quantity, unit = it.unit) },
     steps = steps,
+    timeline = timeline.map { BackupPhase(text = it.text, minMinutes = it.minMinutes, maxMinutes = it.maxMinutes, place = it.place.key) },
     tags = tags.map { BackupTag(name = it.name, key = it.predefinedKey) },
     photos = photoIds,
     pages = pageIds,
@@ -138,6 +143,8 @@ fun BackupRecipe.toRecipe() = Recipe(
     originalText = originalText,
     ingredients = ingredients.map { Ingredient(text = it.text, isHeading = it.heading, quantity = it.quantity, unit = it.unit) },
     steps = steps,
+    timeline = timeline.take(TimelinePhase.MAX_PHASES)
+        .map { TimelinePhase.lenient(it.text, it.minMinutes, it.maxMinutes, PhasePlace.fromKey(it.place)) },
     tags = tags.map { Tag(name = it.name, predefinedKey = it.key) },
     photoIds = photos,
     pageIds = pages,
@@ -148,3 +155,7 @@ fun BackupRecipe.toRecipe() = Recipe(
 /** Eigene Voreinstellungen des Teigrechners je Teigart (Kennung wie [com.moltobene.app.data.dough.DoughType.key]). */
 @Serializable
 data class BackupPresets(val presets: Map<String, List<DoughPresets.Own>> = emptyMap())
+
+/** Phase im Zeitplan; [place] ist die feste Kennung von [PhasePlace]. */
+@Serializable
+data class BackupPhase(val text: String, val minMinutes: Int = 0, val maxMinutes: Int = 0, val place: String = "none")

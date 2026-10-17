@@ -697,4 +697,63 @@
     <string name="voice_error_microphone">Das Mikrofon lässt sich gerade nicht benutzen. Vielleicht verwendet es eine andere App.</string>
     <string name="voice_error_memory">Nicht genug Arbeitsspeicher für die Spracheingabe.</string>
     <string name="voice_error_other">Die Spracheingabe konnte nicht gestartet werden.</string>
+
+    <!-- Zeitplan eines Teigs (#71) -->
+    <string name="phase_preferment_mix">%1$s ansetzen</string>
+    <string name="phase_preferment_ripen">%1$s reifen lassen</string>
+    <string name="phase_knead">Teig kneten</string>
+    <string name="phase_bulk">Teig gehen lassen</string>
+    <string name="phase_shape">Teig formen</string>
+    <string name="phase_proof">Geformten Teig gehen lassen</string>
+    <string name="phase_warm_up">Teig auf Zimmertemperatur kommen lassen</string>
+    <string name="phase_bake">Backen</string>
+    <plurals name="duration_minutes">
+        <item quantity="one">%1$d Minute</item>
+        <item quantity="other">%1$d Minuten</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">%1$d Stunde</item>
+        <item quantity="other">%1$d Stunden</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">%1$d Tag</item>
+        <item quantity="other">%1$d Tage</item>
+    </plurals>
+    <plurals name="duration_range_minutes">
+        <item quantity="one">%1$d bis %2$d Minute</item>
+        <item quantity="other">%1$d bis %2$d Minuten</item>
+    </plurals>
+    <plurals name="duration_range_hours">
+        <item quantity="one">%1$d bis %2$d Stunde</item>
+        <item quantity="other">%1$d bis %2$d Stunden</item>
+    </plurals>
+    <plurals name="duration_range_days">
+        <item quantity="one">%1$d bis %2$d Tag</item>
+        <item quantity="other">%1$d bis %2$d Tage</item>
+    </plurals>
+    <string name="place_room">bei Zimmertemperatur</string>
+    <string name="place_fridge">im Kühlschrank</string>
+    <string name="place_oven">im Backofen</string>
+    <string name="schedule_title">Zeitplan</string>
+    <string name="schedule_hint">Die Zeiten sind Richtwerte. Temperatur und Mehl verändern sie. Ob der Teig so weit ist, zeigt der Teig selbst.</string>
+    <string name="schedule_start">Teig starten</string>
+    <string name="schedule_now">Jetzt: %1$s</string>
+    <string name="schedule_next_range">Weiter ab %1$s, spätestens %2$s</string>
+    <string name="schedule_next_at">Weiter um %1$s</string>
+    <string name="schedule_ready">Bereit für den nächsten Schritt. Spätestens %1$s</string>
+    <string name="schedule_overdue">Spätester Zeitpunkt (%1$s) überschritten. Teig prüfen.</string>
+    <string name="schedule_finished">Fertig. Der Teig ist durch.</string>
+    <string name="schedule_complete">Phase abschließen</string>
+    <string name="schedule_undo">Zurücknehmen</string>
+    <string name="schedule_remove">Aus laufenden Teigen entfernen</string>
+    <string name="schedule_state_done">Erledigt</string>
+    <string name="schedule_state_current">Aktuell</string>
+    <string name="schedule_state_upcoming">Folgt</string>
+    <string name="schedule_done_at">Erledigt %1$s</string>
+    <string name="schedule_phase_range">%1$s bis %2$s</string>
+    <string name="schedule_phase_at">%1$s</string>
+    <string name="schedule_phase_semantics">%1$s. %2$s. %3$s</string>
+    <string name="home_running_title">Laufende Teige</string>
+    <string name="home_running_item">%1$s: %2$s</string>
+    <string name="home_running_finished">fertig</string>
 </resources>
