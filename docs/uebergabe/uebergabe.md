@@ -6,7 +6,7 @@ Stand: 17.10.2026 · App-Version 0.53.0 (versionCode 93) · Regeln in `CLAUDE.md
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, nur auf dem Handy. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
 
 ## Git-Stand
-- `origin/main` = Version 0.52.1 (Commit `ce4a375`). Arbeitszweig `kochen-teig-einstellungen` liegt 2 Commits davor: 0.53.0 (Kochschrift größer, Teigrechner kompakter mit Vorteig in der Leiste, Einstellungen als aufklappbare Gruppen) und Rundgang-Anpassung. **Noch nicht nach `main` gemergt**; Build-/Rundgangsergebnis des Zweigs prüfen, dann Squash-Merge mit Bildschirmfotos-Sichtung.
+- `origin/main` = Version 0.53.0 (veröffentlicht, Commit `eb7849e`). Arbeitszweig `teig-zeitplan` (0.54.0) liegt darauf, gebaut und grün, noch nicht gemergt.
 - Parallele Sitzungen im selben Ordner kommen vor (am 17.10. erschien während der Sitzung ein neuer Commit): vor Commit, Push und Versionssprung `git fetch origin`, Zweig und `origin/main` prüfen.
 
 ## Arbeitsweise (bewährt)
@@ -41,6 +41,6 @@ Nach Umschalten der Sortierung bleibt die Liste an der Scrollposition. Gesamtmen
 ## Laufende Arbeit (17.10.2026): Zeitplan für Teige (#71), Zweig `teig-zeitplan`, Version 0.54.0 (versionCode 94)
 Wunsch des Projektinhabers: Zeitplan für Teige (nicht für Kochschritte), z. B. Biga 1–3 Tage kühl; im Rezept „Teig starten“, dann immer Stand und nächster Zeitpunkt. Entscheidungen: nur Anzeige in der App (kein Wecker, keine Berechtigung), Zeitplan im Rezept, zuerst Pizza und Brot. Plan: `C:\Users\bernd\.claude\plans\mossy-swimming-dahl.md`.
 - Umgesetzt (noch nicht gebaut, kein PC-Build möglich): `Recipe.timeline` + Tabellen `recipe_phases`/`dough_runs` (Datenbank 4, AutoMigration 3→4), Sicherung (`timeline` optional), `DoughTimeline`/`DoughRunPlanner`/`DurationUnit`, Zeitplan als Zubereitung in `DoughDraft`, `ui/schedule/ScheduleCard` im Rezept, Kachel „Laufende Teige“ auf der Startseite, Tests, Rundgangtest `teigZeitplan`, Texte beider Sprachen, CHANGELOG, Aufbau, Begriffe in `CLAUDE.md`.
-- Der Zweig `teig-zeitplan` wurde von `kochen-teig-einstellungen` (0.53.0, noch nicht in `main`) abgezweigt. Eine parallele Sitzung hat auf ihm den Commit `afa1188` („wieder je zwei Felder pro Reihe“) angelegt, der versehentlich meine ersten Dateien mitnahm; nichts gepusht. Beim Merge zusammen mit 0.53.0 nach `main` (Squash).
-- Nächster Schritt: pushen, `gh workflow run build.yml --ref teig-zeitplan`, Fehler beheben, Bildschirmfotos 14p–14s und 14c prüfen (Teigrechner-Entwurf mit Zubereitung), dann Squash-Merge. Offen/Ideen: Startzeit wählbar, Übersetzung der Phasentexte, fertige Läufe von der Startseite ausblenden, Uhr-App-Übergabe (#71 Stufe 2, nur nach Freigabe), Zeitplan bearbeiten.
+- Der Zweig wurde auf das veröffentlichte 0.53.0 umgesetzt (Rebase). Erster Build (Lauf 39014286813) grün samt Rundgang; Bildschirmfotos 14p–14s gesichtet, in Ordnung.
+- Nächster Schritt: neuen Build auf dem umgesetzten Zweig abwarten, Squash-Merge nach `main` (Release 0.54.0), Issue #71 offen lassen (Stufe 2). Offen/Ideen: Startzeit wählbar, Übersetzung der Phasentexte, fertige Läufe ausblenden, Zeitplan bearbeiten.
 - `CLAUDE.md` verschlankt (Codeaufbau in `docs/aufbau.md`), Übergabe-Regel eingeführt (früher am Tag erledigt).
