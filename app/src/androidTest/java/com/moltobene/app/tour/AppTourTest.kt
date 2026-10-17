@@ -836,7 +836,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         pressBack()
         pressBack()
         waitForText(text(R.string.home_running_title))
-        composeRule.onNodeWithText(title).assertIsDisplayed()
+        composeRule.onAllNodesWithText(title).onFirst().assertIsDisplayed()
         screenshot("14s-startseite-laufender-teig")
     }
 
