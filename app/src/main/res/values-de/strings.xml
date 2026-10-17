@@ -237,6 +237,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Zeitplan für Teige: Der Teigrechner legt bei Pizza und Brot einen Zeitplan an (z. B. Biga 1 bis 3 Tage im Kühlschrank). Im Rezept startet „Teig starten“ den Ablauf; die App zeigt, wo der Teig steht und wann es weitergeht, auch auf der Startseite.</item>
         <item>Teigrechner kompakter: Werte stehen paarweise nebeneinander, die Voreinstellung braucht weniger Platz, und die Leiste unten zeigt bei Biga oder Poolish auch den Vorteig.</item>
         <item>Einstellungen aufgeräumt: Die Gruppen lassen sich auf- und zuklappen, so passt alles auf einen Bildschirm.</item>
         <item>Beim Kochen ist die Schrift für Zutaten und Schritte etwas größer.</item>
@@ -751,9 +752,9 @@
     <string name="schedule_state_upcoming">Folgt</string>
     <string name="schedule_done_at">Erledigt %1$s</string>
     <string name="schedule_phase_range">%1$s bis %2$s</string>
-    <string name="schedule_phase_at">%1$s</string>
+    <string name="schedule_phase_line">%1$s · %2$s</string>
+    <string name="schedule_started">Gestartet %1$s</string>
+    <string name="schedule_remove_confirm">Teig aus den laufenden Teigen entfernen? Das Rezept bleibt erhalten.</string>
     <string name="schedule_phase_semantics">%1$s. %2$s. %3$s</string>
     <string name="home_running_title">Laufende Teige</string>
-    <string name="home_running_item">%1$s: %2$s</string>
-    <string name="home_running_finished">fertig</string>
 </resources>

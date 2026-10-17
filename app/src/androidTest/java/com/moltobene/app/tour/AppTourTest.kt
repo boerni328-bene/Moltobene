@@ -55,6 +55,7 @@ import com.moltobene.app.data.knowhow.KnowHow
 import com.moltobene.app.data.ThemeMode
 import com.moltobene.app.data.share.RecipeJsonLd
 import com.moltobene.app.ui.whatsnew.WhatsNew
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -787,8 +788,56 @@ class AppTourTest(private val variant: DisplayVariant) {
         }
         val draft = runBlocking { container().repository.getAll().first { it.isDraft } }
         assertEquals(com.moltobene.app.data.SourceType.OWN, draft.source?.type)
+        // Pizza und Brot bekommen einen Zeitplan (#71); die Biga reift 1 bis 3 Tage.
+        assertTrue(draft.timeline.isNotEmpty())
+        assertEquals(draft.timeline.size, draft.steps.size)
         waitForText(text(R.string.dough_saved))
         screenshot("14c-teigrechner-entwurf")
+    }
+
+    /** Zeitplan eines Teigs (#71): Teig starten, Phase abschließen, laufender Teig auf der Startseite. */
+    @Test
+    fun teigZeitplan() {
+        addSampleRecipes()
+        val title = "Pizzateig mit Biga"
+        runBlocking {
+            container().repository.save(
+                com.moltobene.app.data.Recipe(
+                    id = com.moltobene.app.data.RecipeIds.newId(),
+                    title = title,
+                    language = "de",
+                    ingredients = listOf(com.moltobene.app.data.Ingredient("500 g Mehl")),
+                    steps = listOf("Biga reifen lassen (1 bis 3 Tage, im Kühlschrank)", "Backen (8 bis 15 Minuten, im Backofen)"),
+                    timeline = listOf(
+                        com.moltobene.app.data.TimelinePhase("Biga reifen lassen", 24 * 60, 72 * 60, com.moltobene.app.data.PhasePlace.FRIDGE),
+                        com.moltobene.app.data.TimelinePhase("Teig kneten", 10, 30, com.moltobene.app.data.PhasePlace.NONE),
+                        com.moltobene.app.data.TimelinePhase("Backen", 8, 15, com.moltobene.app.data.PhasePlace.OVEN),
+                    ),
+                    createdAt = System.currentTimeMillis(),
+                    updatedAt = System.currentTimeMillis(),
+                ),
+            )
+        }
+        openRecipe(title)
+        waitForText(text(R.string.schedule_start))
+        composeRule.onNodeWithText(text(R.string.schedule_start)).performScrollTo().assertIsDisplayed()
+        screenshot("14p-zeitplan")
+        composeRule.onNodeWithText(text(R.string.schedule_start)).performScrollTo().performClick()
+        waitForText(text(R.string.schedule_complete))
+        composeRule.onNodeWithText(text(R.string.schedule_complete)).performScrollTo().assertIsDisplayed()
+        screenshot("14q-zeitplan-lauf")
+        composeRule.onNodeWithText(text(R.string.schedule_complete)).performScrollTo().performClick()
+        waitForText(text(R.string.schedule_undo))
+        screenshot("14r-zeitplan-phase-erledigt")
+        val run = runBlocking { container().repository.observeRuns().first().single() }
+        assertEquals(1, run.doneAt.size)
+
+        // Zurück zur Startseite: Der laufende Teig steht ganz oben.
+        pressBack()
+        pressBack()
+        waitForText(text(R.string.home_running_title))
+        composeRule.onNodeWithText(title).assertIsDisplayed()
+        screenshot("14s-startseite-laufender-teig")
     }
 
     /** Rezept übersetzen (#60): Umschalter „DE | EN“, Übersetzung mit Hinweis; Abhaken gilt auch im Original. */

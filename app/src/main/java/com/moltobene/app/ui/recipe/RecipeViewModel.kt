@@ -9,8 +9,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.moltobene.app.data.Adjustment
+import com.moltobene.app.data.DoughRun
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeRepository
+import com.moltobene.app.data.dough.DoughRunPlanner
 import com.moltobene.app.data.ocr.CropArea
 import com.moltobene.app.data.photos.PhotoStore
 import com.moltobene.app.data.share.PreparedShare
@@ -39,6 +41,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
+import java.util.UUID
 
 sealed interface RecipeUiState {
     data object Loading : RecipeUiState
@@ -116,6 +119,33 @@ class RecipeViewModel(
     val adjustment: StateFlow<Adjustment?> = savedStateHandle.getStateFlow<String?>(KEY_ADJUSTMENT, null)
         .map { Adjustment.decode(it) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, Adjustment.decode(savedStateHandle.get<String>(KEY_ADJUSTMENT)))
+
+    /** Laufende Teige dieses Rezepts (#71), die zuletzt gestarteten zuerst. */
+    val runs: StateFlow<List<DoughRun>> = repository.observeRuns()
+        .map { all -> all.filter { it.recipeId == recipeId } }
+        .catch { emit(emptyList()) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** „Teig starten“: Der Zeitplan des Rezepts beginnt jetzt. */
+    fun startRun() {
+        viewModelScope.launch {
+            repository.saveRun(DoughRun(id = UUID.randomUUID().toString(), recipeId = recipeId, startedAt = System.currentTimeMillis()))
+        }
+    }
+
+    /** „Phase abschließen“: Die laufende Phase endet jetzt, die Folgezeiten rechnen ab hier neu. */
+    fun completePhase(run: DoughRun) {
+        val count = (state.value as? RecipeUiState.Content)?.recipe?.timeline?.size ?: return
+        viewModelScope.launch { repository.saveRun(DoughRunPlanner.complete(run, count, System.currentTimeMillis())) }
+    }
+
+    fun undoPhase(run: DoughRun) {
+        viewModelScope.launch { repository.saveRun(DoughRunPlanner.undo(run)) }
+    }
+
+    fun removeRun(run: DoughRun) {
+        viewModelScope.launch { repository.deleteRun(run.id) }
+    }
 
     fun toggleIngredient(index: Int, text: String) {
         val key = progressKey(index, text)

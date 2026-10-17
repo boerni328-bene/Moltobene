@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moltobene.app.data.AppPreferences
 import com.moltobene.app.data.RecipeRepository
+import com.moltobene.app.data.dough.DoughRunPlanner
 import com.moltobene.app.data.photos.PhotoStore
 import com.moltobene.app.ui.collection.RecipeListItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -49,6 +50,25 @@ class HomeViewModel(
         .mapLatest { ids -> runCatching { repository.getSummaries(ids).map(::toItem) }.getOrDefault(emptyList()) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** Laufende Teige (#71) für die Startseite: das Rezept, die aktuelle Phase und wann es frühestens und spätestens weitergeht. */
+    val running: StateFlow<List<RunningDough>> = repository.observeRuns()
+        .mapLatest { runs ->
+            runs.mapNotNull { run ->
+                val recipe = repository.getRecipe(run.recipeId)?.takeIf { it.timeline.isNotEmpty() } ?: return@mapNotNull null
+                val state = DoughRunPlanner.state(recipe.timeline, run)
+                val time = state.phases.getOrNull(state.current)
+                RunningDough(
+                    recipeId = recipe.id,
+                    title = recipe.title,
+                    phase = recipe.timeline.getOrNull(state.current)?.text,
+                    earliest = time?.endEarliest ?: 0L,
+                    latest = time?.endLatest ?: 0L,
+                )
+            }
+        }
+        .catch { emit(emptyList()) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     init {
         viewModelScope.launch { runCatching { preferences.loadRecentRecipes() } }
         // Ändert sich die Zahl der Rezepte (erstes Lesen, Hinzufügen, Löschen), gibt es einen neuen Vorschlag.
@@ -75,3 +95,6 @@ class HomeViewModel(
         thumbnail = summary.photoId?.let { photoStore.thumbFile(it) },
     )
 }
+
+/** Ein laufender Teig auf der Startseite; [phase] ist null, wenn alle Phasen abgeschlossen sind. */
+data class RunningDough(val recipeId: String, val title: String, val phase: String?, val earliest: Long, val latest: Long)

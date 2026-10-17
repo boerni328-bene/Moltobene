@@ -237,6 +237,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Dough schedule: for pizza and bread the dough calculator creates a schedule (for example biga 1 to 3 days in the refrigerator). In the recipe, “Start dough” begins the process; the app shows where the dough stands and when to continue, also on Home.</item>
         <item>Compact dough calculator: values sit side by side, the preset takes less room, and the bar at the bottom also shows the preferment for biga or poolish.</item>
         <item>Tidier settings: groups can be expanded and collapsed, so everything fits on one screen.</item>
         <item>While cooking, the text for ingredients and steps is a little larger.</item>
@@ -753,9 +754,9 @@
     <string name="schedule_state_upcoming">Upcoming</string>
     <string name="schedule_done_at">Done %1$s</string>
     <string name="schedule_phase_range">%1$s to %2$s</string>
-    <string name="schedule_phase_at">%1$s</string>
+    <string name="schedule_phase_line">%1$s · %2$s</string>
+    <string name="schedule_started">Started %1$s</string>
+    <string name="schedule_remove_confirm">Remove this dough from the running doughs? The recipe stays.</string>
     <string name="schedule_phase_semantics">%1$s. %2$s. %3$s</string>
     <string name="home_running_title">Running doughs</string>
-    <string name="home_running_item">%1$s: %2$s</string>
-    <string name="home_running_finished">finished</string>
 </resources>

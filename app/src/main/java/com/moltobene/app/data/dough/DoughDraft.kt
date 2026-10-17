@@ -69,7 +69,7 @@ interface DoughTexts {
 /**
  * Das Ergebnis des Teigrechners als normales Rezept (#69, „Als Rezept speichern“): Zutaten als Textzeilen mit der Menge
  * vorn und dem Anteil vom Mehl in Klammern, Zwischenüberschriften für Vorteig und Hauptteig, Portionsangabe wie
- * „6 Teigkugeln (je 250 g)“, damit „Umrechnen …“ und das Teilen sie verstehen. Die Zubereitung bleibt leer.
+ * „6 Teigkugeln (je 250 g)“, damit „Umrechnen …“ und das Teilen sie verstehen. Bei Pizza und Brot kommt der Zeitplan (#71) dazu, auch als Zubereitung; bei Pasta und Kuchen bleibt die Zubereitung leer.
  */
 data class DoughDraft(
     val title: String,

@@ -143,6 +143,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moltobene.app.R
 import com.moltobene.app.data.Adjustment
+import com.moltobene.app.data.DoughRun
 import com.moltobene.app.data.AmountScaling
 import com.moltobene.app.data.Pan
 import com.moltobene.app.data.PanScaling
@@ -175,6 +176,9 @@ import com.moltobene.app.ui.components.RecipePhoto
 import com.moltobene.app.ui.components.RecipePhotoLarge
 import com.moltobene.app.ui.components.TagLabels
 import com.moltobene.app.ui.components.isLargeText
+import com.moltobene.app.ui.schedule.ScheduleActions
+import com.moltobene.app.ui.schedule.ScheduleCard
+import com.moltobene.app.ui.schedule.rememberNow
 import com.moltobene.app.ui.theme.Spacing
 import java.io.File
 import java.util.Locale
@@ -208,6 +212,7 @@ fun RecipeScreen(
     val checked by viewModel.checkedIngredients.collectAsStateWithLifecycle()
     val currentStep by viewModel.currentStep.collectAsStateWithLifecycle()
     val adjustment by viewModel.adjustment.collectAsStateWithLifecycle()
+    val runs by viewModel.runs.collectAsStateWithLifecycle()
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
@@ -425,6 +430,13 @@ fun RecipeScreen(
                     onPreviousStep = viewModel::previousStep,
                     onNextStep = viewModel::nextStep,
                 ),
+                schedule = ScheduleActions(
+                    onStart = viewModel::startRun,
+                    onComplete = viewModel::completePhase,
+                    onUndo = viewModel::undoPhase,
+                    onRemove = viewModel::removeRun,
+                ),
+                runs = runs,
                 translation = TranslationActions(
                     state = translation,
                     onShowLanguage = viewModel::showLanguage,
@@ -596,6 +608,8 @@ private fun RecipeContent(
     photo: File?,
     cooking: CookingState,
     translation: TranslationActions,
+    schedule: ScheduleActions,
+    runs: List<DoughRun>,
     speech: SpeechOutput,
     voice: VoiceInput,
     headsetButtons: Boolean,
@@ -895,6 +909,10 @@ private fun RecipeContent(
                 }
                 RecipeTimes(recipe.prepMinutes, recipe.totalMinutes)
                 if (recipe.tags.isNotEmpty()) RecipeTags(recipe.tags)
+
+                if (recipe.timeline.isNotEmpty()) {
+                    ScheduleCard(timeline = recipe.timeline, runs = runs, now = rememberNow(), actions = schedule)
+                }
 
                 if (recipe.ingredients.isNotEmpty()) {
                     SectionTitle(stringResource(R.string.ingredients))
