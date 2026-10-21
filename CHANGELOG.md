@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.54.1] – 2026-10-21 (versionCode 95)
+
+### Geändert
+- **YouTube ohne Rezepttext in der Beschreibung.** Die Meldung nennt jetzt einen Ausweg: Wird die Zutatenliste im Video eingeblendet, ein Bildschirmfoto davon machen und über „Aus Foto übernehmen“ ergänzen. Titel, Link und Beschreibung bleiben wie bisher als Entwurf erhalten.
+
 ## [0.54.0] – 2026-10-17 (versionCode 94)
 
 ### Neu

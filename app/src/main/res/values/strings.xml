@@ -155,7 +155,7 @@
     <string name="file_loading">Reading file …</string>
     <string name="file_done">Recipe imported from the file. Check that everything is in the right place.</string>
     <string name="video_done">Recipe imported from the video description. Compare it with the video: descriptions often lack amounts or steps.</string>
-    <string name="video_no_recipe">The video description contains no recipe. Title and link are saved, the description is under “Imported text”.</string>
+    <string name="video_no_recipe">The video description contains no recipe. Title and link are saved, the description is under “Imported text”. Tip: if the video shows the ingredient list on screen, take a screenshot of it and add it with “Import from photo”.</string>
     <string name="video_link_only">The video description contains no recipe, only links. Title and link of the video are saved.</string>
     <plurals name="video_recipe_links">
         <item quantity="one">The video description contains a link. The recipe can be imported from this page:</item>

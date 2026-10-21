@@ -154,7 +154,7 @@
     <string name="file_loading">Datei wird gelesen …</string>
     <string name="file_done">Rezept aus der Datei übernommen. Prüfen, ob alles an der richtigen Stelle steht.</string>
     <string name="video_done">Rezept aus der Videobeschreibung übernommen. Mit dem Video vergleichen: In Beschreibungen fehlen oft Mengen oder Schritte.</string>
-    <string name="video_no_recipe">In der Videobeschreibung steht kein Rezept. Titel und Link sind gespeichert, die Beschreibung steht unter „Übernommener Text“.</string>
+    <string name="video_no_recipe">In der Videobeschreibung steht kein Rezept. Titel und Link sind gespeichert, die Beschreibung steht unter „Übernommener Text“. Tipp: Wird die Zutatenliste im Video eingeblendet, ein Bildschirmfoto davon machen und über „Aus Foto übernehmen“ ergänzen.</string>
     <string name="video_link_only">In der Videobeschreibung steht kein Rezept, nur Links. Titel und Link des Videos sind gespeichert.</string>
     <plurals name="video_recipe_links">
         <item quantity="one">Die Videobeschreibung enthält einen Link. Das Rezept lässt sich von dieser Seite übernehmen:</item>
