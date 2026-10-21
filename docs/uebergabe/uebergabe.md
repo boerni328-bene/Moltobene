@@ -42,6 +42,7 @@ Nach Umschalten der Sortierung bleibt die Liste an der Scrollposition. Gesamtmen
 - GitHub-Guthaben (Free-Konto) für Oktober aufgebraucht: kein Build/Release möglich. Zweig erst pushen und bauen, wenn Guthaben da ist oder ein Ersatz-Weg steht (Frage an den Inhaber: kostenlose Alternative zu GitHub Actions).
 - Stufe 3 erledigt (nur Text): Meldung `video_no_recipe` nennt den Weg über Bildschirmfoto und „Aus Foto übernehmen“.
 - Stufe 1 (automatische Untertitel) am 21.10. geprüft und NICHT machbar: Die Videoseite enthält zwar `captionTracks`, aber `timedtext` antwortet ohne Token (PO-Token) mit leerer Antwort (HTTP 200, 0 Bytes); der Android-Client der Innertube-Schnittstelle gibt 400. Umgehen wäre fragil und ein Eingriff in YouTubes Schutz – nicht weiterverfolgt.
+- Ursache des „Guthabens“: Actions-Speicher 0,5 GB voll (1.762 Artefakte, ca. 18 GB gemeldet), Minuten sind frei. Sicherung auf `D:\Claude\Sicherung\github-artefakte` per `.github/scripts/artefakte-sichern.ps1` (lief am 21.10. ohne `-Loeschen`; Protokoll prüfen, dann mit `-Loeschen`). Entscheidung des Inhabers: keine Windows-Aufgabe; bei ca. 350 MB Artefakten nachfragen. Offen: `retention-days` in `build.yml`.
 - Alternative zu Stufe 1 (nicht beschlossen): Zuhören-Modus (Mikrofon + vorhandene Spracherkennung #80) oder Hinweis zu angehefteten Kommentaren.
 
 ## Zuletzt erledigt (17.10.2026): Version 0.54.0

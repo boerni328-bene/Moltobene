@@ -7,6 +7,7 @@ Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
 ### Geändert
 - **YouTube ohne Rezepttext in der Beschreibung.** Die Meldung nennt jetzt einen Ausweg: Wird die Zutatenliste im Video eingeblendet, ein Bildschirmfoto davon machen und über „Aus Foto übernehmen“ ergänzen. Titel, Link und Beschreibung bleiben wie bisher als Entwurf erhalten.
+- Intern: Die Dateien, die ein Build zum Nachsehen ablegt (Bildschirmfotos, Berichte), werden auf GitHub nach 7 Tagen gelöscht, damit der Speicher nicht mehr vollläuft.
 
 ## [0.54.0] – 2026-10-17 (versionCode 94)
 
