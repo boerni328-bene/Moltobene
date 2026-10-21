@@ -38,6 +38,12 @@ Nicht nötig für 1.0: PDF (#47), Umzug aus Apps (#76), Fassungen/Vergleichen (#
 ## Bekannte kleine Mängel
 Nach Umschalten der Sortierung bleibt die Liste an der Scrollposition. Gesamtmengen-Kacheln im Teigrechner werden bei langen Texten am Rand abgeschnitten (wischbar). Bildschirmfoto „26a-schlagwort-vorschlaege“ zeigt die Chips nicht. Pseudosprache-Fotos der Rezeptansicht nicht ausführlich gesichtet.
 
+## Stand 21.10.2026: YouTube ohne Rezepttext (Zweig `video-hinweis`, Version 0.54.1, lokal committet, NICHT gepusht)
+- GitHub-Guthaben (Free-Konto) für Oktober aufgebraucht: kein Build/Release möglich. Zweig erst pushen und bauen, wenn Guthaben da ist oder ein Ersatz-Weg steht (Frage an den Inhaber: kostenlose Alternative zu GitHub Actions).
+- Stufe 3 erledigt (nur Text): Meldung `video_no_recipe` nennt den Weg über Bildschirmfoto und „Aus Foto übernehmen“.
+- Stufe 1 (automatische Untertitel) am 21.10. geprüft und NICHT machbar: Die Videoseite enthält zwar `captionTracks`, aber `timedtext` antwortet ohne Token (PO-Token) mit leerer Antwort (HTTP 200, 0 Bytes); der Android-Client der Innertube-Schnittstelle gibt 400. Umgehen wäre fragil und ein Eingriff in YouTubes Schutz – nicht weiterverfolgt.
+- Alternative zu Stufe 1 (nicht beschlossen): Zuhören-Modus (Mikrofon + vorhandene Spracherkennung #80) oder Hinweis zu angehefteten Kommentaren.
+
 ## Zuletzt erledigt (17.10.2026): Version 0.54.0
 Zeitplan für Teige (#71, Stufe 1, Issue bleibt offen): „Teig starten“, Stand und nächster Zeitpunkt im Rezept und als Kachel auf der Startseite, nur Anzeige. Dazu: schlankere Regler im Teigrechner, Rezeptansicht wieder in normaler Schrift (nur aktueller Schritt groß), gestrichelte Linien zwischen Zutaten.
 - Ideen für Stufe 2: Startzeit wählbar, Übersetzung der Phasentexte, fertige Läufe ausblenden, Zeitplan bearbeiten.
