@@ -58,6 +58,7 @@ internal fun StorageSection(
     val always = setOf(Item.PROGRAM, Item.PHOTOS, Item.DATABASE)
     Item.entries.filter { it in always || result[it] > 0 }.forEach { item ->
         val name = stringResource(nameOf(item))
+        val deleteDescription = stringResource(R.string.storage_delete_item, name)
         ListItem(
             headlineContent = { Text(name) },
             supportingContent = {
@@ -66,11 +67,11 @@ internal fun StorageSection(
                     when (item) {
                         Item.LANGUAGE_PACK -> OutlinedButton(
                             onClick = onDeleteLanguagePack,
-                            modifier = Modifier.semantics { contentDescription = context.getString(R.string.storage_delete_item, name) },
+                            modifier = Modifier.semantics { contentDescription = deleteDescription },
                         ) { Text(stringResource(R.string.delete)) }
                         Item.VOICE_PACK -> OutlinedButton(
                             onClick = onDeleteVoicePack,
-                            modifier = Modifier.semantics { contentDescription = context.getString(R.string.storage_delete_item, name) },
+                            modifier = Modifier.semantics { contentDescription = deleteDescription },
                         ) { Text(stringResource(R.string.delete)) }
                         Item.CACHE -> OutlinedButton(onClick = onClearCache, enabled = !busy) {
                             Text(stringResource(R.string.storage_clear_cache))
