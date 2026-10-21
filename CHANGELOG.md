@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.55.0] – 2026-10-21 (versionCode 96)
+
+### Neu
+- **Speicher in den Einstellungen.** Der neue Bereich „Speicher“ zeigt, wie viel Platz die App auf dem Handy belegt: Programm, Fotos, Vorschaubilder, Rezepte, Sprachpaket, Erkennungspaket, gespeicherte Übersetzungen und Zwischenspeicher, jeweils einzeln und als Summe.
+- **Aufräumen.** Sprachpaket und Erkennungspaket lassen sich dort löschen (und später neu laden), der Zwischenspeicher mit „Zwischenspeicher leeren“. Fotos und Rezepte werden nie gelöscht. Die Sicherungsdatei liegt außerhalb der App und wird nicht mitgezählt.
+
 ## [0.54.1] – 2026-10-21 (versionCode 95)
 
 ### Geändert

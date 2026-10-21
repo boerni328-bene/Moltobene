@@ -1,6 +1,6 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 17.10.2026 · App-Version 0.54.0 (versionCode 94) · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 21.10.2026 · `main` = Version 0.54.0 (versionCode 94); Arbeitszweig `speicher-anzeige` = 0.55.0 (siehe unten) · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, nur auf dem Handy. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
@@ -43,7 +43,7 @@ Nach Umschalten der Sortierung bleibt die Liste an der Scrollposition. Gesamtmen
 - Stufe 3 erledigt (nur Text): Meldung `video_no_recipe` nennt den Weg über Bildschirmfoto und „Aus Foto übernehmen“.
 - Stufe 1 (automatische Untertitel) am 21.10. geprüft und NICHT machbar: Die Videoseite enthält zwar `captionTracks`, aber `timedtext` antwortet ohne Token (PO-Token) mit leerer Antwort (HTTP 200, 0 Bytes); der Android-Client der Innertube-Schnittstelle gibt 400. Umgehen wäre fragil und ein Eingriff in YouTubes Schutz – nicht weiterverfolgt.
 - Ursache des „Guthabens“: Actions-Speicher 0,5 GB voll (1.762 Artefakte, ca. 18 GB gemeldet), Minuten sind frei. Sicherung auf `D:\Claude\Sicherung\github-artefakte` per `.github/scripts/artefakte-sichern.ps1` (lief am 21.10. ohne `-Loeschen`; Protokoll prüfen, dann mit `-Loeschen`). Entscheidung des Inhabers: keine Windows-Aufgabe; bei ca. 350 MB Artefakten nachfragen. Offen: `retention-days` in `build.yml`.
-- Nächste Aufgabe (freigegeben 21.10., erst NACH dem Artefakte-Aufräumen): Einstellungen → Speicher, Version 0.55.0. Anzeige je Posten und Summe: Programm (APK), Fotos/Vorschaubilder/Originalseiten (`filesDir`), Datenbank, Sprachpaket, Erkennungspaket, gespeicherte Übersetzungen (`noBackupFilesDir`), Zwischenspeicher (`cacheDir`). Mit Knöpfen „Zwischenspeicher leeren“ und Löschen der Pakete (vorhandenen Weg nutzen), evtl. „Fotos ohne Rezept“ prüfen. Messen auf Hintergrundthread; neue Texte in beiden `strings.xml`, Rundgang-Test, Aufbau-Datei ergänzen.
+- Zweig `speicher-anzeige` (von `video-hinweis`, Version 0.55.0, versionCode 96, lokal committet, NICHT gebaut): Einstellungen → Speicher (`data/StorageUsage.kt`, `ui/settings/StorageSection.kt`, Test `StorageUsageTest`, Rundgang `speicherAnzeige`), mit Löschknöpfen für Sprach- und Erkennungspaket und „Zwischenspeicher leeren“. Ungeprüft: Es gab keinen Build (GitHub-Speicher voll; Anzeige setzt sich verzögert zurück). Beim ersten Build auf Kompilierfehler und die Bildschirmfoto `29e-speicher` achten. Danach beide Zweige zusammen auf `main` (Squash). Artefakte: Sicherung unter `D:ClaudeSicherunggithub-artefakte` vollständig, 1.751 auf GitHub gelöscht, 332 MB bleiben; `retention-days: 7` steht in `build.yml` (nur auf Zweig).
 - Alternative zu Stufe 1 (nicht beschlossen): Zuhören-Modus (Mikrofon + vorhandene Spracherkennung #80) oder Hinweis zu angehefteten Kommentaren.
 
 ## Zuletzt erledigt (17.10.2026): Version 0.54.0

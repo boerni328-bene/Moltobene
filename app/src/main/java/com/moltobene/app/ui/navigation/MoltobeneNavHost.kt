@@ -215,7 +215,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
         }
         composable<SettingsRoute> {
             SettingsScreen(
-                viewModel = viewModel { SettingsViewModel(container.backupManager, container.preferences, container.languagePack, container.voicePack) { container.speech } },
+                viewModel = viewModel { SettingsViewModel(container.backupManager, container.preferences, container.languagePack, container.voicePack, container.storageUsage) { container.speech } },
                 snackbarHostState = snackbarHostState,
                 onBack = { navController.popBackStack() },
                 onOpenLicenses = { navController.navigate(LicensesRoute) },

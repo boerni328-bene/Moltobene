@@ -217,6 +217,16 @@ fun SettingsScreen(
                     onPalette = viewModel::setPalette,
                 )
             }
+            SettingsGroup(stringResource(R.string.settings_section_storage)) {
+                StorageSection(
+                    result = viewModel.storageResult,
+                    busy = viewModel.state != SettingsUiState.Idle,
+                    onMeasure = viewModel::measureStorage,
+                    onClearCache = viewModel::clearCache,
+                    onDeleteLanguagePack = { confirmDeletePack = true },
+                    onDeleteVoicePack = { confirmDeleteVoicePack = true },
+                )
+            }
             SettingsGroup(stringResource(R.string.settings_section_about)) {
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.app_name)) },
@@ -342,6 +352,11 @@ private fun eventText(event: SettingsEvent): String = when (event) {
     SettingsEvent.RestoreFailed -> stringResource(R.string.restore_error_failed)
     SettingsEvent.LanguagePackDeleted -> stringResource(R.string.language_pack_deleted)
     SettingsEvent.VoicePackDeleted -> stringResource(R.string.voice_pack_deleted)
+    is SettingsEvent.CacheCleared -> if (event.freedBytes <= 0) {
+        stringResource(R.string.storage_cache_nothing)
+    } else {
+        stringResource(R.string.storage_cache_cleared, Formatter.formatShortFileSize(LocalContext.current, event.freedBytes))
+    }
 }
 
 /** Sprachpaket für „Rezept übersetzen“ (#60): Größe vorab, Fortschritt, Fehler mit dem nächsten Schritt. */

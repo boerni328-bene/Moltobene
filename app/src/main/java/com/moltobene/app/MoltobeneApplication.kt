@@ -8,6 +8,7 @@ import androidx.annotation.VisibleForTesting
 import com.moltobene.app.data.AppPreferences
 import com.moltobene.app.data.LegacyCleanup
 import com.moltobene.app.data.RecipeRepository
+import com.moltobene.app.data.StorageUsage
 import com.moltobene.app.data.backup.BackupManager
 import com.moltobene.app.data.db.MoltobeneDatabase
 import com.moltobene.app.data.ocr.PendingRecognition
@@ -133,6 +134,21 @@ class AppContainer(context: Context) {
     /** Gespeicherte Übersetzungen (#60): Zwischenspeicher außerhalb der Sicherung, je Rezept und Sprache. */
     val translations: RecipeTranslations by lazy {
         RecipeTranslations(TranslationStore(File(appContext.noBackupFilesDir, TRANSLATIONS_DIR))) { translationEngine }
+    }
+
+    /** Belegter Speicher je Posten für Einstellungen → Speicher. */
+    val storageUsage: StorageUsage by lazy {
+        val db = appContext.getDatabasePath(MoltobeneDatabase.NAME).path
+        val info = appContext.applicationInfo
+        StorageUsage(
+            program = (listOf(info.sourceDir) + info.splitSourceDirs.orEmpty()).map(::File),
+            database = listOf("", "-wal", "-shm", "-journal").map { File(db + it) },
+            files = appContext.filesDir,
+            noBackupFiles = appContext.noBackupFilesDir,
+            packs = StorageUsage.Packs(languagePack.directory, voicePack.directory),
+            translations = File(appContext.noBackupFilesDir, TRANSLATIONS_DIR),
+            cache = appContext.cacheDir,
+        )
     }
 
     /** Für „Aus Link übernehmen“; nutzt den jeweils aktuellen [pageLoader]. */
