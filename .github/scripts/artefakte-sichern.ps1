@@ -58,7 +58,8 @@ Log ("Gesichert: {0}, schon vorhanden: {1}, Fehler: {2}." -f $gesichert, $uebers
 
 if ($Loeschen) {
     $geloescht = 0
-    foreach ($gruppe in ($liste | Group-Object Name)) {
+    # Die Namen enden auf die Version ("moltobene-0.54.0"): Zur Art zaehlt nur der Teil davor.
+    foreach ($gruppe in ($liste | Group-Object { $_.Name -replace '-\d+\.\d+\.\d+$', '' })) {
         $alt = $gruppe.Group | Sort-Object Datum -Descending | Select-Object -Skip $Behalten
         foreach ($a in $alt) {
             $datei = Join-Path (Join-Path $Ziel $a.Name) ("{0}_{1}.zip" -f $a.Datum.Substring(0, 10), $a.Id)
