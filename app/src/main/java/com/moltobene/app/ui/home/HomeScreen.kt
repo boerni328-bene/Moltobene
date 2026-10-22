@@ -319,8 +319,6 @@ private fun TileGrid(
             tiles.chunked(2).forEach { pair ->
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s), modifier = Modifier.height(IntrinsicSize.Max)) {
                     pair.forEach { it(Modifier.weight(1f).fillMaxHeight()) }
-                    // Eine einzelne Kachel in der letzten Reihe bleibt halb breit, damit alle gleich aussehen.
-                    if (pair.size == 1) Spacer(Modifier.weight(1f))
                 }
             }
         }
@@ -346,10 +344,9 @@ private fun CompactTile(
         modifier = modifier,
     ) {
         Column(modifier = Modifier.padding(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-                Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(24.dp))
-                Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-            }
+            // Das Symbol steht über dem Titel, damit lange Namen („Grundrezepte“) nie mitten im Wort umbrechen.
+            Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(24.dp))
+            Text(title, style = MaterialTheme.typography.titleMedium)
             // Mehrere Zeilen als einzelne Texte, damit z. B. der Titel eines laufenden Teigs für sich lesbar bleibt.
             subtitle?.lines()?.forEach { Text(it, style = MaterialTheme.typography.bodySmall) }
         }

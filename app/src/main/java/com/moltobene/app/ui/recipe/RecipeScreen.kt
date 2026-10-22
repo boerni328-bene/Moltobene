@@ -77,7 +77,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -932,7 +932,7 @@ private fun RecipeContent(
                         if (cooking.currentStep != null && TAB_STEPS in shownTabs) tabKey = TAB_STEPS
                     }
                 }
-                TabRow(selectedTabIndex = shownTabs.indexOf(tab), containerColor = Color.Transparent) {
+                ScrollableTabRow(selectedTabIndex = shownTabs.indexOf(tab), edgePadding = 0.dp, containerColor = Color.Transparent) {
                     shownTabs.forEach { key ->
                         Tab(
                             selected = key == tab,
