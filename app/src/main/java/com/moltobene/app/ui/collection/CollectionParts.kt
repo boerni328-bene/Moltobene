@@ -368,6 +368,7 @@ internal fun AddChooser(
     onFromText: () -> Unit,
     onFromFile: () -> Unit,
     onFromAudio: () -> Unit,
+    onFromSpeech: () -> Unit,
     onDough: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -402,6 +403,7 @@ internal fun AddChooser(
                 AddOption(R.drawable.ic_description, R.string.import_from_file, R.string.add_hint_file, onFromFile)
                 AddGroup(R.string.add_group_voice)
                 AddOption(R.drawable.ic_graphic_eq, R.string.import_from_audio, R.string.add_hint_audio, onFromAudio)
+                AddOption(R.drawable.ic_mic, R.string.add_record, R.string.add_hint_record, onFromSpeech)
                 AddGroup(R.string.add_group_tools)
                 AddOption(R.drawable.ic_calculate, R.string.dough_title, R.string.add_hint_dough, onDough)
                 Spacer(Modifier.size(Spacing.l))

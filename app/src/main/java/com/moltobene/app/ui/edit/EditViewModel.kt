@@ -1,5 +1,8 @@
 package com.moltobene.app.ui.edit
 
+import com.moltobene.app.data.voice.Dictation
+import com.moltobene.app.data.voice.DictationState
+import com.moltobene.app.data.voice.VoiceProblem
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.annotation.StringRes
@@ -111,6 +114,7 @@ class EditViewModel(
     private val webImporter: WebImporter,
     private val recipeFiles: RecipeFileReader,
     private val transcriber: Transcriber,
+    private val dictation: Dictation,
 ) : ViewModel() {
 
     private val route = handle.toRoute<EditRoute>()
@@ -585,6 +589,59 @@ class EditViewModel(
                 saveDraft()
             }
         }
+    }
+
+    /** „Aufnehmen“ (Rezept einsprechen, Beta): Zustand des Zuhörens für die Oberfläche. */
+    val dictationState: kotlinx.coroutines.flow.StateFlow<DictationState> get() = dictation.state
+
+    /** „Aufnehmen“ in der Hinzufügen-Seite: Das Aufnahmefenster erscheint beim ersten Öffnen von selbst. */
+    fun takeSpeechPrompt(): Boolean {
+        if (!route.fromSpeech || startPromptShownField.value) return false
+        startPromptShownField.value = true
+        return true
+    }
+
+    /** Beginnt zuzuhören; die Berechtigung „Mikrofon“ muss erteilt sein. Ohne Erkennungspaket gibt es eine Meldung. */
+    fun startDictation() {
+        if (isImporting || isRecognizing) return
+        dismissProblem()
+        if (!dictation.isAvailable()) {
+            reportProblem(R.string.dictation_no_pack)
+            return
+        }
+        dictation.start()
+    }
+
+    /**
+     * „Fertig“: Was gesprochen wurde, wird wie bei „Aus Audio übernehmen“ aufgeteilt und als Entwurf übernommen; der erkannte
+     * Text bleibt vollständig als übernommener Text erhalten. Es wird nichts aufgenommen oder gespeichert.
+     */
+    fun finishDictation() {
+        dictation.finish { lines ->
+            val text = SpokenRecipe.text(lines)
+            if (text.isBlank()) {
+                reportProblem(R.string.dictation_nothing)
+            } else {
+                importText(text)
+                checkHintField.value = CHECK_AUDIO
+                saveDraft()
+            }
+        }
+    }
+
+    fun cancelDictation() = dictation.cancel()
+
+    /** Das Zuhören ist gescheitert: ehrliche Meldung und zurück in den Ausgangszustand. */
+    fun onDictationFailed(problem: VoiceProblem) {
+        reportProblem(
+            when (problem) {
+                VoiceProblem.NO_PACK -> R.string.dictation_no_pack
+                VoiceProblem.MICROPHONE -> R.string.voice_error_microphone
+                VoiceProblem.LOW_MEMORY -> R.string.voice_error_memory
+                VoiceProblem.OTHER -> R.string.voice_error_other
+            },
+        )
+        dictation.cancel()
     }
 
     /** Vorbelegung für „Aus Link übernehmen“: der Link aus „Quelle“, z. B. für einen neuen Versuch ohne Netz. */
@@ -1392,6 +1449,7 @@ class EditViewModel(
 
     override fun onCleared() {
         run?.cancel()
+        dictation.cancel()
     }
 
     private companion object {

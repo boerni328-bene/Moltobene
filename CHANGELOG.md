@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.57.0] – 2026-10-22 (versionCode 98)
+
+### Neu
+- **Aufnehmen (Beta).** Auf der Seite „Hinzufügen“ unter „Sprache“ lässt sich ein Rezept einsprechen: erst der Titel, dann Zutaten und Zubereitung. Der Text erscheint beim Sprechen und wird bei „Fertig“ zum Entwurf, den es zu prüfen gilt. Die Erkennung läuft auf dem Handy mit dem Erkennungspaket aus den Einstellungen; das Mikrofon wird erst beim Antippen abgefragt, und die Aufnahme wird nicht gespeichert, nur der erkannte Text.
+
 ## [0.56.0] – 2026-10-22 (versionCode 97)
 
 ### Neu

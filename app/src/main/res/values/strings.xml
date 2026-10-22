@@ -246,6 +246,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>New (beta): “Record” on the Add page: speak a recipe, the text appears while you talk and becomes a draft. The recording is not saved.</item>
         <item>New (beta): “Import from audio” recognizes an audio file on the device, such as a voice message, and turns it into a draft. It needs the recognition pack from Settings.</item>
         <item>New look: Home shows the dish of the day large, the cookbook (formerly “Collection”) is a list with tabs at the top and a home icon, a recipe has tabs for ingredients, instructions and notes, and Add is its own page.</item>
         <item>Clearer dough calculator: the result stays at the top, values change with minus and plus, the preferment is highlighted, and tapping biga, poolish, sourdough starter or a yeast type explains the term.</item>
@@ -655,6 +656,16 @@
 
     <!-- Collection: add menu, filter, view -->
     <string name="add_short">Add</string>
+    <!-- Record: speak a recipe (beta) -->
+    <string name="add_record">Record</string>
+    <string name="add_hint_record">Speak a recipe, recognized on the device</string>
+    <string name="dictation_hint">Speak a recipe: the title first, then ingredients and instructions. The recording is not saved, only the recognized text.</string>
+    <string name="dictation_starting">Microphone is starting …</string>
+    <string name="dictation_listening">Listening …</string>
+    <string name="dictation_finishing">Finishing the recognition …</string>
+    <string name="dictation_done">Done</string>
+    <string name="dictation_no_pack">“Record” needs the recognition pack. It can be downloaded in Settings under “Voice input”.</string>
+    <string name="dictation_nothing">No speech was recognized.</string>
     <!-- Add as its own page (draft of 22 Oct 2026) -->
     <string name="add_group_own">Write yourself</string>
     <string name="add_group_import">Import from a source</string>

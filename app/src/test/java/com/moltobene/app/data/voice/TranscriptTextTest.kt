@@ -12,6 +12,13 @@ class TranscriptTextTest {
     }
 
     @Test
+    fun `liest das Teilergebnis`() {
+        assertEquals("zwei ei", TranscriptText.partialFromJson("""{"partial" : "zwei ei"}"""))
+        assertEquals("", TranscriptText.partialFromJson("""{"text": "zwei"}"""))
+        assertEquals("", TranscriptText.partialFromJson(null))
+    }
+
+    @Test
     fun `nichts erkannt oder kaputte Antwort ergibt leeren Text`() {
         assertEquals("", TranscriptText.fromJson("""{"text" : ""}"""))
         assertEquals("", TranscriptText.fromJson("""{"partial": "zwei"}"""))

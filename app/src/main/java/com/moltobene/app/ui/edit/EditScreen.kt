@@ -1,5 +1,13 @@
 package com.moltobene.app.ui.edit
 
+import com.moltobene.app.data.voice.DictationState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.DisposableEffect
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.core.content.ContextCompat
+import android.content.pm.PackageManager
+import android.Manifest
 import android.content.ActivityNotFoundException
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -193,6 +201,63 @@ fun EditScreen(
                 scope.launch { snackbarHostState.showSnackbar(fileChooserMissing) }
             }
         }
+    }
+    // „Aufnehmen“ (Rezept einsprechen, Beta): Das Mikrofon wird erst beim Antippen gebraucht und dann abgefragt.
+    val dictationState by viewModel.dictationState.collectAsStateWithLifecycle()
+    val micDenied = stringResource(R.string.voice_permission_denied)
+    val micPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) viewModel.startDictation() else scope.launch { snackbarHostState.showSnackbar(micDenied) }
+    }
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        if (viewModel.takeSpeechPrompt()) {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                viewModel.startDictation()
+            } else {
+                micPermission.launch(Manifest.permission.RECORD_AUDIO)
+            }
+        }
+    }
+    (dictationState as? DictationState.Failed)?.let { failed ->
+        LaunchedEffect(failed) { viewModel.onDictationFailed(failed.problem) }
+    }
+    // Im Hintergrund hört das Mikrofon nicht weiter zu.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_STOP) viewModel.cancelDictation() }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    if (dictationState !is DictationState.Off && dictationState !is DictationState.Failed) {
+        AlertDialog(
+            onDismissRequest = viewModel::cancelDictation,
+            title = { Text(stringResource(R.string.add_record), modifier = Modifier.semantics { heading() }) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                    Text(stringResource(R.string.dictation_hint), style = MaterialTheme.typography.bodyMedium)
+                    val shown = dictationState
+                    Text(
+                        text = when (shown) {
+                            DictationState.Starting -> stringResource(R.string.dictation_starting)
+                            DictationState.Finishing -> stringResource(R.string.dictation_finishing)
+                            else -> stringResource(R.string.dictation_listening)
+                        },
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                    )
+                    (shown as? DictationState.Listening)?.text?.takeIf { it.isNotBlank() }?.let { heard ->
+                        Text(heard, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = viewModel::finishDictation, enabled = dictationState is DictationState.Listening) {
+                    Text(stringResource(R.string.dictation_done))
+                }
+            },
+            dismissButton = { TextButton(onClick = viewModel::cancelDictation) { Text(stringResource(R.string.cancel)) } },
+        )
     }
     val pickPages = rememberLauncherForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia(MAX_PAGES),
