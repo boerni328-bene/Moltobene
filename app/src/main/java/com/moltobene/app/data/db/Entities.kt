@@ -142,6 +142,8 @@ data class RecipeSummaryRow(
     val favorite: Boolean,
     val createdAt: Long,
     val photoId: String?,
+    val totalMinutes: Int?,
+    val servings: Int?,
 )
 
 data class RecipeWithDetails(

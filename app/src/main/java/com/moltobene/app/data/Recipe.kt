@@ -77,6 +77,8 @@ data class RecipeSummary(
     val photoId: String?,
     /** Wann das Rezept hinzugefügt wurde; für „Zuletzt hinzugefügt“. */
     val createdAt: Long = 0L,
+    val totalMinutes: Int? = null,
+    val servings: Int? = null,
 )
 
 object RecipeIds {

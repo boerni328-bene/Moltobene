@@ -11,17 +11,17 @@
     <string name="delete">Löschen</string>
     <string name="remove">Entfernen</string>
 
-    <!-- Sammlung -->
+    <!-- Kochbuch -->
     <!-- Name des Bildschirms mit Zusatz in der oberen Leiste, z. B. „Aus Foto übernehmen · 3 Seiten“ -->
     <string name="screen_title_detail">%1$s · %2$s</string>
-    <string name="collection_title">Sammlung</string>
+    <string name="collection_title">Kochbuch</string>
     <string name="add_recipe">Rezept hinzufügen</string>
     <string name="search_placeholder">Rezepte suchen</string>
     <string name="search_clear">Suche löschen</string>
     <string name="search_no_results">Keine passenden Rezepte gefunden</string>
     <string name="collection_empty_title">Noch keine Rezepte vorhanden</string>
     <string name="collection_empty_text">Rezepte selbst eintippen oder aus Link, Foto oder Text übernehmen. Alles bleibt nur auf dem Handy.</string>
-    <string name="collection_error">Die Sammlung konnte nicht geladen werden.</string>
+    <string name="collection_error">Das Kochbuch konnte nicht geladen werden.</string>
     <string name="untitled_recipe">Ohne Titel</string>
     <string name="draft_label">Entwurf</string>
 
@@ -246,6 +246,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Neues Aussehen: Die Startseite zeigt das Gericht des Tages groß, das Kochbuch (früher „Sammlung“) ist eine Liste mit Reitern oben und einem Startsymbol, das Rezept hat Reiter für Zutaten, Zubereitung und Notizen, und Hinzufügen ist eine eigene Seite.</item>
+        <item>Teigrechner übersichtlicher: Das Ergebnis steht oben fest, Werte lassen sich mit Minus und Plus ändern, der Vorteig ist hervorgehoben, und ein Tipp auf Biga, Poolish, Sauerteig oder eine Hefeart erklärt den Begriff.</item>
+        <item>Einstellungen als Liste mit Symbolen: Oben stehen Schalter für das Wichtigste („Schnell“), jede Gruppe öffnet sich als eigene Ansicht.</item>
         <item>Neuer Bereich „Speicher“ in den Einstellungen: Er zeigt, wie viel Platz die App belegt – getrennt nach Programm, Fotos, Vorschaubildern, Rezepten, Sprachpaket, Erkennungspaket, Übersetzungen und Zwischenspeicher, dazu die Summe. Pakete und Zwischenspeicher lassen sich dort löschen.</item>
         <item>Zeitplan für Teige: Der Teigrechner legt bei Pizza und Brot einen Zeitplan an (z. B. Biga 1 bis 3 Tage im Kühlschrank). Im Rezept startet „Teig starten“ den Ablauf; die App zeigt, wo der Teig steht und wann es weitergeht, auch auf der Startseite.</item>
         <item>Teigrechner kompakter: Werte stehen paarweise nebeneinander, die Voreinstellung braucht weniger Platz, und die Leiste unten zeigt bei Biga oder Poolish auch den Vorteig.</item>
@@ -310,6 +313,9 @@
     <string name="settings_section_about">Info</string>
     <string name="settings_group_expanded">Aufgeklappt</string>
     <string name="settings_group_collapsed">Zugeklappt</string>
+    <string name="settings_quick">Schnell</string>
+    <string name="settings_quick_screen_on">Bildschirm bleibt beim Kochen an</string>
+    <string name="settings_quick_headset">Kopfhörertasten beim Vorlesen</string>
     <string name="app_tagline">Moltobene sammelt Kochrezepte aus allen Quellen an einem Ort, gespeichert nur auf dem eigenen Handy.</string>
     <string name="license_note_moltobene">Moltobene selbst ist freie Software und darf unter den Bedingungen dieser Lizenz genutzt, weitergegeben und verändert werden, ohne jede Gewährleistung. Quelltext: github.com/boerni328-bene/Moltobene</string>
     <string name="license_note_opus_mt">Modelle des Sprachpakets für die Übersetzung, nur auf Wunsch heruntergeladen. Für Moltobene geändert: nach ONNX umgewandelt und auf 8 Bit verkleinert. Quelle: huggingface.co/Helsinki-NLP</string>
@@ -324,7 +330,7 @@
     </plurals>
     <string name="screen_on_device">Wie das Handy</string>
     <!-- Startseite (#81) -->
-    <string name="home_recipes_title">Sammlung</string>
+    <string name="home_recipes_title">Kochbuch</string>
     <plurals name="home_recipes_count">
         <item quantity="one">%1$d Rezept</item>
         <item quantity="other">%1$d Rezepte</item>
@@ -343,13 +349,13 @@
     <string name="knowhow_error">Die Artikel konnten nicht geladen werden.</string>
     <string name="basics_title">Grundrezepte</string>
     <string name="home_basics_text">Béchamelsauce, Vinaigrette und mehr</string>
-    <string name="basics_intro">Bewährte Grundrezepte zum Übernehmen in die Sammlung. Danach lassen sie sich wie jedes andere Rezept bearbeiten, umrechnen und übersetzen.</string>
+    <string name="basics_intro">Bewährte Grundrezepte zum Übernehmen ins Kochbuch. Danach lassen sie sich wie jedes andere Rezept bearbeiten, umrechnen und übersetzen.</string>
     <string name="basics_adopt">Übernehmen</string>
-    <string name="basics_added">„%1$s“ ist jetzt in der Sammlung</string>
+    <string name="basics_added">„%1$s“ ist jetzt im Kochbuch</string>
     <string name="basics_open">Öffnen</string>
     <string name="basics_failed">Das Grundrezept konnte nicht übernommen werden.</string>
     <string name="basics_error">Die Grundrezepte konnten nicht geladen werden.</string>
-    <string name="basics_duplicate_title">Schon in der Sammlung</string>
+    <string name="basics_duplicate_title">Schon im Kochbuch</string>
     <string name="basics_duplicate_text">„%1$s“ wurde bereits übernommen.</string>
     <string name="basics_adopt_anyway">Trotzdem übernehmen</string>
     <string name="basics_expanded">Aufgeklappt</string>
@@ -426,7 +432,7 @@
     <string name="storage_photos">Fotos</string>
     <string name="storage_photos_hint">Fotos der Gerichte und Originalseiten in voller Größe.</string>
     <string name="storage_thumbnails">Vorschaubilder</string>
-    <string name="storage_thumbnails_hint">Kleine Bilder für die Sammlung.</string>
+    <string name="storage_thumbnails_hint">Kleine Bilder für das Kochbuch.</string>
     <string name="storage_database">Rezepte</string>
     <string name="storage_database_hint">Titel, Zutaten, Zubereitung und Notizen aller Rezepte.</string>
     <string name="storage_language_pack">Sprachpaket Deutsch–Englisch</string>
@@ -466,15 +472,15 @@
     <string name="language_pack_error_space">Nicht genug Speicherplatz auf dem Handy. Etwa %1$s freigeben und erneut versuchen.</string>
     <string name="language_pack_error_damaged">Das Sprachpaket kam nicht vollständig an. Erneut versuchen.</string>
     <string name="language_pack_error_unavailable">Das Sprachpaket ist gerade nicht erreichbar. Später erneut versuchen.</string>
-    <string name="backup_title">Sammlung sichern</string>
+    <string name="backup_title">Kochbuch sichern</string>
     <string name="backup_text">Alle Rezepte und Fotos in einer Datei speichern. Die Sicherungsdatei ist nicht verschlüsselt.</string>
     <string name="backup_file_name">moltobene-sicherung-%1$s.zip</string>
-    <string name="backup_running">Sammlung wird gesichert …</string>
+    <string name="backup_running">Kochbuch wird gesichert …</string>
     <plurals name="backup_done">
-        <item quantity="one">Sammlung gesichert: %d Rezept</item>
-        <item quantity="other">Sammlung gesichert: %d Rezepte</item>
+        <item quantity="one">Kochbuch gesichert: %d Rezept</item>
+        <item quantity="other">Kochbuch gesichert: %d Rezepte</item>
     </plurals>
-    <string name="backup_error">Die Sammlung konnte nicht gesichert werden.</string>
+    <string name="backup_error">Das Kochbuch konnte nicht gesichert werden.</string>
     <string name="backup_error_space">Nicht genug Speicherplatz für die Sicherung. Platz schaffen oder einen anderen Speicherort wählen.</string>
     <string name="backup_error_incomplete">Die Sicherungsdatei war nach dem Schreiben nicht vollständig und wurde entfernt. Erneut sichern, am besten an einem anderen Speicherort.</string>
     <string name="backup_never">Noch nie gesichert</string>
@@ -489,11 +495,11 @@
     <string name="backup_hint_action">Sichern</string>
     <string name="backup_hint_hide">Hinweis ausblenden</string>
     <string name="restore_error_space">Nicht genug Speicherplatz auf dem Handy, um die Sicherung zu lesen. Platz schaffen und erneut versuchen.</string>
-    <string name="restore_title">Sammlung wiederherstellen</string>
+    <string name="restore_title">Kochbuch wiederherstellen</string>
     <string name="restore_text">Rezepte aus einer Sicherungsdatei wiederherstellen. Vorhandene Rezepte bleiben erhalten.</string>
     <string name="restore_checking">Sicherung wird geprüft …</string>
     <string name="restore_running">Rezepte werden wiederhergestellt …</string>
-    <string name="restore_confirm_title">Sammlung wiederherstellen?</string>
+    <string name="restore_confirm_title">Kochbuch wiederherstellen?</string>
     <string name="restore_confirm_date">Sicherung vom %1$s</string>
     <plurals name="restore_confirm_total">
         <item quantity="one">%d Rezept in der Sicherung</item>
@@ -510,12 +516,12 @@
         <item quantity="one">%d Rezept wiederhergestellt</item>
         <item quantity="other">%d Rezepte wiederhergestellt</item>
     </plurals>
-    <string name="restore_nothing_new">Die Sammlung ist bereits auf dem neuesten Stand.</string>
+    <string name="restore_nothing_new">Das Kochbuch ist bereits auf dem neuesten Stand.</string>
     <string name="restore_error_not_backup">Diese Datei ist keine Moltobene-Sicherung.</string>
     <string name="restore_error_newer">Diese Sicherung stammt von einer neueren App-Version. Bitte Moltobene aktualisieren.</string>
     <string name="restore_error_damaged">Die Sicherungsdatei ist beschädigt.</string>
     <string name="restore_error_too_large">Die Sicherungsdatei ist zu groß.</string>
-    <string name="restore_error_failed">Die Sicherung konnte nicht wiederhergestellt werden. Die Sammlung ist unverändert.</string>
+    <string name="restore_error_failed">Die Sicherung konnte nicht wiederhergestellt werden. Das Kochbuch ist unverändert.</string>
 
     <!-- Teigrechner (#69) -->
     <string name="dough_title">Teigrechner</string>
@@ -586,6 +592,26 @@
     <string name="dough_help_preferment_effect">Ein Vorteig kann Geschmack und Teigeigenschaften verbessern; Biga macht den Teig tendenziell fester, Poolish dehnbarer. Mehl und Wasser des Vorteigs zählen im Rechner zur Gesamtmenge.</string>
     <string name="dough_help_preferment_range">Biga ist typischerweise fest (etwa 50 bis 60 % Wasser vom Mehl im Vorteig), Poolish flüssig (etwa 100 %). Üblich sind etwa 20 bis 50 % des gesamten Mehls im Vorteig.</string>
     <string name="dough_help_preferment_care">Die Reifezeit hängt von der Temperatur ab: Eine Biga braucht bei etwa 15 bis 20 °C meist 8 bis 16 Stunden. Zu lange gereift, fällt der Vorteig zusammen und riecht stechend sauer. Biga und Poolish werden mit Hefe angesetzt und sind kein Sauerteig; bei Sauerteig ist die Hefe im Hauptteig freiwillig.</string>
+    <!-- Begriffe im Teigrechner (Entwurf vom 22.10.2026): Biga, Poolish, Sauerteig und die Hefearten antippen -->
+    <string name="dough_help_term_open">Was ist %1$s?</string>
+    <string name="dough_help_biga_effect">Fester Vorteig mit wenig Wasser. Er gibt kräftigeres Aroma, eine offene Krume und einen Teig, der sich gut dehnen lässt. Typisch für italienische Pizza und Ciabatta.</string>
+    <string name="dough_help_biga_range">Etwa 50 bis 60 % Wasser vom Mehl im Vorteig, meist 20 bis 40 % des gesamten Mehls und sehr wenig Hefe (etwa 0,1 bis 1 % vom Mehl im Vorteig).</string>
+    <string name="dough_help_biga_care">Bei etwa 15 bis 20 °C meist 8 bis 16 Stunden, im Kühlschrank bis zu drei Tage. Zu lange Reife macht den Teig schlaff und sauer.</string>
+    <string name="dough_help_poolish_effect">Flüssiger Vorteig aus gleichen Teilen Mehl und Wasser. Er gibt milden, leicht nussigen Geschmack und eine sehr lockere Krume. Typisch für Baguette und Brötchen.</string>
+    <string name="dough_help_poolish_range">Etwa 100 % Wasser vom Mehl im Vorteig, dazu 0,05 bis 0,5 % Hefe vom Mehl im Vorteig.</string>
+    <string name="dough_help_poolish_care">Meist 8 bis 16 Stunden bei Raumtemperatur. Reif ist er, wenn die Oberfläche voller Blasen ist und beginnt einzufallen.</string>
+    <string name="dough_help_sourdough_effect">Anstellgut aus Mehl und Wasser mit wilden Hefen und Milchsäurebakterien. Es lockert den Teig und gibt Säure, Aroma und längere Frischhaltung.</string>
+    <string name="dough_help_sourdough_range">Meist 10 bis 30 % vom gesamten Mehl als Anstellgut.</string>
+    <string name="dough_help_sourdough_care">Braucht deutlich längere Gehzeiten als Hefe, oft 8 bis 24 Stunden, und das Anstellgut muss regelmäßig gefüttert werden.</string>
+    <string name="dough_help_fresh_effect">Gepresste Hefe aus lebenden Hefezellen, der Würfel aus dem Kühlregal. Sie ist der Maßstab für die Umrechnung der anderen Hefearten.</string>
+    <string name="dough_help_fresh_range">1 g Frischhefe entspricht etwa 0,33 g Trockenhefe (Instant) und etwa 0,4 g Aktive Trockenhefe.</string>
+    <string name="dough_help_fresh_care">Kühl lagern und nur wenige Wochen aufbewahren. In lauwarmer Flüssigkeit auflösen oder fein zerbröseln.</string>
+    <string name="dough_help_instant_effect">Feines Pulver, das direkt unter das Mehl gemischt wird. Es wirkt stärker als Frischhefe.</string>
+    <string name="dough_help_instant_range">Etwa ein Drittel der Frischhefe-Menge.</string>
+    <string name="dough_help_instant_care">Ungeöffnet lange haltbar; geöffnet kühl und trocken lagern.</string>
+    <string name="dough_help_active_effect">Gröbere Körnchen, die vor dem Gebrauch in lauwarmem Wasser aufgelöst werden.</string>
+    <string name="dough_help_active_range">Etwa 40 % der Frischhefe-Menge, also etwas mehr als bei Trockenhefe (Instant).</string>
+    <string name="dough_help_active_care">In Wasser von etwa 35 °C auflösen und 5 bis 10 Minuten stehen lassen, bis sie schäumt.</string>
     <string name="dough_preset_custom">Eigene Werte</string>
     <string name="dough_preset_position">%1$d von %2$d</string>
     <string name="dough_preset_previous">Vorherige Voreinstellung</string>
@@ -624,8 +650,20 @@
     <string name="dough_unit_balls">Teigkugeln (je %1$s g)</string>
     <string name="dough_unit_loaves">Laibe (je %1$s g)</string>
 
-    <!-- Sammlung: Hinzufügen-Menü, Filter, Ansicht -->
+    <!-- Kochbuch: Hinzufügen-Menü, Filter, Ansicht -->
     <string name="add_short">Hinzufügen</string>
+    <!-- Hinzufügen als eigene Seite (Entwurf vom 22.10.2026) -->
+    <string name="add_group_own">Selbst</string>
+    <string name="add_group_import">Aus einer Quelle übernehmen</string>
+    <string name="add_group_voice">Sprache · Beta</string>
+    <string name="add_group_tools">Rechner</string>
+    <string name="add_hint_write">Titel, Zutaten, Zubereitung, Foto</string>
+    <string name="add_hint_link">Internetseite, Koch-Portal</string>
+    <string name="add_hint_photo">Kochbuch, Zettel, PDF</string>
+    <string name="add_hint_text">WhatsApp, E-Mail, Zwischenablage</string>
+    <string name="add_hint_file">Sicherung, andere Rezept-App</string>
+    <string name="add_hint_audio">Sprachnachricht oder Aufnahme auf dem Handy</string>
+    <string name="add_hint_dough">Pizza, Brot, Pasta, Kuchen</string>
     <string name="filter_all">Alle</string>
     <string name="filter_favorites">Favoriten</string>
     <string name="filter_drafts">Entwürfe</string>

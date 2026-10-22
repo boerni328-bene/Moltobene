@@ -15,14 +15,14 @@
     <!-- Sammlung -->
     <!-- Name des Bildschirms mit Zusatz in der oberen Leiste, z. B. „Aus Foto übernehmen · 3 Seiten“ -->
     <string name="screen_title_detail">%1$s · %2$s</string>
-    <string name="collection_title">Collection</string>
+    <string name="collection_title">Cookbook</string>
     <string name="add_recipe">Add recipe</string>
     <string name="search_placeholder">Search recipes</string>
     <string name="search_clear">Clear search</string>
     <string name="search_no_results">No matching recipes found</string>
     <string name="collection_empty_title">No recipes yet</string>
     <string name="collection_empty_text">Type recipes in or import them from a link, photo or text. Everything stays on the device.</string>
-    <string name="collection_error">The collection could not be loaded.</string>
+    <string name="collection_error">The cookbook could not be loaded.</string>
     <string name="untitled_recipe">Untitled</string>
     <string name="draft_label">Draft</string>
 
@@ -246,6 +246,9 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>New look: Home shows the dish of the day large, the cookbook (formerly “Collection”) is a list with tabs at the top and a home icon, a recipe has tabs for ingredients, instructions and notes, and Add is its own page.</item>
+        <item>Clearer dough calculator: the result stays at the top, values change with minus and plus, the preferment is highlighted, and tapping biga, poolish, sourdough starter or a yeast type explains the term.</item>
+        <item>Settings as a list with icons: switches for the most important options (“Quick”) sit at the top, and each group opens as its own view.</item>
         <item>New “Storage” section in Settings: it shows how much space the app uses – split into app, photos, thumbnails, recipes, language pack, recognition pack, translations and cache, plus the total. Packs and the cache can be deleted there.</item>
         <item>Dough schedule: for pizza and bread the dough calculator creates a schedule (for example biga 1 to 3 days in the refrigerator). In the recipe, “Start dough” begins the process; the app shows where the dough stands and when to continue, also on Home.</item>
         <item>Compact dough calculator: values sit side by side, the preset takes less room, and the bar at the bottom also shows the preferment for biga or poolish.</item>
@@ -310,6 +313,9 @@
     <string name="settings_section_about">About</string>
     <string name="settings_group_expanded">Expanded</string>
     <string name="settings_group_collapsed">Collapsed</string>
+    <string name="settings_quick">Quick</string>
+    <string name="settings_quick_screen_on">Keep screen on while cooking</string>
+    <string name="settings_quick_headset">Headset buttons while reading aloud</string>
     <string name="app_tagline">Moltobene collects recipes from every source in one place, stored only on the phone itself.</string>
     <string name="license_note_moltobene">Moltobene itself is free software and may be used, shared and changed under the terms of this license, without any warranty. Source code: github.com/boerni328-bene/Moltobene</string>
     <string name="license_note_opus_mt">Models of the language pack for translation, downloaded only on request. Changed for Moltobene: converted to ONNX and reduced to 8 bit. Source: huggingface.co/Helsinki-NLP</string>
@@ -324,7 +330,7 @@
     </plurals>
     <string name="screen_on_device">Same as device</string>
     <!-- Startseite (#81) -->
-    <string name="home_recipes_title">Collection</string>
+    <string name="home_recipes_title">Cookbook</string>
     <plurals name="home_recipes_count">
         <item quantity="one">%1$d recipe</item>
         <item quantity="other">%1$d recipes</item>
@@ -343,13 +349,13 @@
     <string name="knowhow_error">The articles could not be loaded.</string>
     <string name="basics_title">Basic recipes</string>
     <string name="home_basics_text">Béchamel sauce, vinaigrette and more</string>
-    <string name="basics_intro">Reliable basic recipes to import into the collection. Afterwards they can be edited, adjusted and translated like any other recipe.</string>
+    <string name="basics_intro">Reliable basic recipes to import into the cookbook. Afterwards they can be edited, adjusted and translated like any other recipe.</string>
     <string name="basics_adopt">Import</string>
-    <string name="basics_added">“%1$s” is now in the collection</string>
+    <string name="basics_added">“%1$s” is now in the cookbook</string>
     <string name="basics_open">Open</string>
     <string name="basics_failed">The basic recipe could not be imported.</string>
     <string name="basics_error">The basic recipes could not be loaded.</string>
-    <string name="basics_duplicate_title">Already in the collection</string>
+    <string name="basics_duplicate_title">Already in the cookbook</string>
     <string name="basics_duplicate_text">“%1$s” has already been imported.</string>
     <string name="basics_adopt_anyway">Import anyway</string>
     <string name="basics_expanded">Expanded</string>
@@ -426,7 +432,7 @@
     <string name="storage_photos">Photos</string>
     <string name="storage_photos_hint">Photos of dishes and original pages in full size.</string>
     <string name="storage_thumbnails">Thumbnails</string>
-    <string name="storage_thumbnails_hint">Small images for the collection.</string>
+    <string name="storage_thumbnails_hint">Small images for the cookbook.</string>
     <string name="storage_database">Recipes</string>
     <string name="storage_database_hint">Titles, ingredients, instructions and notes of all recipes.</string>
     <string name="storage_language_pack">Language pack German–English</string>
@@ -466,15 +472,15 @@
     <string name="language_pack_error_space">Not enough storage space on the device. Free up about %1$s and try again.</string>
     <string name="language_pack_error_damaged">The language pack did not arrive completely. Try again.</string>
     <string name="language_pack_error_unavailable">The language pack is not available right now. Try again later.</string>
-    <string name="backup_title">Back up collection</string>
+    <string name="backup_title">Back up cookbook</string>
     <string name="backup_text">Saves all recipes and photos in one file. The backup file is not encrypted.</string>
     <string name="backup_file_name">moltobene-backup-%1$s.zip</string>
-    <string name="backup_running">Backing up collection …</string>
+    <string name="backup_running">Backing up cookbook …</string>
     <plurals name="backup_done">
-        <item quantity="one">Collection backed up: %d recipe</item>
-        <item quantity="other">Collection backed up: %d recipes</item>
+        <item quantity="one">Cookbook backed up: %d recipe</item>
+        <item quantity="other">Cookbook backed up: %d recipes</item>
     </plurals>
-    <string name="backup_error">The collection could not be backed up.</string>
+    <string name="backup_error">The cookbook could not be backed up.</string>
     <string name="backup_error_space">Not enough storage space for the backup. Free up space or choose another location.</string>
     <string name="backup_error_incomplete">The backup file was incomplete after writing and has been removed. Back up again, ideally to another location.</string>
     <string name="backup_never">Never backed up</string>
@@ -489,11 +495,11 @@
     <string name="backup_hint_action">Back up</string>
     <string name="backup_hint_hide">Hide hint</string>
     <string name="restore_error_space">Not enough storage space on the device to read the backup. Free up space and try again.</string>
-    <string name="restore_title">Restore collection</string>
+    <string name="restore_title">Restore cookbook</string>
     <string name="restore_text">Restores recipes from a backup file. Existing recipes are kept.</string>
     <string name="restore_checking">Checking backup …</string>
     <string name="restore_running">Restoring recipes …</string>
-    <string name="restore_confirm_title">Restore collection?</string>
+    <string name="restore_confirm_title">Restore cookbook?</string>
     <string name="restore_confirm_date">Backup from %1$s</string>
     <plurals name="restore_confirm_total">
         <item quantity="one">%d recipe in the backup</item>
@@ -510,12 +516,12 @@
         <item quantity="one">%d recipe restored</item>
         <item quantity="other">%d recipes restored</item>
     </plurals>
-    <string name="restore_nothing_new">The collection is already up to date.</string>
+    <string name="restore_nothing_new">The cookbook is already up to date.</string>
     <string name="restore_error_not_backup">This file is not a Moltobene backup.</string>
     <string name="restore_error_newer">This backup comes from a newer app version. Please update Moltobene.</string>
     <string name="restore_error_damaged">The backup file is damaged.</string>
     <string name="restore_error_too_large">The backup file is too large.</string>
-    <string name="restore_error_failed">The backup could not be restored. The collection is unchanged.</string>
+    <string name="restore_error_failed">The backup could not be restored. The cookbook is unchanged.</string>
 
     <!-- Dough calculator (#69) -->
     <string name="dough_title">Dough calculator</string>
@@ -588,6 +594,26 @@
     <string name="dough_help_preferment_effect">A preferment can improve flavor and dough properties; biga tends to make the dough firmer, poolish more extensible. Flour and water of the preferment count toward the totals in the calculator.</string>
     <string name="dough_help_preferment_range">Biga is typically stiff (about 50 to 60 % water of its flour), poolish liquid (about 100 %). About 20 to 50 % of the total flour in the preferment is common.</string>
     <string name="dough_help_preferment_care">Ripening time depends on temperature: a biga usually needs 8 to 16 hours at about 15 to 20 °C. Left too long, the preferment collapses and smells sharply sour. Biga and poolish are made with yeast and are not sourdough; with sourdough, the yeast in the final dough is optional.</string>
+    <!-- Terms in the dough calculator (draft of 22 Oct 2026): tap biga, poolish, sourdough starter and the yeast types -->
+    <string name="dough_help_term_open">What is %1$s?</string>
+    <string name="dough_help_biga_effect">A stiff preferment with little water. It gives stronger flavor, an open crumb and a dough that stretches well. Typical for Italian pizza and ciabatta.</string>
+    <string name="dough_help_biga_range">About 50 to 60% water of the flour in the preferment, usually 20 to 40% of the total flour and very little yeast (about 0.1 to 1% of the preferment flour).</string>
+    <string name="dough_help_biga_care">At about 59 to 68°F (15 to 20°C) usually 8 to 16 hours, in the refrigerator up to three days. Too long makes the dough slack and sour.</string>
+    <string name="dough_help_poolish_effect">A liquid preferment of equal parts flour and water. It gives a mild, slightly nutty flavor and a very light crumb. Typical for baguettes and rolls.</string>
+    <string name="dough_help_poolish_range">About 100% water of the flour in the preferment, plus 0.05 to 0.5% yeast of the preferment flour.</string>
+    <string name="dough_help_poolish_care">Usually 8 to 16 hours at room temperature. It is ripe when the surface is full of bubbles and starts to sink.</string>
+    <string name="dough_help_sourdough_effect">A starter of flour and water with wild yeasts and lactic acid bacteria. It leavens the dough and adds acidity, flavor and longer freshness.</string>
+    <string name="dough_help_sourdough_range">Usually 10 to 30% of the total flour as starter.</string>
+    <string name="dough_help_sourdough_care">Needs much longer rising times than yeast, often 8 to 24 hours, and the starter has to be fed regularly.</string>
+    <string name="dough_help_fresh_effect">Pressed yeast of living yeast cells, the cube from the refrigerated shelf. It is the reference for converting the other yeast types.</string>
+    <string name="dough_help_fresh_range">1 g fresh yeast equals about 0.33 g instant yeast and about 0.4 g active dry yeast.</string>
+    <string name="dough_help_fresh_care">Store cold and keep only a few weeks. Dissolve in lukewarm liquid or crumble finely.</string>
+    <string name="dough_help_instant_effect">A fine powder that is mixed straight into the flour. It is stronger than fresh yeast.</string>
+    <string name="dough_help_instant_range">About one third of the amount of fresh yeast.</string>
+    <string name="dough_help_instant_care">Keeps for a long time unopened; once opened store cool and dry.</string>
+    <string name="dough_help_active_effect">Coarser granules that are dissolved in lukewarm water before use.</string>
+    <string name="dough_help_active_range">About 40% of the amount of fresh yeast, so a little more than instant yeast.</string>
+    <string name="dough_help_active_care">Dissolve in water of about 95°F (35°C) and let stand 5 to 10 minutes until foamy.</string>
     <string name="dough_preset_custom">Custom values</string>
     <string name="dough_preset_position">%1$d of %2$d</string>
     <string name="dough_preset_previous">Previous preset</string>
@@ -628,6 +654,18 @@
 
     <!-- Collection: add menu, filter, view -->
     <string name="add_short">Add</string>
+    <!-- Add as its own page (draft of 22 Oct 2026) -->
+    <string name="add_group_own">Write yourself</string>
+    <string name="add_group_import">Import from a source</string>
+    <string name="add_group_voice">Voice · beta</string>
+    <string name="add_group_tools">Calculator</string>
+    <string name="add_hint_write">Title, ingredients, instructions, photo</string>
+    <string name="add_hint_link">Website, cooking portal</string>
+    <string name="add_hint_photo">Cookbook, note, PDF</string>
+    <string name="add_hint_text">WhatsApp, email, clipboard</string>
+    <string name="add_hint_file">Backup, other recipe app</string>
+    <string name="add_hint_audio">Voice message or recording on the device</string>
+    <string name="add_hint_dough">Pizza, bread, pasta, cake</string>
     <string name="filter_all">All</string>
     <string name="filter_favorites">Favorites</string>
     <string name="filter_drafts">Drafts</string>

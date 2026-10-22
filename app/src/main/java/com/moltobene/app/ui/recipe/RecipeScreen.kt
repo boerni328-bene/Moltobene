@@ -76,6 +76,8 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -914,8 +916,43 @@ private fun RecipeContent(
                     ScheduleCard(timeline = recipe.timeline, runs = runs, now = rememberNow(), actions = schedule)
                 }
 
-                if (recipe.ingredients.isNotEmpty()) {
-                    SectionTitle(stringResource(R.string.ingredients))
+                // Reiter (Entwurf vom 22.10.2026): Zutaten, Zubereitung und Notizen nacheinander statt untereinander. Beim
+                // Weiterschalten mit der Kochleiste springt die Ansicht zur Zubereitung.
+                val shownTabs = buildList {
+                    if (recipe.ingredients.isNotEmpty()) add(TAB_INGREDIENTS)
+                    if (recipe.steps.isNotEmpty()) add(TAB_STEPS)
+                    add(TAB_NOTES)
+                }
+                var tabKey by rememberSaveable { mutableStateOf(shownTabs.first()) }
+                val tab = if (tabKey in shownTabs) tabKey else shownTabs.first()
+                var lastStep by rememberSaveable { mutableStateOf(cooking.currentStep) }
+                LaunchedEffect(cooking.currentStep) {
+                    if (cooking.currentStep != lastStep) {
+                        lastStep = cooking.currentStep
+                        if (cooking.currentStep != null && TAB_STEPS in shownTabs) tabKey = TAB_STEPS
+                    }
+                }
+                TabRow(selectedTabIndex = shownTabs.indexOf(tab), containerColor = Color.Transparent) {
+                    shownTabs.forEach { key ->
+                        Tab(
+                            selected = key == tab,
+                            onClick = { tabKey = key },
+                            text = {
+                                Text(
+                                    stringResource(
+                                        when (key) {
+                                            TAB_INGREDIENTS -> R.string.ingredients
+                                            TAB_STEPS -> R.string.instructions
+                                            else -> R.string.notes
+                                        },
+                                    ),
+                                )
+                            },
+                        )
+                    }
+                }
+
+                if (tab == TAB_INGREDIENTS) {
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceContainer,
                         shape = MaterialTheme.shapes.large,
@@ -944,8 +981,7 @@ private fun RecipeContent(
                         }
                     }
 
-                if (recipe.steps.isNotEmpty()) {
-                    SectionTitle(stringResource(R.string.instructions))
+                if (tab == TAB_STEPS) {
                     val steps = translated?.steps?.takeIf { it.size == recipe.steps.size } ?: recipe.steps
                     recipe.steps.forEachIndexed { index, step ->
                         StepRow(
@@ -958,7 +994,7 @@ private fun RecipeContent(
                     }
                 }
 
-                NotesSection(notes = recipe.notes, onSave = onSaveNotes)
+                if (tab == TAB_NOTES) NotesSection(notes = recipe.notes, onSave = onSaveNotes)
 
                 recipe.source?.let { source ->
                     SectionTitle(stringResource(R.string.source))
@@ -1481,7 +1517,7 @@ private fun RecipeTimes(prepMinutes: Int?, totalMinutes: Int?) {
 }
 
 /** Dauer in Stunden und Minuten mit den Abkürzungen der Sprache, z. B. „1 Std., 30 Min.“ oder “1 hr, 30 min”. */
-private fun formatDuration(minutes: Int, locale: Locale): String {
+internal fun formatDuration(minutes: Int, locale: Locale): String {
     val hours = minutes / 60
     val rest = minutes % 60
     val parts = buildList {
@@ -1546,7 +1582,10 @@ private fun RecipeTags(tags: List<Tag>) {
 }
 
 /** Kleinstes Seitenverhältnis (Breite zu Höhe) des Fotos in der Rezeptansicht: nie höher als 5:3. */
-private const val COOKING_PHOTO_MIN_RATIO = 5f / 3f
+private const val COOKING_PHOTO_MIN_RATIO = 2.4f
+private const val TAB_INGREDIENTS = 0
+private const val TAB_STEPS = 1
+private const val TAB_NOTES = 2
 
 /** Ob unter der Leiste der Übersetzungsbalken steht (Rezept mit möglicher Übersetzung, die gerade nicht das Original zeigt). */
 private fun translationBarShown(recipe: Recipe, state: TranslationState): Boolean {

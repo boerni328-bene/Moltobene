@@ -3,6 +3,19 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.56.0] – 2026-10-22 (versionCode 97)
+
+### Neu
+- **Neues, kompakteres Aussehen.** Die Startseite zeigt das Gericht des Tages als großes Foto mit kleinen Kacheln darunter. Das Kochbuch (bisher „Sammlung“) ist eine Liste mit Zeit und Portionen je Rezept und Reitern für Alle, Favoriten und Entwürfe; links oben führt ein Startsymbol zurück zur Startseite.
+- **Rezept mit Reitern.** Zutaten, Zubereitung und Notizen stehen auf eigenen Reitern, das Foto ist flacher. Beim Weiterschalten mit der Kochleiste springt die Ansicht zur Zubereitung.
+- **Teigrechner übersichtlicher.** Das Ergebnis steht oben fest und rechnet mit. Werte lassen sich mit Minus und Plus ändern oder antippen und tippen. Der Vorteig ist hervorgehoben und zeigt Mehl, Wasser und Hefe des Vorteigs als Kacheln. Ein Tipp auf „Was ist Biga?“ oder „Was ist Trockenhefe?“ öffnet ein leicht durchsichtiges Fenster mit einer Erklärung; neu erklärt werden Biga, Poolish, Sauerteig, Frischhefe, Trockenhefe (Instant) und Aktive Trockenhefe.
+- **Einstellungen als Liste.** Oben stehen Schalter für „Bildschirm bleibt beim Kochen an“ und „Kopfhörertasten beim Vorlesen“. Darunter zeigt jede Gruppe Symbol und Stand und öffnet sich als eigene Ansicht.
+- **Hinzufügen als eigene Seite.** Die Wege sind in Gruppen geordnet (Selbst, Aus einer Quelle übernehmen, Sprache, Rechner), jeder mit einem kurzen Hinweis.
+
+### Geändert
+- „Sammlung“ heißt jetzt „Kochbuch“ (englisch „Cookbook“), auch bei „Kochbuch sichern“ und „Kochbuch wiederherstellen“. Das Kochbuch startet neu als Liste; wer das Raster gewählt hatte, behält es.
+- Im Teigrechner steht der Name des Bildschirms klein in der oberen Leiste statt als Überschrift darunter.
+
 ## [0.55.0] – 2026-10-21 (versionCode 96)
 
 ### Neu

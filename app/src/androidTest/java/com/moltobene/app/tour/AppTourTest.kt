@@ -1436,7 +1436,7 @@ class AppTourTest(private val variant: DisplayVariant) {
     /** Text aus strings.xml in der Sprache der jeweiligen Darstellung. */
     private fun text(@StringRes id: Int, vararg args: Any): String = activity.getString(id, *args)
 
-    private fun field(@StringRes label: Int) = composeRule.onNode(hasSetTextAction() and hasText(text(label)))
+    private fun field(@StringRes label: Int) = composeRule.onNode(hasSetTextAction() and (hasText(text(label)) or hasContentDescription(text(label))))
 
     private fun input(@StringRes label: Int, value: String) {
         field(label).performScrollTo().performTextInput(value)

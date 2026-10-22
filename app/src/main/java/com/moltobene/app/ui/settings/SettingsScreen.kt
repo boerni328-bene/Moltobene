@@ -1,5 +1,13 @@
 package com.moltobene.app.ui.settings
 
+import androidx.activity.compose.BackHandler
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Switch
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.res.painterResource
 import android.text.format.Formatter
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -104,6 +112,16 @@ fun SettingsScreen(
     val screenOn by viewModel.screenOn.collectAsStateWithLifecycle()
     val startScreen by viewModel.startScreen.collectAsStateWithLifecycle()
     val speechSettings by viewModel.speechSettings.collectAsStateWithLifecycle()
+    // Liste mit Gruppen (Entwurf vom 22.10.2026): Eine Gruppe öffnet sich als eigene Ansicht, Zurück führt zur Liste.
+    var openGroup by rememberSaveable { mutableStateOf<String?>(null) }
+    BackHandler(enabled = openGroup != null) { openGroup = null }
+    val backupSummary = viewModel.lastBackup.let { last ->
+        if (last == null) {
+            stringResource(R.string.backup_never)
+        } else {
+            pluralStringResource(R.plurals.backup_last, last.recipes, last.recipes, DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(last.at)))
+        }
+    }
     val context = LocalContext.current
     val createBackup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
         if (uri != null) viewModel.backup(uri)
@@ -125,7 +143,7 @@ fun SettingsScreen(
             TopAppBar(
                 title = { AppTitle(style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { if (openGroup != null) openGroup = null else onBack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
@@ -139,8 +157,17 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
         ) {
-            ScreenTitle(stringResource(R.string.settings_title), modifier = Modifier.padding(ScreenTitlePadding))
-            SettingsGroup(stringResource(R.string.collection_title), initiallyExpanded = true) {
+            ScreenTitle(openGroup ?: stringResource(R.string.settings_title), modifier = Modifier.padding(ScreenTitlePadding))
+            if (openGroup == null) {
+                QuickSettings(
+                    screenOn = screenOn ?: ScreenOn.STAYS_ON,
+                    onScreenOn = viewModel::setScreenOn,
+                    headsetButtons = speechSettings.headsetButtons,
+                    onHeadsetButtons = { on -> viewModel.changeSpeech { s -> s.copy(headsetButtons = on) } },
+                )
+            }
+            CompositionLocalProvider(LocalGroupState provides GroupState(openGroup) { openGroup = it }) {
+            SettingsGroup(stringResource(R.string.collection_title), R.drawable.ic_grid_view, backupSummary) {
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.backup_title)) },
                     supportingContent = {
@@ -171,7 +198,7 @@ fun SettingsScreen(
                     modifier = Modifier.clickable { openBackup.launch(BACKUP_MIME_TYPES) },
                 )
             }
-            SettingsGroup(stringResource(R.string.settings_section_translation)) {
+            SettingsGroup(stringResource(R.string.settings_section_translation), R.drawable.ic_description) {
                 LanguagePackItem(
                     state = languagePack,
                     onDownload = viewModel::downloadLanguagePack,
@@ -179,13 +206,13 @@ fun SettingsScreen(
                     onDelete = { confirmDeletePack = true },
                 )
             }
-            SettingsGroup(stringResource(R.string.settings_section_start)) {
+            SettingsGroup(stringResource(R.string.settings_section_start), R.drawable.ic_home) {
                 StartSection(startScreen = startScreen ?: StartScreen.HOME, onStartScreen = viewModel::setStartScreen)
             }
-            SettingsGroup(stringResource(R.string.settings_section_cooking)) {
+            SettingsGroup(stringResource(R.string.settings_section_cooking), R.drawable.ic_restaurant) {
                 CookingSection(screenOn = screenOn ?: ScreenOn.STAYS_ON, onScreenOn = viewModel::setScreenOn)
             }
-            SettingsGroup(stringResource(R.string.settings_section_speech)) {
+            SettingsGroup(stringResource(R.string.settings_section_speech), R.drawable.ic_volume_up) {
                 SpeechSection(
                     settings = speechSettings,
                     onChange = viewModel::changeSpeech,
@@ -194,7 +221,7 @@ fun SettingsScreen(
                     onStopSpeech = viewModel::stopSpeech,
                 )
             }
-            SettingsGroup(stringResource(R.string.settings_section_voice_input)) {
+            SettingsGroup(stringResource(R.string.settings_section_voice_input), R.drawable.ic_mic) {
                 NoticeCard(
                     text = stringResource(R.string.voice_beta_note),
                     kind = NoticeKind.INFO,
@@ -207,7 +234,7 @@ fun SettingsScreen(
                     onDelete = { confirmDeleteVoicePack = true },
                 )
             }
-            SettingsGroup(stringResource(R.string.settings_section_appearance)) {
+            SettingsGroup(stringResource(R.string.settings_section_appearance), R.drawable.ic_image) {
                 AppearanceSection(
                     appearance = appearance ?: Appearance(),
                     onMode = { mode ->
@@ -217,7 +244,7 @@ fun SettingsScreen(
                     onPalette = viewModel::setPalette,
                 )
             }
-            SettingsGroup(stringResource(R.string.settings_section_storage)) {
+            SettingsGroup(stringResource(R.string.settings_section_storage), R.drawable.ic_move_to_inbox) {
                 StorageSection(
                     result = viewModel.storageResult,
                     busy = viewModel.state != SettingsUiState.Idle,
@@ -227,7 +254,7 @@ fun SettingsScreen(
                     onDeleteVoicePack = { confirmDeleteVoicePack = true },
                 )
             }
-            SettingsGroup(stringResource(R.string.settings_section_about)) {
+            SettingsGroup(stringResource(R.string.settings_section_about), R.drawable.ic_info, stringResource(R.string.version_label, BuildConfig.VERSION_NAME)) {
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.app_name)) },
                     supportingContent = { Text(stringResource(R.string.version_label, BuildConfig.VERSION_NAME)) },
@@ -246,6 +273,7 @@ fun SettingsScreen(
                     headlineContent = { Text(stringResource(R.string.licenses_title)) },
                     modifier = Modifier.clickable(onClick = onOpenLicenses),
                 )
+            }
             }
             Spacer(Modifier.height(Spacing.m))
         }
@@ -418,56 +446,87 @@ private fun LanguagePackItem(
     )
 }
 
+
+/** Welche Gruppe der Einstellungen gerade offen ist (null = die Liste) und wie man sie öffnet oder schließt. */
+private class GroupState(val open: String?, val onOpen: (String?) -> Unit)
+
+private val LocalGroupState = staticCompositionLocalOf { GroupState(null) {} }
+
 /**
- * Eine Gruppe der Einstellungen als Karte, die sich auf- und zuklappen lässt: zugeklappt steht nur die Überschrift,
- * so passen alle Gruppen auf einen Bildschirm. Der Zustand überlebt das Drehen ([rememberSaveable]).
+ * Eine Gruppe der Einstellungen (Entwurf vom 22.10.2026): In der Liste eine Zeile mit Symbol, Name und kurzem Stand;
+ * Tippen öffnet die Gruppe, dann steht nur ihr Inhalt da (Zurück führt zur Liste). Der Name ist zugleich die Kennung,
+ * die das Drehen des Handys übersteht.
  */
 @Composable
 private fun SettingsGroup(
     title: String,
-    initiallyExpanded: Boolean = false,
+    @DrawableRes icon: Int,
+    value: String? = null,
     content: @Composable () -> Unit,
 ) {
-    var expanded by rememberSaveable(title) { mutableStateOf(initiallyExpanded) }
-    val state = stringResource(if (expanded) R.string.settings_group_expanded else R.string.settings_group_collapsed)
+    val group = LocalGroupState.current
+    if (group.open == null) {
+        ListItem(
+            headlineContent = { Text(title, style = MaterialTheme.typography.titleMedium) },
+            supportingContent = value?.let { { Text(it) } },
+            leadingContent = {
+                Icon(painterResource(icon), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            },
+            trailingContent = {
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            },
+            modifier = Modifier.heightIn(min = 56.dp).clickable(role = Role.Button) { group.onOpen(title) },
+        )
+    } else if (group.open == title) {
+        content()
+    }
+}
+
+/**
+ * „Schnell“ oben in der Liste: Schalter für das, was man beim Kochen am häufigsten ändert. Die vollständige Auswahl
+ * (z. B. Aus nach 15 Minuten) steht weiter in den Gruppen.
+ */
+@Composable
+private fun QuickSettings(
+    screenOn: ScreenOn,
+    onScreenOn: (ScreenOn) -> Unit,
+    headsetButtons: Boolean,
+    onHeadsetButtons: (Boolean) -> Unit,
+) {
     Surface(
-        color = MaterialTheme.colorScheme.surface,
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m, vertical = Spacing.xs),
     ) {
-        Column {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 56.dp)
-                    .clickable(role = Role.Button) { expanded = !expanded }
-                    .padding(horizontal = Spacing.m)
-                    .semantics(mergeDescendants = true) {
-                        heading()
-                        stateDescription = state
-                    },
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f),
-                )
-                Icon(
-                    imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+        Column(modifier = Modifier.padding(vertical = Spacing.xs)) {
+            Text(
+                stringResource(R.string.settings_quick),
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.xs).semantics { heading() },
+            )
+            QuickSwitch(stringResource(R.string.settings_quick_screen_on), screenOn == ScreenOn.STAYS_ON) {
+                onScreenOn(if (it) ScreenOn.STAYS_ON else ScreenOn.DEVICE)
             }
-            if (expanded) {
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                content()
-            }
+            QuickSwitch(stringResource(R.string.settings_quick_headset), headsetButtons, onHeadsetButtons)
         }
     }
 }
 
+@Composable
+private fun QuickSwitch(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .toggleable(value = checked, role = Role.Switch, onValueChange = onChange)
+            .padding(horizontal = Spacing.m),
+    ) {
+        Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        Switch(checked = checked, onCheckedChange = null)
+    }
+}
 
 /** Hinweis, solange gesichert oder wiederhergestellt wird – lässt sich nicht wegtippen. */
 @Composable

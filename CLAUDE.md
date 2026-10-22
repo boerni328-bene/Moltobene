@@ -23,9 +23,9 @@ Festgelegt vom Projektinhaber am 29.09.2026 (siehe `docs/besprechungen/2026-09-2
    3. YouTube (Videobeschreibung; nur als bestmöglicher Versuch ohne Zusage) sowie Dateien oder andere Rezept-Apps.
    4. **Sprache** (freigegeben vom Projektinhaber am 22.10.2026, Beta): „Aus Audio übernehmen“ (eine Audiodatei auf dem Handy, z. B. Sprachnachricht oder eigene Aufnahme; die App lädt nie Ton oder Video aus YouTube herunter und greift keinen Ton anderer Apps ab) und „Aus Sprache übernehmen“ (Rezept einsprechen). Beides erkennt auf dem Handy mit dem Erkennungspaket, der erkannte Text wird geprüft und zum Entwurf; Audiodateien werden nicht gespeichert.
    Weitere Erfassungswege sind erwünscht und werden von den Spezialisten vorgeschlagen.
-3. **Sammlung finden und ordnen:** suchen, sortieren, einordnen.
+3. **Kochbuch finden und ordnen:** suchen, sortieren, einordnen.
 4. **Mit dem Rezept kochen:** Bildschirm bleibt an (in den Einstellungen änderbar), aus Armlänge lesbar, Zutaten und Schritte abhakbar, Portionen umrechnen (auch nach einer Zutat oder Backform), eigene Notizen zum Rezept. Beim Kochen hilft die Sprache: Vorlesen (#79) und Spracheingabe (#80, Mikrofon-Knopf in der Kochleiste; Befehle „Weiter“, „Zurück“, „Wiederholen“, „Vorlesen“, „Stopp“, ausschalten mit „Mikrofon aus“; vom Projektinhaber am 13.10.2026 freigegeben, Deutsch zuerst). Dazu ein **Teigrechner** für Pizza, Brot, Pasta und Kuchen, jede Teigart mit eigenen Angaben (z. B. Vorteig wie Biga oder Poolish, verschiedene Hefen); das Ergebnis wird ein Rezept; bei Pizza und Brot mit **Zeitplan** (z. B. Biga 1 bis 3 Tage im Kühlschrank), den „Teig starten“ im Rezept in einen laufenden Teig verwandelt: Stand, nächster Zeitpunkt und Startseiten-Kachel, nur Anzeige, kein Wecker (#71, Wunsch des Projektinhabers vom 17.10.2026). (Ergänzt am 08.10.2026, siehe `docs/besprechungen/2026-10-08-teige-pizza-pasta-kuchen.md`.)
-5. **Teilen, sichern und umziehen:** einzelne Rezepte teilen; die ganze Sammlung inklusive Fotos als Datei sichern, wiederherstellen und auf ein neues Handy umziehen.
+5. **Teilen, sichern und umziehen:** einzelne Rezepte teilen; das ganze Kochbuch inklusive Fotos als Datei sichern, wiederherstellen und auf ein neues Handy umziehen.
 
 ### Bewusst nicht
 
@@ -56,7 +56,7 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 | Deutsch | Englisch | Nicht verwenden |
 |---|---|---|
 | Rezept | Recipe | |
-| Sammlung | Collection | Bibliothek, Liste |
+| Kochbuch (die Rezepte auf dem Handy; bis 22.10.2026 „Sammlung“, Entscheidung des Projektinhabers) | Cookbook | Sammlung, Bibliothek, Liste |
 | Titel | Title | Name |
 | Zutaten | Ingredients | |
 | Zubereitung (einzelner Eintrag: Schritt) | Instructions (Step) | Anleitung |
@@ -75,7 +75,7 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 | hinzufügen (neues Rezept) | add | anlegen, erstellen |
 | übernehmen (aus einer Quelle) | import | importieren |
 | teilen (an andere) | share | exportieren |
-| sichern / wiederherstellen (ganze Sammlung) | back up / restore | Backup, Export |
+| sichern / wiederherstellen (ganzes Kochbuch) | back up / restore | Backup, Export |
 | Handy | device | Gerät, Smartphone |
 | Einstellungen | Settings | |
 | übersetzen (Rezept in eine andere Sprache) | translate | übertragen |
@@ -88,6 +88,9 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 | Spracheingabe (Mikrofon-Knopf und Sprachbefehle, #80) | voice input | Sprachsteuerung, Diktat |
 | Erkennungspaket (Spracheingabe, #80) | recognition pack | Sprachpaket (belegt für die Übersetzung), Sprachmodell |
 | Mikrofon | microphone | |
+| Aufnehmen (Rezept einsprechen, Beta; Schaltfläche unter „Sprache“ auf der Seite „Hinzufügen“, Entscheidung 22.10.2026) | record | Einsprechen |
+| Schnell (Schalter oben in den Einstellungen) | Quick | Favoriten, Kurzwahl |
+| Startsymbol (Haus links oben im Kochbuch) | home icon | Pfeil zurück |
 | Stimme (der Sprachausgabe) | voice | Sprecher |
 | Kochleiste (Zurück, Vorlesen, Weiter, Zutaten) | cooking bar | Steuerleiste |
 | Hörprobe (Stimme anhören, #85) | sample | Probe, Test |
@@ -150,7 +153,7 @@ Das Englisch der Oberfläche ist amerikanisch („Favorite“, „Colors“, „
 - Farben im Code **nur** über `MaterialTheme.colorScheme` (Ausnahmen: die Markenfarbe des Schriftzugs über `MoltobeneTheme.brand`, Kobaltblau `#2747D9`, im Dunkelmodus etwas heller `#5A78FF`, in jeder Farbwelt gleich; die Farbmuster der Auswahl in den Einstellungen über `colorSchemeOf`), Schriftgrößen nur über `MaterialTheme.typography`, Ecken über `MaterialTheme.shapes`, Abstände über `Spacing` – nie feste Werte.
 - Schrift: Standardschrift von Android, Material-3-Größenskala.
 - **App-Symbol:** Logo des Projektinhabers vom 08.10.2026 (Variante F3a): weißes „MB“ mit Lächeln auf Kobaltblau `#2747D9`, rundherum die Quellen der Rezepte. Vorlagen unter `docs/logo/`, im App-Code `drawable/ic_launcher_foreground.xml` und `ic_launcher_background` in `values/colors.xml`. Die Farben in der App bleiben „Schiefer“.
-- **MOLTOBENE oben auf jedem Bildschirm** (Wunsch des Projektinhabers vom 08.10.2026): `ui/components/AppTitle` – fett, „M“ und „B“ in der Markenfarbe; darunter der Name des Bildschirms als Überschrift (`ScreenTitle`), bei Foto-Bildschirmen klein in der Leiste (`AppTitleWithScreen`). Neue Bildschirme ebenso. In der Sammlung steht oben nur der Schriftzug mit den Einstellungen; alle Wege zum Hinzufügen und der Teigrechner liegen hinter dem Knopf „Hinzufügen“ unten rechts (Entscheidung des Projektinhabers vom 12.10.2026, ersetzt die Symbole oben vom 08.10.); die Sammlung zeigt Foto-Karten oder eine Liste (Umschalter neben der Suche) mit den Filtern Alle/Favoriten/Entwürfe (`ui/collection/CollectionParts.kt`); in der Rezeptansicht der Umschalter „DE | EN“ (Originalsprache mit Sternchen, z. B. „DE*“), Bearbeiten und ⋮ – „Teilen“ steht dort im Menü.
+- **MOLTOBENE oben auf jedem Bildschirm** (Wunsch des Projektinhabers vom 08.10.2026): `ui/components/AppTitle` – fett, „M“ und „B“ in der Markenfarbe; darunter der Name des Bildschirms als Überschrift (`ScreenTitle`), bei Foto-Bildschirmen klein in der Leiste (`AppTitleWithScreen`). Neue Bildschirme ebenso. Im Kochbuch stehen oben links das Startsymbol (statt eines Pfeils, Wunsch vom 22.10.2026), der Schriftzug und die Einstellungen; alle Wege zum Hinzufügen und der Teigrechner liegen hinter dem Knopf „Hinzufügen“ unten rechts (Entscheidung des Projektinhabers vom 12.10.2026, ersetzt die Symbole oben vom 08.10.); das Kochbuch zeigt eine Liste mit Zeit und Portionen (Standard) oder Foto-Karten (Umschalter neben der Suche) mit den Reitern Alle/Favoriten/Entwürfe (`ui/collection/CollectionParts.kt`); in der Rezeptansicht der Umschalter „DE | EN“ (Originalsprache mit Sternchen, z. B. „DE*“), Bearbeiten und ⋮ – „Teilen“ steht dort im Menü.
 - Hell- und Dunkelmodus gleichwertig; Kontraste mindestens WCAG AA.
 - **Lange Sprachen und große Schrift (Besprechung vom 12.10.2026, Ü3):** Texte dürfen nie abgeschnitten werden oder mitten im Wort umbrechen. Deshalb keine festen Breiten für Texte (nur `weight` und Umbruch, `FlowRow`), Chips und Schaltflächen brechen um statt zu wischen, Beschriftungen sind kurz (italienische, französische und spanische Texte sind etwa 30 % länger als deutsche); Schalter mit Text bekommen bei großer Schrift mehr Platz (zwei Reihen oder Auswahlfeld statt einer engen Reihe). Sätze mit Zahlen („Standard 250 g“, „Schritt 2 von 5“) sind immer ganze Texte mit nummerierten Platzhaltern. Meldungen mit Aktion stellen die Aktion bei großer Schrift unter den Text (`AppSnackbarHost`). Hinweise, die der Nutzer lesen muss, gehören in `NoticeCard` (Symbol + Text), nie nur in eine kurze Einblendung.
 - Tippflächen mindestens 48 dp; Informationen nie nur über Farbe.

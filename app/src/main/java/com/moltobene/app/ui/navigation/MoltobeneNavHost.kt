@@ -116,6 +116,12 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                 onAddFromAudio = { navController.navigate(EditRoute(fromAudio = true)) },
                 onOpenDough = { navController.navigate(DoughRoute) },
                 onOpenSettings = { navController.navigate(SettingsRoute) },
+                // Zurück zur Startseite; ist sie nicht im Stapel (Start im Kochbuch), wird sie geöffnet.
+                onOpenHome = {
+                    if (!navController.popBackStack<HomeRoute>(inclusive = false)) {
+                        navController.navigate(HomeRoute) { popUpTo<CollectionRoute> { inclusive = true } }
+                    }
+                },
             )
         }
         composable<RecipeRoute> { entry ->

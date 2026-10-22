@@ -33,6 +33,8 @@ data class RecipeListItem(
     val isDraft: Boolean,
     val favorite: Boolean,
     val thumbnail: File?,
+    val totalMinutes: Int? = null,
+    val servings: Int? = null,
 )
 
 /** Welche Rezepte die Sammlung zeigt (neben der Suche). */
@@ -68,7 +70,7 @@ class CollectionViewModel(
     private val _filter = MutableStateFlow(CollectionFilter.ALL)
     val filter: StateFlow<CollectionFilter> = _filter.asStateFlow()
 
-    private val _grid = MutableStateFlow(true)
+    private val _grid = MutableStateFlow(false)
 
     /** Raster (true) oder Liste; die Wahl bleibt gemerkt. */
     val grid: StateFlow<Boolean> = _grid.asStateFlow()
@@ -107,6 +109,8 @@ class CollectionViewModel(
                             isDraft = summary.isDraft,
                             favorite = summary.favorite,
                             thumbnail = summary.photoId?.let { photoStore.thumbFile(it) },
+                            totalMinutes = summary.totalMinutes,
+                            servings = summary.servings,
                         )
                     },
                     query = query,
