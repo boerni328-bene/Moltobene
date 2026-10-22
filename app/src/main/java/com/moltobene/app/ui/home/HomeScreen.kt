@@ -350,7 +350,8 @@ private fun CompactTile(
                 Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(24.dp))
                 Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
             }
-            if (subtitle != null) Text(subtitle, style = MaterialTheme.typography.bodySmall)
+            // Mehrere Zeilen als einzelne Texte, damit z. B. der Titel eines laufenden Teigs für sich lesbar bleibt.
+            subtitle?.lines()?.forEach { Text(it, style = MaterialTheme.typography.bodySmall) }
         }
     }
 }

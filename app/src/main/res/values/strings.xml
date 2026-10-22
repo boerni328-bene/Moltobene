@@ -602,7 +602,7 @@
     <string name="dough_help_poolish_effect">A liquid preferment of equal parts flour and water. It gives a mild, slightly nutty flavor and a very light crumb. Typical for baguettes and rolls.</string>
     <string name="dough_help_poolish_range">About 100% water of the flour in the preferment, plus 0.05 to 0.5% yeast of the preferment flour.</string>
     <string name="dough_help_poolish_care">Usually 8 to 16 hours at room temperature. It is ripe when the surface is full of bubbles and starts to sink.</string>
-    <string name="dough_help_sourdough_effect">A starter of flour and water with wild yeasts and lactic acid bacteria. It leavens the dough and adds acidity, flavor and longer freshness.</string>
+    <string name="dough_help_sourdough_effect">A starter of flour and water with wild yeasts and lactic acid bacteria. It leavens the dough and adds acidity and flavor.</string>
     <string name="dough_help_sourdough_range">Usually 10 to 30% of the total flour as starter.</string>
     <string name="dough_help_sourdough_care">Needs much longer rising times than yeast, often 8 to 24 hours, and the starter has to be fed regularly.</string>
     <string name="dough_help_fresh_effect">Pressed yeast of living yeast cells, the cube from the refrigerated shelf. It is the reference for converting the other yeast types.</string>
@@ -613,7 +613,7 @@
     <string name="dough_help_instant_care">Keeps for a long time unopened; once opened store cool and dry.</string>
     <string name="dough_help_active_effect">Coarser granules that are dissolved in lukewarm water before use.</string>
     <string name="dough_help_active_range">About 40% of the amount of fresh yeast, so a little more than instant yeast.</string>
-    <string name="dough_help_active_care">Dissolve in water of about 95°F (35°C) and let stand 5 to 10 minutes until foamy.</string>
+    <string name="dough_help_active_care">Dissolve in water of about 95°F (35°C) until foamy.</string>
     <string name="dough_preset_custom">Custom values</string>
     <string name="dough_preset_position">%1$d of %2$d</string>
     <string name="dough_preset_previous">Previous preset</string>

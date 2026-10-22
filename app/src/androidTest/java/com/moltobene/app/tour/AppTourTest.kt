@@ -20,6 +20,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -191,7 +192,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("11-rezept-mit-foto")
 
         // Antippen zeigt das Foto ganz, als Vollbild zum Vergrößern.
-        composeRule.onNodeWithContentDescription(text(R.string.photo)).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.photo)).performSemanticsAction(SemanticsActions.OnClick)
         waitForDescription(text(R.string.zoom_in))
         waitForDescription(text(R.string.photo))
         screenshot("11a-foto-vollbild")
@@ -330,6 +331,7 @@ class AppTourTest(private val variant: DisplayVariant) {
 
         // Notiz hinzufügen direkt in der Rezeptansicht (#61).
         // Das Beispielrezept hat schon eine Notiz, deshalb heißt der Knopf „Notiz bearbeiten“; der Text ist vorausgefüllt.
+        openRecipeTab(R.string.notes)
         composeRule.onNodeWithText(text(R.string.note_edit)).performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
         composeRule.waitUntil(TIMEOUT_MILLIS) { composeRule.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty() }
         composeRule.onNode(hasSetTextAction()).performTextReplacement("Nächstes Mal weniger Salz")
@@ -356,7 +358,9 @@ class AppTourTest(private val variant: DisplayVariant) {
 
         composeRule.onNodeWithText("800 g reife Tomaten").performScrollTo().performClick()
         composeRule.onNodeWithText("800 g reife Tomaten").assertIsOn()
+        openRecipeTab(R.string.instructions)
         composeRule.onNodeWithText("Tomaten würfeln", substring = true).performScrollTo().performClick()
+        openRecipeTab(R.string.ingredients)
         screenshot("12a-kochen-abgehakt")
 
         // Von 4 auf 5 Portionen: Nur die Anzeige ändert sich, das Häkchen bleibt. Stück werden auf ½ gerundet und
@@ -488,7 +492,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.settings_section_voice_input))
         openSettingsGroup(R.string.settings_section_voice_input)
         screenshot("12r-spracheingabe-einstellungen")
-        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+        leaveSettings()
         waitForText("800 g reife Tomaten")
 
         // Mit Erkennungspaket (nachgestellt) und erteilter Berechtigung.
@@ -755,9 +759,11 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithText(text(R.string.dough_default_reset_short)).performScrollTo().performClick()
         waitUntilGone(text(R.string.dough_default_value, "65 %"))
 
-        // Jeder Wert hat einen Regler.
-        composeRule.waitUntil(TIMEOUT_MILLIS) {
-            composeRule.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)).fetchSemanticsNodes().isNotEmpty()
+        // Bei großer Schrift hat jeder Wert einen Regler; sonst stehen Minus und Plus am Feld (Entwurf vom 22.10.2026).
+        if (variant == DisplayVariant.LARGE_TEXT) {
+            composeRule.waitUntil(TIMEOUT_MILLIS) {
+                composeRule.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo)).fetchSemanticsNodes().isNotEmpty()
+            }
         }
         screenshot("14j-teigrechner-regler")
 
@@ -1325,8 +1331,13 @@ class AppTourTest(private val variant: DisplayVariant) {
     @Test
     fun einstellungen() {
         composeRule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
-        waitForText(text(R.string.backup_title))
+        // Die Liste zeigt oben „Schnell“, dann die Gruppen mit ihrem Stand; „Kochbuch“ führt zum Sichern.
+        waitForText(text(R.string.settings_quick))
         screenshot("29-einstellungen")
+        openSettingsGroup(R.string.collection_title)
+        waitForText(text(R.string.backup_title))
+        screenshot("29-einstellungen-kochbuch")
+        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
 
         openSettingsGroup(R.string.settings_section_about)
         screenshot("29d-einstellungen-info")
@@ -1378,7 +1389,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithText(text(R.string.appearance_mode)).performScrollTo()
         screenshot("29a-darstellung")
 
-        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+        leaveSettings()
         waitForText(SampleRecipes.POTATO_SALAD)
         screenshot("29b-sammlung-terrakotta")
     }
@@ -1402,7 +1413,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithText(text(R.string.settings_section_cooking)).performScrollTo()
         screenshot("29c-bildschirm-in-der-rezeptansicht")
 
-        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+        leaveSettings()
         openRecipe(SampleRecipes.TOMATO_SAUCE)
         waitForText("800 g reife Tomaten")
         composeRule.waitUntil(TIMEOUT_MILLIS) { screenKeptOn() }
@@ -1413,7 +1424,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         // „Wie das Handy“ steht auch unter „Hell oder dunkel“; der Abschnitt „Kochen“ kommt zuerst.
         composeRule.onAllNodesWithText(text(R.string.screen_on_device)).onFirst().performScrollTo().performClick()
         composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.screenOn.value == ScreenOn.DEVICE }
-        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+        leaveSettings()
         // Die Sammlung steht noch beim Rezept von eben (bei großer Schrift ist der Anfang der Liste nicht mehr geladen).
         composeRule.waitUntil(TIMEOUT_MILLIS) { composeRule.onAllNodes(hasScrollToNodeAction()).fetchSemanticsNodes().isNotEmpty() }
         composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(SampleRecipes.TOMATO_SAUCE))
@@ -1425,7 +1436,23 @@ class AppTourTest(private val variant: DisplayVariant) {
 
     // --- Hilfsfunktionen ---
 
-    /** Klappt eine zugeklappte Gruppe der Einstellungen auf (nur aufrufen, wenn sie zu ist). */
+    /** Wechselt in der Rezeptansicht zum Reiter „Zutaten“, „Zubereitung“ oder „Notizen“ (Entwurf vom 22.10.2026). */
+    private fun openRecipeTab(@StringRes label: Int) {
+        composeRule.onNode(isSelectable() and hasText(text(label))).performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
+        composeRule.waitForIdle()
+    }
+
+    /** Verlässt die Einstellungen: Ist eine Gruppe offen, führt Zurück erst zur Liste, dann aus den Einstellungen. */
+    private fun leaveSettings() {
+        composeRule.waitForIdle()
+        if (composeRule.onAllNodesWithText(text(R.string.settings_quick)).fetchSemanticsNodes().isEmpty()) {
+            composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+            composeRule.waitForIdle()
+        }
+        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+    }
+
+    /** Öffnet eine Gruppe der Einstellungen (nur aufrufen, wenn die Liste zu sehen ist); sie ersetzt dann die Liste. */
     private fun openSettingsGroup(@StringRes title: Int) {
         composeRule.onNodeWithText(text(title)).performScrollTo().performClick()
         composeRule.waitForIdle()

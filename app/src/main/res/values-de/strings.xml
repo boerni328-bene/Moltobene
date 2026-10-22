@@ -600,10 +600,10 @@
     <string name="dough_help_poolish_effect">Flüssiger Vorteig aus gleichen Teilen Mehl und Wasser. Er gibt milden, leicht nussigen Geschmack und eine sehr lockere Krume. Typisch für Baguette und Brötchen.</string>
     <string name="dough_help_poolish_range">Etwa 100 % Wasser vom Mehl im Vorteig, dazu 0,05 bis 0,5 % Hefe vom Mehl im Vorteig.</string>
     <string name="dough_help_poolish_care">Meist 8 bis 16 Stunden bei Raumtemperatur. Reif ist er, wenn die Oberfläche voller Blasen ist und beginnt einzufallen.</string>
-    <string name="dough_help_sourdough_effect">Anstellgut aus Mehl und Wasser mit wilden Hefen und Milchsäurebakterien. Es lockert den Teig und gibt Säure, Aroma und längere Frischhaltung.</string>
+    <string name="dough_help_sourdough_effect">Anstellgut aus Mehl und Wasser mit wilden Hefen und Milchsäurebakterien. Es lockert den Teig und gibt Säure und Aroma.</string>
     <string name="dough_help_sourdough_range">Meist 10 bis 30 % vom gesamten Mehl als Anstellgut.</string>
     <string name="dough_help_sourdough_care">Braucht deutlich längere Gehzeiten als Hefe, oft 8 bis 24 Stunden, und das Anstellgut muss regelmäßig gefüttert werden.</string>
-    <string name="dough_help_fresh_effect">Gepresste Hefe aus lebenden Hefezellen, der Würfel aus dem Kühlregal. Sie ist der Maßstab für die Umrechnung der anderen Hefearten.</string>
+    <string name="dough_help_fresh_effect">Gepresste Hefe aus lebenden Hefezellen, der Würfel aus dem Kühlregal. Die Frischhefe ist der Maßstab für die Umrechnung der anderen Hefearten.</string>
     <string name="dough_help_fresh_range">1 g Frischhefe entspricht etwa 0,33 g Trockenhefe (Instant) und etwa 0,4 g Aktive Trockenhefe.</string>
     <string name="dough_help_fresh_care">Kühl lagern und nur wenige Wochen aufbewahren. In lauwarmer Flüssigkeit auflösen oder fein zerbröseln.</string>
     <string name="dough_help_instant_effect">Feines Pulver, das direkt unter das Mehl gemischt wird. Es wirkt stärker als Frischhefe.</string>
@@ -611,7 +611,7 @@
     <string name="dough_help_instant_care">Ungeöffnet lange haltbar; geöffnet kühl und trocken lagern.</string>
     <string name="dough_help_active_effect">Gröbere Körnchen, die vor dem Gebrauch in lauwarmem Wasser aufgelöst werden.</string>
     <string name="dough_help_active_range">Etwa 40 % der Frischhefe-Menge, also etwas mehr als bei Trockenhefe (Instant).</string>
-    <string name="dough_help_active_care">In Wasser von etwa 35 °C auflösen und 5 bis 10 Minuten stehen lassen, bis sie schäumt.</string>
+    <string name="dough_help_active_care">In Wasser von etwa 35 °C auflösen, bis sie schäumt.</string>
     <string name="dough_preset_custom">Eigene Werte</string>
     <string name="dough_preset_position">%1$d von %2$d</string>
     <string name="dough_preset_previous">Vorherige Voreinstellung</string>

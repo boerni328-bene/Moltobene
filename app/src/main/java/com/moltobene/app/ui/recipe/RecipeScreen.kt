@@ -1582,7 +1582,7 @@ private fun RecipeTags(tags: List<Tag>) {
 }
 
 /** Kleinstes Seitenverhältnis (Breite zu Höhe) des Fotos in der Rezeptansicht: nie höher als 5:3. */
-private const val COOKING_PHOTO_MIN_RATIO = 2.4f
+private const val COOKING_PHOTO_MIN_RATIO = 2f
 private const val TAB_INGREDIENTS = 0
 private const val TAB_STEPS = 1
 private const val TAB_NOTES = 2

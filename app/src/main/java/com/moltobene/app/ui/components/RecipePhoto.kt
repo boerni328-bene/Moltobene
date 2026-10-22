@@ -94,7 +94,7 @@ fun RecipePhotoLarge(file: File, onOpen: () -> Unit, modifier: Modifier = Modifi
 /** Seitenverhältnis bis das Foto geladen ist (übliche Handyfotos), und die Grenzen für sehr hohe oder breite Fotos. */
 private const val DEFAULT_RATIO = 4f / 3f
 private const val MIN_RATIO = 3f / 4f
-private const val MAX_RATIO = 2.4f
+private const val MAX_RATIO = 2f
 
 /** Das Symbol bleibt auf hellen wie dunklen Fotos erkennbar. */
 private const val ICON_BACKGROUND_ALPHA = 0.85f
