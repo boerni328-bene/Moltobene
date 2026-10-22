@@ -12,4 +12,9 @@ object TranscriptText {
     fun fromJson(json: String?): String = runCatching {
         Json.parseToJsonElement(json.orEmpty()).jsonObject["text"]?.jsonPrimitive?.contentOrNull
     }.getOrNull().orEmpty().trim()
+
+    /** Das Teilergebnis beim Sprechen, z. B. `{"partial": "zwei ei"}`; leer, wenn nichts erkannt wurde. */
+    fun partialFromJson(json: String?): String = runCatching {
+        Json.parseToJsonElement(json.orEmpty()).jsonObject["partial"]?.jsonPrimitive?.contentOrNull
+    }.getOrNull().orEmpty().trim()
 }

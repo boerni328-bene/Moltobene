@@ -22,8 +22,10 @@ import com.moltobene.app.data.speech.AndroidSpeechOutput
 import com.moltobene.app.data.speech.SpeechOutput
 import com.moltobene.app.data.translate.LanguagePackManager
 import com.moltobene.app.data.voice.AudioDecoder
+import com.moltobene.app.data.voice.Dictation
 import com.moltobene.app.data.voice.Transcriber
 import com.moltobene.app.data.voice.VoiceInput
+import com.moltobene.app.data.voice.VoskDictation
 import com.moltobene.app.data.voice.VoskTranscriber
 import com.moltobene.app.data.voice.VoicePackManager
 import com.moltobene.app.data.voice.VoskVoiceInput
@@ -129,6 +131,10 @@ class AppContainer(context: Context) {
     /** Spracheingabe in der Kochansicht (#80). Der Rundgang setzt hier eine nachgestellte Fassung ein. */
     @VisibleForTesting
     var voice: VoiceInput = VoskVoiceInput({ voicePack.directory }, appScope)
+
+    /** „Aufnehmen“ (Rezept einsprechen, Beta). Der Rundgang setzt hier eine nachgestellte Fassung ein. */
+    @VisibleForTesting
+    var dictation: Dictation = VoskDictation({ voicePack.directory }, appScope)
 
     /** Freie Spracherkennung für „Aus Audio übernehmen“. Der Rundgang setzt hier eine nachgestellte Fassung ein. */
     @VisibleForTesting

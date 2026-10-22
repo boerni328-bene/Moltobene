@@ -84,6 +84,7 @@ fun CollectionScreen(
     onAddFromLink: () -> Unit,
     onAddFromFile: () -> Unit,
     onAddFromAudio: () -> Unit,
+    onAddFromSpeech: () -> Unit,
     onOpenDough: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenHome: () -> Unit,
@@ -123,6 +124,10 @@ fun CollectionScreen(
             onFromAudio = {
                 chooseAdd = false
                 onAddFromAudio()
+            },
+            onFromSpeech = {
+                chooseAdd = false
+                onAddFromSpeech()
             },
             onDough = {
                 chooseAdd = false

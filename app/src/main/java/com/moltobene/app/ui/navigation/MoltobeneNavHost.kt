@@ -91,6 +91,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                     onAddFromLink = { navController.navigate(EditRoute(fromLink = true)) },
                     onAddFromFile = { navController.navigate(EditRoute(fromFile = true)) },
                     onAddFromAudio = { navController.navigate(EditRoute(fromAudio = true)) },
+                    onAddFromSpeech = { navController.navigate(EditRoute(fromSpeech = true)) },
                     onOpenSettings = { navController.navigate(SettingsRoute) },
                 )
             }
@@ -114,6 +115,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                 onAddFromLink = { navController.navigate(EditRoute(fromLink = true)) },
                 onAddFromFile = { navController.navigate(EditRoute(fromFile = true)) },
                 onAddFromAudio = { navController.navigate(EditRoute(fromAudio = true)) },
+                onAddFromSpeech = { navController.navigate(EditRoute(fromSpeech = true)) },
                 onOpenDough = { navController.navigate(DoughRoute) },
                 onOpenSettings = { navController.navigate(SettingsRoute) },
                 // Zurück zur Startseite; ist sie nicht im Stapel (Start im Kochbuch), wird sie geöffnet.
@@ -178,6 +180,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                         container.webImporter,
                         container.recipeFileReader,
                         container.transcriber,
+                        container.dictation,
                     )
                 },
                 snackbarHostState = snackbarHostState,
