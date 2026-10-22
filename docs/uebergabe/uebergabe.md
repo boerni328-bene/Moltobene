@@ -5,6 +5,14 @@ Stand: 22.10.2026 · `main` = Version 0.55.0 (versionCode 96), veröffentlicht �
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, nur auf dem Handy. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
 
+## In Arbeit (22.10.2026): Neues Aussehen, Zweig `neues-design`, Version 0.56.0 (versionCode 97)
+- Auf Zweig `zuhoeren-modus` aufgebaut (Audio-Vorarbeit liegt dort, ungebaut/unfertig); beide Zweige gehören zusammen auf `main`. Nichts auf `main`, kein Release.
+- Umgesetzt nach Auswahl des Inhabers (Entwurfsseiten im Claude-Artefakt „Moltobene Auswahl“): Startseite D (Foto-Bühne, vier kompakte Kacheln), Rezept A (flaches Foto, Reiter Zutaten/Zubereitung/Notizen), Kochbuch B (Liste mit Zeit/Portionen, Reiter Alle/Favoriten/Entwürfe, Startsymbol links oben), Teigrechner A (Ergebnis oben fest, Minus/Plus-Felder, Vorteig-Karte hervorgehoben, Erklärfenster für Biga/Poolish/Sauerteig/Hefearten), Einstellungen A + „Schnell“-Schalter aus D (Liste, Gruppe öffnet als eigene Ansicht), Hinzufügen D (eigene Seite).
+- **„Sammlung“ heißt jetzt „Kochbuch“** (Cookbook), Regeln in `CLAUDE.md` angepasst. Neue Schaltfläche „Aufnehmen“ (Rezept einsprechen) ist beschlossen, aber noch nicht programmiert (gehört zu „Aus Sprache übernehmen“, Zweig `zuhoeren-modus`).
+- Build 1 (Run 39766881011) rot: Hilfetexte (Fachregeln: keine Minuten, kein „Sie“, keine Frischhaltung) und 9 Rundgang-Tests; behoben. Build 2 (Run 39770353454) grün. Build 3 (Run 39772873993) nach kleinen Korrekturen (Symbol über Titel in Kacheln, Reiter ohne Wortumbruch) läuft.
+- Offen: Bildschirmfotos aller Darstellungen sichten (Ordner `bildschirmfotos/0.56.0`), Erklärtexte (Teigwissen: Biga, Poolish, Sauerteig, Hefen) vom Inhaber/Fachperson gegenlesen, Pasta/Kuchen im Teigrechner haben noch kein festes Ergebnis oben, Teigrechner passt noch nicht ganz auf einen Bildschirm (Voreinstellungskarte).
+- Nächster Schritt: Build 3 prüfen, Fotos ansehen, dem Inhaber zeigen, dann Squash-Merge zusammen mit `zuhoeren-modus` (nur nach Freigabe).
+
 ## Git-Stand
 - `main` = Version 0.54.0 (Squash-Merge von `teig-zeitplan`, Build grün, Release folgt aus dem Build auf main). Zweig `teig-zeitplan` ist erledigt.
 - Parallele Sitzungen im selben Ordner kommen vor (am 17.10. erschien während der Sitzung ein neuer Commit): vor Commit, Push und Versionssprung `git fetch origin`, Zweig und `origin/main` prüfen.
