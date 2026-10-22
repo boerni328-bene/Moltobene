@@ -18,6 +18,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
@@ -82,8 +83,10 @@ fun CollectionScreen(
     onAddFromText: () -> Unit,
     onAddFromLink: () -> Unit,
     onAddFromFile: () -> Unit,
+    onAddFromAudio: () -> Unit,
     onOpenDough: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenHome: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val query by viewModel.query.collectAsStateWithLifecycle()
@@ -117,6 +120,10 @@ fun CollectionScreen(
                 chooseAdd = false
                 onAddFromFile()
             },
+            onFromAudio = {
+                chooseAdd = false
+                onAddFromAudio()
+            },
             onDough = {
                 chooseAdd = false
                 onOpenDough()
@@ -130,6 +137,12 @@ fun CollectionScreen(
             TopAppBar(
                 // Der Name der App als Titel (Wunsch des Projektinhabers vom 08.10.2026).
                 title = { AppTitle(style = MaterialTheme.typography.titleLarge, heading = true) },
+                // Startsymbol statt Pfeil (Wunsch des Projektinhabers vom 22.10.2026): führt zur Startseite.
+                navigationIcon = {
+                    IconButton(onClick = onOpenHome) {
+                        Icon(Icons.Filled.Home, contentDescription = stringResource(R.string.start_home))
+                    }
+                },
                 actions = {
                     IconButton(onClick = onOpenSettings) {
                         Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings_title))

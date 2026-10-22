@@ -105,7 +105,7 @@ class RecipeRepository(
     }
 }
 
-private fun RecipeSummaryRow.toSummary() = RecipeSummary(id = id, title = title, isDraft = isDraft, favorite = favorite, photoId = photoId, createdAt = createdAt)
+private fun RecipeSummaryRow.toSummary() = RecipeSummary(id = id, title = title, isDraft = isDraft, favorite = favorite, photoId = photoId, createdAt = createdAt, totalMinutes = totalMinutes, servings = servings)
 
 private fun RecipeWithDetails.toRecipe() = Recipe(
     id = recipe.id,

@@ -1,5 +1,6 @@
 package com.moltobene.app.ui.dough
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.background
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -68,6 +70,12 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -87,8 +95,7 @@ import com.moltobene.app.data.dough.LineRole
 import com.moltobene.app.data.dough.Preferment
 import com.moltobene.app.data.dough.YeastKind
 import com.moltobene.app.ui.components.AppTitle
-import com.moltobene.app.ui.components.ScreenTitle
-import com.moltobene.app.ui.components.ScreenTitlePadding
+import com.moltobene.app.ui.components.AppTitleWithScreen
 import com.moltobene.app.ui.components.isLargeText
 import com.moltobene.app.ui.theme.Spacing
 import java.util.Locale
@@ -114,7 +121,8 @@ fun DoughScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { AppTitle(style = MaterialTheme.typography.titleLarge) },
+                // Name der App und klein der Bildschirm (Entwurf vom 22.10.2026): spart die Überschrift im Formular.
+                title = { AppTitleWithScreen(stringResource(R.string.dough_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
@@ -176,7 +184,6 @@ private fun typeLabel(type: DoughType): Int = when (type) {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 internal fun Header(selected: DoughType, onSelect: (DoughType) -> Unit) {
-    ScreenTitle(stringResource(R.string.dough_title), modifier = Modifier.padding(ScreenTitlePadding))
     val types = DoughType.entries
     if (isLargeText()) {
         FlowRow(
@@ -204,10 +211,11 @@ internal fun Header(selected: DoughType, onSelect: (DoughType) -> Unit) {
 }
 /** Eine Karte mit Überschrift; gliedert das Formular ruhig und kompakt. */
 @Composable
-internal fun Card(title: String, onHelp: (() -> Unit)? = null, content: @Composable () -> Unit) {
+internal fun Card(title: String, onHelp: (() -> Unit)? = null, highlighted: Boolean = false, content: @Composable () -> Unit) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainer,
         shape = MaterialTheme.shapes.large,
+        border = if (highlighted) BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null,
         modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m),
     ) {
         Column(
@@ -306,6 +314,12 @@ internal fun NumberField(
         field(modifier)
         return
     }
+    // Bei normaler Schrift ein Feld mit Minus und Plus in einer Zeile (Entwurf vom 22.10.2026); bei großer Schrift
+    // bleibt es beim Feld mit Knöpfen und Regler darunter.
+    if (!isLargeText()) {
+        StepperField(label, value, onChange, error, modifier, integer, suffix, stepping)
+        return
+    }
     fun text(number: Double) = if (integer) number.toLong().toString() else show(number)
     val bounds = if (LocalDoughSliders.current && stepping.field != null) DoughStepper.sliderBounds(stepping.field, stepping.range) else null
     // Eine Bedienung pro Wert (#86): Regler mit antippbarer Zahl; Plus und Minus nur bei kleinen ganzen Zahlen
@@ -384,6 +398,88 @@ internal fun NumberField(
             }
             slider()
             defaultLine()
+        }
+    }
+}
+
+/** Hängt die Einheit („g“, „%“) hinter die Zahl, ohne dass sie mitgetippt oder gelöscht wird. */
+private class SuffixTransformation(private val suffix: String) : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText = TransformedText(
+        AnnotatedString(text.text + " " + suffix),
+        object : OffsetMapping {
+            override fun originalToTransformed(offset: Int) = offset
+            override fun transformedToOriginal(offset: Int) = offset.coerceAtMost(text.length)
+        },
+    )
+}
+
+/**
+ * Feld mit Minus und Plus in einer Zeile (Entwurf vom 22.10.2026): darüber der Name, in der Mitte die antippbare Zahl
+ * mit Einheit. Die Schrittweite, die Grenzen und der Standardwert kommen wie beim Feld mit Regler aus [stepping].
+ */
+@Composable
+private fun StepperField(
+    label: String,
+    value: String,
+    onChange: (String) -> Unit,
+    error: String?,
+    modifier: Modifier,
+    integer: Boolean,
+    suffix: String?,
+    stepping: Stepping,
+) {
+    val current = parseNumber(value)
+    val default = stepping.default
+    val atDefault = default != null && DoughStepper.isDefault(current, default)
+    fun text(number: Double) = if (integer) number.toLong().toString() else show(number)
+    val stepText = show(stepping.step) + suffix?.let { " $it" }.orEmpty()
+    val colors = MaterialTheme.colorScheme
+    Column(modifier = modifier) {
+        Text(label, style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant, maxLines = 1)
+        Surface(
+            shape = MaterialTheme.shapes.small,
+            color = colors.surface,
+            border = BorderStroke(1.dp, if (error != null) colors.error else colors.outlineVariant),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    onClick = { onChange(text(DoughStepper.next(current, stepping.step, -1, stepping.range, default))) },
+                    enabled = DoughStepper.canStep(current, -1, stepping.range),
+                ) {
+                    Icon(painterResource(R.drawable.ic_remove), contentDescription = stringResource(R.string.dough_step_less, label, stepText))
+                }
+                BasicTextField(
+                    value = value,
+                    onValueChange = onChange,
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.titleMedium.copy(color = colors.onSurface, textAlign = TextAlign.Center),
+                    keyboardOptions = KeyboardOptions(keyboardType = if (integer) KeyboardType.Number else KeyboardType.Decimal),
+                    cursorBrush = SolidColor(colors.primary),
+                    visualTransformation = if (suffix != null) SuffixTransformation(suffix) else VisualTransformation.None,
+                    modifier = Modifier.weight(1f).semantics { contentDescription = label },
+                )
+                IconButton(
+                    onClick = { onChange(text(DoughStepper.next(current, stepping.step, +1, stepping.range, default))) },
+                    enabled = DoughStepper.canStep(current, +1, stepping.range),
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.dough_step_more, label, stepText))
+                }
+            }
+        }
+        if (error != null) {
+            Text(error, style = MaterialTheme.typography.bodySmall, color = colors.error, modifier = Modifier.padding(start = Spacing.xs))
+        }
+        // „Standard 250 g“ nur, wenn der Wert abweicht; mit „Zurücksetzen“ in einer Zeile.
+        if (default != null && !atDefault) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.dough_default_value, show(default) + suffix?.let { " $it" }.orEmpty()),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.onSurfaceVariant,
+                    modifier = Modifier.weight(1f).padding(start = Spacing.xs),
+                )
+                TextButton(onClick = { onChange(text(default)) }) { Text(stringResource(R.string.dough_default_reset_short)) }
+            }
         }
     }
 }
@@ -607,12 +703,22 @@ private fun DoughForm(
     DoughHelpDialog(helpTopics(help)) { help = null }
 
     val bread = type == DoughType.BREAD
+    // Bei normaler Schrift steht das Ergebnis oben fest und rechnet beim Ändern der Werte mit (Entwurf vom 22.10.2026);
+    // bei großer Schrift bleibt es bei der Leiste unten, damit zum Scrollen genug Platz bleibt.
+    val pinned = !isLargeText()
+    val success = result as? DoughResult.Success
+    val resultDraft = success?.let { viewModel.draft(it, input) }
+    val resultTotals = success?.let { viewModel.totals(it, input) }
     Column(modifier = Modifier.fillMaxSize()) {
+        if (pinned) {
+            header()
+            ResultTop(summary = if (success != null && resultDraft != null) summaryLine(success, resultDraft) else null, totals = resultTotals)
+        }
         Column(
             modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(Spacing.s),
         ) {
-            header()
+            if (!pinned) header()
 
             PresetCard(
                 entries = entries,
@@ -695,6 +801,9 @@ private fun DoughForm(
                         yeastKindKey = kind.key
                     },
                 )
+                TextButton(onClick = { help = yeastKind.key }) {
+                    Text(stringResource(R.string.dough_help_term_open, stringResource(AndroidDoughTexts.yeastName(yeastKind))))
+                }
                 NumberField(
                     stringResource(R.string.dough_yeast_amount), yeast, { yeast = it },
                     issueFor(DoughField.YEAST), Modifier.fillMaxWidth(), suffix = "%",
@@ -702,7 +811,9 @@ private fun DoughForm(
                 )
             }
 
-            Card(stringResource(R.string.dough_section_preferment), onHelp = { help = "preferment" }) {
+            // Der Vorteig ist hervorgehoben (Rahmen in der Hauptfarbe): Auswahl, Anteile und die Mengen des Vorteigs als Kacheln,
+            // dazu ein Fenster, das Biga, Poolish und Sauerteig erklärt (Entwurf vom 22.10.2026).
+            Card(stringResource(R.string.dough_section_preferment), onHelp = { help = "preferment" }, highlighted = true) {
                 ChoiceField(
                     label = stringResource(R.string.dough_section_preferment),
                     options = Preferment.entries,
@@ -714,12 +825,26 @@ private fun DoughForm(
                         if (option != Preferment.NONE) prefermentWater = show(DoughLimits.defaultPrefermentWater(option))
                     },
                 )
+                if (preferment != Preferment.NONE) {
+                    TextButton(onClick = { help = preferment.key }) {
+                        Text(stringResource(R.string.dough_help_term_open, stringResource(prefermentLabel(preferment))))
+                    }
+                }
                 Text(
                     stringResource(prefermentExplanation(preferment)),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 if (preferment != Preferment.NONE) {
+                    val tiles = (result as? DoughResult.Success)?.let { viewModel.prefermentItems(it, input) }.orEmpty()
+                    if (tiles.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier.horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                        ) {
+                            for (item in tiles) TotalTile(item)
+                        }
+                    }
                     Fields(
                         { m ->
                             NumberField(
@@ -796,20 +921,72 @@ private fun DoughForm(
             }
         }
 
-        val success = result as? DoughResult.Success
-        val draft = success?.let { viewModel.draft(it, input) }
-        val prefermentItems = success?.let { viewModel.prefermentItems(it, input) }.orEmpty()
-        val prefermentBar = if (prefermentItems.isEmpty()) null else stringResource(
-            R.string.dough_bar_preferment,
-            stringResource(prefermentLabel(preferment)),
-            prefermentItems.joinToString(", ") { "${it.amount} ${it.name}" },
-        )
-        ResultBar(
-            summary = if (success != null && draft != null) summaryLine(success, draft) else null,
-            totals = success?.let { viewModel.totals(it, input) },
-            onSave = { viewModel.saveAsRecipe(input, onSaved) },
-            preferment = prefermentBar,
-        )
+        if (pinned) {
+            SaveBar(enabled = success != null, onSave = { viewModel.saveAsRecipe(input, onSaved) })
+        } else {
+            val prefermentItems = success?.let { viewModel.prefermentItems(it, input) }.orEmpty()
+            val prefermentBar = if (prefermentItems.isEmpty()) null else stringResource(
+                R.string.dough_bar_preferment,
+                stringResource(prefermentLabel(preferment)),
+                prefermentItems.joinToString(", ") { "${it.amount} ${it.name}" },
+            )
+            ResultBar(
+                summary = if (success != null && resultDraft != null) summaryLine(success, resultDraft) else null,
+                totals = resultTotals,
+                onSave = { viewModel.saveAsRecipe(input, onSaved) },
+                preferment = prefermentBar,
+            )
+        }
+    }
+}
+
+/**
+ * Oben fest (Entwurf vom 22.10.2026): die Summe und die Gesamtmengen als Kacheln. [summary] null = ungültig. Die
+ * Kacheln teilen sich die Breite, bei mehr als vier lassen sie sich seitlich verschieben.
+ */
+@Composable
+private fun ResultTop(summary: String?, totals: List<TotalItem>?) {
+    Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        shape = MaterialTheme.shapes.large,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m, vertical = Spacing.xs),
+    ) {
+        Column(modifier = Modifier.padding(Spacing.s), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            Column(modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }) {
+                if (summary != null) {
+                    Text(summary, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                } else {
+                    Text(
+                        stringResource(R.string.dough_invalid),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+            if (summary != null && !totals.isNullOrEmpty()) {
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                ) {
+                    for (item in totals) TotalTile(item)
+                }
+            }
+        }
+    }
+}
+
+/** „Als Rezept speichern“ unten; die Summen stehen oben ([ResultTop]). */
+@Composable
+private fun SaveBar(enabled: Boolean, onSave: () -> Unit) {
+    Surface(color = MaterialTheme.colorScheme.surface, tonalElevation = 3.dp) {
+        Button(
+            onClick = onSave,
+            enabled = enabled,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m, vertical = Spacing.s),
+        ) {
+            Text(stringResource(R.string.dough_save))
+        }
     }
 }
 

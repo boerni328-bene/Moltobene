@@ -1,5 +1,14 @@
 package com.moltobene.app.ui.collection
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material3.Surface
+import com.moltobene.app.ui.components.AppTitle
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Dialog
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import android.content.res.Resources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,6 +50,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -58,6 +69,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -74,6 +86,7 @@ import com.moltobene.app.ui.components.DraftLabel
 import com.moltobene.app.ui.components.OptionButton
 import com.moltobene.app.ui.components.RecipePhoto
 import com.moltobene.app.ui.components.TagLabels
+import com.moltobene.app.ui.recipe.formatDuration
 import com.moltobene.app.ui.theme.Spacing
 
 /** Suchfeld als ruhige Pille ohne Rahmen, daneben der Umschalter Raster/Liste. */
@@ -143,22 +156,27 @@ internal fun FilterRow(
     val resources = LocalResources.current
     val large = LocalDensity.current.fontScale > 1.3f
     var chooseTags by rememberSaveable { mutableStateOf(false) }
+    // Alle / Favoriten / Entwürfe als Reiter (Entwurf „Dichte Liste“, 22.10.2026), darunter die Schlagwörter als Chips.
+    val options = buildList {
+        add(CollectionFilter.ALL to R.string.filter_all)
+        if (hasFavorites || filter == CollectionFilter.FAVORITES) add(CollectionFilter.FAVORITES to R.string.filter_favorites)
+        if (hasDrafts || filter == CollectionFilter.DRAFTS) add(CollectionFilter.DRAFTS to R.string.filter_drafts)
+    }
+    if (options.size > 1) {
+        ScrollableTabRow(
+            selectedTabIndex = options.indexOfFirst { it.first == filter }.coerceAtLeast(0),
+            edgePadding = Spacing.m,
+            containerColor = Color.Transparent,
+        ) {
+            for ((value, label) in options) {
+                Tab(selected = filter == value, onClick = { onFilterChange(value) }, text = { Text(stringResource(label)) })
+            }
+        }
+    }
     Row(
         modifier = Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = Spacing.m),
         horizontalArrangement = Arrangement.spacedBy(Spacing.s),
     ) {
-        val options = buildList {
-            add(CollectionFilter.ALL to R.string.filter_all)
-            if (hasFavorites || filter == CollectionFilter.FAVORITES) add(CollectionFilter.FAVORITES to R.string.filter_favorites)
-            if (hasDrafts || filter == CollectionFilter.DRAFTS) add(CollectionFilter.DRAFTS to R.string.filter_drafts)
-        }
-        for ((value, label) in options) {
-            FilterChip(
-                selected = filter == value,
-                onClick = { onFilterChange(value) },
-                label = { Text(stringResource(label)) },
-            )
-        }
         if (large) {
             if (tagCounts.isNotEmpty()) {
                 val label = when (selectedTags.size) {
@@ -315,6 +333,15 @@ internal fun RecipeRow(item: RecipeListItem, onClick: () -> Unit) {
         Thumbnail(item, title, Modifier.size(56.dp).clip(MaterialTheme.shapes.medium))
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
             Text(text = title, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            // Zeit und Portionen in einer Zeile (Entwurf „Dichte Liste“, 22.10.2026); fehlt beides, bleibt die Zeile weg.
+            val locale = LocalConfiguration.current.locales[0]
+            val meta = listOfNotNull(
+                item.totalMinutes?.takeIf { it > 0 }?.let { formatDuration(it, locale) },
+                item.servings?.takeIf { it > 0 }?.let { pluralStringResource(R.plurals.servings_count, it, it) },
+            ).joinToString(" · ")
+            if (meta.isNotEmpty()) {
+                Text(text = meta, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
             if (item.isDraft) DraftLabel()
         }
         if (item.favorite) {
@@ -328,7 +355,11 @@ internal fun RecipeRow(item: RecipeListItem, onClick: () -> Unit) {
     }
 }
 
-/** „Hinzufügen“: alle Wege, ein Rezept zu bekommen, und der Teigrechner an einer Stelle. */
+/**
+ * „Hinzufügen“ (Entwurf „Eigene Seite“ vom 22.10.2026): eine Seite in Gruppen – Selbst schreiben, Aus einer Quelle
+ * übernehmen, Sprache (Beta) und der Teigrechner. Jeder Weg hat unter dem Namen eine kurze Zeile, was dahintersteckt.
+ * Die Seite deckt den Bildschirm; Schließen oder Zurück führt zurück.
+ */
 @Composable
 internal fun AddChooser(
     onWrite: () -> Unit,
@@ -336,31 +367,78 @@ internal fun AddChooser(
     onFromPhoto: () -> Unit,
     onFromText: () -> Unit,
     onFromFile: () -> Unit,
+    onFromAudio: () -> Unit,
     onDough: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.add_short), modifier = Modifier.semantics { heading() }) },
-        text = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(Spacing.s),
-            ) {
-                OptionButton(R.drawable.ic_edit_note, R.string.add_recipe, onWrite)
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            Column(modifier = Modifier.fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState())) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = Spacing.xs, vertical = Spacing.xs)) {
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.close))
+                    }
+                    AppTitle(style = MaterialTheme.typography.titleLarge)
+                }
+                Text(
+                    stringResource(R.string.add_short),
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.s).semantics { heading() },
+                )
+                AddGroup(R.string.add_group_own)
+                Surface(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    shape = MaterialTheme.shapes.large,
+                    modifier = Modifier.padding(horizontal = Spacing.m),
+                ) {
+                    AddOption(R.drawable.ic_edit_note, R.string.add_recipe, R.string.add_hint_write, onWrite)
+                }
+                AddGroup(R.string.add_group_import)
                 // Reihenfolge wie in der Vision: Internetseiten zuerst.
-                OptionButton(R.drawable.ic_link, R.string.import_from_link, onFromLink)
-                OptionButton(R.drawable.ic_document_scanner, R.string.import_from_photo, onFromPhoto)
-                OptionButton(R.drawable.ic_content_paste, R.string.import_from_text, onFromText)
-                OptionButton(R.drawable.ic_description, R.string.import_from_file, onFromFile)
-                HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.xs))
-                OptionButton(R.drawable.ic_calculate, R.string.dough_title, onDough)
+                AddOption(R.drawable.ic_link, R.string.import_from_link, R.string.add_hint_link, onFromLink)
+                AddOption(R.drawable.ic_document_scanner, R.string.import_from_photo, R.string.add_hint_photo, onFromPhoto)
+                AddOption(R.drawable.ic_content_paste, R.string.import_from_text, R.string.add_hint_text, onFromText)
+                AddOption(R.drawable.ic_description, R.string.import_from_file, R.string.add_hint_file, onFromFile)
+                AddGroup(R.string.add_group_voice)
+                AddOption(R.drawable.ic_graphic_eq, R.string.import_from_audio, R.string.add_hint_audio, onFromAudio)
+                AddGroup(R.string.add_group_tools)
+                AddOption(R.drawable.ic_calculate, R.string.dough_title, R.string.add_hint_dough, onDough)
+                Spacer(Modifier.size(Spacing.l))
             }
-        },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+        }
+    }
+}
+
+@Composable
+private fun AddGroup(@StringRes title: Int) {
+    Text(
+        stringResource(title),
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = Spacing.m, end = Spacing.m, top = Spacing.m, bottom = Spacing.xs).semantics { heading() },
     )
 }
 
+/** Eine Zeile: Symbol, Name und darunter ein kurzer Hinweis; mindestens 56 dp hoch. */
+@Composable
+private fun AddOption(@DrawableRes icon: Int, @StringRes title: Int, @StringRes hint: Int, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.m),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(role = Role.Button, onClick = onClick)
+            .heightIn(min = 56.dp)
+            .padding(horizontal = Spacing.m, vertical = Spacing.s),
+    ) {
+        Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(24.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(stringResource(title), style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
 
 /** Knopf mit Menü „Sortieren“: Titel A–Z oder zuletzt hinzugefügt; die gewählte Reihenfolge trägt ein Häkchen (#57). */
 @Composable

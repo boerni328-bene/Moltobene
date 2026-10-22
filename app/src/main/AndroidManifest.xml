@@ -15,7 +15,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <!--
-      Mikrofon (#80, vom Projektinhaber am 13.10.2026 freigegeben): nur für die Spracheingabe in der Kochansicht. Das Mikrofon
+      Mikrofon (#80, vom Projektinhaber am 13.10.2026 freigegeben, am 22.10.2026 erweitert um „Aus Sprache übernehmen“,
+      Rezept einsprechen): nur für die Spracheingabe in der Kochansicht und das Einsprechen. Das Mikrofon
       hört nur zu, solange der Knopf in der Kochleiste an ist, die Ansicht offen und der Bildschirm an ist; die Erkennung läuft
       ganz auf dem Handy (data/voice), es wird nichts aufgenommen, gespeichert oder gesendet. Die Berechtigung wird erst beim
       ersten Antippen des Knopfes abgefragt.

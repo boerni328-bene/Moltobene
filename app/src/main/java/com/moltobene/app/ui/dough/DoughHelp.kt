@@ -33,6 +33,12 @@ internal enum class HelpTopic(
     SALT(R.string.dough_help_salt, R.string.dough_help_salt_effect, R.string.dough_help_salt_range, R.string.dough_help_salt_care),
     OIL(R.string.dough_help_oil, R.string.dough_help_oil_effect, R.string.dough_help_oil_range, R.string.dough_help_oil_care),
     YEAST(R.string.dough_help_yeast, R.string.dough_help_yeast_effect, R.string.dough_help_yeast_range, R.string.dough_help_yeast_care),
+    BIGA(R.string.dough_pre_biga, R.string.dough_help_biga_effect, R.string.dough_help_biga_range, R.string.dough_help_biga_care),
+    POOLISH(R.string.dough_pre_poolish, R.string.dough_help_poolish_effect, R.string.dough_help_poolish_range, R.string.dough_help_poolish_care),
+    SOURDOUGH(R.string.dough_pre_sourdough, R.string.dough_help_sourdough_effect, R.string.dough_help_sourdough_range, R.string.dough_help_sourdough_care),
+    FRESH_YEAST(R.string.dough_yeast_fresh, R.string.dough_help_fresh_effect, R.string.dough_help_fresh_range, R.string.dough_help_fresh_care),
+    INSTANT_YEAST(R.string.dough_yeast_instant, R.string.dough_help_instant_effect, R.string.dough_help_instant_range, R.string.dough_help_instant_care),
+    ACTIVE_YEAST(R.string.dough_yeast_active, R.string.dough_help_active_effect, R.string.dough_help_active_range, R.string.dough_help_active_care),
     PREFERMENT(
         R.string.dough_help_preferment, R.string.dough_help_preferment_effect, R.string.dough_help_preferment_range,
         R.string.dough_help_preferment_care,
@@ -44,6 +50,12 @@ internal fun helpTopics(key: String?): List<HelpTopic> = when (key) {
     "dough" -> listOf(HelpTopic.WATER, HelpTopic.SALT, HelpTopic.OIL)
     "yeast" -> listOf(HelpTopic.YEAST)
     "preferment" -> listOf(HelpTopic.PREFERMENT)
+    "biga" -> listOf(HelpTopic.BIGA)
+    "poolish" -> listOf(HelpTopic.POOLISH)
+    "sourdough" -> listOf(HelpTopic.SOURDOUGH)
+    "fresh" -> listOf(HelpTopic.FRESH_YEAST)
+    "instant_dry" -> listOf(HelpTopic.INSTANT_YEAST)
+    "active_dry" -> listOf(HelpTopic.ACTIVE_YEAST)
     else -> emptyList()
 }
 
@@ -53,6 +65,8 @@ internal fun DoughHelpDialog(topics: List<HelpTopic>, onDismiss: () -> Unit) {
     if (topics.isEmpty()) return
     AlertDialog(
         onDismissRequest = onDismiss,
+        // Leicht durchsichtig (Wunsch des Projektinhabers vom 22.10.2026); der Text bleibt gut lesbar.
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.94f),
         title = { Text(stringResource(R.string.dough_help_title), modifier = Modifier.semantics { heading() }) },
         text = {
             Column(

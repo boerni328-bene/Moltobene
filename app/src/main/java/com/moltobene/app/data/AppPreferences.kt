@@ -157,8 +157,8 @@ class AppPreferences(context: Context) {
         prefs.edit { putInt(KEY_BACKUP_HINT_HIDDEN_AT, unsaved) }
     }
 
-    /** Sammlung als Raster (Standard) oder Liste. */
-    suspend fun collectionGrid(): Boolean = withContext(Dispatchers.IO) { prefs.getBoolean(KEY_COLLECTION_GRID, true) }
+    /** Kochbuch als Liste (Standard) oder Raster. */
+    suspend fun collectionGrid(): Boolean = withContext(Dispatchers.IO) { prefs.getBoolean(KEY_COLLECTION_GRID, false) }
 
     suspend fun setCollectionGrid(grid: Boolean) = withContext(Dispatchers.IO) {
         prefs.edit { putBoolean(KEY_COLLECTION_GRID, grid) }
