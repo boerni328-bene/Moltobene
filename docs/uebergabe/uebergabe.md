@@ -5,13 +5,11 @@ Stand: 22.10.2026 · `main` = Version 0.55.0 (versionCode 96), veröffentlicht �
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, nur auf dem Handy. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
 
-## In Arbeit (22.10.2026): Neues Aussehen, Zweig `neues-design`, Version 0.56.0 (versionCode 97)
-- Auf Zweig `zuhoeren-modus` aufgebaut (Audio-Vorarbeit liegt dort, ungebaut/unfertig); beide Zweige gehören zusammen auf `main`. Nichts auf `main`, kein Release.
-- Umgesetzt nach Auswahl des Inhabers (Entwurfsseiten im Claude-Artefakt „Moltobene Auswahl“): Startseite D (Foto-Bühne, vier kompakte Kacheln), Rezept A (flaches Foto, Reiter Zutaten/Zubereitung/Notizen), Kochbuch B (Liste mit Zeit/Portionen, Reiter Alle/Favoriten/Entwürfe, Startsymbol links oben), Teigrechner A (Ergebnis oben fest, Minus/Plus-Felder, Vorteig-Karte hervorgehoben, Erklärfenster für Biga/Poolish/Sauerteig/Hefearten), Einstellungen A + „Schnell“-Schalter aus D (Liste, Gruppe öffnet als eigene Ansicht), Hinzufügen D (eigene Seite).
-- **„Sammlung“ heißt jetzt „Kochbuch“** (Cookbook), Regeln in `CLAUDE.md` angepasst. Neue Schaltfläche „Aufnehmen“ (Rezept einsprechen) ist beschlossen, aber noch nicht programmiert (gehört zu „Aus Sprache übernehmen“, Zweig `zuhoeren-modus`).
-- Build 1 (Run 39766881011) rot: Hilfetexte (Fachregeln: keine Minuten, kein „Sie“, keine Frischhaltung) und 9 Rundgang-Tests; behoben. Build 2 (Run 39770353454) grün. Build 4 (Run 39776097088) grün (Testlauf inklusive); Fotos in `bildschirmfotos/0.56.0` gesichtet, Startseite, Rezept, Kochbuch, Teigrechner, Einstellungen und Hinzufügen sehen wie geplant aus.
-- Offen: Bildschirmfotos aller Darstellungen sichten (Ordner `bildschirmfotos/0.56.0`), Erklärtexte (Teigwissen: Biga, Poolish, Sauerteig, Hefen) vom Inhaber/Fachperson gegenlesen, Pasta/Kuchen im Teigrechner haben noch kein festes Ergebnis oben, Teigrechner passt noch nicht ganz auf einen Bildschirm (Voreinstellungskarte).
-- Nächster Schritt: dem Inhaber zeigen (Hell/Dunkel/Schrift 200 % in `bildschirmfotos/0.56.0`), dann Squash-Merge zusammen mit `zuhoeren-modus` (nur nach Freigabe).
+## Stand 22.10.2026: Version 0.56.0 veröffentlicht
+- `main` = 0.56.0 (versionCode 97), Release v0.56.0 mit APK und Prüfsumme, Build grün. Enthält das neue Aussehen (Startseite D, Rezept A mit Reitern, Kochbuch B, Teigrechner A mit Erklärfenstern, Einstellungen A mit „Schnell“, Hinzufügen D) und „Aus Audio übernehmen“ (Beta, Qualität mit echter Aufnahme noch ungeprüft). Zweige `neues-design` und `zuhoeren-modus` sind erledigt (löschbar).
+- „Sammlung“ heißt jetzt „Kochbuch“ (Regeln in `CLAUDE.md`). „Aufnehmen“ (Rezept einsprechen) ist beschlossen, aber noch nicht programmiert (Schritt 3 von „Aus Sprache übernehmen“).
+- Offen: Erklärtexte im Teigrechner (Biga, Poolish, Sauerteig, Hefen) gegenlesen; Pasta/Kuchen ohne festes Ergebnis oben; Teigrechner passt noch nicht ganz auf einen Bildschirm; Rückmeldung des Inhabers nach Blick auf die Fotos (`bildschirmfotos/0.56.0`) und auf dem echten Handy.
+- Nächster Schritt: „Aus Sprache übernehmen“ (Mikrofon, Text live, Prüfen vor dem Entwurf), danach Weg zu 1.0 (Abnahmeliste unten).
 
 ## Git-Stand
 - `main` = Version 0.54.0 (Squash-Merge von `teig-zeitplan`, Build grün, Release folgt aus dem Build auf main). Zweig `teig-zeitplan` ist erledigt.
