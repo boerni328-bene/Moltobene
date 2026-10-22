@@ -266,7 +266,7 @@
         <item>The app only goes online on request: for “Import from link” and when downloading the language pack for translation or the recognition pack for voice input. For “Import from link” it loads exactly that one page and, if available, its photo. As with any browser, the page learns the device’s internet address (IP address), the time and the preferred language. No cookies are stored and no details about the device are sent.</item>
         <item>Otherwise content only leaves the device when it is shared or backed up. Notes are never shared. The backup file is not encrypted.</item>
         <item>The language pack and the recognition pack for voice input come from the project page on GitHub. GitHub learns the device’s internet address (IP address) and the time. No recipes are sent.</item>
-        <item>The microphone is only needed for voice input in the cooking view and is only requested when the microphone button is tapped for the first time. It only listens while the button is on, the recipe is open and the screen is on. Recognition runs entirely on the device; nothing is recorded, stored or sent.</item>
+        <item>The microphone is only needed for voice input in the cooking view and for dictating a recipe, and is only requested when it is tapped for the first time. It only listens while the button is on (when dictating: until “Done”) and the screen is on. Audio files chosen for “Import from audio” stay unchanged and are not stored. Recognition runs entirely on the device; nothing is recorded, stored or sent.</item>
         <item>Text recognition, translation and voice input run entirely on the device, without internet. Android’s automatic cloud backup is turned off.</item>
     </string-array>
 

@@ -15,3 +15,5 @@ Ausgelagert aus `CLAUDE.md` am 17.10.2026, um Tokens zu sparen. Nur lesen, wenn 
 
 
 - **Speicher (0.55.0):** `data/StorageUsage.kt` (reines Kotlin, Test `StorageUsageTest`) misst Programm, Fotos, Vorschaubilder, Datenbank, Sprachpaket, Erkennungspaket, Übersetzungen, Zwischenspeicher und Sonstiges und leert den Zwischenspeicher (Dateien jünger als 10 Minuten bleiben). Angezeigt in `ui/settings/StorageSection.kt` (Einstellungen → Speicher), Verdrahtung über `AppContainer.storageUsage`. Neue Ordner der App dort ergänzen, sonst landen sie unter „Sonstiges“.
+
+- **Gesprochene Rezepte (in Arbeit, Zweig zuhoeren-modus):** `data/voice/SpokenNumbers.kt` (Zahlwörter → Ziffern, Brüche, Dezimalkomma) und `SpokenRecipe.kt` (Äußerungen → Zeilen für „Aus Text übernehmen“), beide reines Kotlin mit Tests. Folgen: freie Erkennung (Vosk ohne Grammatik) für „Aus Audio übernehmen“ und „Aus Sprache übernehmen“.

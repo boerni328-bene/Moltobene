@@ -51,5 +51,9 @@ Zeitplan für Teige (#71, Stufe 1, Issue bleibt offen): „Teig starten“, Stan
 - Ideen für Stufe 2: Startzeit wählbar, Übersetzung der Phasentexte, fertige Läufe ausblenden, Zeitplan bearbeiten.
 - Nächster Schritt: Build/Release auf main prüfen, dann Weg zu 1.0 (Abnahmeliste oben).
 
-## Idee in Planung: „Aus Zuhören übernehmen“ (YouTube ohne Rezepttext, noch kein Auftrag)
-Vosk-Modell des Erkennungspakets (#80) ohne Grammatik laufen lassen (freie Erkennung), Text in „Aus Text übernehmen“ geben; Zahlwörter („zweihundert Gramm“) vorher in Ziffern umwandeln; Rohtext bleibt als „Übernommener Text“. Offene Entscheidungen beim Inhaber: Mikrofon-Zweck erweitern (CLAUDE.md, Datenschutztext), Beta-Kennzeichnung, Qualität des kleinen Modells vorab mit echtem Video testen. Audio aus YouTube mitschneiden (AudioPlaybackCapture/MediaProjection) wurde verworfen.
+## In Arbeit: „Aus Audio übernehmen“ und „Aus Sprache übernehmen“ (Zweig `zuhoeren-modus`, Beta, freigegeben 22.10.2026)
+Freigabe des Inhabers: Mikrofon-Zweck erweitert um „Rezept einsprechen“, neue Erfassungswege (Vision/CLAUDE.md, Manifest-Kommentar und Datenschutztext sind angepasst). Verworfen: Download oder Mitschnitt von YouTube-Ton (Bedingungen von YouTube, technisch blockiert). Kein Mikrofon bei „Aus Audio“.
+- Schritt 1 erledigt (ungebaut): `SpokenNumbers`, `SpokenRecipe` + Tests.
+- Schritt 2: freie Erkennung (Vosk ohne Grammatik, `VoiceInput` erweitern oder eigene `Transcriber`-Klasse), Audiodatei über Dateiauswahl lesen und mit `MediaExtractor`/`MediaCodec` zu 16-kHz-Mono-PCM umwandeln (keine neue Bibliothek), Kopie im Zwischenspeicher danach löschen, Text → „Aus Text übernehmen“, Rohtext als „Übernommener Text“.
+- Schritt 3: „Aus Sprache übernehmen“ mit Mikrofon, Text erscheint live, Prüfen vor dem Entwurf.
+- Danach: Texte DE/EN (feste Begriffe in CLAUDE.md ergänzen), Rundgang, Version 0.56.0, CHANGELOG, Qualität an echtem Beispiel prüfen (kleines Modell).
