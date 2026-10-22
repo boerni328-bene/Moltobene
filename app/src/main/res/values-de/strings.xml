@@ -154,7 +154,7 @@
     <string name="file_loading">Datei wird gelesen …</string>
     <string name="file_done">Rezept aus der Datei übernommen. Prüfen, ob alles an der richtigen Stelle steht.</string>
     <string name="video_done">Rezept aus der Videobeschreibung übernommen. Mit dem Video vergleichen: In Beschreibungen fehlen oft Mengen oder Schritte.</string>
-    <string name="video_no_recipe">In der Videobeschreibung steht kein Rezept. Titel und Link sind gespeichert, die Beschreibung steht unter „Übernommener Text“.</string>
+    <string name="video_no_recipe">In der Videobeschreibung steht kein Rezept. Titel und Link sind gespeichert, die Beschreibung steht unter „Übernommener Text“. Tipp: Wird die Zutatenliste im Video eingeblendet, ein Bildschirmfoto davon machen und über „Aus Foto übernehmen“ ergänzen.</string>
     <string name="video_link_only">In der Videobeschreibung steht kein Rezept, nur Links. Titel und Link des Videos sind gespeichert.</string>
     <plurals name="video_recipe_links">
         <item quantity="one">Die Videobeschreibung enthält einen Link. Das Rezept lässt sich von dieser Seite übernehmen:</item>
@@ -237,6 +237,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Neuer Bereich „Speicher“ in den Einstellungen: Er zeigt, wie viel Platz die App belegt – getrennt nach Programm, Fotos, Vorschaubildern, Rezepten, Sprachpaket, Erkennungspaket, Übersetzungen und Zwischenspeicher, dazu die Summe. Pakete und Zwischenspeicher lassen sich dort löschen.</item>
         <item>Zeitplan für Teige: Der Teigrechner legt bei Pizza und Brot einen Zeitplan an (z. B. Biga 1 bis 3 Tage im Kühlschrank). Im Rezept startet „Teig starten“ den Ablauf; die App zeigt, wo der Teig steht und wann es weitergeht, auch auf der Startseite.</item>
         <item>Teigrechner kompakter: Werte stehen paarweise nebeneinander, die Voreinstellung braucht weniger Platz, und die Leiste unten zeigt bei Biga oder Poolish auch den Vorteig.</item>
         <item>Einstellungen aufgeräumt: Die Gruppen lassen sich auf- und zuklappen, so passt alles auf einen Bildschirm.</item>
@@ -407,6 +408,32 @@
     <string name="speech_headset_note">Wurde in einem Rezept einmal das Vorlesen gestartet, steuern Wiedergabe/Pause, Weiter und Zurück am Kopfhörer das Vorlesen. Welche Geste welche Taste sendet (z. B. zwei- oder dreimal tippen), legt der Kopfhörer fest, oft in dessen eigener App. Unten steht, was jede Taste in Moltobene auslöst. Solange das Rezept offen ist, bekommt eine Musik-App diese Tasten nicht.</string>
     <!-- Einstellungen: Darstellung (Hell/Dunkel und Farbwelt) -->
     <string name="settings_section_appearance">Darstellung</string>
+    <string name="settings_section_storage">Speicher</string>
+    <string name="storage_measuring">Speicher wird gemessen …</string>
+    <string name="storage_total">Insgesamt</string>
+    <string name="storage_note">Die Sicherungsdatei liegt außerhalb der App und ist hier nicht enthalten.</string>
+    <string name="storage_program">Programm</string>
+    <string name="storage_program_hint">Die App selbst, vom System verwaltet.</string>
+    <string name="storage_photos">Fotos</string>
+    <string name="storage_photos_hint">Fotos der Gerichte und Originalseiten in voller Größe.</string>
+    <string name="storage_thumbnails">Vorschaubilder</string>
+    <string name="storage_thumbnails_hint">Kleine Bilder für die Sammlung.</string>
+    <string name="storage_database">Rezepte</string>
+    <string name="storage_database_hint">Titel, Zutaten, Zubereitung und Notizen aller Rezepte.</string>
+    <string name="storage_language_pack">Sprachpaket Deutsch–Englisch</string>
+    <string name="storage_language_pack_hint">Zum Übersetzen von Rezepten. Lässt sich jederzeit neu laden.</string>
+    <string name="storage_voice_pack">Erkennungspaket Deutsch</string>
+    <string name="storage_voice_pack_hint">Für die Spracheingabe. Lässt sich jederzeit neu laden.</string>
+    <string name="storage_translations">Gespeicherte Übersetzungen</string>
+    <string name="storage_translations_hint">Übersetzte Rezepte, damit sie nicht neu übersetzt werden müssen.</string>
+    <string name="storage_cache">Zwischenspeicher</string>
+    <string name="storage_cache_hint">Vorübergehende Dateien, z. B. vom Teilen. Das Leeren ist gefahrlos.</string>
+    <string name="storage_other">Sonstiges</string>
+    <string name="storage_other_hint">Einstellungen und laufende Vorgänge.</string>
+    <string name="storage_clear_cache">Zwischenspeicher leeren</string>
+    <string name="storage_cache_cleared">%1$s freigegeben.</string>
+    <string name="storage_cache_nothing">Der Zwischenspeicher ist schon leer.</string>
+    <string name="storage_delete_item">%1$s löschen</string>
     <string name="appearance_mode">Hell oder dunkel</string>
     <string name="theme_system">Wie das Handy</string>
     <string name="theme_light">Hell</string>

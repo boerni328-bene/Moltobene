@@ -113,6 +113,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: lint-bericht-${{ steps.version.outputs.name }}
+          retention-days: 7
           path: app/build/reports/lint-results-release.html
           if-no-files-found: ignore
 
@@ -139,6 +140,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: datenbank-schema-${{ steps.version.outputs.name }}
+          retention-days: 7
           path: app/schemas
           if-no-files-found: ignore
 
@@ -209,6 +211,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: moltobene-${{ steps.version.outputs.name }}
+          retention-days: 7
           path: dist/*.apk
           if-no-files-found: error
 
@@ -216,6 +219,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: mapping-${{ steps.version.outputs.name }}
+          retention-days: 7
           path: app/build/outputs/mapping/release/mapping.txt
           if-no-files-found: error
 
@@ -320,6 +324,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: bildschirmfotos-${{ steps.version.outputs.name }}
+          retention-days: 7
           path: bildschirmfotos
           if-no-files-found: ignore
 
@@ -328,6 +333,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: testbericht-${{ steps.version.outputs.name }}
+          retention-days: 7
           path: |
             app/build/reports/androidTests/connected
             emulator.log

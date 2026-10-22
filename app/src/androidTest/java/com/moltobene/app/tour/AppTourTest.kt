@@ -1333,6 +1333,19 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("32-lizenzen")
     }
 
+    /** „Speicher“ in den Einstellungen: Posten je Bereich und die Summe; Pakete lassen sich dort löschen. */
+    @Test
+    fun speicherAnzeige() {
+        addSampleRecipes()
+        waitForText(SampleRecipes.POTATO_SALAD)
+        composeRule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        waitForText(text(R.string.settings_section_storage))
+        openSettingsGroup(R.string.settings_section_storage)
+        waitForText(text(R.string.storage_total))
+        composeRule.onNodeWithText(text(R.string.storage_total)).performScrollTo()
+        screenshot("29e-speicher")
+    }
+
     /**
      * „Darstellung“ in den Einstellungen: Farbwelt und Hell/Dunkel wählen, die ganze App wechselt sofort. Gewählt wird
      * Hell bzw. Dunkel wie in der Darstellung des Rundgangs, damit das Handy dabei bleibt, wie es ist.

@@ -13,6 +13,7 @@ import com.moltobene.app.data.Palette
 import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.StartScreen
 import com.moltobene.app.data.StorageFull
+import com.moltobene.app.data.StorageUsage
 import com.moltobene.app.data.ThemeMode
 import com.moltobene.app.data.backup.BackupManager
 import com.moltobene.app.data.backup.BackupReader
@@ -45,6 +46,7 @@ sealed interface SettingsEvent {
     data object RestoreFailed : SettingsEvent
     data object LanguagePackDeleted : SettingsEvent
     data object VoicePackDeleted : SettingsEvent
+    data class CacheCleared(val freedBytes: Long) : SettingsEvent
 }
 
 class SettingsViewModel(
@@ -52,8 +54,27 @@ class SettingsViewModel(
     private val preferences: AppPreferences,
     private val languagePack: LanguagePackManager,
     private val voicePack: VoicePackManager,
+    private val storage: StorageUsage,
     private val speech: () -> SpeechOutput,
 ) : ViewModel() {
+
+    /** Belegter Speicher je Posten; null, solange er gemessen wird oder noch nicht gefragt wurde. */
+    var storageResult by mutableStateOf<StorageUsage.Result?>(null)
+        private set
+
+    /** Misst den Speicher im Hintergrund; wird beim Aufklappen der Gruppe „Speicher“ und nach dem Löschen aufgerufen. */
+    fun measureStorage() {
+        viewModelScope.launch { storageResult = runCatching { storage.measure() }.getOrNull() }
+    }
+
+    /** Leert den Zwischenspeicher und meldet, wie viel frei wurde. */
+    fun clearCache() {
+        viewModelScope.launch {
+            val freed = runCatching { storage.clearCache() }.getOrDefault(0L)
+            event = SettingsEvent.CacheCleared(freed)
+            measureStorage()
+        }
+    }
 
     /**
      * Sprachpaket für „Rezept übersetzen“ (#60); der Download läuft weiter, wenn die Einstellungen geschlossen werden.
@@ -70,6 +91,7 @@ class SettingsViewModel(
         viewModelScope.launch {
             languagePack.delete()
             event = SettingsEvent.LanguagePackDeleted
+            if (storageResult != null) measureStorage()
         }
     }
 
@@ -85,6 +107,7 @@ class SettingsViewModel(
         viewModelScope.launch {
             voicePack.delete()
             event = SettingsEvent.VoicePackDeleted
+            if (storageResult != null) measureStorage()
         }
     }
 

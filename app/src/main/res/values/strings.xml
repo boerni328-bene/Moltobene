@@ -155,7 +155,7 @@
     <string name="file_loading">Reading file …</string>
     <string name="file_done">Recipe imported from the file. Check that everything is in the right place.</string>
     <string name="video_done">Recipe imported from the video description. Compare it with the video: descriptions often lack amounts or steps.</string>
-    <string name="video_no_recipe">The video description contains no recipe. Title and link are saved, the description is under “Imported text”.</string>
+    <string name="video_no_recipe">The video description contains no recipe. Title and link are saved, the description is under “Imported text”. Tip: if the video shows the ingredient list on screen, take a screenshot of it and add it with “Import from photo”.</string>
     <string name="video_link_only">The video description contains no recipe, only links. Title and link of the video are saved.</string>
     <plurals name="video_recipe_links">
         <item quantity="one">The video description contains a link. The recipe can be imported from this page:</item>
@@ -237,6 +237,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>New “Storage” section in Settings: it shows how much space the app uses – split into app, photos, thumbnails, recipes, language pack, recognition pack, translations and cache, plus the total. Packs and the cache can be deleted there.</item>
         <item>Dough schedule: for pizza and bread the dough calculator creates a schedule (for example biga 1 to 3 days in the refrigerator). In the recipe, “Start dough” begins the process; the app shows where the dough stands and when to continue, also on Home.</item>
         <item>Compact dough calculator: values sit side by side, the preset takes less room, and the bar at the bottom also shows the preferment for biga or poolish.</item>
         <item>Tidier settings: groups can be expanded and collapsed, so everything fits on one screen.</item>
@@ -407,6 +408,32 @@
     <string name="speech_headset_note">After reading aloud has been started once in a recipe, play/pause, next and previous on the headset control reading aloud. Which gesture sends which button (for example tapping twice or three times) is decided by the headset, often in its own app. Below, choose what each button does in Moltobene. While the recipe is open, a music app does not get these buttons.</string>
     <!-- Einstellungen: Darstellung (Hell/Dunkel und Farbwelt) -->
     <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_section_storage">Storage</string>
+    <string name="storage_measuring">Measuring storage…</string>
+    <string name="storage_total">Total</string>
+    <string name="storage_note">The backup file is stored outside the app and is not included here.</string>
+    <string name="storage_program">App</string>
+    <string name="storage_program_hint">The app itself, managed by the system.</string>
+    <string name="storage_photos">Photos</string>
+    <string name="storage_photos_hint">Photos of dishes and original pages in full size.</string>
+    <string name="storage_thumbnails">Thumbnails</string>
+    <string name="storage_thumbnails_hint">Small images for the collection.</string>
+    <string name="storage_database">Recipes</string>
+    <string name="storage_database_hint">Titles, ingredients, instructions and notes of all recipes.</string>
+    <string name="storage_language_pack">Language pack German–English</string>
+    <string name="storage_language_pack_hint">For translating recipes. Can be downloaded again at any time.</string>
+    <string name="storage_voice_pack">Recognition pack German</string>
+    <string name="storage_voice_pack_hint">For voice input. Can be downloaded again at any time.</string>
+    <string name="storage_translations">Saved translations</string>
+    <string name="storage_translations_hint">Translated recipes, so they do not have to be translated again.</string>
+    <string name="storage_cache">Cache</string>
+    <string name="storage_cache_hint">Temporary files, e.g. from sharing. Clearing it is safe.</string>
+    <string name="storage_other">Other</string>
+    <string name="storage_other_hint">Settings and tasks in progress.</string>
+    <string name="storage_clear_cache">Clear cache</string>
+    <string name="storage_cache_cleared">%1$s freed.</string>
+    <string name="storage_cache_nothing">The cache is already empty.</string>
+    <string name="storage_delete_item">Delete %1$s</string>
     <string name="appearance_mode">Light or dark</string>
     <string name="theme_system">Same as device</string>
     <string name="theme_light">Light</string>
