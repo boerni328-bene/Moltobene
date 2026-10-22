@@ -20,8 +20,11 @@ class PcmConverter(
     /** Noch nicht verbrauchte Werte aus dem letzten Stück. */
     private var tail = ShortArray(0)
 
-    /** Stelle des nächsten Ausgabewerts, gemessen vom Anfang von [tail]. */
-    private var phase = 0.0
+    /**
+     * Stelle des nächsten Ausgabewerts, gemessen vom Anfang von [tail], in Einheiten von 1/[targetRate] Eingabewerten. Mit
+     * ganzen Zahlen gerechnet, damit das Ergebnis nicht davon abhängt, wie der Rohton in Stücke geteilt ist.
+     */
+    private var phase = 0L
 
     /**
      * Wandelt die ersten [length] Werte von [input] (abwechselnd je Kanal) um; liefert die fertigen Werte mit
@@ -40,16 +43,16 @@ class PcmConverter(
         val out = ArrayList<Short>(buffer.size / window + 1)
         var position = phase
         while (true) {
-            val index = position.toInt()
+            val index = (position / targetRate).toInt()
             if (index + window > buffer.size) break
             var sum = 0
             for (i in index until index + window) sum += buffer[i]
             out += (sum.toDouble() / window).roundToInt().toShort()
-            position += step
+            position += sourceRate
         }
-        val consumed = position.toInt().coerceAtMost(buffer.size)
+        val consumed = (position / targetRate).toInt().coerceAtMost(buffer.size)
         tail = buffer.copyOfRange(consumed, buffer.size)
-        phase = position - consumed
+        phase = position - consumed.toLong() * targetRate
         return out.toShortArray()
     }
 
