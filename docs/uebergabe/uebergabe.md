@@ -9,7 +9,7 @@ Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die
 - `main` = 0.56.0 (versionCode 97), Release v0.56.0 mit APK und Prüfsumme, Build grün. Enthält das neue Aussehen (Startseite D, Rezept A mit Reitern, Kochbuch B, Teigrechner A mit Erklärfenstern, Einstellungen A mit „Schnell“, Hinzufügen D) und „Aus Audio übernehmen“ (Beta, Qualität mit echter Aufnahme noch ungeprüft). Zweige `neues-design` und `zuhoeren-modus` sind erledigt (löschbar).
 - „Sammlung“ heißt jetzt „Kochbuch“ (Regeln in `CLAUDE.md`). „Aufnehmen“ (Rezept einsprechen) ist beschlossen, aber noch nicht programmiert (Schritt 3 von „Aus Sprache übernehmen“).
 - Offen: Erklärtexte im Teigrechner (Biga, Poolish, Sauerteig, Hefen) gegenlesen; Pasta/Kuchen ohne festes Ergebnis oben; Teigrechner passt noch nicht ganz auf einen Bildschirm; Rückmeldung des Inhabers nach Blick auf die Fotos (`bildschirmfotos/0.56.0`) und auf dem echten Handy.
-- Nächster Schritt: „Aus Sprache übernehmen“ (Mikrofon, Text live, Prüfen vor dem Entwurf), danach Weg zu 1.0 (Abnahmeliste unten).
+- Zweig `aufnehmen` (Version 0.57.0, Build grün, Run 39790677385, NICHT auf main): „Aufnehmen“ (Rezept einsprechen) mit `Dictation`/`VoskDictation`, Fenster im Bearbeiten-Bildschirm. Zuhören nur am echten Handy prüfbar. Nächster Schritt: Freigabe zum Veröffentlichen, danach Weg zu 1.0 (Abnahmeliste unten).
 
 ## Git-Stand
 - `main` = Version 0.54.0 (Squash-Merge von `teig-zeitplan`, Build grün, Release folgt aus dem Build auf main). Zweig `teig-zeitplan` ist erledigt.
