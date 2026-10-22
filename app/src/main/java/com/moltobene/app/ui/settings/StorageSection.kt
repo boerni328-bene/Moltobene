@@ -54,9 +54,10 @@ internal fun StorageSection(
         return
     }
 
-    // Immer gezeigt: Programm, Fotos, Rezepte. Die übrigen nur, wenn sie etwas belegen.
+    // Immer gezeigt: Programm, Fotos, Rezepte. Die übrigen nur, wenn sie etwas belegen; „Sonstiges“ erst ab 1 kB,
+    // denn ein paar Byte sagen nichts aus (die Summe zählt sie trotzdem mit).
     val always = setOf(Item.PROGRAM, Item.PHOTOS, Item.DATABASE)
-    Item.entries.filter { it in always || result[it] > 0 }.forEach { item ->
+    Item.entries.filter { it in always || result[it] >= if (it == Item.OTHER) 1024 else 1 }.forEach { item ->
         val name = stringResource(nameOf(item))
         val deleteDescription = stringResource(R.string.storage_delete_item, name)
         ListItem(
