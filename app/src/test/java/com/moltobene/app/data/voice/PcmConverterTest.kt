@@ -28,7 +28,7 @@ class PcmConverterTest {
     fun `44,1 kHz ergibt etwa 16 kHz und bleibt bei Gleichton gleich`() {
         val input = ShortArray(44_100) { 300 }
         val out = PcmConverter(44_100, 1).convert(input)
-        assertEquals(16_000, out.size.toDouble(), 3.0)
+        assertEquals(16_000.0, out.size.toDouble(), 3.0)
         assertTrue(out.all { it.toInt() == 300 })
     }
 

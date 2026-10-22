@@ -625,7 +625,7 @@ class AppTourTest(private val variant: DisplayVariant) {
     fun teigrechnerPastaUndKuchen() {
         openAddMenu()
         waitForText(text(R.string.dough_title))
-        clickVisible(text(R.string.dough_title))
+        composeRule.onNodeWithText(text(R.string.dough_title)).performScrollTo().performClick()
         waitForText(text(R.string.dough_save))
 
         clickVisible(text(R.string.dough_type_pasta))
@@ -695,7 +695,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         // Der Teigrechner steht im Menü des Hauptknopfs „Hinzufügen“.
         openAddMenu()
         waitForText(text(R.string.dough_title))
-        clickVisible(text(R.string.dough_title))
+        composeRule.onNodeWithText(text(R.string.dough_title)).performScrollTo().performClick()
         waitForText(text(R.string.dough_save))
         waitForText("4 " + text(R.string.dough_unit_balls, "250"), substring = true)
         screenshot("14a-teigrechner")
