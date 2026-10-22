@@ -336,6 +336,7 @@ internal fun AddChooser(
     onFromPhoto: () -> Unit,
     onFromText: () -> Unit,
     onFromFile: () -> Unit,
+    onFromAudio: () -> Unit,
     onDough: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -353,6 +354,7 @@ internal fun AddChooser(
                 OptionButton(R.drawable.ic_document_scanner, R.string.import_from_photo, onFromPhoto)
                 OptionButton(R.drawable.ic_content_paste, R.string.import_from_text, onFromText)
                 OptionButton(R.drawable.ic_description, R.string.import_from_file, onFromFile)
+                OptionButton(R.drawable.ic_graphic_eq, R.string.import_from_audio, onFromAudio)
                 HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.xs))
                 OptionButton(R.drawable.ic_calculate, R.string.dough_title, onDough)
             }

@@ -152,6 +152,15 @@
     <string name="link_error_not_allowed">This link does not lead to a public web page.</string>
     <string name="link_error">The page could not be read. The link is saved as the source.</string>
     <string name="import_from_file">Import from file</string>
+    <string name="import_from_audio">Import from audio</string>
+    <string name="audio_transcribing">Recognizing audio… Long recordings can take a while.</string>
+    <string name="audio_no_pack">“Import from audio” needs the recognition pack. It can be downloaded in Settings under “Voice input”.</string>
+    <string name="audio_nothing">No speech was recognized in the audio file.</string>
+    <string name="audio_too_long">The audio file is too long. Up to 30 minutes are possible.</string>
+    <string name="audio_unsupported">This audio format is not supported. Choose a file such as mp3, m4a or ogg.</string>
+    <string name="audio_low_memory">Not enough memory for recognition. Close other apps and try again.</string>
+    <string name="audio_error">The audio file could not be read.</string>
+    <string name="audio_done">Imported from spoken text (beta). Recognition makes mistakes, especially with amounts and names: check everything. The recognized text is under “Imported text”.</string>
     <string name="file_loading">Reading file …</string>
     <string name="file_done">Recipe imported from the file. Check that everything is in the right place.</string>
     <string name="video_done">Recipe imported from the video description. Compare it with the video: descriptions often lack amounts or steps.</string>

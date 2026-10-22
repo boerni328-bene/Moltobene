@@ -128,7 +128,7 @@ Das Englisch der Oberfläche ist amerikanisch („Favorite“, „Colors“, „
 
 - Keine direkte Anrede, neutral und knapp: „Rezept hinzufügen“, „Rezept wirklich löschen?“, „Noch keine Rezepte vorhanden“.
 - Schaltflächen nennen die Aktion („Löschen“, „Speichern“, „Verwerfen“), nie „OK“ oder „Ja“.
-- Erfassungswege heißen einheitlich „Aus Link übernehmen“, „Aus Foto übernehmen“, „Aus Text übernehmen“, „Aus Datei übernehmen“ (englisch “Import from link / photo / text / file”). „Text erkennen“ ist nur die Schaltfläche in der Seitenübersicht vor der Texterkennung.
+- Erfassungswege heißen einheitlich „Aus Link übernehmen“, „Aus Foto übernehmen“, „Aus Text übernehmen“, „Aus Datei übernehmen“, „Aus Audio übernehmen“ (englisch “Import from link / photo / text / file”). „Text erkennen“ ist nur die Schaltfläche in der Seitenübersicht vor der Texterkennung.
 - Meldungen sagen, was passiert ist und was man tun kann; keine Fachbegriffe, kein Amtsdeutsch.
 - Deutsche Anführungszeichen „…“, im Englischen “…”.
 

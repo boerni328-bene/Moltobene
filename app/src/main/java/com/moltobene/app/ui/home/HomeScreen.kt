@@ -81,6 +81,7 @@ fun HomeScreen(
     onAddFromText: () -> Unit,
     onAddFromLink: () -> Unit,
     onAddFromFile: () -> Unit,
+    onAddFromAudio: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
     val count by viewModel.recipeCount.collectAsStateWithLifecycle()
@@ -109,6 +110,10 @@ fun HomeScreen(
             onFromFile = {
                 chooseAdd = false
                 onAddFromFile()
+            },
+            onFromAudio = {
+                chooseAdd = false
+                onAddFromAudio()
             },
             onDough = {
                 chooseAdd = false

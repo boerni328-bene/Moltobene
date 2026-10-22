@@ -53,7 +53,6 @@ Zeitplan für Teige (#71, Stufe 1, Issue bleibt offen): „Teig starten“, Stan
 
 ## In Arbeit: „Aus Audio übernehmen“ und „Aus Sprache übernehmen“ (Zweig `zuhoeren-modus`, Beta, freigegeben 22.10.2026)
 Freigabe des Inhabers: Mikrofon-Zweck erweitert um „Rezept einsprechen“, neue Erfassungswege (Vision/CLAUDE.md, Manifest-Kommentar und Datenschutztext sind angepasst). Verworfen: Download oder Mitschnitt von YouTube-Ton (Bedingungen von YouTube, technisch blockiert). Kein Mikrofon bei „Aus Audio“.
-- Schritt 1 erledigt (ungebaut): `SpokenNumbers`, `SpokenRecipe` + Tests.
-- Schritt 2: freie Erkennung (Vosk ohne Grammatik, `VoiceInput` erweitern oder eigene `Transcriber`-Klasse), Audiodatei über Dateiauswahl lesen und mit `MediaExtractor`/`MediaCodec` zu 16-kHz-Mono-PCM umwandeln (keine neue Bibliothek), Kopie im Zwischenspeicher danach löschen, Text → „Aus Text übernehmen“, Rohtext als „Übernommener Text“.
+- Schritt 1 erledigt: `SpokenNumbers`, `SpokenRecipe` + Tests. Schritt 2 programmiert (ungebaut, 22.10.): `AudioDecoder`, `PcmConverter`, `VoskTranscriber`, `EditViewModel.importAudio`, Eintrag „Aus Audio übernehmen“ im Hinzufügen-Menü (Home und Sammlung), Texte DE/EN, Rundgang `hinzufuegenMitAudio`. **Ungeprüft:** Kompilieren, Unit-Tests, echte Erkennung (Qualität des kleinen Modells mit einer echten Aufnahme am Handy prüfen), Verhalten bei Dateien ohne Längenangabe.
 - Schritt 3: „Aus Sprache übernehmen“ mit Mikrofon, Text erscheint live, Prüfen vor dem Entwurf.
 - Danach: Texte DE/EN (feste Begriffe in CLAUDE.md ergänzen), Rundgang, Version 0.56.0, CHANGELOG, Qualität an echtem Beispiel prüfen (kleines Modell).

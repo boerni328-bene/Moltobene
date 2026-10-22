@@ -39,6 +39,9 @@ import com.moltobene.app.data.share.IncomingText
 import com.moltobene.app.data.share.RecipeFileReader
 import com.moltobene.app.data.web.WebAddress
 import com.moltobene.app.data.web.WebException
+import com.moltobene.app.data.voice.SpokenRecipe
+import com.moltobene.app.data.voice.TranscribeException
+import com.moltobene.app.data.voice.Transcriber
 import com.moltobene.app.data.web.WebImporter
 import com.moltobene.app.data.web.WebRecipe
 import com.moltobene.app.data.web.YouTube
@@ -107,6 +110,7 @@ class EditViewModel(
     private val sharedInput: SharedInput,
     private val webImporter: WebImporter,
     private val recipeFiles: RecipeFileReader,
+    private val transcriber: Transcriber,
 ) : ViewModel() {
 
     private val route = handle.toRoute<EditRoute>()
@@ -349,6 +353,7 @@ class EditViewModel(
         CHECK_LINK_TEXT -> R.string.link_text_done
         CHECK_FILE -> R.string.file_done
         CHECK_VIDEO -> R.string.video_done
+        CHECK_AUDIO -> R.string.audio_done
         else -> null
     }
 
@@ -529,6 +534,57 @@ class EditViewModel(
         if (!route.fromFile || startPromptShownField.value) return false
         startPromptShownField.value = true
         return true
+    }
+
+    /** „Aus Audio übernehmen“ in der Sammlung: Die Dateiauswahl erscheint beim ersten Öffnen von selbst. */
+    fun takeAudioPrompt(): Boolean {
+        if (!route.fromAudio || startPromptShownField.value) return false
+        startPromptShownField.value = true
+        return true
+    }
+
+    /**
+     * „Aus Audio übernehmen“ (Beta): Die Sprache in einer Audiodatei (Sprachnachricht, eigene Aufnahme …) wird auf dem
+     * Handy erkannt und wie Text aus „Aus Text übernehmen“ aufgeteilt; der erkannte Text bleibt vollständig als übernommener
+     * Text erhalten. Die Datei wird nur gelesen, nie kopiert oder gespeichert.
+     */
+    fun importAudio(uri: Uri) {
+        if (isImporting || isRecognizing) return
+        dismissProblem()
+        if (!transcriber.isAvailable()) {
+            reportProblem(R.string.audio_no_pack)
+            return
+        }
+        importing = R.string.audio_transcribing
+        importJob = viewModelScope.launch {
+            try {
+                val text = SpokenRecipe.text(transcriber.transcribe(uri))
+                if (text.isBlank()) {
+                    reportProblem(R.string.audio_nothing)
+                } else {
+                    importText(text)
+                    checkHintField.value = CHECK_AUDIO
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: TranscribeException) {
+                reportProblem(
+                    when (e.problem) {
+                        TranscribeException.Problem.NO_PACK -> R.string.audio_no_pack
+                        TranscribeException.Problem.UNSUPPORTED -> R.string.audio_unsupported
+                        TranscribeException.Problem.TOO_LONG -> R.string.audio_too_long
+                        TranscribeException.Problem.LOW_MEMORY -> R.string.audio_low_memory
+                        TranscribeException.Problem.FAILED -> R.string.audio_error
+                    },
+                )
+            } catch (e: Exception) {
+                reportProblem(R.string.audio_error)
+            } finally {
+                importing = null
+                importJob = null
+                saveDraft()
+            }
+        }
     }
 
     /** Vorbelegung für „Aus Link übernehmen“: der Link aus „Quelle“, z. B. für einen neuen Versuch ohne Netz. */
@@ -1347,6 +1403,7 @@ class EditViewModel(
         const val CHECK_LINK_TEXT = "linkText"
         const val CHECK_FILE = "file"
         const val CHECK_VIDEO = "video"
+        const val CHECK_AUDIO = "audio"
         /** Trennt die Felder in [snapshot]; kommt in eingegebenem Text nicht vor. */
         const val SNAPSHOT_SEPARATOR = "\u0000"
         /** Kantenlänge der Vorschaubilder in der Seitenübersicht. */

@@ -1114,6 +1114,18 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("21-text-erkannt")
     }
 
+    /**
+     * „Hinzufügen“ zeigt alle Wege, auch „Aus Audio übernehmen“ (Beta). Die Dateiauswahl von Android und die Erkennung
+     * selbst brauchen das Erkennungspaket und echte Audiodateien und gehören nicht in den Rundgang.
+     */
+    @Test
+    fun hinzufuegenMitAudio() {
+        openAddMenu()
+        waitForText(text(R.string.import_from_audio))
+        composeRule.onNodeWithText(text(R.string.import_from_file)).assertExists()
+        screenshot("22a-hinzufuegen-wege")
+    }
+
     @Test
     fun ausTextUebernehmen() {
         openAddMenu()

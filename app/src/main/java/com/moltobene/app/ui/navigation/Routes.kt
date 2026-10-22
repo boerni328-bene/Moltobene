@@ -17,7 +17,8 @@ data class RecipeRoute(val id: String)
  * [id] leer = neues Rezept hinzufügen; [fromPhoto] = gleich mit der Texterkennung beginnen;
  * [fromText] = gleich mit „Aus Text übernehmen“ beginnen;
  * [fromLink] = gleich mit „Aus Link übernehmen“ beginnen;
- * [fromFile] = gleich die Dateiauswahl für „Aus Datei übernehmen“ öffnen; [fromShare] = Bilder oder Text aus „Teilen mit…“ übernehmen.
+ * [fromFile] = gleich die Dateiauswahl für „Aus Datei übernehmen“ öffnen; [fromAudio] = dasselbe für „Aus Audio übernehmen“;
+ * [fromShare] = Bilder oder Text aus „Teilen mit…“ übernehmen.
  */
 @Serializable
 data class EditRoute(
@@ -26,6 +27,7 @@ data class EditRoute(
     val fromText: Boolean = false,
     val fromLink: Boolean = false,
     val fromFile: Boolean = false,
+    val fromAudio: Boolean = false,
     val fromShare: Boolean = false,
 )
 

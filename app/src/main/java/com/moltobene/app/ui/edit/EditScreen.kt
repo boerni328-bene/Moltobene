@@ -111,6 +111,9 @@ private val RECIPE_FILE_TYPES = arrayOf(
     "application/json", "application/ld+json", "text/html", "text/plain", "application/octet-stream",
 )
 
+/** Dateitypen für „Aus Audio übernehmen“: Audiodateien aller Art, auch Sprachnachrichten (ogg/opus). */
+private val AUDIO_FILE_TYPES = arrayOf("audio/*", "application/ogg")
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditScreen(
@@ -173,6 +176,19 @@ fun EditScreen(
         if (viewModel.takeFilePrompt()) {
             try {
                 openRecipeFile.launch(RECIPE_FILE_TYPES)
+            } catch (e: ActivityNotFoundException) {
+                scope.launch { snackbarHostState.showSnackbar(fileChooserMissing) }
+            }
+        }
+    }
+    // „Aus Audio übernehmen“ (Beta): Audiodatei in der Dateiauswahl von Android wählen; sie wird nur gelesen.
+    val openAudioFile = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) viewModel.importAudio(uri)
+    }
+    LaunchedEffect(Unit) {
+        if (viewModel.takeAudioPrompt()) {
+            try {
+                openAudioFile.launch(AUDIO_FILE_TYPES)
             } catch (e: ActivityNotFoundException) {
                 scope.launch { snackbarHostState.showSnackbar(fileChooserMissing) }
             }

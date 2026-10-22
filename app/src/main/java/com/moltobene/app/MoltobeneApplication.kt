@@ -21,7 +21,10 @@ import com.moltobene.app.data.knowhow.KnowHowStore
 import com.moltobene.app.data.speech.AndroidSpeechOutput
 import com.moltobene.app.data.speech.SpeechOutput
 import com.moltobene.app.data.translate.LanguagePackManager
+import com.moltobene.app.data.voice.AudioDecoder
+import com.moltobene.app.data.voice.Transcriber
 import com.moltobene.app.data.voice.VoiceInput
+import com.moltobene.app.data.voice.VoskTranscriber
 import com.moltobene.app.data.voice.VoicePackManager
 import com.moltobene.app.data.voice.VoskVoiceInput
 import com.moltobene.app.data.translate.MarianEngine
@@ -126,6 +129,10 @@ class AppContainer(context: Context) {
     /** Spracheingabe in der Kochansicht (#80). Der Rundgang setzt hier eine nachgestellte Fassung ein. */
     @VisibleForTesting
     var voice: VoiceInput = VoskVoiceInput({ voicePack.directory }, appScope)
+
+    /** Freie Spracherkennung für „Aus Audio übernehmen“. Der Rundgang setzt hier eine nachgestellte Fassung ein. */
+    @VisibleForTesting
+    var transcriber: Transcriber = VoskTranscriber(AudioDecoder(appContext)) { voicePack.directory }
 
     /** Übersetzer aus dem Sprachpaket. Der Rundgang setzt hier einen nachgestellten Übersetzer ein. */
     @VisibleForTesting

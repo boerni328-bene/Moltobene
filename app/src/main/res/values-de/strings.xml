@@ -151,6 +151,15 @@
     <string name="link_error_not_allowed">Dieser Link führt nicht zu einer öffentlichen Internetseite.</string>
     <string name="link_error">Die Seite konnte nicht gelesen werden. Der Link ist als Quelle gespeichert.</string>
     <string name="import_from_file">Aus Datei übernehmen</string>
+    <string name="import_from_audio">Aus Audio übernehmen</string>
+    <string name="audio_transcribing">Audio wird erkannt … Bei langen Aufnahmen kann das etwas dauern.</string>
+    <string name="audio_no_pack">Für „Aus Audio übernehmen“ wird das Erkennungspaket gebraucht. Es lässt sich in den Einstellungen unter „Spracheingabe“ laden.</string>
+    <string name="audio_nothing">In der Audiodatei wurde keine Sprache erkannt.</string>
+    <string name="audio_too_long">Die Audiodatei ist zu lang. Möglich sind bis zu 30 Minuten.</string>
+    <string name="audio_unsupported">Dieses Audioformat wird nicht unterstützt. Besser eine Datei wie mp3, m4a oder ogg wählen.</string>
+    <string name="audio_low_memory">Zu wenig Arbeitsspeicher für die Erkennung. Andere Apps schließen und es erneut versuchen.</string>
+    <string name="audio_error">Die Audiodatei konnte nicht gelesen werden.</string>
+    <string name="audio_done">Aus gesprochenem Text übernommen (Beta). Die Erkennung macht Fehler, vor allem bei Mengen und Namen: Alles prüfen. Der erkannte Text steht unter „Übernommener Text“.</string>
     <string name="file_loading">Datei wird gelesen …</string>
     <string name="file_done">Rezept aus der Datei übernommen. Prüfen, ob alles an der richtigen Stelle steht.</string>
     <string name="video_done">Rezept aus der Videobeschreibung übernommen. Mit dem Video vergleichen: In Beschreibungen fehlen oft Mengen oder Schritte.</string>
