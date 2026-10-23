@@ -3,6 +3,15 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.58.0] – 2026-10-23 (versionCode 99)
+
+### Neu
+- **Im Rezept wischen.** Nach links oder rechts wischen wechselt zwischen Zutaten, Zubereitung, Notizen und Quelle; die Reiter lassen sich weiter antippen.
+- **Reiter „Quelle“.** Quelle, Video und Originalseiten stehen gesammelt auf einem eigenen Reiter und nicht mehr unter den Notizen. Der Reiter erscheint nur, wenn es etwas davon gibt.
+
+### Geändert
+- Im Teigrechner teilt sich das Öl die Reihe mit dem Hinweis „in % vom Mehl“ und braucht keine eigene Zeile mehr.
+
 ## [0.57.0] – 2026-10-22 (versionCode 98)
 
 ### Neu

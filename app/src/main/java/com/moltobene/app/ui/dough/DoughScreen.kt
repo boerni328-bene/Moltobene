@@ -245,15 +245,28 @@ internal fun Card(title: String, onHelp: (() -> Unit)? = null, highlighted: Bool
  * Schrift untereinander über die volle Breite. In der Zweierreihe fehlen Plus und Minus; der Regler bleibt.
  */
 @Composable
-internal fun Fields(vararg fields: @Composable (Modifier) -> Unit, weights: List<Float>? = null) {
+internal fun Fields(vararg fields: @Composable (Modifier) -> Unit, weights: List<Float>? = null, trailing: (@Composable () -> Unit)? = null) {
     if (isLargeText()) {
-        Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) { fields.forEach { it(Modifier.fillMaxWidth()) } }
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+            fields.forEach { it(Modifier.fillMaxWidth()) }
+            trailing?.invoke()
+        }
         return
     }
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
         fields.toList().chunked(2).forEach { pair ->
             if (pair.size == 1) {
-                pair[0](Modifier.fillMaxWidth())
+                if (trailing == null) {
+                    pair[0](Modifier.fillMaxWidth())
+                } else {
+                    // Das letzte einzelne Feld teilt sich die Reihe mit dem Hinweis, statt eine halb leere Reihe zu füllen.
+                    CompositionLocalProvider(LocalDoughCompactField provides true) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalAlignment = Alignment.CenterVertically) {
+                            pair[0](Modifier.weight(1f))
+                            Box(modifier = Modifier.weight(1f)) { trailing() }
+                        }
+                    }
+                }
             } else {
                 CompositionLocalProvider(LocalDoughCompactField provides true) {
                     Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
@@ -756,11 +769,6 @@ private fun DoughForm(
                         )
                     },
                 )
-                Text(
-                    stringResource(R.string.dough_percent_note),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
                 Fields(
                     { m ->
                         NumberField(
@@ -778,6 +786,14 @@ private fun DoughForm(
                         NumberField(
                             stringResource(R.string.dough_oil), oil, { oil = it }, issueFor(DoughField.OIL), m, suffix = "%",
                             stepping = stepping(DoughField.OIL, defaults.oil),
+                        )
+                    },
+                    // Der Hinweis steht neben dem Öl, statt eine eigene Zeile zu belegen.
+                    trailing = {
+                        Text(
+                            stringResource(R.string.dough_percent_note),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     },
                 )
