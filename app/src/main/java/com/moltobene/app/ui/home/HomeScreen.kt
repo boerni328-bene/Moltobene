@@ -64,6 +64,7 @@ import com.moltobene.app.ui.components.isLargeText
 import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.schedule.formatMoment
 import com.moltobene.app.ui.theme.Spacing
+import com.moltobene.app.ui.components.readingWidth
 
 /**
  * Startseite (Wunsch des Projektinhabers vom 12.10.2026, #81): große Kacheln statt gleich der Rezeptliste. Zuerst
@@ -157,6 +158,7 @@ fun HomeScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
+                .readingWidth()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = Spacing.m),
             verticalArrangement = Arrangement.spacedBy(Spacing.s),

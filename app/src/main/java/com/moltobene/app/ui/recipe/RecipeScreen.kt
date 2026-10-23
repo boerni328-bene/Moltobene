@@ -179,6 +179,16 @@ import com.moltobene.app.ui.components.RecipePhoto
 import com.moltobene.app.ui.components.RecipePhotoLarge
 import com.moltobene.app.ui.components.TagLabels
 import com.moltobene.app.ui.components.isLargeText
+import com.moltobene.app.ui.components.isWideLayout
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import com.moltobene.app.ui.schedule.ScheduleActions
 import com.moltobene.app.ui.schedule.ScheduleCard
 import com.moltobene.app.ui.schedule.rememberNow
@@ -299,7 +309,7 @@ fun RecipeScreen(
     }
 
     // Mit Foto und ohne Übersetzungsbalken liegt das Foto unter der Leiste, der Inhalt nutzt dann die Höhe der Leiste mit.
-    val barOverPhoto = !deleting && (state as? RecipeUiState.Content)?.let {
+    val barOverPhoto = !deleting && !isWideLayout() && (state as? RecipeUiState.Content)?.let {
         it.photo != null && !translationBarShown(it.recipe, translation)
     } == true
     Scaffold(
@@ -800,7 +810,258 @@ private fun RecipeContent(
         else -> null
     }
 
-    Column(modifier = modifier.fillMaxSize()) {
+    // Tablet (#91): Ab etwa 720 dp Breite stehen Zutaten und Zubereitung nebeneinander, jede Spalte blättert für sich.
+    // Pfeiltasten (Tablet mit Tastatur, Chromebook) gehen zum nächsten und vorigen Schritt.
+    val keyFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { runCatching { keyFocus.requestFocus() } }
+    val wide = isWideLayout()
+    var adjusting by rememberSaveable { mutableStateOf(false) }
+    val videoLink = RecipeShareText.videoLink(recipe)
+    val shownTabs = buildList {
+        if (recipe.ingredients.isNotEmpty() && !wide) add(TAB_INGREDIENTS)
+        if (recipe.steps.isNotEmpty()) add(TAB_STEPS)
+        add(TAB_NOTES)
+        if (recipe.source != null || videoLink != null || recipe.pageIds.isNotEmpty()) add(TAB_SOURCE)
+    }
+    var tabKey by rememberSaveable { mutableStateOf(shownTabs.first()) }
+    val tab = if (tabKey in shownTabs) tabKey else shownTabs.first()
+    var lastStep by rememberSaveable { mutableStateOf(cooking.currentStep) }
+    LaunchedEffect(cooking.currentStep) {
+        if (cooking.currentStep != lastStep) {
+            lastStep = cooking.currentStep
+            if (cooking.currentStep != null && TAB_STEPS in shownTabs) tabKey = TAB_STEPS
+        }
+    }
+    val swipeThreshold = with(LocalDensity.current) { 64.dp.toPx() }
+    val swipe = Modifier.pointerInput(shownTabs, tab) {
+        var total = 0f
+        detectHorizontalDragGestures(
+            onDragStart = { total = 0f },
+            onDragEnd = {
+                val index = shownTabs.indexOf(tab)
+                if (total <= -swipeThreshold && index < shownTabs.lastIndex) {
+                    tabKey = shownTabs[index + 1]
+                } else if (total >= swipeThreshold && index > 0) {
+                    tabKey = shownTabs[index - 1]
+                }
+            },
+            onDragCancel = { total = 0f },
+            onHorizontalDrag = { _, delta -> total += delta },
+        )
+    }
+
+    val tabRow: @Composable () -> Unit = {
+        ScrollableTabRow(selectedTabIndex = shownTabs.indexOf(tab), edgePadding = 0.dp, containerColor = Color.Transparent) {
+            shownTabs.forEach { key ->
+                Tab(
+                    selected = key == tab,
+                    onClick = { tabKey = key },
+                    text = {
+                        Text(
+                            stringResource(
+                                when (key) {
+                                    TAB_INGREDIENTS -> R.string.ingredients
+                                    TAB_STEPS -> R.string.instructions
+                                    TAB_SOURCE -> R.string.source
+                                    else -> R.string.notes
+                                },
+                            ),
+                        )
+                    },
+                )
+            }
+        }
+    }
+    val headerContent: @Composable () -> Unit = {
+        if (recipe.isDraft) DraftLabel()
+        Text(
+            text = localized(title.ifBlank { stringResource(R.string.untitled_recipe) }, textLocale),
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.semantics { heading() },
+        )
+        if (translated != null && recipe.title.isNotBlank() && recipe.title != title) {
+            Text(
+                text = stringResource(R.string.translation_original_title, recipe.title),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Column(modifier = Modifier.padding(horizontal = Spacing.s, vertical = Spacing.xs)) {
+        AdjustRow(onAdjust = { adjusting = true }) {
+        if (originalServings != null) {
+            // Nach Backform bleibt es bei der Anzahl der Formen; nur die Mengen ändern sich (#67).
+            val exact = if (cooking.adjustment is Adjustment.ByPan) originalServings.toDouble() else originalServings * factor
+            val shown = exact.roundToInt().coerceIn(1, Adjustment.MAX_SERVINGS)
+            ServingsControl(
+                shown = shown,
+                approximate = abs(exact - shown) >= SERVINGS_TOLERANCE,
+                unit = servingsUnit,
+                onChange = { cooking.onAdjust(if (it == originalServings) null else Adjustment.Servings(it)) },
+            )
+        } else if (servingsUnit != null) {
+            // Eine Backform ohne Anzahl (#63), z. B. „Springform Ø 26 cm“.
+            Text(
+                text = localized(servingsUnit, textLocale),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        }
+        run {
+            AdjustActions(
+                adjusted = factor != 1.0,
+                hint = when (val current = cooking.adjustment) {
+                    is Adjustment.ByIngredient -> stringResource(
+                        R.string.adjust_ingredient_hint,
+                        lines.getOrNull(current.index)?.joinToString("") { it.text }.orEmpty(),
+                        texts.getOrNull(current.index).orEmpty(),
+                    )
+                    is Adjustment.ByPan -> stringResource(
+                        R.string.adjust_pan_hint,
+                        panLabel(current.to, current.inch),
+                        panLabel(current.from, current.inch),
+                    )
+                    else -> originalServings?.let { stringResource(R.string.servings_scaled_hint, servingsText(it, servingsUnit)) }
+                },
+                bakingNote = cooking.adjustment is Adjustment.ByPan,
+                onAdjust = { adjusting = true },
+                onReset = { cooking.onAdjust(null) },
+            )
+        }
+            }
+        }
+        if (adjusting) {
+            AdjustDialog(
+                servings = originalServings?.let { (it * factor).roundToInt().coerceIn(1, Adjustment.MAX_SERVINGS) },
+                servingsUnit = servingsUnit,
+                choices = choices,
+                decimalSeparator = if (recipeLanguage == "en") '.' else ',',
+                recipePan = remember(recipe.servingsUnit) { PanScaling.parse(recipe.servingsUnit) },
+                onServings = {
+                    adjusting = false
+                    cooking.onAdjust(if (it == originalServings) null else Adjustment.Servings(it))
+                },
+                onIngredient = { choice, amount ->
+                    adjusting = false
+                    cooking.onAdjust(Adjustment.byIngredient(choice.index, choice.line, amount))
+                },
+                onPan = { from, to, inch ->
+                    adjusting = false
+                    cooking.onAdjust(Adjustment.ByPan(from, to, inch))
+                },
+                onDismiss = { adjusting = false },
+            )
+        }
+        RecipeTimes(recipe.prepMinutes, recipe.totalMinutes)
+        if (recipe.tags.isNotEmpty()) RecipeTags(recipe.tags)
+
+        if (recipe.timeline.isNotEmpty()) {
+            ScheduleCard(timeline = recipe.timeline, runs = runs, now = rememberNow(), actions = schedule)
+        }
+    }
+    val ingredientsContent: @Composable () -> Unit = {
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Column(modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.xs)) {
+        recipe.ingredients.forEachIndexed { index, ingredient ->
+            if (ingredient.isHeading) {
+                Text(
+                    text = localized(texts[index], textLocale),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = Spacing.s).semantics { heading() },
+                )
+            } else {
+                if (index > 0 && !recipe.ingredients[index - 1].isHeading) DashedDivider()
+                IngredientRow(
+                    parts = lines[index],
+                    locale = textLocale,
+                    checked = RecipeViewModel.progressKey(index, ingredient.text) in cooking.checked,
+                    onToggle = { cooking.onToggleIngredient(index, ingredient.text) },
+                )
+            }
+        }
+    }
+            }
+    }
+    val stepsContent: @Composable () -> Unit = {
+        val steps = translated?.steps?.takeIf { it.size == recipe.steps.size } ?: recipe.steps
+        recipe.steps.forEachIndexed { index, step ->
+            StepRow(
+                number = index + 1,
+                text = localized(steps[index], textLocale),
+                current = cooking.currentStep == RecipeViewModel.progressKey(index, step),
+                barInset = barInset,
+                onClick = { cooking.onToggleStep(index, step) },
+            )
+        }
+    }
+    val otherContent: @Composable () -> Unit = {
+        if (tab == TAB_NOTES) NotesSection(notes = recipe.notes, onSave = onSaveNotes)
+
+        if (tab == TAB_SOURCE) recipe.source?.let { source ->
+            SectionTitle(stringResource(R.string.source))
+            val url = source.url
+            if (url != null && RecipeText.isWebLink(url)) {
+                SourceLink(url = url, snackbarHostState = snackbarHostState)
+            } else {
+                val resources = LocalResources.current
+                val text = listOfNotNull(
+                    source.name,
+                    source.page?.let { page -> RecipeText.formatPage(page) { resources.getString(R.string.source_page, it) } },
+                ).joinToString(", ")
+                if (text.isNotBlank()) Text(text, style = MaterialTheme.typography.bodyLarge)
+            }
+        }
+
+        // Der Link zum Video, wenn er nicht schon als Quelle dasteht (z. B. bei einem Rezept nur aus dem Video).
+        if (tab == TAB_SOURCE) videoLink?.let { video ->
+            SectionTitle(stringResource(R.string.video))
+            if (RecipeText.isWebLink(video)) {
+                SourceLink(url = video, snackbarHostState = snackbarHostState)
+            } else {
+                Text(video, style = MaterialTheme.typography.bodyLarge)
+            }
+        }
+
+        // Originalseiten (#38), z. B. die Kochbuchseite oder ein handgeschriebenes Rezept zum Nachlesen.
+        if (tab == TAB_SOURCE && recipe.pageIds.isNotEmpty()) {
+            OutlinedButton(onClick = onShowPages, modifier = Modifier.padding(top = Spacing.m)) {
+                Icon(painterResource(R.drawable.ic_document_scanner), contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.size(Spacing.s))
+                Text(pluralStringResource(R.plurals.original_pages_show, recipe.pageIds.size, recipe.pageIds.size))
+            }
+        }
+    }
+    val tabContent: @Composable () -> Unit = {
+        if (tab == TAB_INGREDIENTS) ingredientsContent()
+        if (tab == TAB_STEPS) stepsContent()
+        otherContent()
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .focusRequester(keyFocus)
+            .focusable()
+            .onKeyEvent { event ->
+                if (event.type != KeyEventType.KeyDown) return@onKeyEvent false
+                when (event.key) {
+                    Key.DirectionRight -> move(cooking.onNextStep()).let { true }
+                    Key.DirectionLeft -> move(cooking.onPreviousStep()).let { true }
+                    else -> false
+                }
+            },
+    ) {
         // Der Übersetzungsbalken (Fortschritt, Hinweis, Fehler) steht fest unter der Leiste und wandert beim Blättern nicht
         // mit (Wunsch vom 14.10.2026).
         if (translationBarShown(recipe, translation.state) && originalLanguage != null) {
@@ -810,252 +1071,62 @@ private fun RecipeContent(
                 }
             }
         }
-        Column(
-            modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(scrollState),
-        ) {
-            if (photo != null) {
-                // Beim Kochen soll Platz für Zutaten und Schritte bleiben: höchstens etwa 5:3 hoch, höhere Fotos werden zugeschnitten.
-                RecipePhotoLarge(file = photo, onOpen = onShowPhoto, modifier = Modifier.fillMaxWidth().clip(photoShape), minRatio = COOKING_PHOTO_MIN_RATIO)
-            } else {
-                RecipePhoto(file = null, placeholderIconSize = 40.dp, modifier = Modifier.fillMaxWidth().height(120.dp).clip(photoShape))
-            }
-
-            Column(
-                modifier = Modifier.padding(Spacing.m),
-                verticalArrangement = Arrangement.spacedBy(Spacing.s),
-            ) {
-                if (recipe.isDraft) DraftLabel()
-                Text(
-                    text = localized(title.ifBlank { stringResource(R.string.untitled_recipe) }, textLocale),
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.semantics { heading() },
-                )
-                if (translated != null && recipe.title.isNotBlank() && recipe.title != title) {
-                    Text(
-                        text = stringResource(R.string.translation_original_title, recipe.title),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-
-                var adjusting by rememberSaveable { mutableStateOf(false) }
-                Surface(
-                    color = MaterialTheme.colorScheme.surfaceContainer,
-                    shape = MaterialTheme.shapes.large,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Column(modifier = Modifier.padding(horizontal = Spacing.s, vertical = Spacing.xs)) {
-                AdjustRow(onAdjust = { adjusting = true }) {
-                if (originalServings != null) {
-                    // Nach Backform bleibt es bei der Anzahl der Formen; nur die Mengen ändern sich (#67).
-                    val exact = if (cooking.adjustment is Adjustment.ByPan) originalServings.toDouble() else originalServings * factor
-                    val shown = exact.roundToInt().coerceIn(1, Adjustment.MAX_SERVINGS)
-                    ServingsControl(
-                        shown = shown,
-                        approximate = abs(exact - shown) >= SERVINGS_TOLERANCE,
-                        unit = servingsUnit,
-                        onChange = { cooking.onAdjust(if (it == originalServings) null else Adjustment.Servings(it)) },
-                    )
-                } else if (servingsUnit != null) {
-                    // Eine Backform ohne Anzahl (#63), z. B. „Springform Ø 26 cm“.
-                    Text(
-                        text = localized(servingsUnit, textLocale),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                }
-                run {
-                    AdjustActions(
-                        adjusted = factor != 1.0,
-                        hint = when (val current = cooking.adjustment) {
-                            is Adjustment.ByIngredient -> stringResource(
-                                R.string.adjust_ingredient_hint,
-                                lines.getOrNull(current.index)?.joinToString("") { it.text }.orEmpty(),
-                                texts.getOrNull(current.index).orEmpty(),
-                            )
-                            is Adjustment.ByPan -> stringResource(
-                                R.string.adjust_pan_hint,
-                                panLabel(current.to, current.inch),
-                                panLabel(current.from, current.inch),
-                            )
-                            else -> originalServings?.let { stringResource(R.string.servings_scaled_hint, servingsText(it, servingsUnit)) }
-                        },
-                        bakingNote = cooking.adjustment is Adjustment.ByPan,
-                        onAdjust = { adjusting = true },
-                        onReset = { cooking.onAdjust(null) },
-                    )
-                }
+        if (wide) {
+            // Tablet (#91): links Titel, Menge und Zutaten, rechts Foto und Zubereitung; jede Spalte blättert für sich.
+            Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                Column(modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(scrollState)) {
+                    Column(
+                        modifier = Modifier.padding(Spacing.m),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.s),
+                    ) {
+                        headerContent()
+                        if (recipe.ingredients.isNotEmpty()) {
+                            SectionTitle(stringResource(R.string.ingredients))
+                            ingredientsContent()
+                        }
                     }
                 }
-                if (adjusting) {
-                    AdjustDialog(
-                        servings = originalServings?.let { (it * factor).roundToInt().coerceIn(1, Adjustment.MAX_SERVINGS) },
-                        servingsUnit = servingsUnit,
-                        choices = choices,
-                        decimalSeparator = if (recipeLanguage == "en") '.' else ',',
-                        recipePan = remember(recipe.servingsUnit) { PanScaling.parse(recipe.servingsUnit) },
-                        onServings = {
-                            adjusting = false
-                            cooking.onAdjust(if (it == originalServings) null else Adjustment.Servings(it))
-                        },
-                        onIngredient = { choice, amount ->
-                            adjusting = false
-                            cooking.onAdjust(Adjustment.byIngredient(choice.index, choice.line, amount))
-                        },
-                        onPan = { from, to, inch ->
-                            adjusting = false
-                            cooking.onAdjust(Adjustment.ByPan(from, to, inch))
-                        },
-                        onDismiss = { adjusting = false },
-                    )
-                }
-                RecipeTimes(recipe.prepMinutes, recipe.totalMinutes)
-                if (recipe.tags.isNotEmpty()) RecipeTags(recipe.tags)
-
-                if (recipe.timeline.isNotEmpty()) {
-                    ScheduleCard(timeline = recipe.timeline, runs = runs, now = rememberNow(), actions = schedule)
-                }
-
-                // Reiter (Entwurf vom 22.10.2026): Zutaten, Zubereitung und Notizen nacheinander statt untereinander. Beim
-                // Weiterschalten mit der Kochleiste springt die Ansicht zur Zubereitung.
-                // „Quelle“ sammelt Quelle, Video und Originalseiten; der Reiter fehlt, wenn es nichts davon gibt.
-                val videoLink = RecipeShareText.videoLink(recipe)
-                val shownTabs = buildList {
-                    if (recipe.ingredients.isNotEmpty()) add(TAB_INGREDIENTS)
-                    if (recipe.steps.isNotEmpty()) add(TAB_STEPS)
-                    add(TAB_NOTES)
-                    if (recipe.source != null || videoLink != null || recipe.pageIds.isNotEmpty()) add(TAB_SOURCE)
-                }
-                var tabKey by rememberSaveable { mutableStateOf(shownTabs.first()) }
-                val tab = if (tabKey in shownTabs) tabKey else shownTabs.first()
-                var lastStep by rememberSaveable { mutableStateOf(cooking.currentStep) }
-                LaunchedEffect(cooking.currentStep) {
-                    if (cooking.currentStep != lastStep) {
-                        lastStep = cooking.currentStep
-                        if (cooking.currentStep != null && TAB_STEPS in shownTabs) tabKey = TAB_STEPS
-                    }
-                }
-                ScrollableTabRow(selectedTabIndex = shownTabs.indexOf(tab), edgePadding = 0.dp, containerColor = Color.Transparent) {
-                    shownTabs.forEach { key ->
-                        Tab(
-                            selected = key == tab,
-                            onClick = { tabKey = key },
-                            text = {
-                                Text(
-                                    stringResource(
-                                        when (key) {
-                                            TAB_INGREDIENTS -> R.string.ingredients
-                                            TAB_STEPS -> R.string.instructions
-                                            TAB_SOURCE -> R.string.source
-                                            else -> R.string.notes
-                                        },
-                                    ),
-                                )
-                            },
+                Column(modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState())) {
+                    if (photo != null) {
+                        RecipePhotoLarge(
+                            file = photo,
+                            onOpen = onShowPhoto,
+                            modifier = Modifier.padding(horizontal = Spacing.m).fillMaxWidth().clip(MaterialTheme.shapes.large),
+                            minRatio = WIDE_PHOTO_MIN_RATIO,
                         )
                     }
+                    Column(
+                        modifier = Modifier.padding(Spacing.m),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.s),
+                    ) {
+                        tabRow()
+                        Column(
+                            modifier = Modifier.fillMaxWidth().heightIn(min = 240.dp).then(swipe),
+                            verticalArrangement = Arrangement.spacedBy(Spacing.s),
+                        ) { tabContent() }
+                    }
                 }
-
-                // Nach links oder rechts wischen wechselt den Reiter (Wunsch des Projektinhabers vom 23.10.2026).
-                val swipeThreshold = with(LocalDensity.current) { 64.dp.toPx() }
-                val swipe = Modifier.pointerInput(shownTabs, tab) {
-                    var total = 0f
-                    detectHorizontalDragGestures(
-                        onDragStart = { total = 0f },
-                        onDragEnd = {
-                            val index = shownTabs.indexOf(tab)
-                            if (total <= -swipeThreshold && index < shownTabs.lastIndex) {
-                                tabKey = shownTabs[index + 1]
-                            } else if (total >= swipeThreshold && index > 0) {
-                                tabKey = shownTabs[index - 1]
-                            }
-                        },
-                        onDragCancel = { total = 0f },
-                        onHorizontalDrag = { _, delta -> total += delta },
-                    )
+            }
+        } else {
+            Column(
+                modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(scrollState),
+            ) {
+                if (photo != null) {
+                    // Beim Kochen soll Platz für Zutaten und Schritte bleiben: höchstens etwa 5:3 hoch, höhere Fotos werden zugeschnitten.
+                    RecipePhotoLarge(file = photo, onOpen = onShowPhoto, modifier = Modifier.fillMaxWidth().clip(photoShape), minRatio = COOKING_PHOTO_MIN_RATIO)
+                } else {
+                    RecipePhoto(file = null, placeholderIconSize = 40.dp, modifier = Modifier.fillMaxWidth().height(120.dp).clip(photoShape))
                 }
                 Column(
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 240.dp).then(swipe),
+                    modifier = Modifier.padding(Spacing.m),
                     verticalArrangement = Arrangement.spacedBy(Spacing.s),
                 ) {
-                if (tab == TAB_INGREDIENTS) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.surfaceContainer,
-                        shape = MaterialTheme.shapes.large,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Column(modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.xs)) {
-                    recipe.ingredients.forEachIndexed { index, ingredient ->
-                        if (ingredient.isHeading) {
-                            Text(
-                                text = localized(texts[index], textLocale),
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(top = Spacing.s).semantics { heading() },
-                            )
-                        } else {
-                            if (index > 0 && !recipe.ingredients[index - 1].isHeading) DashedDivider()
-                            IngredientRow(
-                                parts = lines[index],
-                                locale = textLocale,
-                                checked = RecipeViewModel.progressKey(index, ingredient.text) in cooking.checked,
-                                onToggle = { cooking.onToggleIngredient(index, ingredient.text) },
-                            )
-                        }
-                    }
-                }
-                        }
-                    }
-
-                if (tab == TAB_STEPS) {
-                    val steps = translated?.steps?.takeIf { it.size == recipe.steps.size } ?: recipe.steps
-                    recipe.steps.forEachIndexed { index, step ->
-                        StepRow(
-                            number = index + 1,
-                            text = localized(steps[index], textLocale),
-                            current = cooking.currentStep == RecipeViewModel.progressKey(index, step),
-                            barInset = barInset,
-                            onClick = { cooking.onToggleStep(index, step) },
-                        )
-                    }
-                }
-
-                if (tab == TAB_NOTES) NotesSection(notes = recipe.notes, onSave = onSaveNotes)
-
-                if (tab == TAB_SOURCE) recipe.source?.let { source ->
-                    SectionTitle(stringResource(R.string.source))
-                    val url = source.url
-                    if (url != null && RecipeText.isWebLink(url)) {
-                        SourceLink(url = url, snackbarHostState = snackbarHostState)
-                    } else {
-                        val resources = LocalResources.current
-                        val text = listOfNotNull(
-                            source.name,
-                            source.page?.let { page -> RecipeText.formatPage(page) { resources.getString(R.string.source_page, it) } },
-                        ).joinToString(", ")
-                        if (text.isNotBlank()) Text(text, style = MaterialTheme.typography.bodyLarge)
-                    }
-                }
-
-                // Der Link zum Video, wenn er nicht schon als Quelle dasteht (z. B. bei einem Rezept nur aus dem Video).
-                if (tab == TAB_SOURCE) videoLink?.let { video ->
-                    SectionTitle(stringResource(R.string.video))
-                    if (RecipeText.isWebLink(video)) {
-                        SourceLink(url = video, snackbarHostState = snackbarHostState)
-                    } else {
-                        Text(video, style = MaterialTheme.typography.bodyLarge)
-                    }
-                }
-
-                // Originalseiten (#38), z. B. die Kochbuchseite oder ein handgeschriebenes Rezept zum Nachlesen.
-                if (tab == TAB_SOURCE && recipe.pageIds.isNotEmpty()) {
-                    OutlinedButton(onClick = onShowPages, modifier = Modifier.padding(top = Spacing.m)) {
-                        Icon(painterResource(R.drawable.ic_document_scanner), contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.size(Spacing.s))
-                        Text(pluralStringResource(R.plurals.original_pages_show, recipe.pageIds.size, recipe.pageIds.size))
-                    }
-                }
+                    headerContent()
+                    tabRow()
+                    Column(
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 240.dp).then(swipe),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.s),
+                    ) { tabContent() }
                 }
             }
         }
@@ -1611,6 +1682,7 @@ private fun RecipeTags(tags: List<Tag>) {
 
 /** Kleinstes Seitenverhältnis (Breite zu Höhe) des Fotos in der Rezeptansicht: nie höher als 5:3. */
 private const val COOKING_PHOTO_MIN_RATIO = 2f
+private const val WIDE_PHOTO_MIN_RATIO = 2.5f
 private const val TAB_INGREDIENTS = 0
 private const val TAB_STEPS = 1
 private const val TAB_NOTES = 2

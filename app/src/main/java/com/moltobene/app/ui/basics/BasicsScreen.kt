@@ -55,6 +55,7 @@ import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.components.CenteredMessage
 import com.moltobene.app.ui.components.ScreenTitle
 import com.moltobene.app.ui.theme.Spacing
+import com.moltobene.app.ui.components.readingWidth
 
 /**
  * Grundrezepte (#82): mitgelieferte Rezepte zum Übernehmen in die eigene Sammlung. Antippen zeigt Zutaten und
@@ -127,7 +128,7 @@ fun BasicsScreen(
             BasicsUiState.Loading -> CenteredMessage(text = "", modifier = Modifier.padding(padding)) { CircularProgressIndicator() }
             BasicsUiState.Error -> CenteredMessage(text = stringResource(R.string.basics_error), modifier = Modifier.padding(padding))
             is BasicsUiState.Content -> LazyColumn(
-                modifier = Modifier.padding(padding).fillMaxSize(),
+                modifier = Modifier.padding(padding).fillMaxSize().readingWidth(),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(Spacing.m),
                 verticalArrangement = Arrangement.spacedBy(Spacing.s),
             ) {

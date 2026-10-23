@@ -98,6 +98,7 @@ import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.components.AppTitleWithScreen
 import com.moltobene.app.ui.components.isLargeText
 import com.moltobene.app.ui.theme.Spacing
+import com.moltobene.app.ui.components.readingWidth
 import java.util.Locale
 import kotlinx.coroutines.delay
 
@@ -139,7 +140,7 @@ fun DoughScreen(
         snackbarHost = { AppSnackbarHost(snackbarHostState) },
     ) { padding ->
         CompositionLocalProvider(LocalDoughSliders provides true) {
-            Column(modifier = Modifier.padding(padding).fillMaxSize()) {
+            Column(modifier = Modifier.padding(padding).fillMaxSize().readingWidth()) {
                 val header: @Composable () -> Unit = {
                     Header(type) { typeKey = it.key }
                 }

@@ -86,6 +86,7 @@ import com.moltobene.app.ui.theme.Spacing
 import com.moltobene.app.ui.theme.applyNightMode
 import com.moltobene.app.ui.whatsnew.WhatsNew
 import com.moltobene.app.ui.whatsnew.WhatsNewDialog
+import com.moltobene.app.ui.components.readingWidth
 import java.text.DateFormat
 import java.time.LocalDate
 import java.util.Date
@@ -155,6 +156,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
+                .readingWidth()
                 .verticalScroll(rememberScrollState()),
         ) {
             ScreenTitle(openGroup ?: stringResource(R.string.settings_title), modifier = Modifier.padding(ScreenTitlePadding))
