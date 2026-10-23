@@ -199,6 +199,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithContentDescription(text(R.string.close)).performClick()
         waitForText("800 g reife Tomaten")
 
+        openRecipeTab(R.string.source)
         composeRule.onNodeWithText("Omas Kochbuch", substring = true).performScrollTo()
         screenshot("12-rezept-ende")
 
