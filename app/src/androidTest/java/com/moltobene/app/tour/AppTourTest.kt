@@ -199,6 +199,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithContentDescription(text(R.string.close)).performClick()
         waitForText("800 g reife Tomaten")
 
+        openRecipeTab(R.string.source)
         composeRule.onNodeWithText("Omas Kochbuch", substring = true).performScrollTo()
         screenshot("12-rezept-ende")
 
@@ -1283,6 +1284,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         assertEquals(1, recipe.photoIds.size)
 
         // In der Rezeptansicht stehen Quelle und Video untereinander.
+        openRecipeTab(R.string.source)
         composeRule.onNodeWithText(SamplePage.VIDEO_WATCH_URL).performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText(SamplePage.CLEAN_URL).assertExists()
         screenshot("27b-quelle-und-video")

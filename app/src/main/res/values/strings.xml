@@ -246,6 +246,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>In a recipe, swipe left or right to switch between ingredients, instructions, notes and source. Source, video and original pages now sit on the “Source” tab. In the dough calculator the oil field takes less room.</item>
         <item>New (beta): “Record” on the Add page: speak a recipe, the text appears while you talk and becomes a draft. The recording is not saved.</item>
         <item>New (beta): “Import from audio” recognizes an audio file on the device, such as a voice message, and turns it into a draft. It needs the recognition pack from Settings.</item>
         <item>New look: Home shows the dish of the day large, the cookbook (formerly “Collection”) is a list with tabs at the top and a home icon, a recipe has tabs for ingredients, instructions and notes, and Add is its own page.</item>

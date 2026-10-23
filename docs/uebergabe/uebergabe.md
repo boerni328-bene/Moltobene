@@ -11,6 +11,9 @@ Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die
 - Offen: Erklärtexte im Teigrechner (Biga, Poolish, Sauerteig, Hefen) gegenlesen; Pasta/Kuchen ohne festes Ergebnis oben; Teigrechner passt noch nicht ganz auf einen Bildschirm; Rückmeldung des Inhabers nach Blick auf die Fotos (`bildschirmfotos/0.56.0`) und auf dem echten Handy.
 - **Version 0.57.0 ist veröffentlicht** (Release v0.57.0, Build grün; Zweig `aufnehmen` erledigt): „Aufnehmen“ (Rezept einsprechen) mit `Dictation`/`VoskDictation`, Fenster im Bearbeiten-Bildschirm. Zuhören nur am echten Handy prüfbar. Nächster Schritt: Rückmeldung des Inhabers vom echten Handy (Aufnehmen, Aus Audio), danach Weg zu 1.0 (Abnahmeliste unten).
 
+## Idee (23.10.2026, noch kein Auftrag): Tablet- und Windows-Version
+Wunsch des Inhabers: nach Veröffentlichung von 0.58.0 (Zweig `rezept-wischen`) an Tablet und evtl. Windows denken. Einschätzung: Tablet = gleiche App mit angepasster Oberfläche (breite Bildschirme: Kochbuch und Rezept nebeneinander, Kochansicht zweispaltig; neue Bibliothek für adaptive Layouts nur nach Rückfrage; Tablet-Varianten im Rundgang). Windows = deutlich größer (Compose Multiplatform, Room/ONNX/Vosk/Fotos/Teilen neu anbinden; Android-Apps unter Windows 11 gehen seit 2025 nicht mehr); Austausch nur über die Sicherungsdatei. Vorschlag: erst `/besprechung` zum Thema, Tablet vor oder gleich nach 1.0, Windows danach entscheiden. Vision (Begriff „Handy“) bei Zustimmung anpassen.
+
 ## Git-Stand
 - `main` = Version 0.54.0 (Squash-Merge von `teig-zeitplan`, Build grün, Release folgt aus dem Build auf main). Zweig `teig-zeitplan` ist erledigt.
 - Parallele Sitzungen im selben Ordner kommen vor (am 17.10. erschien während der Sitzung ein neuer Commit): vor Commit, Push und Versionssprung `git fetch origin`, Zweig und `origin/main` prüfen.

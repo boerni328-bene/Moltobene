@@ -1,5 +1,6 @@
 package com.moltobene.app.ui.recipe
 
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.ClipData
@@ -918,10 +919,13 @@ private fun RecipeContent(
 
                 // Reiter (Entwurf vom 22.10.2026): Zutaten, Zubereitung und Notizen nacheinander statt untereinander. Beim
                 // Weiterschalten mit der Kochleiste springt die Ansicht zur Zubereitung.
+                // „Quelle“ sammelt Quelle, Video und Originalseiten; der Reiter fehlt, wenn es nichts davon gibt.
+                val videoLink = RecipeShareText.videoLink(recipe)
                 val shownTabs = buildList {
                     if (recipe.ingredients.isNotEmpty()) add(TAB_INGREDIENTS)
                     if (recipe.steps.isNotEmpty()) add(TAB_STEPS)
                     add(TAB_NOTES)
+                    if (recipe.source != null || videoLink != null || recipe.pageIds.isNotEmpty()) add(TAB_SOURCE)
                 }
                 var tabKey by rememberSaveable { mutableStateOf(shownTabs.first()) }
                 val tab = if (tabKey in shownTabs) tabKey else shownTabs.first()
@@ -943,6 +947,7 @@ private fun RecipeContent(
                                         when (key) {
                                             TAB_INGREDIENTS -> R.string.ingredients
                                             TAB_STEPS -> R.string.instructions
+                                            TAB_SOURCE -> R.string.source
                                             else -> R.string.notes
                                         },
                                     ),
@@ -952,6 +957,28 @@ private fun RecipeContent(
                     }
                 }
 
+                // Nach links oder rechts wischen wechselt den Reiter (Wunsch des Projektinhabers vom 23.10.2026).
+                val swipeThreshold = with(LocalDensity.current) { 64.dp.toPx() }
+                val swipe = Modifier.pointerInput(shownTabs, tab) {
+                    var total = 0f
+                    detectHorizontalDragGestures(
+                        onDragStart = { total = 0f },
+                        onDragEnd = {
+                            val index = shownTabs.indexOf(tab)
+                            if (total <= -swipeThreshold && index < shownTabs.lastIndex) {
+                                tabKey = shownTabs[index + 1]
+                            } else if (total >= swipeThreshold && index > 0) {
+                                tabKey = shownTabs[index - 1]
+                            }
+                        },
+                        onDragCancel = { total = 0f },
+                        onHorizontalDrag = { _, delta -> total += delta },
+                    )
+                }
+                Column(
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 240.dp).then(swipe),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.s),
+                ) {
                 if (tab == TAB_INGREDIENTS) {
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceContainer,
@@ -996,7 +1023,7 @@ private fun RecipeContent(
 
                 if (tab == TAB_NOTES) NotesSection(notes = recipe.notes, onSave = onSaveNotes)
 
-                recipe.source?.let { source ->
+                if (tab == TAB_SOURCE) recipe.source?.let { source ->
                     SectionTitle(stringResource(R.string.source))
                     val url = source.url
                     if (url != null && RecipeText.isWebLink(url)) {
@@ -1012,7 +1039,7 @@ private fun RecipeContent(
                 }
 
                 // Der Link zum Video, wenn er nicht schon als Quelle dasteht (z. B. bei einem Rezept nur aus dem Video).
-                RecipeShareText.videoLink(recipe)?.let { video ->
+                if (tab == TAB_SOURCE) videoLink?.let { video ->
                     SectionTitle(stringResource(R.string.video))
                     if (RecipeText.isWebLink(video)) {
                         SourceLink(url = video, snackbarHostState = snackbarHostState)
@@ -1022,12 +1049,13 @@ private fun RecipeContent(
                 }
 
                 // Originalseiten (#38), z. B. die Kochbuchseite oder ein handgeschriebenes Rezept zum Nachlesen.
-                if (recipe.pageIds.isNotEmpty()) {
+                if (tab == TAB_SOURCE && recipe.pageIds.isNotEmpty()) {
                     OutlinedButton(onClick = onShowPages, modifier = Modifier.padding(top = Spacing.m)) {
                         Icon(painterResource(R.drawable.ic_document_scanner), contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.size(Spacing.s))
                         Text(pluralStringResource(R.plurals.original_pages_show, recipe.pageIds.size, recipe.pageIds.size))
                     }
+                }
                 }
             }
         }
@@ -1586,6 +1614,7 @@ private const val COOKING_PHOTO_MIN_RATIO = 2f
 private const val TAB_INGREDIENTS = 0
 private const val TAB_STEPS = 1
 private const val TAB_NOTES = 2
+private const val TAB_SOURCE = 3
 
 /** Ob unter der Leiste der Übersetzungsbalken steht (Rezept mit möglicher Übersetzung, die gerade nicht das Original zeigt). */
 private fun translationBarShown(recipe: Recipe, state: TranslationState): Boolean {
