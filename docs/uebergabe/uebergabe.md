@@ -5,9 +5,10 @@ Stand: 22.10.2026 · `main` = Version 0.55.0 (versionCode 96), veröffentlicht �
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, nur auf dem Handy. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
 
-## Stand 22.10.2026: Version 0.56.0 veröffentlicht
+## Stand 23.10.2026: Version 0.58.0 veröffentlicht (0.56.0 und 0.57.0 am 22.10.)
 - `main` = 0.56.0 (versionCode 97), Release v0.56.0 mit APK und Prüfsumme, Build grün. Enthält das neue Aussehen (Startseite D, Rezept A mit Reitern, Kochbuch B, Teigrechner A mit Erklärfenstern, Einstellungen A mit „Schnell“, Hinzufügen D) und „Aus Audio übernehmen“ (Beta, Qualität mit echter Aufnahme noch ungeprüft). Zweige `neues-design` und `zuhoeren-modus` sind erledigt (löschbar).
 - „Sammlung“ heißt jetzt „Kochbuch“ (Regeln in `CLAUDE.md`). „Aufnehmen“ (Rezept einsprechen) ist beschlossen, aber noch nicht programmiert (Schritt 3 von „Aus Sprache übernehmen“).
+- Version 0.58.0 (Release v0.58.0): im Rezept nach links/rechts wischen (Zutaten, Zubereitung, Notizen, neuer Reiter „Quelle“), Öl im Teigrechner teilt sich die Reihe mit dem Hinweis. Zweig `rezept-wischen` erledigt.
 - Offen: Erklärtexte im Teigrechner (Biga, Poolish, Sauerteig, Hefen) gegenlesen; Pasta/Kuchen ohne festes Ergebnis oben; Teigrechner passt noch nicht ganz auf einen Bildschirm; Rückmeldung des Inhabers nach Blick auf die Fotos (`bildschirmfotos/0.56.0`) und auf dem echten Handy.
 - **Version 0.57.0 ist veröffentlicht** (Release v0.57.0, Build grün; Zweig `aufnehmen` erledigt): „Aufnehmen“ (Rezept einsprechen) mit `Dictation`/`VoskDictation`, Fenster im Bearbeiten-Bildschirm. Zuhören nur am echten Handy prüfbar. Nächster Schritt: Rückmeldung des Inhabers vom echten Handy (Aufnehmen, Aus Audio), danach Weg zu 1.0 (Abnahmeliste unten).
 
