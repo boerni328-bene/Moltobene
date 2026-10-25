@@ -39,6 +39,7 @@ import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.components.CenteredMessage
 import com.moltobene.app.ui.components.ScreenTitle
 import com.moltobene.app.ui.theme.Spacing
+import com.moltobene.app.ui.components.readingWidth
 
 /**
  * Teigwissen (#84): Artikel zum Nachschlagen. Antippen klappt einen Artikel auf; Überschriften sind für den
@@ -67,7 +68,7 @@ fun KnowHowScreen(viewModel: KnowHowViewModel, onBack: () -> Unit) {
             KnowHowUiState.Loading -> CenteredMessage(text = "", modifier = Modifier.padding(padding)) { CircularProgressIndicator() }
             KnowHowUiState.Error -> CenteredMessage(text = stringResource(R.string.knowhow_error), modifier = Modifier.padding(padding))
             is KnowHowUiState.Content -> LazyColumn(
-                modifier = Modifier.padding(padding).fillMaxSize(),
+                modifier = Modifier.padding(padding).fillMaxSize().readingWidth(),
                 contentPadding = PaddingValues(Spacing.m),
                 verticalArrangement = Arrangement.spacedBy(Spacing.s),
             ) {

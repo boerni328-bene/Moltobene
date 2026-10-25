@@ -88,6 +88,7 @@ import com.moltobene.app.ui.components.RecipePhoto
 import com.moltobene.app.ui.components.TagLabels
 import com.moltobene.app.ui.recipe.formatDuration
 import com.moltobene.app.ui.theme.Spacing
+import com.moltobene.app.ui.components.readingWidth
 
 /** Suchfeld als ruhige Pille ohne Rahmen, daneben der Umschalter Raster/Liste. */
 @Composable
@@ -308,7 +309,7 @@ internal fun Thumbnail(item: RecipeListItem, title: String, modifier: Modifier) 
 @Composable
 internal fun RecipeList(items: List<RecipeListItem>, onOpenRecipe: (String) -> Unit) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().readingWidth(),
         contentPadding = PaddingValues(top = Spacing.xs, bottom = 96.dp),
     ) {
         items(items, key = { it.id }) { item ->

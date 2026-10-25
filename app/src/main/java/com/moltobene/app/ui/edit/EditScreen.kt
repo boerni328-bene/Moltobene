@@ -109,6 +109,7 @@ import com.moltobene.app.ui.components.PageViewer
 import com.moltobene.app.ui.components.RecipePhotoLarge
 import com.moltobene.app.ui.components.ScreenTitle
 import com.moltobene.app.ui.theme.Spacing
+import com.moltobene.app.ui.components.readingWidth
 import kotlinx.coroutines.launch
 
 /**
@@ -393,6 +394,7 @@ fun EditScreen(
                     .padding(padding)
                     .fillMaxSize()
                     .imePadding()
+                    .readingWidth()
                     .verticalScroll(rememberScrollState())
                     .padding(Spacing.m),
                 verticalArrangement = Arrangement.spacedBy(Spacing.m),

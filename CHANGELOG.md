@@ -3,6 +3,17 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.59.0] – 2026-10-23 (versionCode 100)
+
+### Neu
+- **Tablets werden unterstützt.** Auf breiten Bildschirmen (Tablet, auch Handy quer) stehen im Rezept die Zutaten links und die Zubereitung mit Foto rechts nebeneinander; jede Spalte blättert für sich. Titel, Portionen und Zutaten stehen links, die Reiter Zubereitung, Notizen und Quelle rechts.
+- **Gut lesbare Breite.** Einstellungen, Hinzufügen und Bearbeiten, Teigrechner, Teigwissen, Grundrezepte, Lizenzen, Startseite und die Liste im Kochbuch laufen auf breiten Bildschirmen nicht mehr über die ganze Breite, sondern stehen mittig.
+- **Sprachbefehle beim Vorlesen mit Kopfhörern.** Sind Kopfhörer oder ein Headset angeschlossen, gelten beim Vorlesen alle Sprachbefehle („Weiter“, „Zurück“, „Wiederholen“, „Stopp“). Über den Lautsprecher gilt weiterhin nur „Stopp“, weil das Mikrofon die Stimme sonst mithört.
+- **Pfeiltasten im Rezept.** Mit einer Tastatur (Tablet, Chromebook) blättern die Pfeiltasten auf und ab, links und rechts wechseln zwischen Zubereitung, Notizen und Quelle.
+
+### Geändert
+- Der Rundgang auf dem Emulator prüft jetzt auch Tablet quer und hoch.
+
 ## [0.58.0] – 2026-10-23 (versionCode 99)
 
 ### Neu

@@ -1577,6 +1577,6 @@ class AppTourTest(private val variant: DisplayVariant) {
 
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
-        fun variants(): List<DisplayVariant> = DisplayVariant.entries
+        fun variants(): List<DisplayVariant> = DisplayVariant.entries.filter { !it.isTablet }
     }
 }

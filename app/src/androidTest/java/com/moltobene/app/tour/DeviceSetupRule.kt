@@ -18,6 +18,9 @@ import kotlinx.coroutines.runBlocking
 import org.junit.rules.ExternalResource
 import kotlin.math.abs
 
+/** Schmaler als das gilt der Bildschirm als Handy (Rückstellung nach einer Tablet-Darstellung). */
+private const val PHONE_MAX_WIDTH_DP = 500
+
 /**
  * Bereitet jeden Test vor, bevor die App startet: Sprache, Hell/Dunkel und Schriftgröße einstellen
  * und die Sammlung leeren. Die Schriftgröße bleibt danach, wie sie ist: Die Tests einer Darstellung laufen
@@ -36,7 +39,31 @@ class DeviceSetupRule(private val variant: DisplayVariant) : ExternalResource() 
             if (variant.dark) UiModeManager.MODE_NIGHT_YES else UiModeManager.MODE_NIGHT_NO,
         )
         setFontScale(variant.fontScale)
+        setDisplay()
         runBlocking { resetApp() }
+    }
+
+    /**
+     * Stellt den Bildschirm des Emulators auf Tablet-Größe (#91) oder wieder auf die ursprüngliche Größe zurück. Wie bei der
+     * Schriftgröße bleibt die Einstellung nach dem Test bestehen; der nächste Test setzt sie, wie er sie braucht.
+     */
+    private fun setDisplay() {
+        val expected = variant.widthDp
+        if (expected != null) {
+            TestDevice.shell("wm size ${variant.displaySize}")
+            TestDevice.shell("wm density ${variant.density}")
+        } else {
+            TestDevice.shell("wm size reset")
+            TestDevice.shell("wm density reset")
+        }
+        fun applied() = context.resources.configuration.screenWidthDp.let { width ->
+            if (expected != null) abs(width - expected) <= 2 else width < PHONE_MAX_WIDTH_DP
+        }
+        val deadline = SystemClock.uptimeMillis() + 15_000
+        while (!applied() && SystemClock.uptimeMillis() < deadline) {
+            Thread.sleep(100)
+        }
+        check(applied()) { "Bildschirmgröße der Darstellung ${variant.folder} nicht übernommen" }
     }
 
     /** Schriftgröße des ganzen Handys (wie in den Android-Einstellungen), 2 = 200 %. */

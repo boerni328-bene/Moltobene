@@ -246,6 +246,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
+        <item>New for tablets: in a recipe, ingredients and instructions sit side by side, and each column scrolls on its own. Text and forms stay easy to read on wide screens. With a keyboard, the up and down arrow keys scroll and the left and right arrow keys switch between instructions, notes and source.</item>
         <item>In a recipe, swipe left or right to switch between ingredients, instructions, notes and source. Source, video and original pages now sit on the “Source” tab. In the dough calculator the oil field takes less room.</item>
         <item>New (beta): “Record” on the Add page: speak a recipe, the text appears while you talk and becomes a draft. The recording is not saved.</item>
         <item>New (beta): “Import from audio” recognizes an audio file on the device, such as a voice message, and turns it into a draft. It needs the recognition pack from Settings.</item>

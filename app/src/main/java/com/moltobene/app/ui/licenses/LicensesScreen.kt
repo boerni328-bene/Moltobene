@@ -35,6 +35,7 @@ import com.moltobene.app.ui.components.CenteredMessage
 import com.moltobene.app.ui.components.ScreenTitle
 import com.moltobene.app.ui.components.ScreenTitlePadding
 import com.moltobene.app.ui.theme.Spacing
+import com.moltobene.app.ui.components.readingWidth
 
 /** Einstellungen → Info → „Open-Source-Lizenzen“. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,7 +53,7 @@ fun LicensesScreen(viewModel: LicensesViewModel, onBack: () -> Unit) {
             )
         },
     ) { padding ->
-        Column(modifier = Modifier.padding(padding).fillMaxSize()) {
+        Column(modifier = Modifier.padding(padding).fillMaxSize().readingWidth()) {
             ScreenTitle(stringResource(R.string.licenses_title), modifier = Modifier.padding(ScreenTitlePadding))
             when (val state = viewModel.state) {
                 LicensesUiState.Loading ->

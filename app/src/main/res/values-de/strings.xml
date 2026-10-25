@@ -246,6 +246,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Neu für Tablets: Im Rezept stehen Zutaten und Zubereitung nebeneinander, jede Spalte blättert für sich. Texte und Formulare bleiben auf breiten Bildschirmen gut lesbar. Mit einer Tastatur blättern die Pfeiltasten auf und ab, links und rechts wechseln zwischen Zubereitung, Notizen und Quelle.</item>
         <item>Im Rezept lässt sich nach links und rechts wischen, um zwischen Zutaten, Zubereitung, Notizen und Quelle zu wechseln. Quelle, Video und Originalseiten stehen jetzt auf dem Reiter „Quelle“. Im Teigrechner braucht das Öl weniger Platz.</item>
         <item>Neu (Beta): „Aufnehmen“ auf der Seite „Hinzufügen“: Rezept einsprechen, der Text erscheint beim Sprechen und wird zum Entwurf. Die Aufnahme wird nicht gespeichert.</item>
         <item>Neu (Beta): „Aus Audio übernehmen“ erkennt eine Audiodatei auf dem Handy, z. B. eine Sprachnachricht, und macht daraus einen Entwurf. Dafür wird das Erkennungspaket aus den Einstellungen gebraucht.</item>
