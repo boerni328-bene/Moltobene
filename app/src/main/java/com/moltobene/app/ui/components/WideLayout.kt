@@ -26,3 +26,10 @@ fun isWideLayout(): Boolean = LocalConfiguration.current.screenWidthDp >= WIDE_L
  */
 fun Modifier.readingWidth(max: Dp = READING_WIDTH): Modifier =
     wrapContentWidth(Alignment.CenterHorizontally).widthIn(max = max).fillMaxWidth()
+
+/** Ab dieser Höhe (dp) ist das Fenster „niedrig“ (Handy quer): Die Kochleiste wandert dann nach oben in die Leiste. */
+const val SHORT_HEIGHT_MAX_DP = 480
+
+/** Ist das Fenster niedrig, wie ein Handy im Querformat? */
+@Composable
+fun isShortHeight(): Boolean = LocalConfiguration.current.screenHeightDp < SHORT_HEIGHT_MAX_DP
