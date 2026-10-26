@@ -477,7 +477,8 @@
     <string name="language_pack_error_damaged">The language pack did not arrive completely. Try again.</string>
     <string name="language_pack_error_unavailable">The language pack is not available right now. Try again later.</string>
     <string name="backup_title">Back up cookbook</string>
-    <string name="backup_text">Saves all recipes and photos in one file. The backup file is not encrypted.</string>
+    <string name="backup_text">Saves all recipes and photos in one file. The file contains all recipes and photos unencrypted and should only be shared with trusted places.</string>
+    <string name="backup_devices_notice">There is no automatic sync between devices. Recipes only move when the backup file is transferred to the other device and restored there.</string>
     <string name="backup_file_name">moltobene-backup-%1$s.zip</string>
     <string name="backup_running">Backing up cookbook …</string>
     <plurals name="backup_done">

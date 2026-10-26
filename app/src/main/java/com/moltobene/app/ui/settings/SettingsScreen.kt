@@ -170,6 +170,12 @@ fun SettingsScreen(
             }
             CompositionLocalProvider(LocalGroupState provides GroupState(openGroup) { openGroup = it }) {
             SettingsGroup(stringResource(R.string.collection_title), R.drawable.ic_grid_view, backupSummary) {
+                // Ohne Cloud wandern Rezepte zwischen Geräten nur über die Sicherungsdatei (#94).
+                NoticeCard(
+                    text = stringResource(R.string.backup_devices_notice),
+                    kind = NoticeKind.INFO,
+                    modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.s),
+                )
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.backup_title)) },
                     supportingContent = {

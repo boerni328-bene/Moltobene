@@ -8,7 +8,9 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
 import android.Manifest
+import android.app.Activity
 import android.content.ActivityNotFoundException
+import android.content.ContextWrapper
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -222,10 +224,15 @@ fun EditScreen(
     (dictationState as? DictationState.Failed)?.let { failed ->
         LaunchedEffect(failed) { viewModel.onDictationFailed(failed.problem) }
     }
-    // Im Hintergrund hört das Mikrofon nicht weiter zu.
+    // Im Hintergrund hört das Mikrofon nicht weiter zu. Beim Drehen oder Falten (#92) läuft die Aufnahme weiter,
+    // sonst ginge der bisher gesprochene Text verloren; Zustand und Erkennung liegen im ViewModel.
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_STOP) viewModel.cancelDictation() }
+        val observer = LifecycleEventObserver { _, event ->
+            val changingConfiguration = generateSequence(context) { (it as? ContextWrapper)?.baseContext }
+                .filterIsInstance<Activity>().firstOrNull()?.isChangingConfigurations == true
+            if (event == Lifecycle.Event.ON_STOP && !changingConfiguration) viewModel.cancelDictation()
+        }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }

@@ -35,8 +35,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -48,7 +50,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -120,9 +122,19 @@ fun AreaSelectionScreen(
         // Bei großer Schrift scrollt die ganze Seite, und das Foto behält die halbe Bildschirmhöhe (#53); sonst füllt es
         // den Platz über Hinweis und Knöpfen.
         val large = isLargeText()
-        val photoHeight = (LocalConfiguration.current.screenHeightDp * PHOTO_SHARE).dp
+        // Die Höhe kommt vom tatsächlich verfügbaren Platz, nicht von der Bildschirmhöhe (#93): Im Querformat und im
+        // Mehrfenster-Modus ist der Platz kleiner als der Bildschirm.
+        val density = LocalDensity.current
+        var availableHeight by remember { mutableStateOf(DEFAULT_PHOTO_HEIGHT) }
+        val photoHeight = availableHeight * PHOTO_SHARE
         val bodyModifier = if (large) Modifier.verticalScroll(rememberScrollState()) else Modifier
-        Column(modifier = Modifier.padding(padding).fillMaxSize().then(bodyModifier)) {
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .onSizeChanged { availableHeight = with(density) { it.height.toDp() } }
+                .then(bodyModifier),
+        ) {
             val frameModifier = if (large) Modifier.fillMaxWidth().height(photoHeight) else Modifier.weight(1f).fillMaxWidth()
             when {
                 failed -> CenteredMessage(text = stringResource(R.string.area_load_error), modifier = frameModifier)
@@ -351,8 +363,11 @@ private fun CropFrame(
     }
 }
 
-/** Anteil der Bildschirmhöhe, den das Foto bei großer Schrift mindestens bekommt. */
+/** Anteil des verfügbaren Platzes, den das Foto bei großer Schrift mindestens bekommt. */
 private const val PHOTO_SHARE = 0.5f
+
+/** Höhe, bis der Platz gemessen ist. */
+private val DEFAULT_PHOTO_HEIGHT = 480.dp
 
 /** Abdunklung außerhalb der Rahmen. */
 private const val SCRIM_ALPHA = 0.55f

@@ -3,6 +3,13 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.59.1] – 2026-10-26 (versionCode 101)
+
+### Verbessert
+- **Drehen und Falten.** Läuft beim Drehen des Tablets oder Faltens des Handys gerade „Aufnehmen“ (Rezept einsprechen), geht die Aufnahme weiter, und der bisher gesprochene Text bleibt erhalten. Schritt und Reiter in der Kochansicht bleiben ebenfalls stehen.
+- **Foto-Auswahl bei großer Schrift.** Die Höhe des Fotos richtet sich nach dem tatsächlich freien Platz, nicht mehr nach der Bildschirmhöhe. Im Querformat und im Mehrfenster-Modus bleibt die Auswahlfläche dadurch gut nutzbar.
+- **Hinweise zum Sichern und Wiederherstellen.** Unter Einstellungen steht jetzt: Es gibt keinen automatischen Abgleich zwischen Geräten, Rezepte wandern nur über die Sicherungsdatei. Die Sicherungsdatei enthält alle Rezepte und Fotos unverschlüsselt und sollte nur an vertrauenswürdige Stellen weitergegeben werden.
+
 ## [0.59.0] – 2026-10-23 (versionCode 100)
 
 ### Neu

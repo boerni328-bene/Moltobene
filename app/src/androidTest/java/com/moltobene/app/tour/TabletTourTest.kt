@@ -64,6 +64,24 @@ class TabletTourTest(private val variant: DisplayVariant) {
         waitForText("Tomaten würfeln", substring = true)
     }
 
+    /** Drehen oder Falten baut die Ansicht neu auf (#92): Schritt und Reiter in der Kochansicht bleiben erhalten. */
+    @Test
+    fun drehenInDerKochansicht() {
+        runBlocking { SampleRecipes.addTo(container(), composeRule.activity) }
+        waitForText(SampleRecipes.POTATO_SALAD)
+        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(SampleRecipes.TOMATO_SAUCE))
+        composeRule.onNodeWithText(SampleRecipes.TOMATO_SAUCE).performSemanticsAction(SemanticsActions.OnClick)
+        waitForText("800 g reife Tomaten")
+        composeRule.onNodeWithContentDescription(text(R.string.cook_bar_next_description)).performClick()
+        waitForText("Schritt 1 von", substring = true)
+
+        composeRule.activityRule.scenario.recreate()
+
+        waitForText("Schritt 1 von", substring = true)
+        composeRule.onNodeWithText("800 g reife Tomaten").assertIsDisplayed()
+        screenshot("t03a-nach-dem-drehen")
+    }
+
     @Test
     fun hinzufuegenUndEinstellungen() {
         waitForText(text(R.string.collection_empty_title))

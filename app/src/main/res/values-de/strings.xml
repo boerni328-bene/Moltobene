@@ -477,7 +477,8 @@
     <string name="language_pack_error_damaged">Das Sprachpaket kam nicht vollständig an. Erneut versuchen.</string>
     <string name="language_pack_error_unavailable">Das Sprachpaket ist gerade nicht erreichbar. Später erneut versuchen.</string>
     <string name="backup_title">Kochbuch sichern</string>
-    <string name="backup_text">Alle Rezepte und Fotos in einer Datei speichern. Die Sicherungsdatei ist nicht verschlüsselt.</string>
+    <string name="backup_text">Alle Rezepte und Fotos in einer Datei speichern. Die Datei enthält alle Rezepte und Fotos unverschlüsselt und sollte nur an vertrauenswürdige Stellen weitergegeben werden.</string>
+    <string name="backup_devices_notice">Es gibt keinen automatischen Abgleich zwischen Geräten. Rezepte wandern nur, wenn die Sicherungsdatei auf das andere Gerät übertragen und dort wiederhergestellt wird.</string>
     <string name="backup_file_name">moltobene-sicherung-%1$s.zip</string>
     <string name="backup_running">Kochbuch wird gesichert …</string>
     <plurals name="backup_done">
