@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.59.2] – 2026-10-26 (versionCode 102)
+
+### Verbessert
+- **Neuer Kernsatz.** Unter Einstellungen → Info und in der Beschreibung steht jetzt: „Moltobene sammelt Kochrezepte aus allen Quellen an einem Ort, lokal gespeichert, ohne Cloud.“ Das gilt auch für Tablets.
+
 ## [0.59.1] – 2026-10-26 (versionCode 101)
 
 ### Verbessert

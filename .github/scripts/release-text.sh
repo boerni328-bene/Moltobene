@@ -6,7 +6,7 @@ set -euo pipefail
 
 VERSION="$1"
 APK="$2"
-KERNSATZ="Moltobene sammelt Kochrezepte aus allen Quellen an einem Ort, gespeichert nur auf dem eigenen Handy."
+KERNSATZ="Moltobene sammelt Kochrezepte aus allen Quellen an einem Ort, lokal gespeichert, ohne Cloud."
 
 # Abschnitt dieser Version aus CHANGELOG.md herausschneiden (bis zur nächsten Überschrift „## [“).
 ABSCHNITT=$(awk -v v="$VERSION" '
@@ -21,7 +21,7 @@ echo "$ABSCHNITT"
 echo
 echo "### Installation"
 echo
-echo "Die Datei \`moltobene-$VERSION.apk\` herunterladen und auf dem Handy öffnen (ab Android 8.0)."
+echo "Die Datei \`moltobene-$VERSION.apk\` herunterladen und auf dem Gerät öffnen (ab Android 8.0)."
 echo "Ein Update wird einfach über die vorhandene App installiert, die Sammlung bleibt dabei erhalten."
 echo
 echo "### In English"

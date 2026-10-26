@@ -320,7 +320,7 @@
     <string name="settings_quick">Quick</string>
     <string name="settings_quick_screen_on">Keep screen on while cooking</string>
     <string name="settings_quick_headset">Headset buttons while reading aloud</string>
-    <string name="app_tagline">Moltobene collects recipes from every source in one place, stored only on the phone itself.</string>
+    <string name="app_tagline">Moltobene collects recipes from every source in one place, stored locally, without a cloud.</string>
     <string name="license_note_moltobene">Moltobene itself is free software and may be used, shared and changed under the terms of this license, without any warranty. Source code: github.com/boerni328-bene/Moltobene</string>
     <string name="license_note_opus_mt">Models of the language pack for translation, downloaded only on request. Changed for Moltobene: converted to ONNX and reduced to 8 bit. Source: huggingface.co/Helsinki-NLP</string>
     <string name="settings_section_translation">Translation</string>

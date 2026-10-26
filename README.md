@@ -2,7 +2,7 @@
 
 # Moltobene
 
-_Moltobene sammelt Kochrezepte aus allen Quellen an einem Ort, gespeichert nur auf dem eigenen Handy._
+_Moltobene sammelt Kochrezepte aus allen Quellen an einem Ort, lokal gespeichert, ohne Cloud._
 
 Kostenlos, ohne Werbung, ohne Konto und ohne Tracking. Ins Internet geht die App nur auf Wunsch: wenn ein Rezept aus einem Link übernommen oder das Sprachpaket für die Übersetzung heruntergeladen wird. Dafür braucht sie als einzige Berechtigung den Internetzugang.
 

@@ -10,7 +10,7 @@ Pflege (Wunsch des Projektinhabers vom 17.10.2026): Die Datei wird nach jeder An
 
 Festgelegt vom Projektinhaber am 29.09.2026 (siehe `docs/besprechungen/2026-09-29-vision-der-app.md`), ergänzt am 07.10.2026 um die Übersetzung (#60, `docs/besprechungen/2026-10-07-rezepte-uebersetzen.md`). Änderungen nur mit seiner Zustimmung. Neue Vorschläge werden an dieser Vision gemessen.
 
-**Kernsatz** (wörtlich gleich in README, GitHub und Releases): _Moltobene sammelt Kochrezepte aus allen Quellen an einem Ort, gespeichert nur auf dem eigenen Handy._
+**Kernsatz** (wörtlich gleich in README, GitHub und Releases): _Moltobene sammelt Kochrezepte aus allen Quellen an einem Ort, lokal gespeichert, ohne Cloud._
 
 **Für wen:** Alle, die gern kochen. Öffentlich und kostenlos, verteilt über GitHub Releases. Eine freiwillige Spende ist möglich (Link nur im README, im Store-Eintrag und unter Einstellungen → Info; die App bittet nie aktiv darum, keine Bezahlversion, kein Abo; entschieden am 09.10.2026, siehe `docs/marktberichte/2026-10-09-marktbericht.md`). Lizenz: GPL-3.0 (#72).
 
@@ -76,7 +76,7 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 | übernehmen (aus einer Quelle) | import | importieren |
 | teilen (an andere) | share | exportieren |
 | sichern / wiederherstellen (ganzes Kochbuch) | back up / restore | Backup, Export |
-| Handy | device | Gerät, Smartphone |
+| Handy (nur noch dort, wo ein Gerät gemeint ist, das Mikrofon oder Kamera hat; im Kernsatz und in neuen Texten „Gerät“ bzw. „lokal gespeichert“, Entscheidung 23.10.2026) | device | Smartphone |
 | Einstellungen | Settings | |
 | übersetzen (Rezept in eine andere Sprache) | translate | übertragen |
 | Übersetzung | Translation | |
