@@ -52,6 +52,8 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
@@ -68,6 +70,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -87,6 +91,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
@@ -134,6 +139,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.LocaleList
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -181,6 +187,7 @@ import com.moltobene.app.ui.components.RecipePhoto
 import com.moltobene.app.ui.components.RecipePhotoLarge
 import com.moltobene.app.ui.components.TagLabels
 import com.moltobene.app.ui.components.isLargeText
+import com.moltobene.app.ui.components.isShortHeight
 import com.moltobene.app.ui.components.isWideLayout
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -233,6 +240,7 @@ fun RecipeScreen(
     var menuOpen by remember { mutableStateOf(false) }
     // Das Blättern liegt hier, damit die Leiste über dem Foto erst beim Blättern deckend wird (Rang 9).
     val scrollState = rememberScrollState()
+    val cookingBarHolder = remember { CookingBarHolder() }
     val deletedMessage = stringResource(R.string.recipe_deleted)
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -340,7 +348,22 @@ fun RecipeScreen(
                         TopAppBarDefaults.topAppBarColors()
                     },
                     // Name der App und Umschalter „DE | EN“ bleiben beim Blättern oben stehen (Wunsch vom 08.10.2026).
-                    title = { AppTitle(style = MaterialTheme.typography.titleMedium) },
+                    title = {
+                        val top = cookingBarHolder.data
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
+                            AppTitle(style = MaterialTheme.typography.titleMedium)
+                            // Handy quer: Die Kochleiste ist hier oben; „Schritt 2 von 5“ steht neben dem Namen der App.
+                            top?.statusText()?.let { status ->
+                                Text(
+                                    text = status,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                                )
+                            }
+                        }
+                    },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
@@ -349,6 +372,7 @@ fun RecipeScreen(
                     actions = {
                         val content = state as? RecipeUiState.Content
                         if (content != null && !deleting) {
+                            cookingBarHolder.data?.let { CookingBarTop(it) }
                             val original = remember(content.recipe) { RecipeTranslations.languageOf(content.recipe) }
                             if (original != null && LanguagePack.targets(original).isNotEmpty()) {
                                 LanguageSwitch(
@@ -468,6 +492,7 @@ fun RecipeScreen(
                 scrollState = scrollState,
                 onSaveNotes = viewModel::saveNotes,
                 barInset = if (barOverPhoto) WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + BAR_HEIGHT else 0.dp,
+                topBarHolder = cookingBarHolder,
                 modifier = if (barOverPhoto) Modifier.padding(bottom = padding.calculateBottomPadding()) else Modifier.padding(padding),
             ) }
             current is RecipeUiState.Loading ->
@@ -635,6 +660,7 @@ private fun RecipeContent(
     onSaveNotes: (String) -> Unit,
     scrollState: ScrollState,
     barInset: Dp,
+    topBarHolder: CookingBarHolder?,
     modifier: Modifier = Modifier,
 ) {
     // Das Foto läuft oben bündig unter die Leiste; unten sind die Ecken weich.
@@ -1152,23 +1178,86 @@ private fun RecipeContent(
                 }
             }
         }
-        if (recipe.steps.isNotEmpty() || recipe.ingredients.any { !it.isHeading }) {
-            CookingBar(
-                hasSteps = recipe.steps.isNotEmpty(),
-                speaking = speaking,
-                stepNumber = currentIndex?.plus(1),
-                stepCount = recipe.steps.size,
-                message = barMessage,
-                voiceHint = voiceHint,
-                microphoneOn = micBusy,
-                onMicrophone = { toggleMicrophone() },
-                onPrevious = { move(cooking.onPreviousStep()) },
-                onRead = {
-                    if (speaking) speech.stop() else startReading()
-                },
-                onNext = { move(cooking.onNextStep()) },
-            )
+        val hasBar = recipe.steps.isNotEmpty() || recipe.ingredients.any { !it.isHeading }
+        val data = CookingBarData(
+            hasSteps = recipe.steps.isNotEmpty(),
+            speaking = speaking,
+            stepNumber = currentIndex?.plus(1),
+            stepCount = recipe.steps.size,
+            message = barMessage,
+            voiceHint = voiceHint,
+            microphoneOn = micBusy,
+            onMicrophone = { toggleMicrophone() },
+            onPrevious = { move(cooking.onPreviousStep()) },
+            onRead = {
+                if (speaking) speech.stop() else startReading()
+            },
+            onNext = { move(cooking.onNextStep()) },
+        )
+        // Handy quer (niedriges Fenster): Die Kochleiste steht oben in der Leiste neben dem Namen der App und lässt
+        // Zutaten und Zubereitung mehr Platz. Bei großer Schrift bleibt sie unten, dort ist mehr Raum für die Texte.
+        val inTopBar = hasBar && topBarHolder != null && isShortHeight() && !isLargeText()
+        SideEffect { topBarHolder?.data = if (inTopBar) data else null }
+        DisposableEffect(topBarHolder) { onDispose { topBarHolder?.data = null } }
+        if (hasBar && !inTopBar) CookingBar(data)
+    }
+}
+
+/** Alles, was die Kochleiste zeigt und tut; unten als [CookingBar], im niedrigen Querformat oben als [CookingBarTop]. */
+private class CookingBarData(
+    val hasSteps: Boolean,
+    val speaking: Boolean,
+    val stepNumber: Int?,
+    val stepCount: Int,
+    val message: String?,
+    val voiceHint: String?,
+    val microphoneOn: Boolean,
+    val onMicrophone: () -> Unit,
+    val onPrevious: () -> Unit,
+    val onRead: () -> Unit,
+    val onNext: () -> Unit,
+)
+
+/**
+ * Übergabe der Kochleiste an die obere Leiste: Nur diese liest [data]. Eine Änderung baut deshalb nur die Leiste neu
+ * auf, nicht das Rezept.
+ */
+private class CookingBarHolder {
+    var data by mutableStateOf<CookingBarData?>(null)
+}
+
+/** Status der Kochleiste als Text: eine Kurzmeldung, sonst „Schritt 2 von 5“. */
+@Composable
+private fun CookingBarData.statusText(): String? =
+    message ?: stepNumber?.let { stringResource(R.string.cook_step_of, it, stepCount) }
+
+/** Kochleiste in der oberen Leiste (Handy quer): „Zurück“, „Weiter“, Mikrofon und Vorlesen als Symbole. */
+@Composable
+private fun CookingBarTop(bar: CookingBarData) {
+    val microphoneIcon = if (bar.microphoneOn) R.drawable.ic_mic_off else R.drawable.ic_mic
+    val microphoneDescription = stringResource(
+        if (bar.microphoneOn) R.string.cook_bar_mic_off_description else R.string.cook_bar_mic_on_description,
+    )
+    val readIcon = if (bar.speaking) R.drawable.ic_stop else R.drawable.ic_volume_up
+    val readDescription = stringResource(if (bar.speaking) R.string.cook_bar_stop_description else R.string.cook_bar_read_description)
+    FilledTonalIconButton(onClick = bar.onPrevious, enabled = bar.hasSteps) {
+        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.cook_bar_previous_description))
+    }
+    FilledIconButton(onClick = bar.onNext, enabled = bar.hasSteps) {
+        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.cook_bar_next_description))
+    }
+    val micModifier = Modifier.semantics { contentDescription = microphoneDescription }
+    if (bar.microphoneOn) {
+        FilledIconButton(onClick = bar.onMicrophone, modifier = micModifier) {
+            Icon(painterResource(microphoneIcon), contentDescription = null)
         }
+    } else {
+        FilledTonalIconButton(onClick = bar.onMicrophone, modifier = micModifier) {
+            Icon(painterResource(microphoneIcon), contentDescription = null)
+        }
+    }
+    FilledTonalIconButton(onClick = bar.onRead, enabled = bar.hasSteps) {
+        Icon(painterResource(readIcon), contentDescription = readDescription)
     }
 }
 
@@ -1361,19 +1450,18 @@ private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, barIns
  * oben, „Vorlesen“ darunter rechts, damit kein Wort mitten im Wort umbricht. Das Vorlesen startet nur auf Antippen.
  */
 @Composable
-private fun CookingBar(
-    hasSteps: Boolean,
-    speaking: Boolean,
-    stepNumber: Int?,
-    stepCount: Int,
-    message: String?,
-    voiceHint: String?,
-    microphoneOn: Boolean,
-    onMicrophone: () -> Unit,
-    onPrevious: () -> Unit,
-    onRead: () -> Unit,
-    onNext: () -> Unit,
-) {
+private fun CookingBar(bar: CookingBarData) {
+    val hasSteps = bar.hasSteps
+    val speaking = bar.speaking
+    val stepNumber = bar.stepNumber
+    val stepCount = bar.stepCount
+    val message = bar.message
+    val voiceHint = bar.voiceHint
+    val microphoneOn = bar.microphoneOn
+    val onMicrophone = bar.onMicrophone
+    val onPrevious = bar.onPrevious
+    val onRead = bar.onRead
+    val onNext = bar.onNext
     val previous = stringResource(R.string.cook_bar_previous)
     val previousDescription = stringResource(R.string.cook_bar_previous_description)
     val readIcon = if (speaking) R.drawable.ic_stop else R.drawable.ic_volume_up

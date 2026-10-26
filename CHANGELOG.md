@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.59.3] – 2026-10-26 (versionCode 103)
+
+### Verbessert
+- **Kochleiste oben bei Handy quer.** Im Querformat auf dem Handy stehen „Zurück“, „Weiter“, Mikrofon und Vorlesen jetzt oben in der Leiste neben MOLTOBENE, zusammen mit „Schritt 2 von 5“. Zutaten und Zubereitung bekommen dadurch mehr Platz. Auf Tablets und bei großer Schrift bleibt die Leiste unten.
+
 ## [0.59.2] – 2026-10-26 (versionCode 102)
 
 ### Verbessert

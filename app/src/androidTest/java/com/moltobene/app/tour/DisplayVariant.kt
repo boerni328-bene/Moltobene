@@ -26,6 +26,8 @@ enum class DisplayVariant(
     TABLET_LANDSCAPE(folder = "tablet-quer", language = "de", dark = false, fontScale = 1f, displaySize = "1280x800"),
     /** Tablet hoch, 800 × 1280 dp (#91). Läuft nur im [TabletTourTest]. */
     TABLET_PORTRAIT(folder = "tablet-hoch", language = "de", dark = false, fontScale = 1f, displaySize = "800x1280"),
+    /** Handy quer, 800 × 360 dp: Die Kochleiste steht oben in der Leiste. Läuft nur im [TabletTourTest]. */
+    PHONE_LANDSCAPE(folder = "handy-quer", language = "de", dark = false, fontScale = 1f, displaySize = "800x360"),
     ;
 
     val isTablet: Boolean get() = displaySize != null
