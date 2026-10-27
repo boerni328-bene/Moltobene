@@ -1,74 +1,41 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 22.10.2026 · `main` = Version 0.55.0 (versionCode 96), veröffentlicht · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 27.10.2026 · `main` = Version 0.60.0 (versionCode 104), Release folgt aus dem Build auf `main` · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
-Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, nur auf dem Handy. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
+Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud (neuer Kernsatz seit 0.59.2). Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
 
-## Stand 23.10.2026: Version 0.58.0 veröffentlicht (0.56.0 und 0.57.0 am 22.10.)
-- `main` = 0.56.0 (versionCode 97), Release v0.56.0 mit APK und Prüfsumme, Build grün. Enthält das neue Aussehen (Startseite D, Rezept A mit Reitern, Kochbuch B, Teigrechner A mit Erklärfenstern, Einstellungen A mit „Schnell“, Hinzufügen D) und „Aus Audio übernehmen“ (Beta, Qualität mit echter Aufnahme noch ungeprüft). Zweige `neues-design` und `zuhoeren-modus` sind erledigt (löschbar).
-- „Sammlung“ heißt jetzt „Kochbuch“ (Regeln in `CLAUDE.md`). „Aufnehmen“ (Rezept einsprechen) ist beschlossen, aber noch nicht programmiert (Schritt 3 von „Aus Sprache übernehmen“).
-- Version 0.58.0 (Release v0.58.0): im Rezept nach links/rechts wischen (Zutaten, Zubereitung, Notizen, neuer Reiter „Quelle“), Öl im Teigrechner teilt sich die Reihe mit dem Hinweis. Zweig `rezept-wischen` erledigt.
-- Offen: Erklärtexte im Teigrechner (Biga, Poolish, Sauerteig, Hefen) gegenlesen; Pasta/Kuchen ohne festes Ergebnis oben; Teigrechner passt noch nicht ganz auf einen Bildschirm; Rückmeldung des Inhabers nach Blick auf die Fotos (`bildschirmfotos/0.56.0`) und auf dem echten Handy.
-- **Version 0.57.0 ist veröffentlicht** (Release v0.57.0, Build grün; Zweig `aufnehmen` erledigt): „Aufnehmen“ (Rezept einsprechen) mit `Dictation`/`VoskDictation`, Fenster im Bearbeiten-Bildschirm. Zuhören nur am echten Handy prüfbar. Nächster Schritt: Rückmeldung des Inhabers vom echten Handy (Aufnehmen, Aus Audio), danach Weg zu 1.0 (Abnahmeliste unten).
+## Stand 26./27.10.2026 (alles auf `main`, Zweige gelöscht)
+- 0.59.0 Tablet (#91): zweispaltige Rezeptansicht ab 720 dp (`ui/components/WideLayout.kt`), Pfeiltasten (Auf/Ab blättern, Links/Rechts wechseln Reiter), Sprachbefehle beim Vorlesen mit Kopfhörern (`data/speech/Headphones.kt`; über Lautsprecher nur „Stopp“, keine Pausen gewünscht).
+- 0.59.1 (#92–#94): „Aufnehmen“ überlebt Drehen/Falten, Foto-Auswahl-Höhe aus dem freien Platz, Hinweiskarte zur Sicherungsdatei (kein Abgleich, unverschlüsselt).
+- 0.59.2: Kernsatz „… an einem Ort, lokal gespeichert, ohne Cloud.“ (README, CLAUDE.md, Release-Text, App, GitHub-Beschreibung).
+- 0.59.3: Handy quer (Höhe < 480 dp, nicht bei großer Schrift): Kochleiste (Zurück, Weiter, Mikrofon, Vorlesen, „Schritt x von y“) steht oben in der Leiste (`CookingBarTop`, `CookingBarHolder` in `RecipeScreen.kt`). Rundgang-Darstellung `PHONE_LANDSCAPE` (800×360).
+- 0.60.0: Menü beim langen Berühren eines Rezepts im Kochbuch (gleich wie ⋮ im Rezept, `ui/recipe/RecipeMenuItems.kt`, Aktionen in `CollectionViewModel`); Schriftgröße klein/mittel/groß (`data/CookingTextSize.kt`, ersetzt „Große Schrift beim Kochen“, alter Wert wird als „groß“ übernommen).
+- Lehre: Eigenschaften in ViewModels vor dem `init`-Block deklarieren (sonst NullPointerException).
 
-## Idee (23.10.2026, noch kein Auftrag): Tablet- und Windows-Version
-Wunsch des Inhabers: nach Veröffentlichung von 0.58.0 (Zweig `rezept-wischen`) an Tablet und evtl. Windows denken. Einschätzung: Tablet = gleiche App mit angepasster Oberfläche (breite Bildschirme: Kochbuch und Rezept nebeneinander, Kochansicht zweispaltig; neue Bibliothek für adaptive Layouts nur nach Rückfrage; Tablet-Varianten im Rundgang). Windows = deutlich größer (Compose Multiplatform, Room/ONNX/Vosk/Fotos/Teilen neu anbinden; Android-Apps unter Windows 11 gehen seit 2025 nicht mehr); Austausch nur über die Sicherungsdatei. Vorschlag: erst `/besprechung` zum Thema, Tablet vor oder gleich nach 1.0, Windows danach entscheiden. Vision (Begriff „Handy“) bei Zustimmung anpassen.
+## Offen / zurückgestellt
+- Schrift 200 % verbessern (Inhaber: „später“; Bildschirm und Gerät nannte er nicht).
+- YouTube-Link: Feld „Video“ unter „Quelle“ gibt es schon; Inhaber nennt bei Bedarf ein Rezept, bei dem er fehlt.
+- Handy quer: Foto in der rechten Spalte nimmt viel Höhe, der erste Schritt liegt darunter (ggf. Foto dort kleiner).
+- Noch „Handy“ in etwa 27 deutschen App-Texten und im README (eigener Durchgang, Begriff laut Besprechung 23.10. entfällt).
+- Wiederherstellen mit Auswahl (ältere ersetzen, fehlende ergänzen, Doppelte einzeln bestätigen): eigenes Vorhaben, noch auszuarbeiten.
+- Windows-Version: erst nach 1.0 (Besprechung `docs/besprechungen/2026-10-23-tablet-und-windows.md`).
+- Echtes Handy/Tablet prüfen: Kochleiste oben (Handy quer), Menü beim langen Berühren, Schriftgrößen, Kopfhörer-Befehle.
 
-### Besprechung 23.10.2026 (Protokoll `docs/besprechungen/2026-10-23-tablet-und-windows.md`, Issues noch nicht angelegt)
-Entschieden vom Inhaber: Tablets offiziell unterstützen, Rezeptansicht auf dem Tablet zweispaltig (Zutaten und Zubereitung zugleich); Windows erwünscht (Rezepte mit Maus/Tastatur bearbeiten, Recherche und Import am PC). Weiter entschieden: Windows erst am Ende (nach 1.0 und Tablet); keine Verschlüsselung der Sicherung; „Handy“ wird durch „lokale Speicherung“ o. ä. ersetzt (Wortlaut offen). Issues #91 (Tablet zweispaltig, Breite, Rundgang), #92 (Drehen/Falten und Sprache), #93 (Fotoauswahl-Höhe), #94 (Hinweise zur Sicherungsdatei) angelegt. Kernsatz neu: „… an einem Ort, lokal gespeichert, ohne Cloud.“ (Umsetzung in CLAUDE.md/README/Texten/Store offen, „Handy“ entfällt). Testtablet vorhanden, Sprache gilt auf Tablets. Zu ausarbeiten: Wiederherstellen mit Auswahl (ältere ersetzen, fehlende ergänzen, Doppelte einzeln bestätigen). Nächster Schritt: Tablet-Zweig (#91) beginnen, sobald der Inhaber es sagt.
+## Weg zu Version 1.0 (Abnahmeliste)
+1. Prüfung auf echtem Handy durch den Projektinhaber: Blättern, Vorlesen mit TalkBack, Spracheingabe, Kopfhörertasten, „Aufnehmen“, „Aus Audio“, Texterkennung/Übersetzung messen (#52, #62).
+2. Teigwissen-Artikel von einer Fachperson gegenlesen (oder „ohne Gewähr“ belassen); Erklärtexte im Teigrechner gegenlesen.
+3. Store-Auftritt (#73): eigene Gerichte-Fotos (ohne Aufnahmeort, keine erkennbaren Personen), Texte, Spendenlink nur im Store-Eintrag; Markenname „Molto Bene“ vorher im Markenregister prüfen.
+4. `/pruefrunde` vor 1.0 (automatisch laut `CLAUDE.md`); Issues erst nach Freigabe.
+Nicht nötig für 1.0: PDF (#47), Umzug aus Apps (#76), Fassungen/Vergleichen (#77/#78), Gehzeiten (#71 Stufe 2), kleineres Lesemodell (#59), Baseline-Profil.
 
-### Stand 25.10.2026: Version 0.59.0 (Tablet, #91) auf `main` gepusht, Release-Build läuft (Zweig `tablet-ansicht` erledigt)
-Zweispaltige Rezeptansicht ab 720 dp, `ui/components/WideLayout.kt`, `TabletTourTest`. Pfeiltasten: Auf/Ab blättern, Links/Rechts wechseln den Reiter. Sprachbefehle beim Vorlesen: mit Kopfhörern alle (`data/speech/Headphones.kt`), über Lautsprecher nur „Stopp“ (und das oft wirkungslos, keine Pausen gewünscht). Inhaber hat Tablet geprüft: gut. Zurückgestellt: Schrift 200 % verbessern („später“); YouTube-Link unter Quelle gibt es schon (Feld „Video“), Inhaber nennt bei Bedarf ein Rezept. Nächste Schritte: #92–#94, Kernsatz ohne „Handy“, Weg zu 1.0.
-
-## Git-Stand
-- `main` = Version 0.54.0 (Squash-Merge von `teig-zeitplan`, Build grün, Release folgt aus dem Build auf main). Zweig `teig-zeitplan` ist erledigt.
-- Parallele Sitzungen im selben Ordner kommen vor (am 17.10. erschien während der Sitzung ein neuer Commit): vor Commit, Push und Versionssprung `git fetch origin`, Zweig und `origin/main` prüfen.
+Offene Fragen an den Inhaber: Zeitpunkt der Store-Fotos, wer prüft die Marke; Baseline-Profil vor oder nach 1.0; Reihenfolge der Abnahmeliste.
+Offene Issues: #16 (prüfen ob erledigt), #47, #52, #57 (schließbar nach Entscheidung), #59, #62, #71, #73–#78.
 
 ## Arbeitsweise (bewährt)
-- Ein Zweig je Aufgabe, bauen mit `gh workflow run build.yml --ref <zweig>`, auf grün warten, **Bildschirmfotos ansehen** (`gh run download <id> -n bildschirmfotos-<version> -D bildschirmfotos/<name>`), dann `git merge --squash` auf `main` mit `Fixes #<Nr>`.
-- Fehlersuche: `gh run view <id> --log-failed` bzw. `--log | grep "##\[error\]com"`; Zeilen mit `texterkennung[...]` und `umrechnenNachBackform[PSEUDO]` sind bewusst übersprungen.
-- Windows: Mehrzeiliges mit Umlauten per Write-Werkzeug schreiben, nicht per Heredoc; `gh` unter `C:\Program Files\GitHub CLI\gh.exe`; kein Python auf dem PC; `git push` scheitert gelegentlich kurz, wiederholen.
-- Stolpersteine: `remember { }` darf nicht `Unit` liefern (`SideEffect` nehmen); bei durchsichtiger Leiste Tests mit `performSemanticsAction(OnClick)` statt `performScrollTo`; Pseudosprache setzt Werte in »…«.
-- Token sparen: Aufbau-Datei nur bei Bedarf lesen, erst suchen dann gezielt lesen, Spezialisten/Prüfrunden nur gezielt, eine Sitzung pro Thema.
-
-## Erledigt seit Version 0.48 (Kurzform)
-Spracheingabe (Beta-Kennzeichnung), Sortieren der Sammlung, Texte-Durchgang, große Kochschrift und Notiz in der Rezeptansicht, Schlagwörter beim Übernehmen, eigene Teigrechner-Voreinstellungen in der Sicherung (0.52.0, mit Schutz der Fotos beim Wiederherstellen 0.52.1), Einstellungen als Gruppen (0.53.0). Prüflauf #52 (Android 8, 1.000 Rezepte): Kaltstart ≈1,0 s, Liste 65 ms, Suche 51 ms.
-
-## Weg zu Version 1.0 (Abnahmeliste, Kopie des Wesentlichen)
-Offen:
-1. **Prüfung auf echtem Handy** durch den Projektinhaber: Blättern, Vorlesen mit TalkBack, Spracheingabe mit Mikrofon, Kopfhörertasten, Texterkennung/Übersetzung messen (#52, #62).
-2. Teigwissen-Artikel von einer Fachperson gegenlesen (oder „ohne Gewähr“ belassen).
-3. Store-Auftritt (#73): eigene Gerichte-Fotos des Projektinhabers (ohne Aufnahmeort, keine erkennbaren Personen), Texte, Spendenlink nur im Store-Eintrag; Markenname „Molto Bene“ vorher im Markenregister prüfen.
-4. **Prüfrunde** (`/pruefrunde`) vor 1.0, automatisch laut `CLAUDE.md`; Issues erst nach Freigabe.
-Nicht nötig für 1.0: PDF (#47), Umzug aus Apps (#76), Fassungen/Vergleichen (#77/#78), Gehzeiten (#71), kleineres Lesemodell (#59), Baseline-Profil.
-
-## Offene Fragen an den Projektinhaber
-- Zeitpunkt der Store-Fotos, wer prüft die Marke?
-- Baseline-Profil (zusätzliches Gradle-Modul): vor oder nach 1.0?
-- Passt die Reihenfolge der Abnahmeliste? (Frage 2 zu Voreinstellungen in der Sicherung ist mit 0.52.0 erledigt.)
-
-## Offene Issues
-#16 neue Version melden (nur auf Antippen; prüfen ob erledigt) · #47 · #52 · #57 (schließbar nach Entscheidung) · #59 · #62 · #71 · #73 · #74 · #75 · #76 · #77 · #78.
-
-## Bekannte kleine Mängel
-Nach Umschalten der Sortierung bleibt die Liste an der Scrollposition. Gesamtmengen-Kacheln im Teigrechner werden bei langen Texten am Rand abgeschnitten (wischbar). Bildschirmfoto „26a-schlagwort-vorschlaege“ zeigt die Chips nicht. Pseudosprache-Fotos der Rezeptansicht nicht ausführlich gesichtet.
-
-## Stand 21.10.2026: YouTube ohne Rezepttext (Zweig `video-hinweis`, Version 0.54.1, lokal committet, NICHT gepusht)
-- GitHub-Guthaben (Free-Konto) für Oktober aufgebraucht: kein Build/Release möglich. Zweig erst pushen und bauen, wenn Guthaben da ist oder ein Ersatz-Weg steht (Frage an den Inhaber: kostenlose Alternative zu GitHub Actions).
-- Stufe 3 erledigt (nur Text): Meldung `video_no_recipe` nennt den Weg über Bildschirmfoto und „Aus Foto übernehmen“.
-- Stufe 1 (automatische Untertitel) am 21.10. geprüft und NICHT machbar: Die Videoseite enthält zwar `captionTracks`, aber `timedtext` antwortet ohne Token (PO-Token) mit leerer Antwort (HTTP 200, 0 Bytes); der Android-Client der Innertube-Schnittstelle gibt 400. Umgehen wäre fragil und ein Eingriff in YouTubes Schutz – nicht weiterverfolgt.
-- Ursache des „Guthabens“: Actions-Speicher 0,5 GB voll (1.762 Artefakte, ca. 18 GB gemeldet), Minuten sind frei. Sicherung auf `D:\Claude\Sicherung\github-artefakte` per `.github/scripts/artefakte-sichern.ps1` (lief am 21.10. ohne `-Loeschen`; Protokoll prüfen, dann mit `-Loeschen`). Entscheidung des Inhabers: keine Windows-Aufgabe; bei ca. 350 MB Artefakten nachfragen. Offen: `retention-days` in `build.yml`.
-- **Version 0.55.0 ist veröffentlicht** (22.10.2026, Release v0.55.0 mit APK und Prüfsumme, Build grün; Squash-Commit 9e34316 auf `main`, enthält auch 0.54.1). Einstellungen → Speicher mit Löschknöpfen für Pakete und Zwischenspeicher. „Sonstiges“ wird unter 1 kB ausgeblendet (Zweig `zuhoeren-modus`, ungebaut). Zweige `video-hinweis` und `speicher-anzeige` sind erledigt (lokal und auf GitHub löschbar). GitHub-Artefakte am 22.10. gesichert und aufgeräumt (332 MB; bei über 350 MB wieder nachfragen) (`.github/scripts/artefakte-sichern.ps1`, 7-Tage-Grenze greift jetzt).
-- Alternative zu Stufe 1 (nicht beschlossen): Zuhören-Modus (Mikrofon + vorhandene Spracherkennung #80) oder Hinweis zu angehefteten Kommentaren.
-
-## Zuletzt erledigt (17.10.2026): Version 0.54.0
-Zeitplan für Teige (#71, Stufe 1, Issue bleibt offen): „Teig starten“, Stand und nächster Zeitpunkt im Rezept und als Kachel auf der Startseite, nur Anzeige. Dazu: schlankere Regler im Teigrechner, Rezeptansicht wieder in normaler Schrift (nur aktueller Schritt groß), gestrichelte Linien zwischen Zutaten.
-- Ideen für Stufe 2: Startzeit wählbar, Übersetzung der Phasentexte, fertige Läufe ausblenden, Zeitplan bearbeiten.
-- Nächster Schritt: Build/Release auf main prüfen, dann Weg zu 1.0 (Abnahmeliste oben).
-
-## In Arbeit: „Aus Audio übernehmen“ und „Aus Sprache übernehmen“ (Zweig `zuhoeren-modus`, Beta, freigegeben 22.10.2026)
-Freigabe des Inhabers: Mikrofon-Zweck erweitert um „Rezept einsprechen“, neue Erfassungswege (Vision/CLAUDE.md, Manifest-Kommentar und Datenschutztext sind angepasst). Verworfen: Download oder Mitschnitt von YouTube-Ton (Bedingungen von YouTube, technisch blockiert). Kein Mikrofon bei „Aus Audio“.
-- Schritt 1 erledigt: `SpokenNumbers`, `SpokenRecipe` + Tests. Schritt 2 programmiert (ungebaut, 22.10.): `AudioDecoder`, `PcmConverter`, `VoskTranscriber`, `EditViewModel.importAudio`, Eintrag „Aus Audio übernehmen“ im Hinzufügen-Menü (Home und Sammlung), Texte DE/EN, Rundgang `hinzufuegenMitAudio`. **Ungeprüft:** Kompilieren, Unit-Tests, echte Erkennung (Qualität des kleinen Modells mit einer echten Aufnahme am Handy prüfen), Verhalten bei Dateien ohne Längenangabe.
-- Schritt 3: „Aus Sprache übernehmen“ mit Mikrofon, Text erscheint live, Prüfen vor dem Entwurf.
-- Danach: Texte DE/EN (feste Begriffe in CLAUDE.md ergänzen), Rundgang, Version 0.56.0, CHANGELOG, Qualität an echtem Beispiel prüfen (kleines Modell).
+- Ein Zweig je Aufgabe, bauen mit `gh workflow run build.yml --ref <zweig>`, auf grün warten, **Bildschirmfotos ansehen** (`gh run download <id> -n bildschirmfotos-<version> -D bildschirmfotos/<name>`), dann `git merge --squash` auf `main` mit `Fixes #<Nr>`. Ein Build dauert ca. 20 Minuten.
+- Fehlersuche: Artefakt `testbericht-<version>` herunterladen (in den Scratchpad-Ordner) und die HTML-Berichte unter `app/build/reports/androidTests/connected/debug/` lesen; `--log-failed` zeigt oft nur „exit code 1“. Zeilen mit `texterkennung[...]` und `umrechnenNachBackform[PSEUDO]` sind bewusst übersprungen.
+- Windows: Mehrzeiliges mit Umlauten per Write-Werkzeug schreiben; `gh` unter `C:\Program Files\GitHub CLI\gh.exe`; kein Python; `git push` scheitert gelegentlich kurz, wiederholen. Warten auf Builds mit `until`-Schleife im Hintergrund, nicht mit `sleep`.
+- Parallele Sitzungen im selben Ordner kommen vor: vor Commit, Push und Versionssprung `git fetch origin`, Zweig und `origin/main` prüfen. Ein alter Stash („Doppelte 0.14.1-Fassung“) liegt unberührt.
+- Stolpersteine: `remember { }` darf nicht `Unit` liefern (`SideEffect`); bei durchsichtiger Leiste Tests mit `performSemanticsAction(OnClick)`; Pseudosprache setzt Werte in »…«; GitHub-Actions-Speicher kann voll sein (Sicherung per `.github/scripts/artefakte-sichern.ps1`, bei über 350 MB nachfragen).
+- Token sparen: Aufbau-Datei nur bei Bedarf lesen, erst suchen dann gezielt lesen, Spezialisten/Prüfrunden nur gezielt.
