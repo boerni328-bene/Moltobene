@@ -1099,7 +1099,8 @@ private fun RecipeContent(
                             file = photo,
                             onOpen = onShowPhoto,
                             modifier = Modifier.padding(horizontal = Spacing.m).fillMaxWidth().clip(MaterialTheme.shapes.large),
-                            minRatio = COOKING_PHOTO_MIN_RATIO,
+                            // Handy quer: flacher zuschneiden, damit der erste Schritt ohne Scrollen sichtbar bleibt.
+                            minRatio = if (isShortHeight()) COOKING_PHOTO_SHORT_MIN_RATIO else COOKING_PHOTO_MIN_RATIO,
                         )
                     }
                     Column(
@@ -1755,6 +1756,7 @@ private fun RecipeTags(tags: List<Tag>) {
 
 /** Kleinstes Seitenverhältnis (Breite zu Höhe) des Fotos in der Rezeptansicht: nie höher als 5:3. */
 private const val COOKING_PHOTO_MIN_RATIO = 2f
+private const val COOKING_PHOTO_SHORT_MIN_RATIO = 3.2f
 private const val TAB_INGREDIENTS = 0
 private const val TAB_STEPS = 1
 private const val TAB_NOTES = 2

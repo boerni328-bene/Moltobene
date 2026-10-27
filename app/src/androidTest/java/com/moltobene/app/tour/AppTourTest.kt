@@ -362,7 +362,6 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithText(SampleRecipes.TOMATO_SAUCE).performSemanticsAction(SemanticsActions.OnLongClick)
         waitForText(text(R.string.share_recipe))
         waitForText(text(R.string.delete_recipe))
-        waitForDescription(text(R.string.cooking_size_small))
         screenshot("12w-menue-in-der-liste")
     }
 

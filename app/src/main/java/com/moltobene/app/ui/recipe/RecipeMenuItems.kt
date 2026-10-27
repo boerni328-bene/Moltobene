@@ -29,7 +29,7 @@ import com.moltobene.app.data.CookingTextSize
 import com.moltobene.app.ui.theme.Spacing
 
 /**
- * Die Einträge des Menüs zu einem Rezept: Favorit, Teilen, Schriftgröße, Löschen. Dasselbe Menü steht oben in der
+ * Die Einträge des Menüs zu einem Rezept: Favorit, Teilen, Löschen und (nur in der Rezeptansicht, [textSize] nicht null) Schriftgröße. Dasselbe Menü steht oben in der
  * Rezeptansicht (⋮) und beim langen Berühren eines Rezepts im Kochbuch. „Fortschritt zurücksetzen“ gibt es nur in der
  * Rezeptansicht ([onReset] nicht null).
  */
@@ -37,13 +37,13 @@ import com.moltobene.app.ui.theme.Spacing
 internal fun RecipeMenuItems(
     favorite: Boolean,
     shareEnabled: Boolean,
-    textSize: CookingTextSize,
-    onTextSize: (CookingTextSize) -> Unit,
     onFavorite: () -> Unit,
     onShare: () -> Unit,
     onShareFile: () -> Unit,
     onDelete: () -> Unit,
     onDismiss: () -> Unit,
+    textSize: CookingTextSize? = null,
+    onTextSize: (CookingTextSize) -> Unit = {},
     onReset: (() -> Unit)? = null,
     resetEnabled: Boolean = true,
 ) {
@@ -72,10 +72,12 @@ internal fun RecipeMenuItems(
             onShareFile()
         },
     )
-    TextSizeRow(selected = textSize, onSelect = {
-        onDismiss()
-        onTextSize(it)
-    })
+    if (textSize != null) {
+        TextSizeRow(selected = textSize, onSelect = {
+            onDismiss()
+            onTextSize(it)
+        })
+    }
     if (onReset != null) {
         DropdownMenuItem(
             text = { Text(stringResource(R.string.cooking_reset)) },

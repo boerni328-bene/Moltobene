@@ -1,6 +1,6 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 27.10.2026 · `main` = Version 0.60.0 (versionCode 104), Release folgt aus dem Build auf `main` · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 27.10.2026 · `main` = Version 0.60.1 (versionCode 105), Release folgt aus dem Build auf `main` · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud (neuer Kernsatz seit 0.59.2). Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
@@ -10,13 +10,14 @@ Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die
 - 0.59.1 (#92–#94): „Aufnehmen“ überlebt Drehen/Falten, Foto-Auswahl-Höhe aus dem freien Platz, Hinweiskarte zur Sicherungsdatei (kein Abgleich, unverschlüsselt).
 - 0.59.2: Kernsatz „… an einem Ort, lokal gespeichert, ohne Cloud.“ (README, CLAUDE.md, Release-Text, App, GitHub-Beschreibung).
 - 0.59.3: Handy quer (Höhe < 480 dp, nicht bei großer Schrift): Kochleiste (Zurück, Weiter, Mikrofon, Vorlesen, „Schritt x von y“) steht oben in der Leiste (`CookingBarTop`, `CookingBarHolder` in `RecipeScreen.kt`). Rundgang-Darstellung `PHONE_LANDSCAPE` (800×360).
+- 0.60.1: Listenmenü ohne Schriftgröße (Wunsch Inhaber), Foto Handy quer flacher.
 - 0.60.0: Menü beim langen Berühren eines Rezepts im Kochbuch (gleich wie ⋮ im Rezept, `ui/recipe/RecipeMenuItems.kt`, Aktionen in `CollectionViewModel`); Schriftgröße klein/mittel/groß (`data/CookingTextSize.kt`, ersetzt „Große Schrift beim Kochen“, alter Wert wird als „groß“ übernommen).
 - Lehre: Eigenschaften in ViewModels vor dem `init`-Block deklarieren (sonst NullPointerException).
 
 ## Offen / zurückgestellt
 - Schrift 200 % verbessern (Inhaber: „später“; Bildschirm und Gerät nannte er nicht).
 - YouTube-Link: Feld „Video“ unter „Quelle“ gibt es schon; Inhaber nennt bei Bedarf ein Rezept, bei dem er fehlt.
-- Handy quer: Foto in der rechten Spalte nimmt viel Höhe, der erste Schritt liegt darunter (ggf. Foto dort kleiner).
+- (erledigt in 0.60.1: Foto bei Handy quer flacher)
 - Noch „Handy“ in etwa 27 deutschen App-Texten und im README (eigener Durchgang, Begriff laut Besprechung 23.10. entfällt).
 - Wiederherstellen mit Auswahl (ältere ersetzen, fehlende ergänzen, Doppelte einzeln bestätigen): eigenes Vorhaben, noch auszuarbeiten.
 - Windows-Version: erst nach 1.0 (Besprechung `docs/besprechungen/2026-10-23-tablet-und-windows.md`).

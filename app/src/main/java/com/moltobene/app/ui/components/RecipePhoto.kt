@@ -67,7 +67,7 @@ fun RecipePhotoLarge(file: File, onOpen: () -> Unit, modifier: Modifier = Modifi
             contentScale = ContentScale.Crop,
             onSuccess = { state ->
                 val size = state.painter.intrinsicSize
-                if (size.width > 0f && size.height > 0f) ratio = (size.width / size.height).coerceIn(minRatio, MAX_RATIO)
+                if (size.width > 0f && size.height > 0f) ratio = (size.width / size.height).coerceIn(minRatio, maxOf(MAX_RATIO, minRatio))
             },
             modifier = Modifier
                 .fillMaxSize()

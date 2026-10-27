@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.60.1] – 2026-10-27 (versionCode 105)
+
+### Geändert
+- **Menü in der Rezeptliste ohne Schriftgröße.** Beim langen Berühren eines Rezepts im Kochbuch stehen nur noch Favorit, Teilen, Als Datei teilen und Löschen. Die Schriftgröße bleibt im Menü des geöffneten Rezepts.
+- **Handy quer: flacheres Foto im Rezept.** Das Foto nimmt weniger Höhe ein, sodass die Zubereitung früher zu sehen ist.
+
 ## [0.60.0] – 2026-10-26 (versionCode 104)
 
 ### Neu

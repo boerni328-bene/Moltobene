@@ -103,11 +103,10 @@ fun CollectionScreen(
     val grid by viewModel.grid.collectAsStateWithLifecycle()
     val sort by viewModel.sort.collectAsStateWithLifecycle()
     val backupHint by viewModel.backupHint.collectAsStateWithLifecycle()
-    val textSize by viewModel.textSize.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
-    // Menü zu einem Rezept in der Liste (langes Berühren): Favorit, Teilen, Schriftgröße, Löschen.
+    // Menü zu einem Rezept in der Liste (langes Berühren): Favorit, Teilen, Löschen.
     var deleteTarget by remember { mutableStateOf<RecipeListItem?>(null) }
     val deletedMessage = stringResource(R.string.recipe_deleted)
     viewModel.shareEvent?.let { event ->
@@ -120,9 +119,7 @@ fun CollectionScreen(
         }
     }
     val actions = RecipeActions(
-        textSize = textSize,
         shareEnabled = !viewModel.preparingShare,
-        onTextSize = viewModel::onTextSizeChange,
         onFavorite = viewModel::toggleFavorite,
         onShare = { id, asFile -> viewModel.share(id, asFile, shareLabels(resources)) },
         onDelete = { deleteTarget = it },

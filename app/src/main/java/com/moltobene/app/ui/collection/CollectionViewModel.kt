@@ -3,7 +3,6 @@ package com.moltobene.app.ui.collection
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moltobene.app.data.AppPreferences
-import com.moltobene.app.data.CookingTextSize
 import com.moltobene.app.data.share.RecipeSharer
 import com.moltobene.app.data.share.ShareLabels
 import com.moltobene.app.ui.recipe.ShareEvent
@@ -135,15 +134,9 @@ class CollectionViewModel(
         .catch { emit(CollectionUiState.Error) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CollectionUiState.Loading)
 
-    private val _textSize = MutableStateFlow(CookingTextSize.MEDIUM)
-
-    /** Schriftgröße in der Rezeptansicht (#61); dieselbe Wahl wie im Menü des Rezepts. */
-    val textSize: StateFlow<CookingTextSize> = _textSize.asStateFlow()
-
     init {
         viewModelScope.launch { runCatching { preferences.collectionGrid() }.getOrNull()?.let { _grid.value = it } }
         viewModelScope.launch { runCatching { preferences.collectionSort() }.getOrNull()?.let { _sort.value = it } }
-        viewModelScope.launch { runCatching { preferences.cookingTextSize() }.getOrNull()?.let { _textSize.value = it } }
         viewModelScope.launch {
             runCatching { repository.cleanUpUnusedPhotos() }
             runCatching { pendingRecognition.deleteLeftovers() }
@@ -163,11 +156,6 @@ class CollectionViewModel(
     fun onSortChange(value: CollectionSort) {
         _sort.value = value
         viewModelScope.launch { runCatching { preferences.setCollectionSort(value) } }
-    }
-
-    fun onTextSizeChange(value: CookingTextSize) {
-        _textSize.value = value
-        viewModelScope.launch { runCatching { preferences.setCookingTextSize(value) } }
     }
 
     /** Favorit eines Rezepts setzen oder entfernen (langes Berühren in der Liste). */

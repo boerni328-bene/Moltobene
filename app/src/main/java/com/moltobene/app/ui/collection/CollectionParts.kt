@@ -89,7 +89,6 @@ import com.moltobene.app.ui.components.DraftLabel
 import com.moltobene.app.ui.components.OptionButton
 import com.moltobene.app.ui.components.RecipePhoto
 import com.moltobene.app.ui.components.TagLabels
-import com.moltobene.app.data.CookingTextSize
 import com.moltobene.app.ui.recipe.RecipeMenuItems
 import com.moltobene.app.ui.recipe.formatDuration
 import com.moltobene.app.ui.theme.Spacing
@@ -286,9 +285,7 @@ private fun RecipeCard(item: RecipeListItem, onClick: () -> Unit, actions: Recip
 
 /** Was das Menü zu einem Rezept in der Liste tun kann (langes Berühren, #92 Wunsch vom 26.10.2026). */
 internal class RecipeActions(
-    val textSize: CookingTextSize,
     val shareEnabled: Boolean,
-    val onTextSize: (CookingTextSize) -> Unit,
     val onFavorite: (String) -> Unit,
     val onShare: (String, Boolean) -> Unit,
     val onDelete: (RecipeListItem) -> Unit,
@@ -301,8 +298,6 @@ private fun RecipeActionMenu(item: RecipeListItem, expanded: Boolean, onDismiss:
         RecipeMenuItems(
             favorite = item.favorite,
             shareEnabled = actions.shareEnabled,
-            textSize = actions.textSize,
-            onTextSize = actions.onTextSize,
             onFavorite = { actions.onFavorite(item.id) },
             onShare = { actions.onShare(item.id, false) },
             onShareFile = { actions.onShare(item.id, true) },
