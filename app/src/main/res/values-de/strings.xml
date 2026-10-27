@@ -34,7 +34,10 @@
     <string name="notes">Notizen</string>
     <string name="note_add">Notiz hinzufügen</string>
     <string name="note_edit">Notiz bearbeiten</string>
-    <string name="cooking_large_text">Große Schrift beim Kochen</string>
+    <string name="cooking_text_size">Schriftgröße</string>
+    <string name="cooking_size_small">Schrift klein</string>
+    <string name="cooking_size_medium">Schrift mittel</string>
+    <string name="cooking_size_large">Schrift groß</string>
     <string name="source">Quelle</string>
     <string name="video">Video</string>
     <string name="servings">Portionen</string>
@@ -246,6 +249,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
+        <item>Neu: Im Menü ⋮ des Rezepts und beim langen Berühren eines Rezepts im Kochbuch gibt es dasselbe Menü mit Favorit, Teilen, Schriftgröße und Löschen. Die Schriftgröße gibt es jetzt in klein, mittel und groß.</item>
         <item>Neu für Tablets: Im Rezept stehen Zutaten und Zubereitung nebeneinander, jede Spalte blättert für sich. Texte und Formulare bleiben auf breiten Bildschirmen gut lesbar. Mit einer Tastatur blättern die Pfeiltasten auf und ab, links und rechts wechseln zwischen Zubereitung, Notizen und Quelle.</item>
         <item>Im Rezept lässt sich nach links und rechts wischen, um zwischen Zutaten, Zubereitung, Notizen und Quelle zu wechseln. Quelle, Video und Originalseiten stehen jetzt auf dem Reiter „Quelle“. Im Teigrechner braucht das Öl weniger Platz.</item>
         <item>Neu (Beta): „Aufnehmen“ auf der Seite „Hinzufügen“: Rezept einsprechen, der Text erscheint beim Sprechen und wird zum Entwurf. Die Aufnahme wird nicht gespeichert.</item>

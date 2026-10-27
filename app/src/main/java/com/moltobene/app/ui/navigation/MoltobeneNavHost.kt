@@ -19,6 +19,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.moltobene.app.MoltobeneApplication
+import com.moltobene.app.data.CookingTextSize
 import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.StartScreen
 import com.moltobene.app.ui.collection.CollectionScreen
@@ -105,6 +106,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                         container.pendingRecognition,
                         container.preferences,
                         container.translations,
+                        container.recipeSharer,
                     )
                 },
                 snackbarHostState = snackbarHostState,
@@ -132,10 +134,10 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
             LaunchedEffect(openedId) { runCatching { container.preferences.addRecentRecipe(openedId) } }
             val screenOn by container.preferences.screenOn.collectAsStateWithLifecycle()
             val speechSettings by container.preferences.speechSettings.collectAsStateWithLifecycle()
-            // „Große Schrift beim Kochen“ (#61): gemerkt in den kleinen Merkwerten.
-            var cookingLarge by remember { mutableStateOf(false) }
+            // Schriftgröße in der Rezeptansicht (#61): gemerkt in den kleinen Merkwerten.
+            var cookingSize by remember { mutableStateOf(CookingTextSize.MEDIUM) }
             val scope = rememberCoroutineScope()
-            LaunchedEffect(Unit) { runCatching { container.preferences.cookingLargeText() }.getOrNull()?.let { cookingLarge = it } }
+            LaunchedEffect(Unit) { runCatching { container.preferences.cookingTextSize() }.getOrNull()?.let { cookingSize = it } }
             RecipeScreen(
                 viewModel = viewModel {
                     RecipeViewModel(
@@ -151,10 +153,10 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                 voice = container.voice,
                 headsetButtons = speechSettings.headsetButtons,
                 headsetMapping = speechSettings.headsetMapping(),
-                cookingLarge = cookingLarge,
-                onCookingLargeChange = { large ->
-                    cookingLarge = large
-                    scope.launch { runCatching { container.preferences.setCookingLargeText(large) } }
+                cookingSize = cookingSize,
+                onCookingSizeChange = { size ->
+                    cookingSize = size
+                    scope.launch { runCatching { container.preferences.setCookingTextSize(size) } }
                 },
                 snackbarHostState = snackbarHostState,
                 onBack = { navController.popBackStack() },

@@ -164,11 +164,17 @@ class AppPreferences(context: Context) {
         prefs.edit { putBoolean(KEY_COLLECTION_GRID, grid) }
     }
 
-    /** „Große Schrift beim Kochen“ (#61): Zutaten, Schritte und Notizen größer; aus ist der Standard. */
-    suspend fun cookingLargeText(): Boolean = withContext(Dispatchers.IO) { prefs.getBoolean(KEY_COOKING_LARGE, false) }
+    /**
+     * Schriftgröße in der Rezeptansicht (#61): klein, mittel (Standard) oder groß. Wer früher „Große Schrift beim Kochen“
+     * eingeschaltet hatte, behält „groß“.
+     */
+    suspend fun cookingTextSize(): CookingTextSize = withContext(Dispatchers.IO) {
+        prefs.getString(KEY_COOKING_SIZE, null)?.let { CookingTextSize.fromKey(it) }
+            ?: if (prefs.getBoolean(KEY_COOKING_LARGE, false)) CookingTextSize.LARGE else CookingTextSize.MEDIUM
+    }
 
-    suspend fun setCookingLargeText(large: Boolean) = withContext(Dispatchers.IO) {
-        prefs.edit { putBoolean(KEY_COOKING_LARGE, large) }
+    suspend fun setCookingTextSize(size: CookingTextSize) = withContext(Dispatchers.IO) {
+        prefs.edit { putString(KEY_COOKING_SIZE, size.key) }
     }
 
     /** Reihenfolge der Sammlung (#57): nach Titel (Standard) oder zuletzt hinzugefügt. */
@@ -224,6 +230,7 @@ class AppPreferences(context: Context) {
         const val KEY_COLLECTION_GRID = "collection_grid"
         const val KEY_COLLECTION_SORT = "collection_sort"
         const val KEY_COOKING_LARGE = "cooking_large_text"
+        const val KEY_COOKING_SIZE = "cooking_text_size"
         const val KEY_DOUGH_PREFIX = "dough_values_"
     }
 }

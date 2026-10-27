@@ -168,6 +168,7 @@ import com.moltobene.app.data.share.RecipeShareText
 import com.moltobene.app.data.share.ShareLabels
 import com.moltobene.app.data.speech.HeadsetAction
 import com.moltobene.app.data.speech.HeadsetMapping
+import com.moltobene.app.data.CookingTextSize
 import com.moltobene.app.data.speech.SpeechOutput
 import com.moltobene.app.data.speech.SpeechState
 import com.moltobene.app.data.speech.SpokenText
@@ -221,8 +222,8 @@ fun RecipeScreen(
     voice: VoiceInput,
     headsetButtons: Boolean = true,
     headsetMapping: HeadsetMapping = HeadsetMapping(),
-    cookingLarge: Boolean = false,
-    onCookingLargeChange: (Boolean) -> Unit = {},
+    cookingSize: CookingTextSize = CookingTextSize.MEDIUM,
+    onCookingSizeChange: (CookingTextSize) -> Unit = {},
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onEdit: (String) -> Unit,
@@ -389,60 +390,18 @@ fun RecipeScreen(
                                     Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options))
                                 }
                                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                stringResource(
-                                                    if (content.recipe.favorite) R.string.favorite_remove else R.string.favorite_add,
-                                                ),
-                                            )
-                                        },
-                                        leadingIcon = { Icon(Icons.Filled.Favorite, contentDescription = null) },
-                                        onClick = {
-                                            menuOpen = false
-                                            viewModel.toggleFavorite()
-                                        },
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.share_recipe)) },
-                                        leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
-                                        enabled = !viewModel.preparingShare,
-                                        onClick = {
-                                            menuOpen = false
-                                            viewModel.share(asFile = false, labels = shareLabels(resources))
-                                        },
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.share_as_file)) },
-                                        enabled = !viewModel.preparingShare,
-                                        onClick = {
-                                            menuOpen = false
-                                            viewModel.share(asFile = true, labels = shareLabels(resources))
-                                        },
-                                    )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.cooking_large_text)) },
-                                    leadingIcon = { if (cookingLarge) Icon(Icons.Filled.Check, contentDescription = null) },
-                                    modifier = Modifier.semantics { selected = cookingLarge },
-                                    onClick = {
-                                        menuOpen = false
-                                        onCookingLargeChange(!cookingLarge)
-                                    },
-                                )
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.cooking_reset)) },
-                                        enabled = checked.isNotEmpty() || currentStep != null,
-                                        onClick = {
-                                            menuOpen = false
-                                            viewModel.resetProgress()
-                                        },
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.delete_recipe)) },
-                                        onClick = {
-                                            menuOpen = false
-                                            confirmDelete = true
-                                        },
+                                    RecipeMenuItems(
+                                        favorite = content.recipe.favorite,
+                                        shareEnabled = !viewModel.preparingShare,
+                                        textSize = cookingSize,
+                                        onTextSize = onCookingSizeChange,
+                                        onFavorite = viewModel::toggleFavorite,
+                                        onShare = { viewModel.share(asFile = false, labels = shareLabels(resources)) },
+                                        onShareFile = { viewModel.share(asFile = true, labels = shareLabels(resources)) },
+                                        onDelete = { confirmDelete = true },
+                                        onDismiss = { menuOpen = false },
+                                        onReset = viewModel::resetProgress,
+                                        resetEnabled = checked.isNotEmpty() || currentStep != null,
                                     )
                                 }
                             }
@@ -456,7 +415,7 @@ fun RecipeScreen(
         val current = state
         when {
             deleting -> CenteredMessage(text = "", modifier = Modifier.padding(padding)) { CircularProgressIndicator() }
-            current is RecipeUiState.Content -> CompositionLocalProvider(LocalCookingLarge provides cookingLarge) { RecipeContent(
+            current is RecipeUiState.Content -> CompositionLocalProvider(LocalCookingSize provides cookingSize) { RecipeContent(
                 recipe = current.recipe,
                 photo = current.photo,
                 cooking = CookingState(
@@ -540,7 +499,7 @@ internal fun openSpeechSettings(context: Context) {
     }
 }
 
-private fun shareLabels(resources: Resources) = ShareLabels(
+internal fun shareLabels(resources: Resources) = ShareLabels(
     untitled = resources.getString(R.string.untitled_recipe),
     ingredients = resources.getString(R.string.ingredients),
     instructions = resources.getString(R.string.instructions),
@@ -558,7 +517,7 @@ private fun shareLabels(resources: Resources) = ShareLabels(
 )
 
 /** Öffnet das Android-Teilen-Menü. Andere Apps dürfen nur die übergebene Datei lesen. */
-private fun openShareMenu(context: Context, share: PreparedShare, chooserTitle: String): Boolean {
+internal fun openShareMenu(context: Context, share: PreparedShare, chooserTitle: String): Boolean {
     val send = Intent(Intent.ACTION_SEND).apply {
         type = share.mimeType
         putExtra(Intent.EXTRA_SUBJECT, share.subject)
@@ -1678,7 +1637,11 @@ private fun TranslationStatus(original: String, actions: TranslationActions) {
 private fun SectionTitle(text: String) {
     Text(
         text = text,
-        style = if (LocalCookingLarge.current) MaterialTheme.typography.headlineLarge else MaterialTheme.typography.headlineMedium,
+        style = when (LocalCookingSize.current) {
+            CookingTextSize.SMALL -> MaterialTheme.typography.headlineSmall
+            CookingTextSize.MEDIUM -> MaterialTheme.typography.headlineMedium
+            CookingTextSize.LARGE -> MaterialTheme.typography.headlineLarge
+        },
         modifier = Modifier
             .padding(top = Spacing.m)
             .semantics { heading() },
@@ -1807,18 +1770,20 @@ private fun translationBarShown(recipe: Recipe, state: TranslationState): Boolea
 private const val BAR_GRADIENT_ALPHA = 0.9f
 private val BAR_HEIGHT = 64.dp
 
-/** „Große Schrift beim Kochen“ (#61): Zutaten, Schritte und Notizen größer, unabhängig von der Schriftgröße des Handys. */
-private val LocalCookingLarge = compositionLocalOf { false }
+/** Schriftgröße in der Rezeptansicht (#61): klein, mittel oder groß, unabhängig von der Schriftgröße des Geräts. */
+private val LocalCookingSize = compositionLocalOf { CookingTextSize.MEDIUM }
 
 /**
- * Schrift für Zutaten, Schritte und Notizen: normal in der Rezeptansicht, nur der aktuelle Schritt (Einzelschritt beim
- * Kochen) ist groß, noch größer mit „Große Schrift beim Kochen“.
+ * Schrift für Zutaten, Schritte und Notizen nach der gewählten Größe. Nur der aktuelle Schritt (Einzelschritt beim
+ * Kochen) ist eine Stufe größer.
  */
 @Composable
-private fun cookingTextStyle(current: Boolean = false): TextStyle = when {
-    !current -> MaterialTheme.typography.bodyLarge
-    LocalCookingLarge.current -> MaterialTheme.typography.headlineMedium
-    else -> MaterialTheme.typography.titleLarge
+private fun cookingTextStyle(current: Boolean = false): TextStyle = with(MaterialTheme.typography) {
+    when (LocalCookingSize.current) {
+        CookingTextSize.SMALL -> if (current) titleMedium else bodyMedium
+        CookingTextSize.MEDIUM -> if (current) titleLarge else bodyLarge
+        CookingTextSize.LARGE -> if (current) headlineMedium else titleLarge
+    }
 }
 
 /**

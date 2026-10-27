@@ -12,6 +12,8 @@ import androidx.annotation.StringRes
 import android.content.res.Resources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -59,6 +61,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -86,6 +89,8 @@ import com.moltobene.app.ui.components.DraftLabel
 import com.moltobene.app.ui.components.OptionButton
 import com.moltobene.app.ui.components.RecipePhoto
 import com.moltobene.app.ui.components.TagLabels
+import com.moltobene.app.data.CookingTextSize
+import com.moltobene.app.ui.recipe.RecipeMenuItems
 import com.moltobene.app.ui.recipe.formatDuration
 import com.moltobene.app.ui.theme.Spacing
 import com.moltobene.app.ui.components.readingWidth
@@ -234,7 +239,7 @@ private fun tagLabel(resources: Resources, counts: List<TagCount>, name: String)
     counts.firstOrNull { it.tag.name == name }?.let { TagLabels.text(resources, it.tag) } ?: name
 
 @Composable
-internal fun RecipeGrid(items: List<RecipeListItem>, onOpenRecipe: (String) -> Unit) {
+internal fun RecipeGrid(items: List<RecipeListItem>, onOpenRecipe: (String) -> Unit, actions: RecipeActions) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 156.dp),
         modifier = Modifier.fillMaxSize(),
@@ -242,17 +247,26 @@ internal fun RecipeGrid(items: List<RecipeListItem>, onOpenRecipe: (String) -> U
         horizontalArrangement = Arrangement.spacedBy(Spacing.s),
         verticalArrangement = Arrangement.spacedBy(Spacing.s),
     ) {
-        items(items, key = { it.id }) { item -> RecipeCard(item = item, onClick = { onOpenRecipe(item.id) }) }
+        items(items, key = { it.id }) { item -> RecipeCard(item = item, onClick = { onOpenRecipe(item.id) }, actions = actions) }
     }
 }
 
 @Composable
-private fun RecipeCard(item: RecipeListItem, onClick: () -> Unit) {
+@OptIn(ExperimentalFoundationApi::class)
+private fun RecipeCard(item: RecipeListItem, onClick: () -> Unit, actions: RecipeActions) {
     val title = item.title.ifBlank { stringResource(R.string.untitled_recipe) }
+    var menu by remember { mutableStateOf(false) }
+    Box {
     Card(
-        onClick = onClick,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         shape = MaterialTheme.shapes.large,
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.large)
+            .combinedClickable(
+                onLongClickLabel = stringResource(R.string.more_options),
+                onLongClick = { menu = true },
+                onClick = onClick,
+            ),
     ) {
         Box {
             Thumbnail(item, title, Modifier.fillMaxWidth().aspectRatio(4f / 3f))
@@ -265,6 +279,36 @@ private fun RecipeCard(item: RecipeListItem, onClick: () -> Unit) {
         ) {
             Text(text = title, style = MaterialTheme.typography.titleSmall, minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
+    }
+    RecipeActionMenu(item = item, expanded = menu, onDismiss = { menu = false }, actions = actions)
+    }
+}
+
+/** Was das Menü zu einem Rezept in der Liste tun kann (langes Berühren, #92 Wunsch vom 26.10.2026). */
+internal class RecipeActions(
+    val textSize: CookingTextSize,
+    val shareEnabled: Boolean,
+    val onTextSize: (CookingTextSize) -> Unit,
+    val onFavorite: (String) -> Unit,
+    val onShare: (String, Boolean) -> Unit,
+    val onDelete: (RecipeListItem) -> Unit,
+)
+
+/** Dasselbe Menü wie oben in der Rezeptansicht (⋮), ohne „Fortschritt zurücksetzen“. */
+@Composable
+private fun RecipeActionMenu(item: RecipeListItem, expanded: Boolean, onDismiss: () -> Unit, actions: RecipeActions) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        RecipeMenuItems(
+            favorite = item.favorite,
+            shareEnabled = actions.shareEnabled,
+            textSize = actions.textSize,
+            onTextSize = actions.onTextSize,
+            onFavorite = { actions.onFavorite(item.id) },
+            onShare = { actions.onShare(item.id, false) },
+            onShareFile = { actions.onShare(item.id, true) },
+            onDelete = { actions.onDelete(item) },
+            onDismiss = onDismiss,
+        )
     }
 }
 
@@ -307,25 +351,32 @@ internal fun Thumbnail(item: RecipeListItem, title: String, modifier: Modifier) 
 }
 
 @Composable
-internal fun RecipeList(items: List<RecipeListItem>, onOpenRecipe: (String) -> Unit) {
+internal fun RecipeList(items: List<RecipeListItem>, onOpenRecipe: (String) -> Unit, actions: RecipeActions) {
     LazyColumn(
         modifier = Modifier.fillMaxSize().readingWidth(),
         contentPadding = PaddingValues(top = Spacing.xs, bottom = 96.dp),
     ) {
         items(items, key = { it.id }) { item ->
-            RecipeRow(item = item, onClick = { onOpenRecipe(item.id) })
+            RecipeRow(item = item, onClick = { onOpenRecipe(item.id) }, actions = actions)
             HorizontalDivider(modifier = Modifier.padding(start = Spacing.m + 56.dp + Spacing.m))
         }
     }
 }
 
 @Composable
-internal fun RecipeRow(item: RecipeListItem, onClick: () -> Unit) {
+@OptIn(ExperimentalFoundationApi::class)
+internal fun RecipeRow(item: RecipeListItem, onClick: () -> Unit, actions: RecipeActions) {
     val title = item.title.ifBlank { stringResource(R.string.untitled_recipe) }
+    var menu by remember { mutableStateOf(false) }
+    Box {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .combinedClickable(
+                onLongClickLabel = stringResource(R.string.more_options),
+                onLongClick = { menu = true },
+                onClick = onClick,
+            )
             .heightIn(min = 72.dp)
             .padding(horizontal = Spacing.m, vertical = Spacing.s),
         verticalAlignment = Alignment.CenterVertically,
@@ -353,6 +404,8 @@ internal fun RecipeRow(item: RecipeListItem, onClick: () -> Unit) {
                 modifier = Modifier.size(20.dp),
             )
         }
+    }
+    RecipeActionMenu(item = item, expanded = menu, onDismiss = { menu = false }, actions = actions)
     }
 }
 

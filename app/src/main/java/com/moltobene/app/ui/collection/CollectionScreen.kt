@@ -44,7 +44,16 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
+import com.moltobene.app.ui.recipe.ShareEvent
+import com.moltobene.app.ui.recipe.openShareMenu
+import com.moltobene.app.ui.recipe.shareLabels
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -94,6 +103,46 @@ fun CollectionScreen(
     val grid by viewModel.grid.collectAsStateWithLifecycle()
     val sort by viewModel.sort.collectAsStateWithLifecycle()
     val backupHint by viewModel.backupHint.collectAsStateWithLifecycle()
+    val textSize by viewModel.textSize.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val resources = LocalResources.current
+    val scope = rememberCoroutineScope()
+    // Menü zu einem Rezept in der Liste (langes Berühren): Favorit, Teilen, Schriftgröße, Löschen.
+    var deleteTarget by remember { mutableStateOf<RecipeListItem?>(null) }
+    val deletedMessage = stringResource(R.string.recipe_deleted)
+    viewModel.shareEvent?.let { event ->
+        val chooserTitle = stringResource(R.string.share_recipe)
+        val errorText = stringResource(R.string.share_error)
+        LaunchedEffect(event) {
+            val opened = event is ShareEvent.Ready && openShareMenu(context, event.share, chooserTitle)
+            if (!opened) snackbarHostState.showSnackbar(errorText)
+            viewModel.shareEvent = null
+        }
+    }
+    val actions = RecipeActions(
+        textSize = textSize,
+        shareEnabled = !viewModel.preparingShare,
+        onTextSize = viewModel::onTextSizeChange,
+        onFavorite = viewModel::toggleFavorite,
+        onShare = { id, asFile -> viewModel.share(id, asFile, shareLabels(resources)) },
+        onDelete = { deleteTarget = it },
+    )
+    deleteTarget?.let { item ->
+        val title = item.title.ifBlank { stringResource(R.string.untitled_recipe) }
+        AlertDialog(
+            onDismissRequest = { deleteTarget = null },
+            title = { Text(stringResource(R.string.delete_confirm_title)) },
+            text = { Text(stringResource(R.string.delete_confirm_text, title)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    deleteTarget = null
+                    viewModel.delete(item.id)
+                    scope.launch { snackbarHostState.showSnackbar(deletedMessage) }
+                }) { Text(stringResource(R.string.delete)) }
+            },
+            dismissButton = { TextButton(onClick = { deleteTarget = null }) { Text(stringResource(R.string.cancel)) } },
+        )
+    }
     // Beim Zurückkehren neu lesen, z. B. nachdem in den Einstellungen gesichert wurde (#51).
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshBackupHint() }
 
@@ -204,9 +253,9 @@ fun CollectionScreen(
                             CenteredMessage(text = stringResource(R.string.search_no_results))
                         } else {
                             if (grid) {
-                                RecipeGrid(items = current.items, onOpenRecipe = onOpenRecipe)
+                                RecipeGrid(items = current.items, onOpenRecipe = onOpenRecipe, actions = actions)
                             } else {
-                                RecipeList(items = current.items, onOpenRecipe = onOpenRecipe)
+                                RecipeList(items = current.items, onOpenRecipe = onOpenRecipe, actions = actions)
                             }
                         }
                     }

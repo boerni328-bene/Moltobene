@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.60.0] – 2026-10-26 (versionCode 104)
+
+### Neu
+- **Menü zum Rezept beim langen Berühren.** Hält man ein Rezept im Kochbuch gedrückt, erscheint dasselbe Menü wie oben im Rezept (⋮): Favorit, Teilen, Als Datei teilen, Schriftgröße und Löschen.
+- **Schriftgröße klein, mittel und groß.** Im Menü stehen drei Knöpfe mit einem „A“. Die Wahl gilt für alle Rezepte und ersetzt „Große Schrift beim Kochen“; wer die große Schrift eingeschaltet hatte, behält „groß“.
+
 ## [0.59.3] – 2026-10-26 (versionCode 103)
 
 ### Verbessert

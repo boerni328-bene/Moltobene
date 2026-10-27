@@ -3,6 +3,15 @@ package com.moltobene.app.ui.collection
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moltobene.app.data.AppPreferences
+import com.moltobene.app.data.CookingTextSize
+import com.moltobene.app.data.share.RecipeSharer
+import com.moltobene.app.data.share.ShareLabels
+import com.moltobene.app.ui.recipe.ShareEvent
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import java.io.IOException
+import kotlinx.coroutines.CancellationException
 import com.moltobene.app.data.RecipeRepository
 import java.util.Locale
 import kotlinx.coroutines.flow.Flow
@@ -62,6 +71,7 @@ class CollectionViewModel(
     private val pendingRecognition: PendingRecognition,
     private val preferences: AppPreferences,
     private val translations: RecipeTranslations,
+    private val sharer: RecipeSharer,
 ) : ViewModel() {
 
     private val _query = MutableStateFlow("")
@@ -125,9 +135,15 @@ class CollectionViewModel(
         .catch { emit(CollectionUiState.Error) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CollectionUiState.Loading)
 
+    private val _textSize = MutableStateFlow(CookingTextSize.MEDIUM)
+
+    /** Schriftgröße in der Rezeptansicht (#61); dieselbe Wahl wie im Menü des Rezepts. */
+    val textSize: StateFlow<CookingTextSize> = _textSize.asStateFlow()
+
     init {
         viewModelScope.launch { runCatching { preferences.collectionGrid() }.getOrNull()?.let { _grid.value = it } }
         viewModelScope.launch { runCatching { preferences.collectionSort() }.getOrNull()?.let { _sort.value = it } }
+        viewModelScope.launch { runCatching { preferences.cookingTextSize() }.getOrNull()?.let { _textSize.value = it } }
         viewModelScope.launch {
             runCatching { repository.cleanUpUnusedPhotos() }
             runCatching { pendingRecognition.deleteLeftovers() }
@@ -147,6 +163,51 @@ class CollectionViewModel(
     fun onSortChange(value: CollectionSort) {
         _sort.value = value
         viewModelScope.launch { runCatching { preferences.setCollectionSort(value) } }
+    }
+
+    fun onTextSizeChange(value: CookingTextSize) {
+        _textSize.value = value
+        viewModelScope.launch { runCatching { preferences.setCookingTextSize(value) } }
+    }
+
+    /** Favorit eines Rezepts setzen oder entfernen (langes Berühren in der Liste). */
+    fun toggleFavorite(id: String) {
+        viewModelScope.launch {
+            val recipe = repository.getRecipe(id) ?: return@launch
+            repository.save(recipe.copy(favorite = !recipe.favorite))
+        }
+    }
+
+    /** Rezept löschen, samt Übersetzung. */
+    fun delete(id: String) {
+        viewModelScope.launch {
+            repository.delete(id)
+            translations.delete(id)
+        }
+    }
+
+    /** true, solange das Teilen vorbereitet wird. */
+    var preparingShare by mutableStateOf(false)
+        private set
+
+    /** Ergebnis fürs Teilen; die Oberfläche öffnet damit das Teilen-Menü und setzt es zurück. */
+    var shareEvent by mutableStateOf<ShareEvent?>(null)
+
+    /** Teilt das Rezept [id] als Text mit Foto oder ([asFile]) als Rezeptdatei. */
+    fun share(id: String, asFile: Boolean, labels: ShareLabels) {
+        if (preparingShare) return
+        preparingShare = true
+        viewModelScope.launch {
+            shareEvent = try {
+                val recipe = repository.getRecipe(id) ?: throw IOException("Rezept fehlt")
+                ShareEvent.Ready(if (asFile) sharer.prepareFile(recipe, labels) else sharer.prepareText(recipe, labels))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                ShareEvent.Failed
+            }
+            preparingShare = false
+        }
     }
 
     fun onGridChange(value: Boolean) {

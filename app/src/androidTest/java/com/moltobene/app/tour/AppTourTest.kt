@@ -46,6 +46,7 @@ import com.moltobene.app.MainActivity
 import com.moltobene.app.MoltobeneApplication
 import com.moltobene.app.R
 import com.moltobene.app.data.CollectionSort
+import com.moltobene.app.data.CookingTextSize
 import com.moltobene.app.data.voice.VoiceCommand
 import com.moltobene.app.data.Appearance
 import com.moltobene.app.data.Palette
@@ -322,11 +323,12 @@ class AppTourTest(private val variant: DisplayVariant) {
         openRecipe(SampleRecipes.TOMATO_SAUCE)
         waitForText("800 g reife Tomaten")
 
-        // „Große Schrift beim Kochen“ (#61) im Menü ⋮: an, Häkchen und größere Schrift, die Wahl bleibt gemerkt.
+        // Schriftgröße (#61) im Menü ⋮: „groß“ wählen, größere Schrift, die Wahl bleibt gemerkt.
         composeRule.onNodeWithContentDescription(text(R.string.more_options)).performClick()
-        waitForText(text(R.string.cooking_large_text))
-        composeRule.onNodeWithText(text(R.string.cooking_large_text)).performClick()
-        composeRule.waitUntil(TIMEOUT_MILLIS) { runBlocking { container().preferences.cookingLargeText() } }
+        waitForDescription(text(R.string.cooking_size_large))
+        screenshot("12s-menue-schriftgroesse")
+        composeRule.onNodeWithContentDescription(text(R.string.cooking_size_large)).performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { runBlocking { container().preferences.cookingTextSize() } == CookingTextSize.LARGE }
         waitForText("800 g reife Tomaten")
         screenshot("12t-grosse-schrift-kochen")
 
@@ -346,9 +348,22 @@ class AppTourTest(private val variant: DisplayVariant) {
 
         // Wieder ausschalten, damit andere Tests in normaler Schrift laufen.
         composeRule.onNodeWithContentDescription(text(R.string.more_options)).performClick()
-        waitForText(text(R.string.cooking_large_text))
-        composeRule.onNodeWithText(text(R.string.cooking_large_text)).performClick()
-        composeRule.waitUntil(TIMEOUT_MILLIS) { !runBlocking { container().preferences.cookingLargeText() } }
+        waitForDescription(text(R.string.cooking_size_medium))
+        composeRule.onNodeWithContentDescription(text(R.string.cooking_size_medium)).performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) { runBlocking { container().preferences.cookingTextSize() } == CookingTextSize.MEDIUM }
+    }
+
+    /** Langes Berühren eines Rezepts im Kochbuch öffnet dasselbe Menü wie ⋮ in der Rezeptansicht. */
+    @Test
+    fun menuZumRezeptInDerListe() {
+        addSampleRecipes()
+        waitForText(SampleRecipes.POTATO_SALAD)
+        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(SampleRecipes.TOMATO_SAUCE))
+        composeRule.onNodeWithText(SampleRecipes.TOMATO_SAUCE).performSemanticsAction(SemanticsActions.OnLongClick)
+        waitForText(text(R.string.share_recipe))
+        waitForText(text(R.string.delete_recipe))
+        waitForDescription(text(R.string.cooking_size_small))
+        screenshot("12w-menue-in-der-liste")
     }
 
     @Test
