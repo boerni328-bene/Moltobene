@@ -18,17 +18,17 @@ Kostenlos, ohne Werbung, ohne Konto und ohne Tracking. Ins Internet geht die App
 - Rezepte aus Text übernehmen: eingefügt aus Nachrichten, E-Mails oder Notizen oder per „Teilen mit…“ aus anderen Apps; Titel, Zutaten und Zubereitung werden automatisch eingeordnet
 - Die Sammlung durchsuchen, mit Vorschaubildern
 - Mit dem Rezept kochen: Der Bildschirm bleibt an, Zutaten lassen sich abhaken, der aktuelle Schritt markieren und die Portionen umrechnen
-- Rezepte übersetzen (Deutsch ↔ Englisch): direkt auf dem Handy und ohne Internet, nachdem einmal das Sprachpaket heruntergeladen wurde (etwa 172 MB). Das Original bleibt erhalten, Abhaken und Portionen umrechnen gehen auch in der Übersetzung.
+- Rezepte übersetzen (Deutsch ↔ Englisch): direkt auf dem Gerät und ohne Internet, nachdem einmal das Sprachpaket heruntergeladen wurde (etwa 172 MB). Das Original bleibt erhalten, Abhaken und Portionen umrechnen gehen auch in der Übersetzung.
 - Einzelne Rezepte teilen: als gut lesbaren Text mit Foto oder als Rezeptdatei im offenen Standard schema.org. Eigene Notizen bleiben dabei privat.
-- Die ganze Sammlung inklusive Fotos als Datei sichern und wiederherstellen, z. B. für den Umzug auf ein neues Handy
-- Darstellung wählen: hell, dunkel oder wie das Handy, in fünf ruhigen Farbwelten (Schiefer, Kobalt, Salbei, Terrakotta, Safran)
+- Die ganze Sammlung inklusive Fotos als Datei sichern und wiederherstellen, z. B. für den Umzug auf ein neues Gerät
+- Darstellung wählen: hell, dunkel oder wie das Gerät, in fünf ruhigen Farbwelten (Schiefer, Kobalt, Salbei, Terrakotta, Safran)
 
 Geplant sind unter anderem Schlagwörter und Favoriten.
 
 ## Installation
 
 1. Unter [Releases](https://github.com/boerni328-bene/Moltobene/releases/latest) die Datei `moltobene-<Version>.apk` herunterladen.
-2. Die Datei auf dem Handy öffnen. Beim ersten Mal fragt Android, ob der Browser bzw. Dateimanager Apps installieren darf; das einmal erlauben.
+2. Die Datei auf dem Gerät öffnen. Beim ersten Mal fragt Android, ob der Browser bzw. Dateimanager Apps installieren darf; das einmal erlauben.
 
 Voraussetzung ist Android 8.0 oder neuer.
 
@@ -48,12 +48,12 @@ Moltobene wird nicht über den Play Store verteilt. Ob eine APK wirklich aus die
 
 ## Datenschutz
 
-- Rezepte und Fotos liegen nur auf dem Handy. Keine Cloud, kein Konto, keine Weitergabe an Dritte.
+- Rezepte und Fotos liegen nur auf dem Gerät. Keine Cloud, kein Konto, keine Weitergabe an Dritte.
 - Die automatische Android-Cloud-Sicherung ist abgeschaltet. Gesichert wird über die eigene Sicherungsdatei.
 - Fotos werden verkleinert und ohne Aufnahmeort gespeichert und geteilt.
-- Die Texterkennung ([PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR) mit [ONNX Runtime](https://onnxruntime.ai), beides quelloffen) ist fest eingebaut und läuft nur auf dem Handy, ohne Internet und ohne Google-Dienste.
-- Ins Internet geht die App nur auf Wunsch, bei „Aus Link übernehmen“ und beim Herunterladen des Sprachpakets. Bei „Aus Link übernehmen“ wird genau diese eine Seite geladen und, falls vorhanden, ihr Foto. Die Seite erfährt dabei – wie bei jedem Browser – die IP-Adresse des Handys, die Uhrzeit und die eingestellte Sprache. Die Verbindung ist immer verschlüsselt, Cookies werden nicht gespeichert, Angaben zum Handy werden nicht mitgeschickt. Dieselbe kurze Datenschutzerklärung steht in der App unter Einstellungen → Info → „Datenschutz“.
-- Das Sprachpaket für die Übersetzung kommt von dieser Projektseite auf GitHub; GitHub erfährt dabei die IP-Adresse des Handys und die Uhrzeit. Rezepte werden nie gesendet: Übersetzt wird vollständig auf dem Handy, mit den quelloffenen Modellen [OPUS-MT](https://huggingface.co/Helsinki-NLP) der Universität Helsinki (CC BY 4.0).
+- Die Texterkennung ([PP-OCRv6](https://github.com/PaddlePaddle/PaddleOCR) mit [ONNX Runtime](https://onnxruntime.ai), beides quelloffen) ist fest eingebaut und läuft nur auf dem Gerät, ohne Internet und ohne Google-Dienste.
+- Ins Internet geht die App nur auf Wunsch, bei „Aus Link übernehmen“ und beim Herunterladen des Sprachpakets. Bei „Aus Link übernehmen“ wird genau diese eine Seite geladen und, falls vorhanden, ihr Foto. Die Seite erfährt dabei – wie bei jedem Browser – die IP-Adresse des Geräts, die Uhrzeit und die eingestellte Sprache. Die Verbindung ist immer verschlüsselt, Cookies werden nicht gespeichert, Angaben zum Gerät werden nicht mitgeschickt. Dieselbe kurze Datenschutzerklärung steht in der App unter Einstellungen → Info → „Datenschutz“.
+- Das Sprachpaket für die Übersetzung kommt von dieser Projektseite auf GitHub; GitHub erfährt dabei die IP-Adresse des Geräts und die Uhrzeit. Rezepte werden nie gesendet: Übersetzt wird vollständig auf dem Gerät, mit den quelloffenen Modellen [OPUS-MT](https://huggingface.co/Helsinki-NLP) der Universität Helsinki (CC BY 4.0).
 
 ## Lizenz
 

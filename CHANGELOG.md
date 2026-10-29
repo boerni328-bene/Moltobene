@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.60.2] – 2026-10-29 (versionCode 106)
+
+### Geändert
+- **Einheitlichere Wortwahl.** In den deutschen Texten der App und im README steht statt „Handy“ nun „Gerät“, passend zum neuen Kernsatz. Die Darstellung „Wie das Handy“ heißt jetzt „Wie das Gerät“.
+
 ## [0.60.1] – 2026-10-27 (versionCode 105)
 
 ### Geändert

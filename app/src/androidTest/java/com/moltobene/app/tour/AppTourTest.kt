@@ -1412,7 +1412,7 @@ class AppTourTest(private val variant: DisplayVariant) {
 
     /**
      * „Kochen“ in den Einstellungen (#68): „Bildschirm in der Rezeptansicht“ wählen. Mit Frist bleibt der Bildschirm
-     * in der Rezeptansicht an, mit „Wie das Handy“ nicht. Die Frist selbst prüft `ScreenOnTest` mit nachgestellter Uhr.
+     * in der Rezeptansicht an, mit „Wie das Gerät“ nicht. Die Frist selbst prüft `ScreenOnTest` mit nachgestellter Uhr.
      */
     @Test
     fun bildschirmInDerRezeptansicht() {
@@ -1437,7 +1437,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
         composeRule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
         openSettingsGroup(R.string.settings_section_cooking)
-        // „Wie das Handy“ steht auch unter „Hell oder dunkel“; der Abschnitt „Kochen“ kommt zuerst.
+        // „Wie das Gerät“ steht auch unter „Hell oder dunkel“; der Abschnitt „Kochen“ kommt zuerst.
         composeRule.onAllNodesWithText(text(R.string.screen_on_device)).onFirst().performScrollTo().performClick()
         composeRule.waitUntil(TIMEOUT_MILLIS) { container().preferences.screenOn.value == ScreenOn.DEVICE }
         leaveSettings()
