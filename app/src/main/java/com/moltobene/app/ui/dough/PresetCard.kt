@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -78,6 +79,8 @@ internal fun PresetCard(
     onSelect: (Int) -> Unit,
     onSave: (String) -> DoughPresets.SaveResult,
     onDelete: (String) -> Unit,
+    compact: Boolean = false,
+    extraActions: List<Pair<String, () -> Unit>> = emptyList(),
 ) {
     var menuOpen by rememberSaveable { mutableStateOf(false) }
     var saving by rememberSaveable { mutableStateOf(false) }
@@ -95,7 +98,7 @@ internal fun PresetCard(
     val position = if (index >= 0) stringResource(R.string.dough_preset_position, index + 1, entries.size) else null
     val description = listOfNotNull(stringResource(R.string.dough_preset_choose, name), position).joinToString(", ")
 
-    Card("") {
+    val navigation: @Composable (@Composable () -> Unit) -> Unit = { trailing ->
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             IconButton(onClick = { choose(DoughPresets.step(index, entries.size, -1)) }) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.dough_preset_previous))
@@ -138,12 +141,56 @@ internal fun PresetCard(
             IconButton(onClick = { choose(DoughPresets.step(index, entries.size, +1)) }) {
                 Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = stringResource(R.string.dough_preset_next))
             }
+            trailing()
         }
-        // Bei großer Schrift passen die Knöpfe nicht nebeneinander; sie rutschen in die nächste Zeile.
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-            TextButton(onClick = { saving = true }, enabled = canSave) { Text(stringResource(R.string.dough_preset_save)) }
-            if (entries.getOrNull(index)?.ownName != null) {
-                TextButton(onClick = { deleting = true }) { Text(stringResource(R.string.dough_preset_delete)) }
+    }
+    val isOwn = entries.getOrNull(index)?.ownName != null
+    if (compact) {
+        // Eine Zeile ohne Karte (ohne Scrollen, Entwurf vom 30.10.2026): Speichern, Löschen und weitere Einträge im Menü.
+        var moreOpen by rememberSaveable { mutableStateOf(false) }
+        Box(modifier = Modifier.padding(horizontal = Spacing.s)) {
+            navigation {
+                Box {
+                    IconButton(onClick = { moreOpen = true }) {
+                        Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options))
+                    }
+                    DropdownMenu(expanded = moreOpen, onDismissRequest = { moreOpen = false }) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.dough_preset_save)) },
+                            enabled = canSave,
+                            onClick = {
+                                moreOpen = false
+                                saving = true
+                            },
+                        )
+                        if (isOwn) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.dough_preset_delete)) },
+                                onClick = {
+                                    moreOpen = false
+                                    deleting = true
+                                },
+                            )
+                        }
+                        for ((label, action) in extraActions) {
+                            DropdownMenuItem(text = { Text(label) }, onClick = {
+                                moreOpen = false
+                                action()
+                            })
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        Card("") {
+            navigation {}
+            // Bei großer Schrift passen die Knöpfe nicht nebeneinander; sie rutschen in die nächste Zeile.
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                TextButton(onClick = { saving = true }, enabled = canSave) { Text(stringResource(R.string.dough_preset_save)) }
+                if (isOwn) {
+                    TextButton(onClick = { deleting = true }) { Text(stringResource(R.string.dough_preset_delete)) }
+                }
             }
         }
     }

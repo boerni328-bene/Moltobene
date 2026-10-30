@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.61.0] – 2026-10-30 (versionCode 108)
+
+### Geändert
+- **Teigrechner (Pizza und Brot) auf einem Bild.** Bei normaler Schrift lassen sich alle Werte ohne Scrollen einstellen: Die Felder stehen paarweise nebeneinander, Hefeart und Vorteig sind Auswahlfelder in der Größe der Felder. Die Voreinstellungen stehen in einer Zeile; Speichern, Löschen, Zurücksetzen und „Was bewirkt das?“ liegen im Menü ⋮ daneben. Was für den Vorteig anzusetzen ist, steht oben im Ergebnis. Bei großer Schrift bleibt es bei den Karten zum Scrollen.
+- **Plus und Minus zählen beim Halten selbst weiter.** Beim langen Drücken zählt der Wert zuerst langsam und dann immer schneller hoch oder runter, bis losgelassen wird oder die Grenze erreicht ist. Ein kurzes Tippen macht weiter genau einen Schritt.
+
 ## [0.60.3] – 2026-10-30 (versionCode 107)
 
 ### Geändert

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
@@ -28,7 +29,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -98,6 +99,7 @@ import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.components.AppTitleWithScreen
 import com.moltobene.app.ui.components.isLargeText
 import com.moltobene.app.ui.theme.Spacing
+import com.moltobene.app.ui.components.RepeatIconButton
 import com.moltobene.app.ui.components.readingWidth
 import java.util.Locale
 import kotlinx.coroutines.delay
@@ -342,17 +344,21 @@ internal fun NumberField(
     val showSteps = !compact && (integer || bounds == null)
     val buttons: @Composable () -> Unit = {
         val stepText = show(stepping.step) + suffix?.let { " $it" }.orEmpty()
-        FilledTonalIconButton(
-            onClick = { onChange(text(DoughStepper.next(current, stepping.step, -1, stepping.range, default))) },
+        RepeatIconButton(
+            onStep = { onChange(text(DoughStepper.next(current, stepping.step, -1, stepping.range, default))) },
             enabled = DoughStepper.canStep(current, -1, stepping.range),
+            contentDescription = stringResource(R.string.dough_step_less, label, stepText),
+            modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer, CircleShape),
         ) {
-            Icon(painterResource(R.drawable.ic_remove), contentDescription = stringResource(R.string.dough_step_less, label, stepText))
+            Icon(painterResource(R.drawable.ic_remove), contentDescription = null)
         }
-        FilledTonalIconButton(
-            onClick = { onChange(text(DoughStepper.next(current, stepping.step, +1, stepping.range, default))) },
+        RepeatIconButton(
+            onStep = { onChange(text(DoughStepper.next(current, stepping.step, +1, stepping.range, default))) },
             enabled = DoughStepper.canStep(current, +1, stepping.range),
+            contentDescription = stringResource(R.string.dough_step_more, label, stepText),
+            modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer, CircleShape),
         ) {
-            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.dough_step_more, label, stepText))
+            Icon(Icons.Filled.Add, contentDescription = null)
         }
     }
     val slider: @Composable () -> Unit = {
@@ -456,11 +462,12 @@ private fun StepperField(
             border = BorderStroke(1.dp, if (error != null) colors.error else colors.outlineVariant),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(
-                    onClick = { onChange(text(DoughStepper.next(current, stepping.step, -1, stepping.range, default))) },
+                RepeatIconButton(
+                    onStep = { onChange(text(DoughStepper.next(current, stepping.step, -1, stepping.range, default))) },
                     enabled = DoughStepper.canStep(current, -1, stepping.range),
+                    contentDescription = stringResource(R.string.dough_step_less, label, stepText),
                 ) {
-                    Icon(painterResource(R.drawable.ic_remove), contentDescription = stringResource(R.string.dough_step_less, label, stepText))
+                    Icon(painterResource(R.drawable.ic_remove), contentDescription = null)
                 }
                 BasicTextField(
                     value = value,
@@ -472,11 +479,12 @@ private fun StepperField(
                     visualTransformation = if (suffix != null) SuffixTransformation(suffix) else VisualTransformation.None,
                     modifier = Modifier.weight(1f).semantics { contentDescription = label },
                 )
-                IconButton(
-                    onClick = { onChange(text(DoughStepper.next(current, stepping.step, +1, stepping.range, default))) },
+                RepeatIconButton(
+                    onStep = { onChange(text(DoughStepper.next(current, stepping.step, +1, stepping.range, default))) },
                     enabled = DoughStepper.canStep(current, +1, stepping.range),
+                    contentDescription = stringResource(R.string.dough_step_more, label, stepText),
                 ) {
-                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.dough_step_more, label, stepText))
+                    Icon(Icons.Filled.Add, contentDescription = null)
                 }
             }
         }
@@ -623,6 +631,57 @@ internal fun <T> ChoiceField(
     }
 }
 
+/**
+ * Auswahlfeld in der Größe der Felder mit Minus und Plus (Entwurf vom 30.10.2026): der Name darüber, darunter die
+ * Auswahl mit Pfeil; die Liste öffnet beim Antippen. Für das Formular ohne Scrollen bei normaler Schrift.
+ */
+@Composable
+internal fun <T> CompactChoice(
+    label: String,
+    options: List<T>,
+    selected: T,
+    optionLabel: @Composable (T) -> String,
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var open by rememberSaveable { mutableStateOf(false) }
+    val selectedLabel = optionLabel(selected)
+    val colors = MaterialTheme.colorScheme
+    Column(modifier = modifier) {
+        Text(label, style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant, maxLines = 1)
+        Box {
+            Surface(
+                shape = MaterialTheme.shapes.small,
+                color = colors.surface,
+                border = BorderStroke(1.dp, colors.outlineVariant),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics(mergeDescendants = true) {
+                        role = Role.DropdownList
+                        contentDescription = "$label: $selectedLabel"
+                    }
+                    .clickable(onClickLabel = label) { open = true },
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.heightIn(min = 48.dp).padding(start = Spacing.s),
+                ) {
+                    Text(selectedLabel, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+                    Text("▾", modifier = Modifier.padding(horizontal = Spacing.s))
+                }
+            }
+            DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+                for (option in options) {
+                    DropdownMenuItem(text = { Text(optionLabel(option)) }, onClick = {
+                        open = false
+                        onSelect(option)
+                    })
+                }
+            }
+        }
+    }
+}
+
 /** Ab so vielen Möglichkeiten gibt es immer ein Auswahlfeld, bei großer Schrift schon ab drei. */
 private const val DROPDOWN_ALWAYS_FROM = 6
 private const val DROPDOWN_LARGE_FROM = 3
@@ -717,16 +776,96 @@ private fun DoughForm(
     DoughHelpDialog(helpTopics(help)) { help = null }
 
     val bread = type == DoughType.BREAD
+    // Die Felder stehen einmal hier, damit das Formular ohne Scrollen und das mit Karten dieselben benutzen.
+    val countField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(if (bread) R.string.dough_count_loaf else R.string.dough_count_ball), count,
+            { count = it }, issueFor(DoughField.COUNT), m, integer = true,
+            stepping = stepping(DoughField.COUNT, defaults.count.toDouble()),
+        )
+    }
+    val pieceField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(R.string.dough_piece), piece, { piece = it },
+            issueFor(DoughField.PIECE_GRAMS), m, suffix = "g",
+            stepping = stepping(DoughField.PIECE_GRAMS, defaults.pieceGrams),
+        )
+    }
+    val waterField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(R.string.dough_water), water, { water = it }, issueFor(DoughField.WATER), m, suffix = "%",
+            stepping = stepping(DoughField.WATER, defaults.water),
+        )
+    }
+    val saltField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(R.string.dough_salt), salt, { salt = it }, issueFor(DoughField.SALT), m, suffix = "%",
+            stepping = stepping(DoughField.SALT, defaults.salt),
+        )
+    }
+    val oilField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(R.string.dough_oil), oil, { oil = it }, issueFor(DoughField.OIL), m, suffix = "%",
+            stepping = stepping(DoughField.OIL, defaults.oil),
+        )
+    }
+    val yeastField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(R.string.dough_yeast_amount), yeast, { yeast = it },
+            issueFor(DoughField.YEAST), m, suffix = "%",
+            stepping = stepping(DoughField.YEAST, YeastKind.FRESH.convert(defaults.yeast, yeastKind)),
+        )
+    }
+    val prefermentFlourField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(R.string.dough_preferment_flour), prefermentFlour, { prefermentFlour = it },
+            issueFor(DoughField.PREFERMENT_FLOUR), m, suffix = "%",
+            stepping = stepping(DoughField.PREFERMENT_FLOUR, defaults.prefermentFlour),
+        )
+    }
+    val prefermentWaterField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(R.string.dough_preferment_water), prefermentWater, { prefermentWater = it },
+            issueFor(DoughField.PREFERMENT_WATER), m, suffix = "%",
+            stepping = stepping(DoughField.PREFERMENT_WATER, DoughLimits.defaultPrefermentWater(preferment)),
+        )
+    }
+    fun selectYeastKind(kind: YeastKind) {
+        // Die Menge bleibt gleichwertig, wenn die Hefeart wechselt.
+        val current = parseNumber(yeast)
+        if (current.isFinite()) {
+            yeast = DoughNumbers.separator(
+                DoughNumbers.plain(yeastKind.convert(current, kind), 3),
+                Locale.getDefault().language,
+            )
+        }
+        yeastKindKey = kind.key
+    }
+    fun selectPreferment(option: Preferment) {
+        prefermentKey = option.key
+        // Biga und Poolish haben feste Wasseranteile, die hier vorausgefüllt werden.
+        if (option != Preferment.NONE) prefermentWater = show(DoughLimits.defaultPrefermentWater(option))
+    }
     // Bei normaler Schrift steht das Ergebnis oben fest und rechnet beim Ändern der Werte mit (Entwurf vom 22.10.2026);
     // bei großer Schrift bleibt es bei der Leiste unten, damit zum Scrollen genug Platz bleibt.
     val pinned = !isLargeText()
     val success = result as? DoughResult.Success
     val resultDraft = success?.let { viewModel.draft(it, input) }
     val resultTotals = success?.let { viewModel.totals(it, input) }
+    val prefermentItems = success?.let { viewModel.prefermentItems(it, input) }.orEmpty()
+    val prefermentBar = if (prefermentItems.isEmpty()) null else stringResource(
+        R.string.dough_bar_preferment,
+        stringResource(prefermentLabel(preferment)),
+        prefermentItems.joinToString(", ") { "${it.amount} ${it.name}" },
+    )
     Column(modifier = Modifier.fillMaxSize()) {
         if (pinned) {
             header()
-            ResultTop(summary = if (success != null && resultDraft != null) summaryLine(success, resultDraft) else null, totals = resultTotals)
+            ResultTop(
+                summary = if (success != null && resultDraft != null) summaryLine(success, resultDraft) else null,
+                totals = resultTotals,
+                preferment = prefermentBar,
+            )
         }
         Column(
             modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
@@ -751,44 +890,67 @@ private fun DoughForm(
                     viewModel.deleteOwnPreset(type, name)
                     chosen = -1
                 },
+                compact = pinned,
+                extraActions = listOf(
+                    stringResource(R.string.dough_reset) to { resetCount += 1 },
+                    stringResource(R.string.dough_help_title) to { help = "all" },
+                ),
             )
 
-            Card(stringResource(R.string.dough_section_dough), onHelp = { help = "dough" }) {
-                Fields(
-                    { m ->
-                        NumberField(
-                            stringResource(if (bread) R.string.dough_count_loaf else R.string.dough_count_ball), count,
-                            { count = it }, issueFor(DoughField.COUNT), m, integer = true,
-                            stepping = stepping(DoughField.COUNT, defaults.count.toDouble()),
-                        )
-                    },
-                    { m ->
-                        NumberField(
-                            stringResource(R.string.dough_piece), piece, { piece = it },
-                            issueFor(DoughField.PIECE_GRAMS), m, suffix = "g",
-                            stepping = stepping(DoughField.PIECE_GRAMS, defaults.pieceGrams),
-                        )
-                    },
+            if (pinned) {
+                // Alles in einem Bild, ohne Scrollen (Entwurf vom 30.10.2026): Felder paarweise, Auswahlen im Format der Felder.
+                val yeastKindChoice: @Composable (Modifier) -> Unit = { m ->
+                    CompactChoice(
+                        label = stringResource(R.string.dough_section_yeast),
+                        options = YeastKind.entries,
+                        selected = yeastKind,
+                        optionLabel = { stringResource(AndroidDoughTexts.yeastName(it)) },
+                        onSelect = ::selectYeastKind,
+                        modifier = m,
+                    )
+                }
+                val prefermentChoice: @Composable (Modifier) -> Unit = { m ->
+                    CompactChoice(
+                        label = stringResource(R.string.dough_section_preferment),
+                        options = Preferment.entries,
+                        selected = preferment,
+                        optionLabel = { stringResource(prefermentLabel(it)) },
+                        onSelect = ::selectPreferment,
+                        modifier = m,
+                    )
+                }
+                val compactFields = buildList<@Composable (Modifier) -> Unit> {
+                    add(countField)
+                    add(pieceField)
+                    add(waterField)
+                    add(saltField)
+                    add(oilField)
+                    add(prefermentChoice)
+                    if (preferment != Preferment.NONE) {
+                        add(prefermentFlourField)
+                        add(prefermentWaterField)
+                    }
+                    add(yeastKindChoice)
+                    add(yeastField)
+                }
+                Column(modifier = Modifier.padding(horizontal = Spacing.m)) {
+                    Fields(*compactFields.toTypedArray())
+                }
+                Text(
+                    stringResource(R.string.dough_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = Spacing.m),
                 )
+                return@Column
+            }
+
+            Card(stringResource(R.string.dough_section_dough), onHelp = { help = "dough" }) {
+                Fields(countField, pieceField)
                 Fields(
-                    { m ->
-                        NumberField(
-                            stringResource(R.string.dough_water), water, { water = it }, issueFor(DoughField.WATER), m, suffix = "%",
-                            stepping = stepping(DoughField.WATER, defaults.water),
-                        )
-                    },
-                    { m ->
-                        NumberField(
-                            stringResource(R.string.dough_salt), salt, { salt = it }, issueFor(DoughField.SALT), m, suffix = "%",
-                            stepping = stepping(DoughField.SALT, defaults.salt),
-                        )
-                    },
-                    { m ->
-                        NumberField(
-                            stringResource(R.string.dough_oil), oil, { oil = it }, issueFor(DoughField.OIL), m, suffix = "%",
-                            stepping = stepping(DoughField.OIL, defaults.oil),
-                        )
-                    },
+                    waterField,
+                    saltField,
+                    oilField,
                     // Der Hinweis steht neben dem Öl, statt eine eigene Zeile zu belegen.
                     trailing = {
                         Text(
@@ -806,26 +968,12 @@ private fun DoughForm(
                     options = YeastKind.entries,
                     selected = yeastKind,
                     optionLabel = { stringResource(AndroidDoughTexts.yeastName(it)) },
-                    onSelect = { kind ->
-                        // Die Menge bleibt gleichwertig, wenn die Hefeart wechselt.
-                        val current = parseNumber(yeast)
-                        if (current.isFinite()) {
-                            yeast = DoughNumbers.separator(
-                                DoughNumbers.plain(yeastKind.convert(current, kind), 3),
-                                Locale.getDefault().language,
-                            )
-                        }
-                        yeastKindKey = kind.key
-                    },
+                    onSelect = ::selectYeastKind,
                 )
                 TextButton(onClick = { help = yeastKind.key }) {
                     Text(stringResource(R.string.dough_help_term_open, stringResource(AndroidDoughTexts.yeastName(yeastKind))))
                 }
-                NumberField(
-                    stringResource(R.string.dough_yeast_amount), yeast, { yeast = it },
-                    issueFor(DoughField.YEAST), Modifier.fillMaxWidth(), suffix = "%",
-                    stepping = stepping(DoughField.YEAST, YeastKind.FRESH.convert(defaults.yeast, yeastKind)),
-                )
+                yeastField(Modifier.fillMaxWidth())
             }
 
             // Der Vorteig ist hervorgehoben (Rahmen in der Hauptfarbe): Auswahl, Anteile und die Mengen des Vorteigs als Kacheln,
@@ -836,11 +984,7 @@ private fun DoughForm(
                     options = Preferment.entries,
                     selected = preferment,
                     optionLabel = { stringResource(prefermentLabel(it)) },
-                    onSelect = { option ->
-                        prefermentKey = option.key
-                        // Biga und Poolish haben feste Wasseranteile, die hier vorausgefüllt werden.
-                        if (option != Preferment.NONE) prefermentWater = show(DoughLimits.defaultPrefermentWater(option))
-                    },
+                    onSelect = ::selectPreferment,
                 )
                 if (preferment != Preferment.NONE) {
                     TextButton(onClick = { help = preferment.key }) {
@@ -862,22 +1006,7 @@ private fun DoughForm(
                             for (item in tiles) TotalTile(item)
                         }
                     }
-                    Fields(
-                        { m ->
-                            NumberField(
-                                stringResource(R.string.dough_preferment_flour), prefermentFlour, { prefermentFlour = it },
-                                issueFor(DoughField.PREFERMENT_FLOUR), m, suffix = "%",
-                                stepping = stepping(DoughField.PREFERMENT_FLOUR, defaults.prefermentFlour),
-                            )
-                        },
-                        { m ->
-                            NumberField(
-                                stringResource(R.string.dough_preferment_water), prefermentWater, { prefermentWater = it },
-                                issueFor(DoughField.PREFERMENT_WATER), m, suffix = "%",
-                                stepping = stepping(DoughField.PREFERMENT_WATER, DoughLimits.defaultPrefermentWater(preferment)),
-                            )
-                        },
-                    )
+                    Fields(prefermentFlourField, prefermentWaterField)
                 }
             }
 
@@ -941,12 +1070,6 @@ private fun DoughForm(
         if (pinned) {
             SaveBar(enabled = success != null, onSave = { viewModel.saveAsRecipe(input, onSaved) })
         } else {
-            val prefermentItems = success?.let { viewModel.prefermentItems(it, input) }.orEmpty()
-            val prefermentBar = if (prefermentItems.isEmpty()) null else stringResource(
-                R.string.dough_bar_preferment,
-                stringResource(prefermentLabel(preferment)),
-                prefermentItems.joinToString(", ") { "${it.amount} ${it.name}" },
-            )
             ResultBar(
                 summary = if (success != null && resultDraft != null) summaryLine(success, resultDraft) else null,
                 totals = resultTotals,
@@ -962,7 +1085,7 @@ private fun DoughForm(
  * Kacheln teilen sich die Breite, bei mehr als vier lassen sie sich seitlich verschieben.
  */
 @Composable
-private fun ResultTop(summary: String?, totals: List<TotalItem>?) {
+private fun ResultTop(summary: String?, totals: List<TotalItem>?, preferment: String? = null) {
     Surface(
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -988,6 +1111,10 @@ private fun ResultTop(summary: String?, totals: List<TotalItem>?) {
                 ) {
                     for (item in totals) TotalTile(item)
                 }
+            }
+            // Biga, Poolish, Sauerteig: was für den Vorteig am Abend vorher angesetzt wird.
+            if (summary != null && preferment != null) {
+                Text(preferment, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.semantics(mergeDescendants = true) {})
             }
         }
     }

@@ -1,6 +1,6 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 27.10.2026 · `main` = Version 0.60.3 (versionCode 107), Release folgt aus dem Build auf `main` · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 30.10.2026 · `main` = Version 0.61.0 (versionCode 108), Release folgt aus dem Build auf `main` · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud (neuer Kernsatz seit 0.59.2). Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
@@ -11,6 +11,7 @@ Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die
 - 0.59.2: Kernsatz „… an einem Ort, lokal gespeichert, ohne Cloud.“ (README, CLAUDE.md, Release-Text, App, GitHub-Beschreibung).
 - 0.59.3: Handy quer (Höhe < 480 dp, nicht bei großer Schrift): Kochleiste (Zurück, Weiter, Mikrofon, Vorlesen, „Schritt x von y“) steht oben in der Leiste (`CookingBarTop`, `CookingBarHolder` in `RecipeScreen.kt`). Rundgang-Darstellung `PHONE_LANDSCAPE` (800×360).
 - 0.60.3: Mengen rechtsbündig in eigener Spalte (`ui/components/IngredientLine.kt`, bei großer Schrift aus), Grundrezepte im Design der Rezepte.
+- 0.61.0: Teigrechner Pizza/Brot auf einem Bild (normale Schrift; `CompactChoice`, Voreinstellungszeile mit Menü ⋮), Plus/Minus mit Dauerdruck (`ui/components/RepeatIconButton.kt`). Offen: Pasta und Kuchen ebenso ohne Scrollen, dann weitere Verbesserungen am Teigrechner vor 1.0.
 - 0.60.1: Listenmenü ohne Schriftgröße (Wunsch Inhaber), Foto Handy quer flacher.
 - 0.60.0: Menü beim langen Berühren eines Rezepts im Kochbuch (gleich wie ⋮ im Rezept, `ui/recipe/RecipeMenuItems.kt`, Aktionen in `CollectionViewModel`); Schriftgröße klein/mittel/groß (`data/CookingTextSize.kt`, ersetzt „Große Schrift beim Kochen“, alter Wert wird als „groß“ übernommen).
 - Lehre: Eigenschaften in ViewModels vor dem `init`-Block deklarieren (sonst NullPointerException).

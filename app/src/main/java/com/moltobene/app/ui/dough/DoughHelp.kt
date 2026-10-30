@@ -47,6 +47,7 @@ internal enum class HelpTopic(
 
 /** Die Themen, die eine Karte des Formulars erklärt; [key] wird beim Drehen des Handys gemerkt. */
 internal fun helpTopics(key: String?): List<HelpTopic> = when (key) {
+    "all" -> listOf(HelpTopic.WATER, HelpTopic.SALT, HelpTopic.OIL, HelpTopic.YEAST, HelpTopic.PREFERMENT)
     "dough" -> listOf(HelpTopic.WATER, HelpTopic.SALT, HelpTopic.OIL)
     "yeast" -> listOf(HelpTopic.YEAST)
     "preferment" -> listOf(HelpTopic.PREFERMENT)
