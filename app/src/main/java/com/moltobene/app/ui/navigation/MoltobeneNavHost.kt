@@ -21,6 +21,7 @@ import androidx.navigation.toRoute
 import com.moltobene.app.MoltobeneApplication
 import com.moltobene.app.data.CookingTextSize
 import com.moltobene.app.data.ScreenOn
+import com.moltobene.app.data.StepperSide
 import com.moltobene.app.data.StartScreen
 import com.moltobene.app.ui.collection.CollectionScreen
 import com.moltobene.app.ui.basics.BasicsViewModel
@@ -216,8 +217,10 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
         composable<DoughRoute> {
             val context = LocalContext.current
             val resources = LocalResources.current
+            val stepperSide by container.preferences.stepperSide.collectAsStateWithLifecycle()
             DoughScreen(
                 viewModel = viewModel { DoughViewModel(context, container.preferences, container.repository) },
+                stepperSide = stepperSide ?: StepperSide.RIGHT,
                 snackbarHostState = snackbarHostState,
                 onBack = { navController.popBackStack() },
                 onOpenKnowHow = { navController.navigate(KnowHowRoute) },

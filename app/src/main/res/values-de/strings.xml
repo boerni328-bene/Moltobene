@@ -330,6 +330,9 @@
     <string name="settings_section_translation">Übersetzung</string>
     <!-- Einstellungen: Kochen (#68) -->
     <string name="settings_section_cooking">Kochen</string>
+    <string name="stepper_side_title">Plus und Minus</string>
+    <string name="stepper_side_right">Nebeneinander rechts vom Wert</string>
+    <string name="stepper_side_left">Nebeneinander links vom Wert</string>
     <string name="screen_on_title">Bildschirm in der Rezeptansicht</string>
     <string name="screen_on_stays">Bleibt an</string>
     <plurals name="screen_on_off_after">
@@ -569,8 +572,6 @@
     <string name="dough_reset">Zurücksetzen</string>
     <string name="dough_step_less">%1$s um %2$s verringern</string>
     <string name="dough_step_more">%1$s um %2$s erhöhen</string>
-    <string name="dough_default_value">Standard %1$s</string>
-    <string name="dough_default_reset_short">Auf Standard</string>
     <string name="dough_totals_title">Gesamtmengen</string>
 
     <!-- Teigwissen (#84): Hinweise zu den Feldern des Teigrechners -->

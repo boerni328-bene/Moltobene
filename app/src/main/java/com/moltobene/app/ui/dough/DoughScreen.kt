@@ -33,6 +33,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -90,6 +91,7 @@ import com.moltobene.app.data.dough.DoughNumbers
 import com.moltobene.app.data.dough.DoughPresets
 import com.moltobene.app.data.dough.DoughResult
 import com.moltobene.app.data.dough.DoughStepper
+import com.moltobene.app.data.StepperSide
 import com.moltobene.app.data.dough.DoughType
 import com.moltobene.app.data.dough.LeavenedInput
 import com.moltobene.app.data.dough.LineRole
@@ -114,6 +116,7 @@ internal fun show(value: Double): String =
 @Composable
 fun DoughScreen(
     viewModel: DoughViewModel,
+    stepperSide: StepperSide,
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onOpenKnowHow: () -> Unit,
@@ -141,7 +144,7 @@ fun DoughScreen(
         },
         snackbarHost = { AppSnackbarHost(snackbarHostState) },
     ) { padding ->
-        CompositionLocalProvider(LocalDoughSliders provides true) {
+        CompositionLocalProvider(LocalDoughSliders provides true, LocalStepperSide provides stepperSide) {
             Column(modifier = Modifier.padding(padding).fillMaxSize().readingWidth()) {
                 val header: @Composable () -> Unit = {
                     Header(type) { typeKey = it.key }
@@ -322,6 +325,8 @@ internal fun NumberField(
             isError = error != null,
             supportingText = error?.let { { Text(it) } },
             singleLine = true,
+            // Geänderte Werte stehen fett (Standardwerte gibt es nur gemeinsam über „Zurücksetzen“).
+            textStyle = LocalTextStyle.current.copy(fontWeight = if (default != null && !atDefault) FontWeight.Bold else null),
             keyboardOptions = KeyboardOptions(keyboardType = if (integer) KeyboardType.Number else KeyboardType.Decimal),
             modifier = m,
         )
@@ -374,37 +379,12 @@ internal fun NumberField(
             )
         }
     }
-    // „Standard 250 g“ nur, wenn der Wert abweicht – eine Zeile mit „Zurücksetzen“, kein Text bei Standard.
-    val defaultLine: @Composable () -> Unit = {
-        if (default != null && !atDefault) {
-            val value = stringResource(R.string.dough_default_value, show(default) + suffix?.let { " $it" }.orEmpty())
-            val reset = stringResource(R.string.dough_default_reset_short)
-            if (compact) {
-                // In der Zweierreihe ist wenig Breite: der Text und darunter der Knopf.
-                Column(modifier = Modifier.fillMaxWidth().padding(start = Spacing.xs)) {
-                    Text(value, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    TextButton(onClick = { onChange(text(default)) }) { Text(reset) }
-                }
-            } else {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        value,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.weight(1f).padding(start = Spacing.m),
-                    )
-                    TextButton(onClick = { onChange(text(default)) }) { Text(reset) }
-                }
-            }
-        }
-    }
     if (isLargeText()) {
         // Bei großer Schrift hat das Feld die volle Breite, die Knöpfe stehen darunter.
         Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
             field(Modifier.fillMaxWidth())
             if (showSteps) Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s), verticalAlignment = Alignment.CenterVertically) { buttons() }
             slider()
-            defaultLine()
         }
     } else {
         Column(modifier = modifier) {
@@ -417,7 +397,6 @@ internal fun NumberField(
                 field(Modifier.fillMaxWidth())
             }
             slider()
-            defaultLine()
         }
     }
 }
@@ -434,8 +413,16 @@ private class SuffixTransformation(private val suffix: String) : VisualTransform
 }
 
 /**
- * Feld mit Minus und Plus in einer Zeile (Entwurf vom 22.10.2026): darüber der Name, in der Mitte die antippbare Zahl
- * mit Einheit. Die Schrittweite, die Grenzen und der Standardwert kommen wie beim Feld mit Regler aus [stepping].
+ * Auf welcher Seite des Werts Minus und Plus nebeneinander stehen (Einstellung „Plus und Minus“, Wunsch vom 30.10.2026,
+ * z. B. für Linkshänder).
+ */
+internal val LocalStepperSide = compositionLocalOf { StepperSide.RIGHT }
+
+/**
+ * Feld mit Minus und Plus in einer Zeile (Entwurf vom 22.10.2026): darüber der Name, die antippbare Zahl mit Einheit
+ * und beide Knöpfe nebeneinander rechts oder links davon ([LocalStepperSide]). Ein geänderter Wert steht fett; den
+ * Standardwert stellt „Zurücksetzen“ für alle Werte gemeinsam wieder her. Die Schrittweite und die Grenzen kommen wie
+ * beim Feld mit Regler aus [stepping].
  */
 @Composable
 private fun StepperField(
@@ -450,10 +437,26 @@ private fun StepperField(
 ) {
     val current = parseNumber(value)
     val default = stepping.default
-    val atDefault = default != null && DoughStepper.isDefault(current, default)
+    val changed = default != null && !DoughStepper.isDefault(current, default)
     fun text(number: Double) = if (integer) number.toLong().toString() else show(number)
     val stepText = show(stepping.step) + suffix?.let { " $it" }.orEmpty()
     val colors = MaterialTheme.colorScheme
+    val buttons: @Composable () -> Unit = {
+        RepeatIconButton(
+            onStep = { onChange(text(DoughStepper.next(current, stepping.step, -1, stepping.range, default))) },
+            enabled = DoughStepper.canStep(current, -1, stepping.range),
+            contentDescription = stringResource(R.string.dough_step_less, label, stepText),
+        ) {
+            Icon(painterResource(R.drawable.ic_remove), contentDescription = null)
+        }
+        RepeatIconButton(
+            onStep = { onChange(text(DoughStepper.next(current, stepping.step, +1, stepping.range, default))) },
+            enabled = DoughStepper.canStep(current, +1, stepping.range),
+            contentDescription = stringResource(R.string.dough_step_more, label, stepText),
+        ) {
+            Icon(Icons.Filled.Add, contentDescription = null)
+        }
+    }
     Column(modifier = modifier) {
         Text(label, style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant, maxLines = 1)
         Surface(
@@ -462,46 +465,27 @@ private fun StepperField(
             border = BorderStroke(1.dp, if (error != null) colors.error else colors.outlineVariant),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                RepeatIconButton(
-                    onStep = { onChange(text(DoughStepper.next(current, stepping.step, -1, stepping.range, default))) },
-                    enabled = DoughStepper.canStep(current, -1, stepping.range),
-                    contentDescription = stringResource(R.string.dough_step_less, label, stepText),
-                ) {
-                    Icon(painterResource(R.drawable.ic_remove), contentDescription = null)
-                }
+                val left = LocalStepperSide.current == StepperSide.LEFT
+                if (left) buttons()
                 BasicTextField(
                     value = value,
                     onValueChange = onChange,
                     singleLine = true,
-                    textStyle = MaterialTheme.typography.titleMedium.copy(color = colors.onSurface, textAlign = TextAlign.Center),
+                    textStyle = MaterialTheme.typography.titleMedium.copy(
+                        color = colors.onSurface,
+                        textAlign = TextAlign.Start,
+                        fontWeight = if (changed) FontWeight.Bold else null,
+                    ),
                     keyboardOptions = KeyboardOptions(keyboardType = if (integer) KeyboardType.Number else KeyboardType.Decimal),
                     cursorBrush = SolidColor(colors.primary),
                     visualTransformation = if (suffix != null) SuffixTransformation(suffix) else VisualTransformation.None,
-                    modifier = Modifier.weight(1f).semantics { contentDescription = label },
+                    modifier = Modifier.weight(1f).padding(horizontal = Spacing.s).semantics { contentDescription = label },
                 )
-                RepeatIconButton(
-                    onStep = { onChange(text(DoughStepper.next(current, stepping.step, +1, stepping.range, default))) },
-                    enabled = DoughStepper.canStep(current, +1, stepping.range),
-                    contentDescription = stringResource(R.string.dough_step_more, label, stepText),
-                ) {
-                    Icon(Icons.Filled.Add, contentDescription = null)
-                }
+                if (!left) buttons()
             }
         }
         if (error != null) {
             Text(error, style = MaterialTheme.typography.bodySmall, color = colors.error, modifier = Modifier.padding(start = Spacing.xs))
-        }
-        // „Standard 250 g“ nur, wenn der Wert abweicht; mit „Zurücksetzen“ in einer Zeile.
-        if (default != null && !atDefault) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    stringResource(R.string.dough_default_value, show(default) + suffix?.let { " $it" }.orEmpty()),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = colors.onSurfaceVariant,
-                    modifier = Modifier.weight(1f).padding(start = Spacing.xs),
-                )
-                TextButton(onClick = { onChange(text(default)) }) { Text(stringResource(R.string.dough_default_reset_short)) }
-            }
         }
     }
 }

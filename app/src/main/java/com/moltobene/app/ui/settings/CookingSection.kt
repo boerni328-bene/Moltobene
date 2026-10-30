@@ -14,6 +14,7 @@ import androidx.compose.ui.semantics.Role
 import com.moltobene.app.R
 import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.StartScreen
+import com.moltobene.app.data.StepperSide
 
 /**
  * „Kochen“ in den Einstellungen (#68): wie lange der Bildschirm in der Rezeptansicht anbleibt. Später kommt hier auch
@@ -41,6 +42,24 @@ private fun label(choice: ScreenOn): String {
         minutes != null -> pluralStringResource(R.plurals.screen_on_off_after, minutes, minutes)
         choice == ScreenOn.DEVICE -> stringResource(R.string.screen_on_device)
         else -> stringResource(R.string.screen_on_stays)
+    }
+}
+
+/** „Teigrechner“ in den Einstellungen: auf welcher Seite des Werts Minus und Plus nebeneinander stehen. */
+@Composable
+internal fun DoughSection(stepperSide: StepperSide, onStepperSide: (StepperSide) -> Unit) {
+    GroupLabel(stringResource(R.string.stepper_side_title))
+    Column(modifier = Modifier.selectableGroup()) {
+        StepperSide.entries.forEach { choice ->
+            val selected = stepperSide == choice
+            ListItem(
+                headlineContent = {
+                    Text(stringResource(if (choice == StepperSide.RIGHT) R.string.stepper_side_right else R.string.stepper_side_left))
+                },
+                leadingContent = { RadioButton(selected = selected, onClick = null) },
+                modifier = Modifier.selectable(selected = selected, role = Role.RadioButton, onClick = { onStepperSide(choice) }),
+            )
+        }
     }
 }
 

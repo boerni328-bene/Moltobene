@@ -39,6 +39,11 @@ class AppPreferences(context: Context) {
     /** „Bildschirm in der Rezeptansicht“ (#68); null, bis [loadAppearance] sie gelesen hat (dann gilt „Bleibt an“). */
     val screenOn: StateFlow<ScreenOn?> = screenOnState.asStateFlow()
 
+    private val stepperSideState = MutableStateFlow<StepperSide?>(null)
+
+    /** „Plus und Minus“ im Teigrechner; null, bis [loadAppearance] sie gelesen hat (dann gilt „rechts“). */
+    val stepperSide: StateFlow<StepperSide?> = stepperSideState.asStateFlow()
+
     private val speechSettingsState = MutableStateFlow(SpeechSettings())
 
     /** Stimme, Tempo und Tonhöhe beim Vorlesen (#85); bis [loadAppearance] sie gelesen hat, gelten die Standardwerte. */
@@ -61,6 +66,8 @@ class AppPreferences(context: Context) {
         appearanceState.compareAndSet(null, stored)
         val screen = runCatching { ScreenOn.fromKey(prefs.getString(KEY_SCREEN_ON, null)) }.getOrDefault(ScreenOn.STAYS_ON)
         screenOnState.compareAndSet(null, screen)
+        val side = runCatching { StepperSide.fromKey(prefs.getString(KEY_STEPPER_SIDE, null)) }.getOrDefault(StepperSide.RIGHT)
+        stepperSideState.compareAndSet(null, side)
         val speech = runCatching { SpeechSettings.decode(prefs.getString(KEY_SPEECH_SETTINGS, null)) }.getOrDefault(SpeechSettings())
         if (!speechSettingsTouched) speechSettingsState.value = speech
     }
@@ -92,6 +99,12 @@ class AppPreferences(context: Context) {
     suspend fun setStartScreen(startScreen: StartScreen) {
         startScreenState.value = startScreen
         withContext(Dispatchers.IO) { prefs.edit { putString(KEY_START_SCREEN, startScreen.key) } }
+    }
+
+    /** Gilt sofort, gespeichert wird danach. */
+    suspend fun setStepperSide(side: StepperSide) {
+        stepperSideState.value = side
+        withContext(Dispatchers.IO) { prefs.edit { putString(KEY_STEPPER_SIDE, side.key) } }
     }
 
     /** Gilt sofort, gespeichert wird danach. */
@@ -224,6 +237,7 @@ class AppPreferences(context: Context) {
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_PALETTE = "palette"
         const val KEY_SCREEN_ON = "screen_on"
+        const val KEY_STEPPER_SIDE = "stepper_side"
         const val KEY_SPEECH_SETTINGS = "speech_settings"
         const val KEY_START_SCREEN = "start_screen"
         const val KEY_RECENT_RECIPES = "recent_recipes"

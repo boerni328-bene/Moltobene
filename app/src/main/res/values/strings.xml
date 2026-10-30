@@ -330,6 +330,9 @@
     <string name="settings_section_translation">Translation</string>
     <!-- Einstellungen: Kochen (#68) -->
     <string name="settings_section_cooking">Cooking</string>
+    <string name="stepper_side_title">Plus and minus</string>
+    <string name="stepper_side_right">Side by side, right of the value</string>
+    <string name="stepper_side_left">Side by side, left of the value</string>
     <string name="screen_on_title">Screen in recipe view</string>
     <string name="screen_on_stays">Stays on</string>
     <plurals name="screen_on_off_after">
@@ -571,8 +574,6 @@
     <string name="dough_reset">Reset</string>
     <string name="dough_step_less">Decrease %1$s by %2$s</string>
     <string name="dough_step_more">Increase %1$s by %2$s</string>
-    <string name="dough_default_value">Default %1$s</string>
-    <string name="dough_default_reset_short">To default</string>
     <string name="dough_totals_title">Totals</string>
 
     <!-- Dough know-how (#84): notes on the fields of the dough calculator -->

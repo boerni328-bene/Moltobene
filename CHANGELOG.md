@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.63.0] – 2026-10-30 (versionCode 110)
+
+### Geändert
+- **Teigrechner: ruhiger und ein gemeinsamer Standard.** Unter geänderten Werten erscheint keine Zeile „Standard“ mehr; geänderte Werte stehen stattdessen fett. Die Standardwerte stellt „Zurücksetzen“ für alle Werte gemeinsam wieder her.
+- **Minus und Plus nebeneinander.** Beide Knöpfe stehen jetzt zusammen rechts vom Wert, sodass der Daumen an einer Stelle bleibt. Unter Einstellungen → Teigrechner → „Plus und Minus“ lassen sie sich auch links vom Wert anzeigen, zum Beispiel für Linkshänder.
+
 ## [0.62.0] – 2026-10-30 (versionCode 109)
 
 ### Geändert

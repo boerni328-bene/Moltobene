@@ -773,14 +773,14 @@ class AppTourTest(private val variant: DisplayVariant) {
         composeRule.onNode(hasText(text(R.string.dough_help_close)) and hasClickAction()).performClick()
         waitUntilGone(text(R.string.dough_help_water_effect))
 
-        // Eine Bedienung pro Wert (#86): Regler mit antippbarer Zahl. Wasseranteil tippen, der Standard wird genannt,
-        // „Auf Standard“ stellt ihn wieder her.
+        // Eine Bedienung pro Wert (#86): Regler mit antippbarer Zahl. Ein geänderter Wert steht fett (Wasseranteil 66),
+        // „Zurücksetzen“ stellt alle Standardwerte gemeinsam wieder her.
         field(R.string.dough_water).performScrollTo().performTextClearance()
         field(R.string.dough_water).performTextInput("66")
-        waitForText(text(R.string.dough_default_value, "65 %"))
+        waitForText("66", substring = true)
         screenshot("14d-teigrechner-standard")
-        composeRule.onNodeWithText(text(R.string.dough_default_reset_short)).performScrollTo().performClick()
-        waitUntilGone(text(R.string.dough_default_value, "65 %"))
+        doughPresetAction(R.string.dough_reset)
+        waitForText("65", substring = true)
 
         // Bei großer Schrift hat jeder Wert einen Regler; sonst stehen Minus und Plus am Feld (Entwurf vom 22.10.2026).
         if (variant == DisplayVariant.LARGE_TEXT) {

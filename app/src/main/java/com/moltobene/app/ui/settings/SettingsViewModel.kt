@@ -11,6 +11,7 @@ import com.moltobene.app.data.AppPreferences
 import com.moltobene.app.data.Appearance
 import com.moltobene.app.data.Palette
 import com.moltobene.app.data.ScreenOn
+import com.moltobene.app.data.StepperSide
 import com.moltobene.app.data.StartScreen
 import com.moltobene.app.data.StorageFull
 import com.moltobene.app.data.StorageUsage
@@ -136,6 +137,13 @@ class SettingsViewModel(
 
     fun setScreenOn(screenOn: ScreenOn) {
         viewModelScope.launch { runCatching { preferences.setScreenOn(screenOn) } }
+    }
+
+    /** „Plus und Minus“ im Teigrechner; gilt sofort. */
+    val stepperSide: StateFlow<StepperSide?> = preferences.stepperSide
+
+    fun setStepperSide(side: StepperSide) {
+        viewModelScope.launch { runCatching { preferences.setStepperSide(side) } }
     }
 
     /** Stimme, Tempo und Tonhöhe beim Vorlesen (#85); gilt sofort beim nächsten Vorlesen. */
