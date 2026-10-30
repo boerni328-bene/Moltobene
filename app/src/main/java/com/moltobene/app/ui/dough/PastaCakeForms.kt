@@ -3,6 +3,7 @@ package com.moltobene.app.ui.dough
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +12,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -21,7 +24,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.moltobene.app.R
@@ -117,19 +122,114 @@ private fun PastaForm(
         }
     }
 
+    val success = result as? DoughResult.Success
+    val resultTotals = success?.let { viewModel.totals(it, YeastKind.FRESH) }
+    val draft = success?.let { viewModel.draftPasta(it, input) }
+    val portionsField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(R.string.dough_portions), portions, { portions = it }, issues.forField(DoughField.COUNT), m,
+            integer = true, stepping = stepping(DoughField.COUNT, defaults.portions.toDouble()),
+        )
+    }
+    val flourField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(R.string.dough_flour_per_portion), flour, { flour = it },
+            issues.forField(DoughField.FLOUR_PER_PORTION), m, suffix = "g",
+            stepping = stepping(DoughField.FLOUR_PER_PORTION, defaults.flourPerPortion),
+        )
+    }
+    val semolinaField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(R.string.dough_semolina), semolina, { semolina = it },
+            issues.forField(DoughField.SEMOLINA), m, suffix = SUFFIX_PERCENT,
+            stepping = stepping(DoughField.SEMOLINA, defaults.semolina),
+        )
+    }
+    val waterField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(R.string.dough_water), water, { water = it }, issues.forField(DoughField.WATER), m, suffix = SUFFIX_PERCENT,
+            stepping = stepping(DoughField.WATER, defaults.water),
+        )
+    }
+    val eggField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(R.string.dough_egg_whole), egg, { egg = it }, issues.forField(DoughField.WHOLE_EGG), m, suffix = SUFFIX_PERCENT,
+            stepping = stepping(DoughField.WHOLE_EGG, defaults.egg),
+        )
+    }
+    val yolkField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(R.string.dough_yolk), yolk, { yolk = it }, issues.forField(DoughField.YOLK), m, suffix = SUFFIX_PERCENT,
+            stepping = stepping(DoughField.YOLK, defaults.yolk),
+        )
+    }
+    val saltField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(R.string.dough_salt), salt, { salt = it }, issues.forField(DoughField.SALT), m, suffix = SUFFIX_PERCENT,
+            stepping = stepping(DoughField.SALT, defaults.salt),
+        )
+    }
+    val oilField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(R.string.dough_oil), oil, { oil = it }, issues.forField(DoughField.OIL), m, suffix = SUFFIX_PERCENT,
+            stepping = stepping(DoughField.OIL, defaults.oil),
+        )
+    }
+    // Hinweise zu Ei und Flüssigkeit: bei Eierteig unter den Feldern.
+    val eggNotes: @Composable () -> Unit = {
+        issues.filterIsInstance<DoughIssue.TooLittleLiquid>().firstOrNull()?.let {
+            Text(
+                stringResource(R.string.dough_error_liquid, show(it.neededPercent)),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+        if (success != null) {
+            val lines = success.sections.flatMap { it.lines }
+            EggHints(
+                lines.filter { it.role == LineRole.EGG }.sumOf { it.grams },
+                lines.filter { it.role == LineRole.YOLK }.sumOf { it.grams },
+            )
+        }
+    }
+
     FormFrame(
         header = header,
-        bar = {
-            val success = result as? DoughResult.Success
-            val draft = success?.let { viewModel.draftPasta(it, input) }
-            ResultBar(
-                summary = if (success != null && draft != null) summaryLine(success, draft) else null,
-                totals = success?.let { viewModel.totals(it, YeastKind.FRESH) },
-                onSave = { viewModel.savePasta(input, onSaved) },
-            )
-        },
+        summary = if (success != null && draft != null) summaryLine(success, draft) else null,
+        totals = resultTotals,
+        onSave = { viewModel.savePasta(input, onSaved) },
         onReset = { resetCount += 1 },
-        extra = (result as? DoughResult.Success)?.let { viewModel.totals(it, YeastKind.FRESH) },
+        extra = resultTotals,
+        compact = {
+            // Alles in einem Bild (Entwurf vom 30.10.2026): Teigart als Auswahlfeld, die Felder paarweise.
+            val kindChoice: @Composable (Modifier) -> Unit = { m ->
+                CompactChoice(
+                    label = stringResource(R.string.dough_section_dough),
+                    options = PastaKind.entries,
+                    selected = kind,
+                    optionLabel = { stringResource(if (it == PastaKind.EGG) R.string.dough_pasta_egg else R.string.dough_pasta_water) },
+                    onSelect = onKind,
+                    modifier = m,
+                )
+            }
+            val compactFields = buildList<@Composable (Modifier) -> Unit> {
+                add(kindChoice)
+                add(portionsField)
+                add(flourField)
+                add(semolinaField)
+                add(waterField)
+                if (kind == PastaKind.EGG) {
+                    add(eggField)
+                    add(yolkField)
+                }
+                add(saltField)
+                add(oilField)
+            }
+            Column(modifier = Modifier.padding(horizontal = Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                Fields(*compactFields.toTypedArray())
+                if (kind == PastaKind.EGG) eggNotes()
+            }
+        },
     ) {
         Card(stringResource(R.string.dough_section_dough)) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
@@ -141,21 +241,7 @@ private fun PastaForm(
                     )
                 }
             }
-            Fields(
-                { m ->
-                    NumberField(
-                        stringResource(R.string.dough_portions), portions, { portions = it }, issues.forField(DoughField.COUNT), m,
-                        integer = true, stepping = stepping(DoughField.COUNT, defaults.portions.toDouble()),
-                    )
-                },
-                { m ->
-                    NumberField(
-                        stringResource(R.string.dough_flour_per_portion), flour, { flour = it },
-                        issues.forField(DoughField.FLOUR_PER_PORTION), m, suffix = "g",
-                        stepping = stepping(DoughField.FLOUR_PER_PORTION, defaults.flourPerPortion),
-                    )
-                },
-            )
+            Fields(portionsField, flourField)
         }
         Card(stringResource(R.string.dough_section_ingredients)) {
             Text(
@@ -163,66 +249,12 @@ private fun PastaForm(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Fields(
-                { m ->
-                    NumberField(
-                        stringResource(R.string.dough_semolina), semolina, { semolina = it },
-                        issues.forField(DoughField.SEMOLINA), m, suffix = SUFFIX_PERCENT,
-                        stepping = stepping(DoughField.SEMOLINA, defaults.semolina),
-                    )
-                },
-                { m ->
-                    NumberField(
-                        stringResource(R.string.dough_water), water, { water = it }, issues.forField(DoughField.WATER), m, suffix = SUFFIX_PERCENT,
-                        stepping = stepping(DoughField.WATER, defaults.water),
-                    )
-                },
-            )
+            Fields(semolinaField, waterField)
             if (kind == PastaKind.EGG) {
-                Fields(
-                    { m ->
-                        NumberField(
-                            stringResource(R.string.dough_egg_whole), egg, { egg = it }, issues.forField(DoughField.WHOLE_EGG), m, suffix = SUFFIX_PERCENT,
-                            stepping = stepping(DoughField.WHOLE_EGG, defaults.egg),
-                        )
-                    },
-                    { m ->
-                        NumberField(
-                            stringResource(R.string.dough_yolk), yolk, { yolk = it }, issues.forField(DoughField.YOLK), m, suffix = SUFFIX_PERCENT,
-                            stepping = stepping(DoughField.YOLK, defaults.yolk),
-                        )
-                    },
-                )
-                issues.filterIsInstance<DoughIssue.TooLittleLiquid>().firstOrNull()?.let {
-                    Text(
-                        stringResource(R.string.dough_error_liquid, show(it.neededPercent)),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
-                val success = result as? DoughResult.Success
-                if (success != null) {
-                    val lines = success.sections.flatMap { it.lines }
-                    EggHints(
-                        lines.filter { it.role == LineRole.EGG }.sumOf { it.grams },
-                        lines.filter { it.role == LineRole.YOLK }.sumOf { it.grams },
-                    )
-                }
+                Fields(eggField, yolkField)
+                eggNotes()
             }
-            Fields(
-                { m ->
-                    NumberField(
-                        stringResource(R.string.dough_salt), salt, { salt = it }, issues.forField(DoughField.SALT), m, suffix = SUFFIX_PERCENT,
-                        stepping = stepping(DoughField.SALT, defaults.salt),
-                    )
-                },
-                { m ->
-                    NumberField(
-                        stringResource(R.string.dough_oil), oil, { oil = it }, issues.forField(DoughField.OIL), m, suffix = SUFFIX_PERCENT,
-                        stepping = stepping(DoughField.OIL, defaults.oil),
-                    )
-                },
-            )
+            Fields(saltField, oilField)
         }
     }
 }
@@ -248,16 +280,59 @@ internal fun EggHints(eggGrams: Double, yolkGrams: Double) {
     }
 }
 
-/** Rahmen eines Formulars: oben scrollend (Teigart, Karten, Hinweis, Zurücksetzen), unten die feste Leiste. */
+/**
+ * Rahmen eines Formulars. Bei normaler Schrift (Entwurf vom 30.10.2026): oben die Teigart, das Ergebnis, dann [compact]
+ * ohne Karten und Scrollen, unten „Als Rezept speichern“. Bei großer Schrift: scrollend Teigart, Karten ([content]),
+ * Hinweis und Zurücksetzen, unten die feste Leiste mit dem Ergebnis.
+ */
 @Composable
 private fun FormFrame(
     header: @Composable () -> Unit,
-    bar: @Composable () -> Unit,
+    summary: String?,
+    totals: List<TotalItem>?,
+    onSave: () -> Unit,
     onReset: () -> Unit,
     extra: List<TotalItem>?,
+    compact: @Composable () -> Unit,
     note: Int? = null,
     content: @Composable () -> Unit,
 ) {
+    val noteText: @Composable () -> Unit = {
+        if (note != null) {
+            Text(
+                stringResource(note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = Spacing.m),
+            )
+        }
+    }
+    if (!com.moltobene.app.ui.components.isLargeText()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            header()
+            ResultTop(summary = summary, totals = totals)
+            Column(
+                modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+            ) {
+                compact()
+                noteText()
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = Spacing.m)) {
+                    Text(
+                        stringResource(R.string.dough_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f),
+                    )
+                    IconButton(onClick = onReset) {
+                        Icon(painterResource(R.drawable.ic_refresh), contentDescription = stringResource(R.string.dough_reset))
+                    }
+                }
+            }
+            SaveBar(enabled = summary != null, onSave = onSave)
+        }
+        return
+    }
     Column(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
@@ -265,17 +340,10 @@ private fun FormFrame(
         ) {
             header()
             content()
-            if (com.moltobene.app.ui.components.isLargeText() && extra != null) {
+            if (extra != null) {
                 TotalsCard(extra)
             }
-            if (note != null) {
-                Text(
-                    stringResource(note),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = Spacing.m),
-                )
-            }
+            noteText()
             Text(
                 stringResource(R.string.dough_hint),
                 style = MaterialTheme.typography.bodySmall,
@@ -286,10 +354,9 @@ private fun FormFrame(
                 Text(stringResource(R.string.dough_reset))
             }
         }
-        bar()
+        ResultBar(summary = summary, totals = totals, onSave = onSave)
     }
 }
-
 // ------------------------------------------------------------------ Kuchen
 
 @Composable
@@ -391,20 +458,167 @@ private fun CakeForm(
         }
     }
 
+    val success = result as? DoughResult.Success
+    val resultTotals = success?.let { viewModel.totals(it, yeastKind) }
+    val draft = success?.let { viewModel.draftCake(it, input) }
+    val unit = if (inch) "″" else "cm"
+    val panIssue = issues.firstOrNull { it === DoughIssue.PanInvalid }
+    val sizeIssue = issues.forField(DoughField.FLOUR_GRAMS)
+    fun selectUnit(toInch: Boolean) {
+        if (toInch == inch) return
+        val factor = if (toInch) 1 / PanScaling.CM_PER_INCH else PanScaling.CM_PER_INCH
+        panA = parseNumber(panA).let { if (it.isFinite()) fmt(it * factor) else panA }
+        panB = parseNumber(panB).let { if (it.isFinite()) fmt(it * factor) else panB }
+        inch = toInch
+    }
+    fun selectYeastKind(option: YeastKind) {
+        // Die Menge bleibt gleichwertig, wenn die Hefeart wechselt.
+        val current = parseNumber(yeast)
+        if (current.isFinite()) yeast = fmt(yeastKind.convert(current, option), 3)
+        yeastKindKey = option.key
+    }
+    val panStepping = Stepping(DoughStepper.stepFor(DoughField.PAN_SIZE))
+    val diameterField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(stringResource(R.string.dough_pan_diameter), panA, { panA = it }, panIssue ?: sizeIssue, m, suffix = unit, stepping = panStepping)
+    }
+    val lengthField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(stringResource(R.string.dough_pan_length), panA, { panA = it }, panIssue ?: sizeIssue, m, suffix = unit, stepping = panStepping)
+    }
+    val widthField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(stringResource(R.string.dough_pan_width), panB, { panB = it }, panIssue, m, suffix = unit, stepping = panStepping)
+    }
+    val flourField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(R.string.dough_label_flour), flour, { flour = it },
+            issues.forField(DoughField.FLOUR_GRAMS), m, suffix = "g",
+            stepping = Stepping(DoughStepper.stepFor(DoughField.FLOUR_GRAMS), CakeLimits.referenceFlour(kind), null, DoughField.FLOUR_GRAMS),
+        )
+    }
+    val yeastAmountField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(R.string.dough_yeast_amount), yeast, { yeast = it },
+            issues.forField(DoughField.YEAST), m, suffix = SUFFIX_PERCENT,
+            stepping = cakeStepping(CakeField.YEAST, YeastKind.FRESH.convert(defaults.yeast, yeastKind)),
+        )
+    }
+    val ingredientFields = fields.filter { it != CakeField.YEAST }.map { field ->
+        val content: @Composable (Modifier) -> Unit = { m ->
+            val (value, change) = when (field) {
+                CakeField.FAT -> fat to { v: String -> fat = v }
+                CakeField.SUGAR -> sugar to { v: String -> sugar = v }
+                CakeField.EGG -> egg to { v: String -> egg = v }
+                CakeField.MILK -> milk to { v: String -> milk = v }
+                CakeField.QUARK -> quark to { v: String -> quark = v }
+                CakeField.BAKING_POWDER -> baking to { v: String -> baking = v }
+                CakeField.SALT -> salt to { v: String -> salt = v }
+                CakeField.YEAST -> yeast to { v: String -> yeast = v }
+            }
+            NumberField(
+                stringResource(cakeFieldLabel(kind, field)), value, change,
+                issues.forField(field.toDoughField()), m, suffix = SUFFIX_PERCENT,
+                stepping = cakeStepping(field, CakeLimits.value(defaults, field)),
+            )
+        }
+        content
+    }
+    val eggHints: @Composable () -> Unit = {
+        if (success != null && CakeField.EGG in fields) {
+            EggHints(success.sections.flatMap { it.lines }.filter { it.role == LineRole.EGG }.sumOf { it.grams }, 0.0)
+        }
+    }
+
     FormFrame(
         header = header,
-        bar = {
-            val success = result as? DoughResult.Success
-            val draft = success?.let { viewModel.draftCake(it, input) }
-            ResultBar(
-                summary = if (success != null && draft != null) summaryLine(success, draft) else null,
-                totals = success?.let { viewModel.totals(it, yeastKind) },
-                onSave = { viewModel.saveCake(input, onSaved) },
-            )
-        },
+        summary = if (success != null && draft != null) summaryLine(success, draft) else null,
+        totals = resultTotals,
+        onSave = { viewModel.saveCake(input, onSaved) },
         onReset = { resetCount += 1 },
-        extra = (result as? DoughResult.Success)?.let { viewModel.totals(it, yeastKind) },
+        extra = resultTotals,
         note = R.string.dough_cake_baking_note,
+        compact = {
+            // Alles in einem Bild (Entwurf vom 30.10.2026): Größe (runde, eckige Backform oder Mehl) als ein Auswahlfeld.
+            val kindChoice: @Composable (Modifier) -> Unit = { m ->
+                CompactChoice(
+                    label = stringResource(R.string.dough_cake_kind_label),
+                    options = CakeKind.entries,
+                    selected = kind,
+                    optionLabel = { stringResource(AndroidDoughTexts.cakeKindName(it)) },
+                    onSelect = onKind,
+                    modifier = m,
+                )
+            }
+            val sizeChoice: @Composable (Modifier) -> Unit = { m ->
+                CompactChoice(
+                    label = stringResource(R.string.dough_section_size),
+                    options = listOf(CAKE_SIZE_ROUND, CAKE_SIZE_RECT, CAKE_SIZE_FLOUR),
+                    selected = if (!byPan) CAKE_SIZE_FLOUR else if (round) CAKE_SIZE_ROUND else CAKE_SIZE_RECT,
+                    optionLabel = {
+                        stringResource(
+                            when (it) {
+                                CAKE_SIZE_ROUND -> R.string.dough_size_pan_round
+                                CAKE_SIZE_RECT -> R.string.dough_size_pan_rect
+                                else -> R.string.dough_size_flour
+                            },
+                        )
+                    },
+                    onSelect = {
+                        byPan = it != CAKE_SIZE_FLOUR
+                        if (byPan) round = it == CAKE_SIZE_ROUND
+                    },
+                    modifier = m,
+                )
+            }
+            val unitChoice: @Composable (Modifier) -> Unit = { m ->
+                CompactChoice(
+                    label = stringResource(R.string.dough_label_unit),
+                    options = listOf(false, true),
+                    selected = inch,
+                    optionLabel = { stringResource(if (it) R.string.dough_unit_inch else R.string.dough_unit_cm) },
+                    onSelect = ::selectUnit,
+                    modifier = m,
+                )
+            }
+            val yeastKindChoice: @Composable (Modifier) -> Unit = { m ->
+                CompactChoice(
+                    label = stringResource(R.string.dough_section_yeast),
+                    options = YeastKind.entries,
+                    selected = yeastKind,
+                    optionLabel = { stringResource(AndroidDoughTexts.yeastName(it)) },
+                    onSelect = ::selectYeastKind,
+                    modifier = m,
+                )
+            }
+            val compactFields = buildList<@Composable (Modifier) -> Unit> {
+                add(kindChoice)
+                add(sizeChoice)
+                if (!byPan) {
+                    add(flourField)
+                } else if (round) {
+                    add(diameterField)
+                    add(unitChoice)
+                } else {
+                    add(lengthField)
+                    add(widthField)
+                    add(unitChoice)
+                }
+                if (CakeField.YEAST in fields) {
+                    add(yeastKindChoice)
+                    add(yeastAmountField)
+                }
+                addAll(ingredientFields)
+            }
+            Column(modifier = Modifier.padding(horizontal = Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                Fields(*compactFields.toTypedArray())
+                if (byPan && success != null) {
+                    Text(
+                        stringResource(R.string.dough_cake_flour_from_pan, fmt(success.flourGrams, 0)),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                eggHints()
+            }
+        },
     ) {
         Card(stringResource(R.string.dough_section_dough)) {
             ChoiceField(
@@ -425,57 +639,15 @@ private fun CakeForm(
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
                     FilterChip(selected = round, onClick = { round = true }, label = { Text(stringResource(R.string.adjust_pan_round)) })
                     FilterChip(selected = !round, onClick = { round = false }, label = { Text(stringResource(R.string.adjust_pan_rectangle)) })
-                    FilterChip(
-                        selected = !inch,
-                        onClick = {
-                            if (inch) {
-                                panA = parseNumber(panA).let { if (it.isFinite()) fmt(it * PanScaling.CM_PER_INCH) else panA }
-                                panB = parseNumber(panB).let { if (it.isFinite()) fmt(it * PanScaling.CM_PER_INCH) else panB }
-                                inch = false
-                            }
-                        },
-                        label = { Text(stringResource(R.string.dough_unit_cm)) },
-                    )
-                    FilterChip(
-                        selected = inch,
-                        onClick = {
-                            if (!inch) {
-                                panA = parseNumber(panA).let { if (it.isFinite()) fmt(it / PanScaling.CM_PER_INCH) else panA }
-                                panB = parseNumber(panB).let { if (it.isFinite()) fmt(it / PanScaling.CM_PER_INCH) else panB }
-                                inch = true
-                            }
-                        },
-                        label = { Text(stringResource(R.string.dough_unit_inch)) },
-                    )
+                    FilterChip(selected = !inch, onClick = { selectUnit(false) }, label = { Text(stringResource(R.string.dough_unit_cm)) })
+                    FilterChip(selected = inch, onClick = { selectUnit(true) }, label = { Text(stringResource(R.string.dough_unit_inch)) })
                 }
-                val unit = if (inch) "″" else "cm"
-                val panIssue = issues.firstOrNull { it === DoughIssue.PanInvalid }
-                val sizeIssue = issues.forField(DoughField.FLOUR_GRAMS)
                 if (round) {
-                    NumberField(
-                        stringResource(R.string.dough_pan_diameter), panA, { panA = it },
-                        panIssue ?: sizeIssue, Modifier.fillMaxWidth(), suffix = unit,
-                        stepping = Stepping(DoughStepper.stepFor(DoughField.PAN_SIZE)),
-                    )
+                    diameterField(Modifier.fillMaxWidth())
                 } else {
-                    Fields(
-                        {
-                            m ->
-                            NumberField(
-                                stringResource(R.string.dough_pan_length), panA, { panA = it }, panIssue ?: sizeIssue, m, suffix = unit,
-                                stepping = Stepping(DoughStepper.stepFor(DoughField.PAN_SIZE)),
-                            )
-                        },
-                        {
-                            m ->
-                            NumberField(
-                                stringResource(R.string.dough_pan_width), panB, { panB = it }, panIssue, m, suffix = unit,
-                                stepping = Stepping(DoughStepper.stepFor(DoughField.PAN_SIZE)),
-                            )
-                        },
-                    )
+                    Fields(lengthField, widthField)
                 }
-                (result as? DoughResult.Success)?.let {
+                success?.let {
                     Text(
                         stringResource(R.string.dough_cake_flour_from_pan, fmt(it.flourGrams, 0)),
                         style = MaterialTheme.typography.bodySmall,
@@ -483,11 +655,7 @@ private fun CakeForm(
                     )
                 }
             } else {
-                NumberField(
-                    stringResource(R.string.dough_label_flour), flour, { flour = it },
-                    issues.forField(DoughField.FLOUR_GRAMS), Modifier.fillMaxWidth(), suffix = "g",
-                    stepping = Stepping(DoughStepper.stepFor(DoughField.FLOUR_GRAMS), CakeLimits.referenceFlour(kind), null, DoughField.FLOUR_GRAMS),
-                )
+                flourField(Modifier.fillMaxWidth())
             }
         }
 
@@ -498,18 +666,9 @@ private fun CakeForm(
                     options = YeastKind.entries,
                     selected = yeastKind,
                     optionLabel = { stringResource(AndroidDoughTexts.yeastName(it)) },
-                    onSelect = { option ->
-                        // Die Menge bleibt gleichwertig, wenn die Hefeart wechselt.
-                        val current = parseNumber(yeast)
-                        if (current.isFinite()) yeast = fmt(yeastKind.convert(current, option), 3)
-                        yeastKindKey = option.key
-                    },
+                    onSelect = ::selectYeastKind,
                 )
-                NumberField(
-                    stringResource(R.string.dough_yeast_amount), yeast, { yeast = it },
-                    issues.forField(DoughField.YEAST), Modifier.fillMaxWidth(), suffix = SUFFIX_PERCENT,
-                    stepping = cakeStepping(CakeField.YEAST, YeastKind.FRESH.convert(defaults.yeast, yeastKind)),
-                )
+                yeastAmountField(Modifier.fillMaxWidth())
             }
         }
 
@@ -519,36 +678,12 @@ private fun CakeForm(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            val shown = fields.filter { it != CakeField.YEAST }
-            shown.chunked(2).forEach { row ->
-                Fields(
-                    *row.map { field ->
-                        val content: @Composable (Modifier) -> Unit = { m ->
-                            val (value, change) = when (field) {
-                                CakeField.FAT -> fat to { v: String -> fat = v }
-                                CakeField.SUGAR -> sugar to { v: String -> sugar = v }
-                                CakeField.EGG -> egg to { v: String -> egg = v }
-                                CakeField.MILK -> milk to { v: String -> milk = v }
-                                CakeField.QUARK -> quark to { v: String -> quark = v }
-                                CakeField.BAKING_POWDER -> baking to { v: String -> baking = v }
-                                CakeField.SALT -> salt to { v: String -> salt = v }
-                                CakeField.YEAST -> yeast to { v: String -> yeast = v }
-                            }
-                            NumberField(
-                                stringResource(cakeFieldLabel(kind, field)), value, change,
-                                issues.forField(field.toDoughField()), m, suffix = SUFFIX_PERCENT,
-                                stepping = cakeStepping(field, CakeLimits.value(defaults, field)),
-                            )
-                        }
-                        content
-                    }.toTypedArray(),
-                )
-            }
-            val success = result as? DoughResult.Success
-            if (success != null && CakeField.EGG in fields) {
-                EggHints(success.sections.flatMap { it.lines }.filter { it.role == LineRole.EGG }.sumOf { it.grams }, 0.0)
-            }
+            ingredientFields.chunked(2).forEach { row -> Fields(*row.toTypedArray()) }
+            eggHints()
         }
     }
 }
 
+private const val CAKE_SIZE_ROUND = 0
+private const val CAKE_SIZE_RECT = 1
+private const val CAKE_SIZE_FLOUR = 2

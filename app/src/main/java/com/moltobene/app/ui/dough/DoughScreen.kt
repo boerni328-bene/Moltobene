@@ -1085,7 +1085,7 @@ private fun DoughForm(
  * Kacheln teilen sich die Breite, bei mehr als vier lassen sie sich seitlich verschieben.
  */
 @Composable
-private fun ResultTop(summary: String?, totals: List<TotalItem>?, preferment: String? = null) {
+internal fun ResultTop(summary: String?, totals: List<TotalItem>?, preferment: String? = null) {
     Surface(
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -1122,7 +1122,7 @@ private fun ResultTop(summary: String?, totals: List<TotalItem>?, preferment: St
 
 /** „Als Rezept speichern“ unten; die Summen stehen oben ([ResultTop]). */
 @Composable
-private fun SaveBar(enabled: Boolean, onSave: () -> Unit) {
+internal fun SaveBar(enabled: Boolean, onSave: () -> Unit) {
     Surface(color = MaterialTheme.colorScheme.surface, tonalElevation = 3.dp) {
         Button(
             onClick = onSave,

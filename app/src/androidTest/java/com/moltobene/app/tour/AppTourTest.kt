@@ -650,6 +650,10 @@ class AppTourTest(private val variant: DisplayVariant) {
         clickVisible(text(R.string.dough_type_pasta))
         waitForText(text(R.string.dough_pasta_egg))
         screenshot("14f-teigrechner-pasta")
+        // Bei normaler Schrift ist die Teigart ein Auswahlfeld, bei großer Schrift ein Chip.
+        if (variant != DisplayVariant.LARGE_TEXT) {
+            composeRule.onNodeWithContentDescription(text(R.string.dough_section_dough) + ": " + text(R.string.dough_pasta_egg)).performClick()
+        }
         clickVisible(text(R.string.dough_pasta_water))
         waitForText(text(R.string.dough_semolina))
         screenshot("14g-teigrechner-wasserteig")

@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.62.0] – 2026-10-30 (versionCode 109)
+
+### Geändert
+- **Pasta und Kuchen im Teigrechner ebenfalls auf einem Bild.** Wie bei Pizza und Brot lassen sich bei normaler Schrift alle Werte ohne Scrollen einstellen: Teigart, Größe (runde oder eckige Backform, Mehl), Einheit und Hefeart sind Auswahlfelder, die übrigen Werte stehen paarweise mit Plus und Minus. Das Ergebnis steht oben, „Als Rezept speichern“ unten. Zurücksetzen ist jetzt das Symbol neben dem Hinweis zum rohen Teig. Bei großer Schrift bleibt es bei den Karten.
+
 ## [0.61.0] – 2026-10-30 (versionCode 108)
 
 ### Geändert

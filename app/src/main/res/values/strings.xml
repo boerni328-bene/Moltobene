@@ -750,6 +750,9 @@
     <string name="dough_size_flour">Flour</string>
     <string name="dough_unit_cm">cm</string>
     <string name="dough_unit_inch">inch</string>
+    <string name="dough_size_pan_round">Round pan</string>
+    <string name="dough_size_pan_rect">Rectangular pan</string>
+    <string name="dough_label_unit">Unit</string>
     <string name="dough_pan_diameter">Diameter</string>
     <string name="dough_pan_length">Length</string>
     <string name="dough_pan_width">Width</string>

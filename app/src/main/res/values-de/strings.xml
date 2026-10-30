@@ -748,6 +748,9 @@
     <string name="dough_size_flour">Mehl</string>
     <string name="dough_unit_cm">cm</string>
     <string name="dough_unit_inch">Zoll</string>
+    <string name="dough_size_pan_round">Runde Backform</string>
+    <string name="dough_size_pan_rect">Eckige Backform</string>
+    <string name="dough_label_unit">Einheit</string>
     <string name="dough_pan_diameter">Durchmesser</string>
     <string name="dough_pan_length">Länge</string>
     <string name="dough_pan_width">Breite</string>
