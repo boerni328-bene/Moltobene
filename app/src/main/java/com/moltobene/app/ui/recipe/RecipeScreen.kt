@@ -188,7 +188,10 @@ import com.moltobene.app.ui.components.RecipePhoto
 import com.moltobene.app.ui.components.RecipePhotoLarge
 import com.moltobene.app.ui.components.TagLabels
 import com.moltobene.app.ui.components.isLargeText
+import com.moltobene.app.ui.components.DashedDivider
+import com.moltobene.app.ui.components.IngredientLine
 import com.moltobene.app.ui.components.isShortHeight
+import com.moltobene.app.ui.components.rememberAmountWidth
 import com.moltobene.app.ui.components.isWideLayout
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -964,6 +967,10 @@ private fun RecipeContent(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Column(modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.xs)) {
+        val amountWidth = rememberAmountWidth(
+            lines = recipe.ingredients.mapIndexed { index, ingredient -> if (ingredient.isHeading) null else lines[index] },
+            style = cookingTextStyle(),
+        )
         recipe.ingredients.forEachIndexed { index, ingredient ->
             if (ingredient.isHeading) {
                 Text(
@@ -977,6 +984,7 @@ private fun RecipeContent(
                 IngredientRow(
                     parts = lines[index],
                     locale = textLocale,
+                    amountWidth = amountWidth,
                     checked = RecipeViewModel.progressKey(index, ingredient.text) in cooking.checked,
                     onToggle = { cooking.onToggleIngredient(index, ingredient.text) },
                 )
@@ -1282,32 +1290,18 @@ private fun servingsText(servings: Int, unit: String?): String =
         stringResource(R.string.servings_with_unit, servings, unit)
     }
 
-/** Dünne gestrichelte Trennlinie zwischen zwei Zutaten. */
-@Composable
-private fun DashedDivider() {
-    val color = MaterialTheme.colorScheme.outlineVariant
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .height(1.dp)
-            .drawBehind {
-                drawLine(
-                    color,
-                    androidx.compose.ui.geometry.Offset(0f, size.height / 2),
-                    androidx.compose.ui.geometry.Offset(size.width, size.height / 2),
-                    strokeWidth = 1.dp.toPx(),
-                    pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 4.dp.toPx())),
-                )
-            },
-    )
-}
-
 /**
  * Eine Zutat zum Abhaken: Die ganze Zeile ist antippbar, abgehakt heißt Häkchen und durchgestrichen.
  * Umgerechnete Mengen sind fett, damit sie nicht nur an der Farbe zu erkennen sind.
  */
 @Composable
-private fun IngredientRow(parts: List<AmountScaling.Part>, locale: LocaleList?, checked: Boolean, onToggle: () -> Unit) {
+private fun IngredientRow(
+    parts: List<AmountScaling.Part>,
+    locale: LocaleList?,
+    amountWidth: Dp?,
+    checked: Boolean,
+    onToggle: () -> Unit,
+) {
     val state = stringResource(if (checked) R.string.ingredient_checked else R.string.ingredient_unchecked)
     val resources = LocalResources.current
     // Der Screenreader liest „etwa 335 g Mehl, umgerechnet“ (#65); die Zutat behält dabei die Sprache des Rezepts.
@@ -1332,18 +1326,10 @@ private fun IngredientRow(parts: List<AmountScaling.Part>, locale: LocaleList?, 
     ) {
         Checkbox(checked = checked, onCheckedChange = null)
         Box(modifier = if (spoken != null) Modifier.clearAndSetSemantics { text = spoken } else Modifier) {
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(SpanStyle(localeList = locale)) {
-                        parts.forEach { part ->
-                            if (part.scaled) {
-                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(part.text) }
-                            } else {
-                                append(part.text)
-                            }
-                        }
-                    }
-                },
+            IngredientLine(
+                parts = parts,
+                amountWidth = amountWidth,
+                locale = locale,
                 style = cookingTextStyle().copy(
                     textDecoration = if (checked) TextDecoration.LineThrough else TextDecoration.None,
                 ),

@@ -173,4 +173,26 @@ class AmountScalingTest {
         assertEquals("350 g Mehl", AmountScaling.scaleText("200 g Mehl", 1.75, "de", exactLeading = true))
         assertEquals("≈ 175 g Zucker", AmountScaling.scaleText("101 g Zucker", 1.75, "de"))
     }
+
+    @Test
+    fun mengeAmZeilenanfangFuerDieSpalte() {
+        assertEquals(5, AmountScaling.amountLength("500 g Mehl"))
+        assertEquals(1, AmountScaling.amountLength("1 Zwiebel"))
+        assertEquals(6, AmountScaling.amountLength("2–3 EL Öl"))
+        assertEquals(7, AmountScaling.amountLength("≈ 1½ EL Öl"))
+        assertEquals(0, AmountScaling.amountLength("Pfeffer"))
+        assertEquals(0, AmountScaling.amountLength("30 % Fett"))
+    }
+
+    @Test
+    fun zeileInMengeUndRestTeilen() {
+        val (amount, name) = AmountScaling.splitAmount(
+            listOf(AmountScaling.Part("≈ 335", scaled = true, approximate = true), AmountScaling.Part(" g Mehl", scaled = false)),
+        )
+        assertEquals("≈ 335 g", amount.joinToString("") { it.text })
+        assertEquals("Mehl", name.joinToString("") { it.text })
+        val (none, all) = AmountScaling.splitAmount(listOf(AmountScaling.Part("Pfeffer", scaled = false)))
+        assertTrue(none.isEmpty())
+        assertEquals("Pfeffer", all.joinToString("") { it.text })
+    }
 }

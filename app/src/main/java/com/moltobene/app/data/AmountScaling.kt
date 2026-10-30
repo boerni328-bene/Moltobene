@@ -105,6 +105,47 @@ object AmountScaling {
         return parts
     }
 
+    /**
+     * Länge der Menge am Anfang der angezeigten Zeile samt bekannter Einheit („500 g“, „≈ 1½ EL“, „2–3“), sonst 0.
+     * Für die Spalte mit den Mengen in der Zutatenliste; „30 % Fett“ oder „180 °C“ zählen nicht.
+     */
+    fun amountLength(line: String): Int {
+        val skip = if (line.startsWith(APPROXIMATE)) APPROXIMATE.length else 0
+        val body = line.substring(skip)
+        val match = LEADING.find(body) ?: return 0
+        val rest = body.substring(match.range.last + 1)
+        val trimmed = rest.trimStart()
+        if (trimmed.startsWith("%") || trimmed.startsWith("°")) return 0
+        var end = match.range.last + 1
+        val unit = UNIT.find(trimmed)?.value?.takeIf { RecipeUnits.kindOf(it) != null }
+        if (unit != null) end += rest.length - trimmed.length + unit.length
+        return skip + end
+    }
+
+    /** Teilt die angezeigten Stücke einer Zeile in Menge und Rest (Menge leer, wenn die Zeile keine hat). */
+    fun splitAmount(parts: List<Part>): Pair<List<Part>, List<Part>> {
+        var remaining = amountLength(parts.joinToString("") { it.text })
+        val head = mutableListOf<Part>()
+        val tail = mutableListOf<Part>()
+        for (part in parts) {
+            when {
+                remaining <= 0 -> tail += part
+                part.text.length <= remaining -> {
+                    head += part
+                    remaining -= part.text.length
+                }
+                else -> {
+                    head += part.copy(text = part.text.take(remaining))
+                    tail += part.copy(text = part.text.drop(remaining), approximate = false)
+                    remaining = 0
+                }
+            }
+        }
+        if (head.isNotEmpty()) head[head.lastIndex] = head.last().let { it.copy(text = it.text.trimEnd()) }
+        if (tail.isNotEmpty()) tail[0] = tail.first().let { it.copy(text = it.text.trimStart()) }
+        return head to tail.filter { it.text.isNotEmpty() }
+    }
+
     /** Die umgerechnete Zeile als Text. */
     fun scaleText(line: String, factor: Double, language: String?, exactLeading: Boolean = false): String =
         scale(line, factor, language, exactLeading).joinToString("") { it.text }

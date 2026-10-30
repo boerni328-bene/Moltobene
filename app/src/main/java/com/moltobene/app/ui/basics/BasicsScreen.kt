@@ -1,7 +1,10 @@
 package com.moltobene.app.ui.basics
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.SnackbarDuration
 import com.moltobene.app.ui.components.AppSnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -30,6 +34,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -48,6 +53,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.moltobene.app.R
+import com.moltobene.app.data.AmountScaling
+import com.moltobene.app.ui.components.DashedDivider
+import com.moltobene.app.ui.components.IngredientLine
+import com.moltobene.app.ui.components.rememberAmountWidth
 import com.moltobene.app.data.basics.BasicRecipes
 import com.moltobene.app.ui.collection.RecipeListItem
 import com.moltobene.app.ui.collection.Thumbnail
@@ -194,26 +203,55 @@ private fun BasicCard(
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
-                Text(stringResource(R.string.ingredients), style = MaterialTheme.typography.titleSmall, modifier = Modifier.semantics { heading() })
-                for (line in text.ingredients) {
-                    val heading = line.endsWith(":")
-                    Text(
-                        line,
-                        style = if (heading) MaterialTheme.typography.titleSmall else MaterialTheme.typography.bodyLarge,
-                        color = if (heading) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-                Text(stringResource(R.string.instructions), style = MaterialTheme.typography.titleSmall, modifier = Modifier.semantics { heading() })
+                Text(stringResource(R.string.ingredients), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
+                BasicIngredients(text.ingredients)
+                Text(stringResource(R.string.instructions), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
                 text.steps.forEachIndexed { index, step ->
-                    Text("${index + 1}. $step", style = MaterialTheme.typography.bodyLarge)
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s), modifier = Modifier.padding(vertical = Spacing.xs)) {
+                        Text(
+                            "${index + 1}.",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.widthIn(min = 24.dp),
+                        )
+                        Text(step, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                    }
                 }
                 if (text.notes.isNotBlank()) {
-                    Text(stringResource(R.string.notes), style = MaterialTheme.typography.titleSmall, modifier = Modifier.semantics { heading() })
+                    Text(stringResource(R.string.notes), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
                     Text(text.notes, style = MaterialTheme.typography.bodyLarge)
                 }
             }
             Button(onClick = onAdopt, modifier = Modifier.align(Alignment.End)) {
                 Text(stringResource(R.string.basics_adopt))
+            }
+        }
+    }
+}
+
+/** Zutaten der Grundrezepte wie in der Rezeptansicht: Karte mit gestrichelten Linien und Mengen in einer eigenen Spalte. */
+@Composable
+private fun BasicIngredients(lines: List<String>) {
+    val style = MaterialTheme.typography.bodyLarge
+    val parts = remember(lines) { lines.map { if (it.endsWith(":")) null else listOf(AmountScaling.Part(it, scaled = false)) } }
+    val amountWidth = rememberAmountWidth(parts, style)
+    Surface(color = MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(horizontal = Spacing.m, vertical = Spacing.xs)) {
+            lines.forEachIndexed { index, line ->
+                val row = parts[index]
+                if (row == null) {
+                    Text(
+                        line,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = Spacing.s).semantics { heading() },
+                    )
+                } else {
+                    if (index > 0 && parts[index - 1] != null) DashedDivider()
+                    Box(modifier = Modifier.heightIn(min = 48.dp), contentAlignment = Alignment.CenterStart) {
+                        IngredientLine(parts = row, amountWidth = amountWidth, style = style, color = MaterialTheme.colorScheme.onSurface)
+                    }
+                }
             }
         }
     }

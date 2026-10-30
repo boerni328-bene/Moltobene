@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.60.3] – 2026-10-30 (versionCode 107)
+
+### Geändert
+- **Mengen in einer eigenen Spalte.** In der Zutatenliste stehen die Mengen („500 g“, „2 EL“) jetzt rechtsbündig untereinander, die Zutaten links daneben. Das ist besser zu überfliegen. Bei großer Schrift bleibt die Zeile wie bisher in einem Stück, damit nichts abgeschnitten wird.
+- **Grundrezepte sehen aus wie normale Rezepte.** Zutaten stehen in derselben Karte mit gestrichelten Linien und Mengenspalte, die Schritte sind nummeriert wie in der Rezeptansicht.
+
 ## [0.60.2] – 2026-10-29 (versionCode 106)
 
 ### Geändert
