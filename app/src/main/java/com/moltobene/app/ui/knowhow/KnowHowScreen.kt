@@ -10,6 +10,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.Alignment
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -104,7 +108,19 @@ private fun ArticleCard(text: KnowHow.Text, expanded: Boolean, onToggle: () -> U
         modifier = Modifier.fillMaxWidth().semantics { stateDescription = stateText },
     ) {
         Column(modifier = Modifier.padding(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
-            Text(text.title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
+            // Der Pfeil zeigt, dass sich der Artikel aufklappen lässt.
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f).semantics { heading() },
+                )
+                Icon(
+                    if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
             Text(text.summary, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             if (expanded) {
                 for (section in text.sections) {

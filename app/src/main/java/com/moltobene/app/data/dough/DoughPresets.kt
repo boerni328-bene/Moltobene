@@ -23,7 +23,6 @@ object DoughPresets {
     /** Alle mitgelieferten Voreinstellungen einer Teigart; Pasta und Kuchen haben (noch) keine. */
     fun shipped(type: DoughType): List<Shipped> = when (type) {
         DoughType.PIZZA -> listOf(
-            Shipped("default", DoughLimits.defaults(type)),
             Shipped("neapolitan", base(type, water = 60.0, salt = 2.8, oil = 0.0, yeast = 0.2)),
             Shipped("new_york", base(type, water = 62.0, salt = 2.0, oil = 2.0, yeast = 0.5)),
             Shipped("sheet_pan", base(type, water = 70.0, salt = 2.0, oil = 5.0, yeast = 0.9, yeastKind = YeastKind.INSTANT_DRY)),
@@ -36,13 +35,6 @@ object DoughPresets {
         DoughType.BREAD -> listOf(
             Shipped("default", DoughLimits.defaults(type)),
             Shipped("white_bread", base(type, water = 65.0, salt = 2.0, oil = 0.0, yeast = 1.0)),
-            Shipped(
-                "poolish_bread",
-                base(
-                    type, water = 70.0, salt = 2.0, oil = 0.0, yeast = 0.3,
-                    preferment = Preferment.POOLISH, prefermentFlour = 30.0, prefermentWater = 100.0,
-                ),
-            ),
             Shipped("ciabatta", base(type, water = 78.0, salt = 2.0, oil = 2.0, yeast = 0.5)),
             Shipped("baguette", base(type, water = 68.0, salt = 2.0, oil = 0.0, yeast = 0.5)),
             Shipped("semmel", base(type, water = 58.0, salt = 2.0, oil = 2.0, yeast = 2.0, malt = 1.0)),

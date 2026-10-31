@@ -650,21 +650,22 @@ class AppTourTest(private val variant: DisplayVariant) {
         clickVisible(text(R.string.dough_type_pasta))
         waitForText(text(R.string.dough_pasta_egg))
         screenshot("14f-teigrechner-pasta")
-        // Bei normaler Schrift ist die Teigart ein Auswahlfeld, bei großer Schrift ein Chip.
-        if (variant != DisplayVariant.LARGE_TEXT) {
-            composeRule.onNodeWithContentDescription(text(R.string.dough_section_dough) + ": " + text(R.string.dough_pasta_egg)).performClick()
-        }
-        clickVisible(text(R.string.dough_pasta_water))
+        // Die Teigart steht bei normaler Schrift als Reihe, bei großer Schrift als Chip.
+        choosePreset(R.string.dough_pasta_water)
         waitForText(text(R.string.dough_semolina))
         screenshot("14g-teigrechner-wasserteig")
 
         clickVisible(text(R.string.dough_type_cake))
         waitForText(text(R.string.dough_cake_batter))
         screenshot("14h-teigrechner-kuchen")
-        // Die sechs Kuchenarten stehen in einem Auswahlfeld (#83): öffnen und die Art wählen.
-        clickVisible(text(R.string.dough_cake_batter))
-        waitForText(text(R.string.dough_cake_quark_oil))
-        clickVisible(text(R.string.dough_cake_quark_oil))
+        // Die sechs Kuchenarten stehen bei normaler Schrift als Reihe, bei großer Schrift in einem Auswahlfeld (#83).
+        if (variant == DisplayVariant.LARGE_TEXT) {
+            clickVisible(text(R.string.dough_cake_batter))
+            waitForText(text(R.string.dough_cake_quark_oil))
+            clickVisible(text(R.string.dough_cake_quark_oil))
+        } else {
+            choosePreset(R.string.dough_cake_quark_oil)
+        }
         waitForText(text(R.string.dough_label_quark))
         composeRule.onNodeWithText(text(R.string.dough_save)).performClick()
         composeRule.waitUntil(10_000) {
@@ -726,12 +727,12 @@ class AppTourTest(private val variant: DisplayVariant) {
         // Voreinstellungen (#83, Etappe 3): nebeneinander wählen, eigene speichern, löschen, zurück zu den Standardwerten.
         // Die gemerkten Werte des vorigen Durchgangs bleiben stehen; „Zurücksetzen“ führt zu den Standardwerten.
         doughPresetAction(R.string.dough_reset)
-        waitForText(text(R.string.dough_preset_default))
+        waitForText(text(R.string.dough_preset_neapolitan))
         // Eigene Änderungen: vor dem Ersetzen durch eine Voreinstellung wird nachgefragt.
         // Wasser ändern: Der Wert weicht vom Standard ab (Eingabe per Tippen, Regler und Zahl gehören zusammen, #86).
         field(R.string.dough_water).performScrollTo().performTextClearance()
         field(R.string.dough_water).performTextInput("66")
-        choosePreset(R.string.dough_preset_neapolitan)
+        choosePreset(R.string.dough_preset_new_york)
         waitForText(text(R.string.dough_preset_replace_title))
         screenshot("14o-teigrechner-voreinstellung-ersetzen")
         composeRule.onNode(hasText(text(R.string.cancel)) and hasClickAction()).performClick()
@@ -754,8 +755,8 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.dough_preset_delete_title, "Mein Teig"))
         composeRule.onNode(hasText(text(R.string.delete)) and hasClickAction()).performClick()
         waitUntilGone("Mein Teig")
-        choosePreset(R.string.dough_preset_default)
-        waitForText(text(R.string.dough_preset_default))
+        choosePreset(R.string.dough_preset_new_york)
+        choosePreset(R.string.dough_preset_neapolitan)
 
         // Teigwissen (#84, Etappe 1): „Was bewirkt das?“ an der Karte „Teig“ (bei normaler Schrift im Menü) öffnet kurze Hinweise.
         if (variant == DisplayVariant.LARGE_TEXT) {
@@ -776,7 +777,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText("66", substring = true)
         screenshot("14d-teigrechner-standard")
         doughPresetAction(R.string.dough_reset)
-        waitForText("65", substring = true)
+        waitForText("60", substring = true)
 
         // Bei großer Schrift hat jeder Wert einen Regler; sonst stehen Minus und Plus am Feld (Entwurf vom 22.10.2026).
         if (variant == DisplayVariant.LARGE_TEXT) {

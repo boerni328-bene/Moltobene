@@ -544,7 +544,7 @@
     <string name="dough_type_bread">Brot</string>
     <string name="dough_section_dough">Teig</string>
     <string name="dough_count_ball">Teigkugeln</string>
-    <string name="dough_count_loaf">Laibe</string>
+    <string name="dough_count_loaf">Stück</string>
     <string name="dough_piece">Gewicht je Stück</string>
     <string name="dough_water">Wasser (Hydration)</string>
     <string name="dough_salt">Salz</string>
@@ -632,7 +632,6 @@
     <string name="dough_preset_neapolitan">Neapolitanisch</string>
     <string name="dough_preset_sheet_pan">Pizza vom Blech</string>
     <string name="dough_preset_white_bread">Weißbrot</string>
-    <string name="dough_preset_poolish_bread">Brot mit Poolish</string>
     <string name="dough_preset_new_york">New York</string>
     <string name="dough_preset_detroit">Detroit</string>
     <string name="dough_preset_focaccia">Focaccia</string>
@@ -674,7 +673,7 @@
     <string name="dough_ingredient_salt">Salz</string>
     <string name="dough_ingredient_oil">Öl</string>
     <string name="dough_unit_balls">Teigkugeln (je %1$s)</string>
-    <string name="dough_unit_loaves">Laibe (je %1$s)</string>
+    <string name="dough_unit_loaves">Stück (je %1$s)</string>
 
     <!-- Kochbuch: Hinzufügen-Menü, Filter, Ansicht -->
     <string name="add_short">Hinzufügen</string>

@@ -71,7 +71,6 @@ internal fun shippedPresetName(key: String): String = stringResource(
         "toast" -> R.string.dough_preset_toast
         "bagel" -> R.string.dough_preset_bagel
         "white_bread" -> R.string.dough_preset_white_bread
-        "poolish_bread" -> R.string.dough_preset_poolish_bread
         else -> R.string.dough_preset_default
     },
 )
@@ -260,4 +259,27 @@ private fun SavePresetDialog(
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
     )
+}
+
+/**
+ * Auswahl einer Teigart als Reihe wie bei den Voreinstellungen: nebeneinander, durch senkrechte Striche getrennt, seitlich
+ * zu verschieben, die gewählte fett und größer (Pasta und Kuchen).
+ */
+@Composable
+internal fun <T> KindRow(
+    options: List<T>,
+    selected: T,
+    label: @Composable (T) -> String,
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.horizontalScroll(rememberScrollState()).selectableGroup(),
+    ) {
+        options.forEachIndexed { i, option ->
+            if (i > 0) VerticalDivider(modifier = Modifier.height(24.dp))
+            PresetItem(label(option), selected = option == selected, onClick = { onSelect(option) })
+        }
+    }
 }

@@ -17,7 +17,6 @@ class DoughPresetsTest {
         for (type in listOf(pizza, bread)) {
             val list = DoughPresets.shipped(type)
             assertTrue("${type.key} hat Voreinstellungen", list.size >= 3)
-            assertEquals("default", list.first().key)
             assertEquals("Kennungen sind einmalig", list.size, list.map { it.key }.toSet().size)
             for (preset in list) {
                 val input = preset.input
@@ -49,15 +48,15 @@ class DoughPresetsTest {
     @Test
     fun erkenntDieVoreinstellungAnDenWerten() {
         val list = DoughPresets.shipped(pizza).map { it.input }
-        val neapolitan = list[1]
-        assertEquals(1, DoughPresets.indexOf(neapolitan.copy(count = 9), list))
+        val neapolitan = list[0]
+        assertEquals(0, DoughPresets.indexOf(neapolitan.copy(count = 9), list))
         assertEquals(-1, DoughPresets.indexOf(neapolitan.copy(water = 61.0), list))
         // Anderes Hefeart-Format oder ein Vorteig ohne Wirkung zählt nicht als gleich.
         assertFalse(DoughPresets.matches(neapolitan.copy(yeastKind = YeastKind.INSTANT_DRY), neapolitan))
         // Ohne Vorteig sind seine Mengen egal.
         assertTrue(DoughPresets.matches(neapolitan.copy(prefermentFlour = 55.0), neapolitan))
         // Mit Vorteig zählen sie.
-        val poolish = DoughPresets.shipped(bread).first { it.key == "poolish_bread" }.input
+        val poolish = DoughLimits.defaults(bread).copy(preferment = Preferment.POOLISH, prefermentFlour = 30.0, prefermentWater = 100.0)
         assertFalse(DoughPresets.matches(poolish.copy(prefermentFlour = 55.0), poolish))
         assertFalse(DoughPresets.matches(poolish.copy(water = Double.NaN), poolish))
     }

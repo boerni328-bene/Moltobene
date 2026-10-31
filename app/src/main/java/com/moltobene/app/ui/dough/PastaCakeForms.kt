@@ -211,19 +211,8 @@ private fun PastaForm(
         onReset = { resetCount += 1 },
         extra = resultTotals,
         compact = {
-            // Alles in einem Bild (Entwurf vom 30.10.2026): Teigart als Auswahlfeld, die Felder paarweise.
-            val kindChoice: @Composable (Modifier) -> Unit = { m ->
-                CompactChoice(
-                    label = stringResource(R.string.dough_section_dough),
-                    options = PastaKind.entries,
-                    selected = kind,
-                    optionLabel = { stringResource(if (it == PastaKind.EGG) R.string.dough_pasta_egg else R.string.dough_pasta_water) },
-                    onSelect = onKind,
-                    modifier = m,
-                )
-            }
+            // Alles in einem Bild (Entwurf vom 30.10.2026): die Teigart als Reihe oben, die Felder paarweise.
             val compactFields = buildList<@Composable (Modifier) -> Unit> {
-                add(kindChoice)
                 add(portionsField)
                 add(flourField)
                 add(semolinaField)
@@ -236,6 +225,12 @@ private fun PastaForm(
                 add(oilField)
             }
             Column(modifier = Modifier.padding(horizontal = Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                KindRow(
+                    options = PastaKind.entries,
+                    selected = kind,
+                    label = { stringResource(if (it == PastaKind.EGG) R.string.dough_pasta_egg else R.string.dough_pasta_water) },
+                    onSelect = onKind,
+                )
                 Fields(*compactFields.toTypedArray())
                 if (kind == PastaKind.EGG) eggNotes()
             }
@@ -554,16 +549,6 @@ private fun CakeForm(
         note = R.string.dough_cake_baking_note,
         compact = {
             // Alles in einem Bild (Entwurf vom 30.10.2026): Größe (runde, eckige Backform oder Mehl) als ein Auswahlfeld.
-            val kindChoice: @Composable (Modifier) -> Unit = { m ->
-                CompactChoice(
-                    label = stringResource(R.string.dough_cake_kind_label),
-                    options = CakeKind.entries,
-                    selected = kind,
-                    optionLabel = { stringResource(AndroidDoughTexts.cakeKindName(it)) },
-                    onSelect = onKind,
-                    modifier = m,
-                )
-            }
             val sizeChoice: @Composable (Modifier) -> Unit = { m ->
                 CompactChoice(
                     label = stringResource(R.string.dough_section_size),
@@ -606,7 +591,6 @@ private fun CakeForm(
                 )
             }
             val compactFields = buildList<@Composable (Modifier) -> Unit> {
-                add(kindChoice)
                 add(sizeChoice)
                 if (!byPan) {
                     add(flourField)
@@ -625,6 +609,12 @@ private fun CakeForm(
                 addAll(ingredientFields)
             }
             Column(modifier = Modifier.padding(horizontal = Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                KindRow(
+                    options = CakeKind.entries,
+                    selected = kind,
+                    label = { stringResource(AndroidDoughTexts.cakeKindName(it)) },
+                    onSelect = onKind,
+                )
                 Fields(*compactFields.toTypedArray())
                 if (byPan && success != null) {
                     Text(

@@ -117,7 +117,7 @@ class DoughCalculatorTest {
         assertTrue(issues(pizza(grams = 1e99)).single() is DoughIssue.OutOfRange)
         // Mit Sauerteig darf die Hefe fehlen, sonst nicht.
         success(pizza(yeast = 0.0, preferment = Preferment.SOURDOUGH, prefermentFlour = 20.0))
-        // Das Äußerste bei Brot: 20 Laibe zu 3 kg sind 60 kg, erlaubt.
+        // Das Äußerste bei Brot: 20 Stück zu 3 kg sind 60 kg, erlaubt.
         success(pizza(type = DoughType.BREAD, count = 20, grams = 3000.0, water = 70.0, salt = 2.0, yeast = 0.5))
     }
 

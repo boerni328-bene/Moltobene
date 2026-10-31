@@ -35,7 +35,7 @@ internal object GermanTexts : DoughTexts {
 
     override fun servingsUnit(kind: YieldKind, detail: String) = when (kind) {
         YieldKind.BALL -> "Teigkugeln (je $detail)"
-        YieldKind.LOAF -> "Laibe (je $detail)"
+        YieldKind.LOAF -> "Stück (je $detail)"
         YieldKind.PORTION -> "Portionen (je $detail Mehl)"
         YieldKind.PAN -> "Backform ($detail)"
         YieldKind.DOUGH -> "Teig"

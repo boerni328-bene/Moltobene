@@ -62,7 +62,7 @@ object DoughLimits {
             prefermentWater = 100.0,
         )
         DoughType.PIZZA -> LeavenedInput(
-            type = DoughType.PIZZA, count = 4, pieceGrams = 250.0, water = 65.0, salt = 2.8, oil = 0.0,
+            type = DoughType.PIZZA, count = 4, pieceGrams = 250.0, water = 60.0, salt = 2.8, oil = 0.0,
             yeastKind = YeastKind.FRESH, yeast = 0.2, preferment = Preferment.NONE, prefermentFlour = 30.0,
             prefermentWater = 100.0,
         )

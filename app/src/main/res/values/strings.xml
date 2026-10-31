@@ -544,7 +544,7 @@
     <string name="dough_type_bread">Bread</string>
     <string name="dough_section_dough">Dough</string>
     <string name="dough_count_ball">Dough balls</string>
-    <string name="dough_count_loaf">Loaves</string>
+    <string name="dough_count_loaf">Pieces</string>
     <string name="dough_piece">Weight each</string>
     <string name="dough_water">Water (hydration)</string>
     <string name="dough_salt">Salt</string>
@@ -634,7 +634,6 @@
     <string name="dough_preset_neapolitan">Neapolitan</string>
     <string name="dough_preset_sheet_pan">Sheet-pan pizza</string>
     <string name="dough_preset_white_bread">White bread</string>
-    <string name="dough_preset_poolish_bread">Bread with poolish</string>
     <string name="dough_preset_new_york">New York</string>
     <string name="dough_preset_detroit">Detroit</string>
     <string name="dough_preset_focaccia">Focaccia</string>
@@ -676,7 +675,7 @@
     <string name="dough_ingredient_salt">salt</string>
     <string name="dough_ingredient_oil">oil</string>
     <string name="dough_unit_balls">dough balls (%1$s each)</string>
-    <string name="dough_unit_loaves">loaves (%1$s each)</string>
+    <string name="dough_unit_loaves">pieces (%1$s each)</string>
 
     <!-- Collection: add menu, filter, view -->
     <string name="add_short">Add</string>

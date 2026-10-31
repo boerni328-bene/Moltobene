@@ -3,6 +3,14 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.69.0] – 2026-11-01 (versionCode 116)
+
+### Geändert
+- **Pizza ohne „Standardwerte“.** Die erste Voreinstellung war praktisch dasselbe wie „Neapolitanisch“; die Standardwerte sind jetzt die von „Neapolitanisch“ (Wasser 60 %), und „Zurücksetzen“ stellt sie wieder her. Beim Brot entfällt „Brot mit Poolish“ (der Vorteig lässt sich direkt wählen).
+- **Brot: „Stück“ statt „Laibe“** bei Anzahl und im gespeicherten Rezept („Stück (je 750 g)“).
+- **Pasta und Kuchen: Teigart wie bei Pizza und Brot** als Reihe nebeneinander, durch senkrechte Striche getrennt und seitlich zu verschieben; die gewählte steht fett und größer.
+- **Teigwissen: Pfeil an den Artikeln.** Ein Pfeil nach unten bzw. oben zeigt, dass sich ein Artikel aufklappen lässt.
+
 ## [0.68.0] – 2026-10-31 (versionCode 115)
 
 ### Neu
