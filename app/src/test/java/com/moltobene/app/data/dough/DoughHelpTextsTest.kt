@@ -66,8 +66,8 @@ class DoughHelpTextsTest {
 
     @Test
     fun keineVerbotenenBegriffe() {
-        // Feste Begriffe: nicht „Gare“/„Stockgare“, nicht „Hydration“, nicht „Bäckerprozente“.
-        val forbidden = Regex("""\b(Gare|Stockgare|Hydration|Bäckerprozente|Stückgare)\b""")
+        // Feste Begriffe: nicht „Gare“/„Stockgare“, nicht „Bäckerprozente“.
+        val forbidden = Regex("""\b(Gare|Stockgare|Bäckerprozente|Stückgare)\b""")
         for ((key, text) in german) assertFalse("$key: $text", forbidden.containsMatchIn(text))
     }
 

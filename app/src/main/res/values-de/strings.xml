@@ -543,7 +543,7 @@
     <string name="dough_count_ball">Teigkugeln</string>
     <string name="dough_count_loaf">Laibe</string>
     <string name="dough_piece">Gewicht je Stück</string>
-    <string name="dough_water">Wasseranteil</string>
+    <string name="dough_water">Wasser (Hydration)</string>
     <string name="dough_salt">Salz</string>
     <string name="dough_oil">Öl</string>
     <string name="dough_section_yeast">Hefe</string>
@@ -563,7 +563,7 @@
     <string name="dough_section_result">Ergebnis</string>
     <string name="dough_bar_preferment">%1$s: %2$s</string>
     <string name="dough_total_line">%1$s g Teig · %2$s</string>
-    <string name="dough_percent_note">Wasseranteil, Salz und Öl in % vom Mehl</string>
+    <string name="dough_percent_note">Wasser, Salz und Öl in % vom Mehl</string>
     <string name="dough_yeast_item">%1$s g %2$s</string>
     <string name="dough_yeast_equal">Gleichwertige Hefemenge: %1$s</string>
     <string name="dough_invalid">Rot markierte Eingaben prüfen.</string>
@@ -581,9 +581,10 @@
     <string name="dough_help_range">Üblich</string>
     <string name="dough_help_care">Gut zu wissen</string>
     <string name="dough_help_close">Schließen</string>
+    <string name="dough_help_knowhow">Mehr im Teigwissen</string>
     <string name="dough_help_values_note">Alle Zahlen sind grobe Orientierungen, keine Normen. Mehl, Raumtemperatur und Ofen verändern das Ergebnis.</string>
-    <string name="dough_help_water">Wasseranteil</string>
-    <string name="dough_help_water_effect">Mehr Wasser macht viele Teige weicher und klebriger und kann eine offenere Krume begünstigen; weniger Wasser gibt einen festeren Teig, der sich meist leichter formen lässt. Der Wasseranteil ist das Wasser in Prozent vom gesamten Mehl; Mehl und Wasser eines Vorteigs zählen mit.</string>
+    <string name="dough_help_water">Wasser (Hydration)</string>
+    <string name="dough_help_water_effect">Mehr Wasser macht viele Teige weicher und klebriger und kann eine offenere Krume begünstigen; weniger Wasser gibt einen festeren Teig, der sich meist leichter formen lässt. Die Hydration ist das Wasser in Prozent vom gesamten Mehl; Mehl und Wasser eines Vorteigs zählen mit.</string>
     <string name="dough_help_water_range">Grobe Orientierung: viele Weißbrote etwa 60 bis 70 %, sehr feuchte Teige wie Ciabatta oder Focaccia um 80 %, neapolitanische Pizza etwa 56 bis 62 %. Pizza vom Blech streut je nach Rezept stark (etwa 55 bis 80 %). Roggen-, Vollkorn- und andere Spezialteige weichen deutlich ab.</string>
     <string name="dough_help_water_care">Wie viel Wasser ein Teig aufnimmt, hängt von Mehl, Mahlgrad, Teigführung und gewünschter Konsistenz ab. Feuchte Teige sind schwerer zu formen; der Wert wird besser in kleinen Schritten geändert.</string>
     <string name="dough_help_salt">Salz</string>
@@ -646,7 +647,7 @@
     <string name="dough_saved">Als Entwurf gespeichert. Zubereitung ergänzen.</string>
     <string name="dough_error_number">Zahl eingeben.</string>
     <string name="dough_error_range">Zwischen %1$s und %2$s.</string>
-    <string name="dough_error_preferment">Der Vorteig braucht Wasser im Wert von %1$s %% des Mehlgewichts, der Teig hat aber nur %2$s %%. Mehl oder Wasser im Vorteig verringern oder den Wasseranteil erhöhen.</string>
+    <string name="dough_error_preferment">Der Vorteig braucht Wasser im Wert von %1$s %% des Mehlgewichts, der Teig hat aber nur %2$s %%. Mehl oder Wasser im Vorteig verringern oder die Hydration erhöhen.</string>
     <string name="dough_recipe_title_pizza">Pizzateig</string>
     <string name="dough_recipe_title_pizza_with">Pizzateig mit %1$s</string>
     <string name="dough_recipe_title_bread">Brotteig</string>

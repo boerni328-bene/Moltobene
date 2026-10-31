@@ -12,13 +12,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -26,7 +25,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.moltobene.app.R
@@ -308,6 +306,9 @@ private fun FormFrame(
         }
     }
     if (!com.moltobene.app.ui.components.isLargeText()) {
+        // Zurücksetzen liegt oben in der Kopfleiste; Speichern als Voreinstellung gibt es hier nicht.
+        val bar = LocalDoughBar.current
+        SideEffect { bar.reset = onReset }
         Column(modifier = Modifier.fillMaxSize()) {
             header()
             ResultTop(summary = summary, totals = totals)
@@ -317,17 +318,12 @@ private fun FormFrame(
             ) {
                 compact()
                 noteText()
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = Spacing.m)) {
-                    Text(
-                        stringResource(R.string.dough_hint),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.weight(1f),
-                    )
-                    IconButton(onClick = onReset) {
-                        Icon(painterResource(R.drawable.ic_refresh), contentDescription = stringResource(R.string.dough_reset))
-                    }
-                }
+                Text(
+                    stringResource(R.string.dough_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = Spacing.m),
+                )
             }
             SaveBar(enabled = summary != null, onSave = onSave)
         }

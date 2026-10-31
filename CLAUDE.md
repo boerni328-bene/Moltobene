@@ -110,7 +110,7 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 | Backkraft (W-Wert auf italienischem Mehl) | baking strength (W value) | Stärke, Triebkraft |
 | Teigart (Pizza, Brot, Pasta, Kuchen) | dough type | Kategorie (gilt nur für Schlagwörter) |
 | Teigkugel | dough ball | Teigling |
-| Wasseranteil, „% vom Mehl“ | hydration, “% of flour” | Hydration (im Deutschen), Bäckerprozente |
+| Wasser (Hydration), „% vom Mehl“ (Entscheidung 31.10.2026) | water (hydration), “% of flour” | Wasseranteil, Bäckerprozente |
 | Gehzeit | rising time | Gare, Stockgare |
 | Vorteig | preferment | |
 | Hauptteig | final dough | |

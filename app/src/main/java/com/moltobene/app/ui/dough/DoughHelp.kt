@@ -3,9 +3,13 @@ package com.moltobene.app.ui.dough
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -60,9 +64,12 @@ internal fun helpTopics(key: String?): List<HelpTopic> = when (key) {
     else -> emptyList()
 }
 
-/** Ein Fenster mit den Hinweisen zu [topics]; scrollt bei großer Schrift. */
+/**
+ * Ein Fenster mit den Hinweisen zu [topics]; scrollt bei großer Schrift. Jedes Thema steht auf einer eigenen Fläche, die
+ * drei Teile mit farbiger Beschriftung. Mit [onKnowHow] führt ein Knopf weiter zu den Artikeln im Teigwissen.
+ */
 @Composable
-internal fun DoughHelpDialog(topics: List<HelpTopic>, onDismiss: () -> Unit) {
+internal fun DoughHelpDialog(topics: List<HelpTopic>, onDismiss: () -> Unit, onKnowHow: (() -> Unit)? = null) {
     if (topics.isEmpty()) return
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -72,18 +79,25 @@ internal fun DoughHelpDialog(topics: List<HelpTopic>, onDismiss: () -> Unit) {
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(Spacing.m),
+                verticalArrangement = Arrangement.spacedBy(Spacing.s),
             ) {
                 for (topic in topics) {
-                    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                        Text(
-                            stringResource(topic.title),
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.semantics { heading() },
-                        )
-                        HelpPart(R.string.dough_help_effect, topic.effect)
-                        HelpPart(R.string.dough_help_range, topic.range)
-                        HelpPart(R.string.dough_help_care, topic.care)
+                    Surface(color = MaterialTheme.colorScheme.surfaceContainer, shape = MaterialTheme.shapes.medium) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(Spacing.s),
+                            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+                        ) {
+                            Text(
+                                stringResource(topic.title),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.semantics { heading() },
+                            )
+                            HorizontalDivider()
+                            HelpPart(R.string.dough_help_effect, topic.effect)
+                            HelpPart(R.string.dough_help_range, topic.range)
+                            HelpPart(R.string.dough_help_care, topic.care)
+                        }
                     }
                 }
                 Text(
@@ -93,6 +107,9 @@ internal fun DoughHelpDialog(topics: List<HelpTopic>, onDismiss: () -> Unit) {
                 )
             }
         },
+        dismissButton = onKnowHow?.let { open ->
+            { TextButton(onClick = open) { Text(stringResource(R.string.dough_help_knowhow)) } }
+        },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.dough_help_close)) } },
     )
 }
@@ -100,7 +117,12 @@ internal fun DoughHelpDialog(topics: List<HelpTopic>, onDismiss: () -> Unit) {
 @Composable
 private fun HelpPart(@StringRes label: Int, @StringRes body: Int) {
     Column {
-        Text(stringResource(label), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+        Text(
+            stringResource(label),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+        )
         Text(stringResource(body), style = MaterialTheme.typography.bodyMedium)
     }
 }

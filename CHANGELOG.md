@@ -3,6 +3,14 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.64.0] – 2026-10-31 (versionCode 111)
+
+### Geändert
+- **Teigrechner: Kopfleiste mit Symbolen.** Ganz oben stehen jetzt „Als Voreinstellung speichern“ (Speichern-Symbol), „Zurücksetzen“ und rechts das Info-Symbol. Das Menü ⋮ entfällt. Das Info-Symbol öffnet „Was bewirkt das?“ in neuer, übersichtlicherer Darstellung (jedes Thema auf einer eigenen Fläche, farbige Beschriftungen); von dort führt „Mehr im Teigwissen“ zu den Artikeln. Bei Pasta und Kuchen öffnet es weiter direkt das Teigwissen.
+- **Voreinstellungen: Pfeile nebeneinander.** Beide Pfeile stehen zusammen auf der Seite, die für Plus und Minus gewählt ist; eine eigene Voreinstellung lässt sich mit dem Papierkorb-Symbol löschen.
+- **Vorteig ganz oben und abgesetzt.** Die Auswahl des Vorteigs steht über den Teigwerten in einer eigenen umrahmten Fläche, zusammen mit Mehl und Wasser des Vorteigs. Der Hauptteig folgt darunter.
+- **„Wasser (Hydration)“** statt „Wasseranteil“ in den Beschriftungen und Hinweisen.
+
 ## [0.63.0] – 2026-10-30 (versionCode 110)
 
 ### Geändert

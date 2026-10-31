@@ -1030,7 +1030,10 @@ class AppTourTest(private val variant: DisplayVariant) {
         // Teigwissen liegt im Teigrechner: ein Info-Symbol in der obersten Zeile.
         composeRule.onNodeWithText(text(R.string.dough_title)).performScrollTo().performClick()
         waitForText(text(R.string.dough_save))
-        composeRule.onNodeWithContentDescription(text(R.string.knowhow_title)).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.dough_help_title)).performClick()
+        // „Was bewirkt das?“ öffnet sich zuerst; von dort führt ein Knopf zu den Artikeln.
+        waitForText(text(R.string.dough_help_knowhow))
+        composeRule.onNode(hasText(text(R.string.dough_help_knowhow)) and hasClickAction()).performClick()
         waitForText(text(R.string.knowhow_intro))
         screenshot("17a-teigwissen")
 
@@ -1487,13 +1490,12 @@ class AppTourTest(private val variant: DisplayVariant) {
     /** Text aus strings.xml in der Sprache der jeweiligen Darstellung. */
     private fun text(@StringRes id: Int, vararg args: Any): String = activity.getString(id, *args)
 
-    /** Eintrag der Voreinstellungszeile im Teigrechner: bei normaler Schrift im Menü ⋮, bei großer Schrift ein Knopf in der Karte. */
+    /** Eintrag der Voreinstellungszeile im Teigrechner: bei normaler Schrift ein Symbol in der Kopfleiste oder der Zeile, bei großer Schrift ein Knopf in der Karte. */
     private fun doughPresetAction(@StringRes label: Int) {
         if (variant == DisplayVariant.LARGE_TEXT) {
             composeRule.onNodeWithText(text(label)).performScrollTo().performClick()
         } else {
-            composeRule.onNodeWithContentDescription(text(R.string.more_options)).performClick()
-            composeRule.onNodeWithText(text(label)).performClick()
+            composeRule.onNodeWithContentDescription(text(label)).performClick()
         }
     }
 

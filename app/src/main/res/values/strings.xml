@@ -543,7 +543,7 @@
     <string name="dough_count_ball">Dough balls</string>
     <string name="dough_count_loaf">Loaves</string>
     <string name="dough_piece">Weight each</string>
-    <string name="dough_water">Hydration</string>
+    <string name="dough_water">Water (hydration)</string>
     <string name="dough_salt">Salt</string>
     <string name="dough_oil">Oil</string>
     <string name="dough_section_yeast">Yeast</string>
@@ -565,7 +565,7 @@
     <string name="dough_section_result">Result</string>
     <string name="dough_bar_preferment">%1$s: %2$s</string>
     <string name="dough_total_line">%1$s g dough · %2$s</string>
-    <string name="dough_percent_note">Salt, oil and hydration in % of flour</string>
+    <string name="dough_percent_note">Water, salt and oil in % of flour</string>
     <string name="dough_yeast_item">%1$s g %2$s</string>
     <string name="dough_yeast_equal">The same amount of yeast: %1$s</string>
     <string name="dough_invalid">Check the entries marked in red.</string>
@@ -583,8 +583,9 @@
     <string name="dough_help_range">Typical range</string>
     <string name="dough_help_care">Good to know</string>
     <string name="dough_help_close">Close</string>
+    <string name="dough_help_knowhow">More in dough know-how</string>
     <string name="dough_help_values_note">All numbers are rough guides, not standards. Flour, room temperature and oven change the result.</string>
-    <string name="dough_help_water">Hydration</string>
+    <string name="dough_help_water">Water (hydration)</string>
     <string name="dough_help_water_effect">More water makes many doughs softer and stickier and can favor a more open crumb; less water gives a firmer dough that is usually easier to shape. Hydration is the water as a percentage of the total flour; flour and water of a preferment count too.</string>
     <string name="dough_help_water_range">Rough guide: many white breads about 60 to 70 %, very wet doughs such as ciabatta or focaccia around 80 %, Neapolitan pizza about 56 to 62 %. Pan pizza varies widely by recipe (about 55 to 80 %). Rye, whole grain and other special doughs differ clearly.</string>
     <string name="dough_help_water_care">How much water a dough takes up depends on flour, grind, handling and the consistency wanted. Wet doughs are harder to shape; it is better to change the value in small steps.</string>

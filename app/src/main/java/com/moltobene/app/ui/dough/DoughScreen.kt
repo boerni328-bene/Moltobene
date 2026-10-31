@@ -49,7 +49,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -112,6 +116,21 @@ internal fun parseNumber(text: String): Double =
 
 internal fun show(value: Double): String =
     DoughNumbers.separator(DoughNumbers.plain(value, 2), Locale.getDefault().language)
+
+/**
+ * Brücke zwischen der Kopfleiste und dem Formular: Das gerade gezeigte Formular trägt ein, was „Speichern als
+ * Voreinstellung“ und „Zurücksetzen“ in der Leiste tun.
+ */
+@Stable
+internal class DoughBarActions {
+    var showSave by mutableStateOf(false)
+    var canSave by mutableStateOf(false)
+    var save: () -> Unit = {}
+    var reset: () -> Unit = {}
+}
+
+internal val LocalDoughBar = compositionLocalOf { DoughBarActions() }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DoughScreen(
@@ -124,6 +143,19 @@ fun DoughScreen(
 ) {
     var typeKey by rememberSaveable { mutableStateOf(DoughType.PIZZA.key) }
     val type = DoughType.fromKey(typeKey) ?: DoughType.PIZZA
+    val bar = remember { DoughBarActions() }
+    var helpOpen by rememberSaveable { mutableStateOf(false) }
+    val leavened = type == DoughType.PIZZA || type == DoughType.BREAD
+    if (helpOpen && leavened) {
+        DoughHelpDialog(
+            topics = helpTopics("all"),
+            onDismiss = { helpOpen = false },
+            onKnowHow = {
+                helpOpen = false
+                onOpenKnowHow()
+            },
+        )
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -134,17 +166,33 @@ fun DoughScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
-                // Teigwissen (#84): ein einfaches Info-Symbol in der obersten Zeile.
+                // Ganz oben (Wunsch des Projektinhabers vom 31.10.2026): Speichern als Voreinstellung, Zurücksetzen und
+                // rechts das Info-Symbol mit „Was bewirkt das?“; bei großer Schrift stehen die ersten beiden in den Karten.
                 actions = {
-                    IconButton(onClick = onOpenKnowHow) {
-                        Icon(painterResource(R.drawable.ic_info), contentDescription = stringResource(R.string.knowhow_title))
+                    if (!isLargeText()) {
+                        if (bar.showSave) {
+                            IconButton(onClick = { bar.save() }, enabled = bar.canSave) {
+                                Icon(painterResource(R.drawable.ic_save), contentDescription = stringResource(R.string.dough_preset_save))
+                            }
+                        }
+                        IconButton(onClick = { bar.reset() }) {
+                            Icon(painterResource(R.drawable.ic_refresh), contentDescription = stringResource(R.string.dough_reset))
+                        }
+                    }
+                    IconButton(onClick = { if (leavened) helpOpen = true else onOpenKnowHow() }) {
+                        Icon(
+                            painterResource(R.drawable.ic_info),
+                            contentDescription = stringResource(if (leavened) R.string.dough_help_title else R.string.knowhow_title),
+                        )
                     }
                 },
             )
         },
         snackbarHost = { AppSnackbarHost(snackbarHostState) },
     ) { padding ->
-        CompositionLocalProvider(LocalDoughSliders provides true, LocalStepperSide provides stepperSide) {
+        CompositionLocalProvider(
+            LocalDoughSliders provides true, LocalStepperSide provides stepperSide, LocalDoughBar provides bar,
+        ) {
             Column(modifier = Modifier.padding(padding).fillMaxSize().readingWidth()) {
                 val header: @Composable () -> Unit = {
                     Header(type) { typeKey = it.key }
@@ -757,7 +805,17 @@ private fun DoughForm(
 
     // Hinweise „Was bewirkt das?“ (Teigwissen, #84): welche Karte gerade erklärt wird.
     var help by rememberSaveable { mutableStateOf<String?>(null) }
-    DoughHelpDialog(helpTopics(help)) { help = null }
+    DoughHelpDialog(helpTopics(help), onDismiss = { help = null })
+    var savingPreset by rememberSaveable { mutableStateOf(false) }
+    // Speichern und Zurücksetzen oben in der Kopfleiste tragen sich hier ein.
+    val bar = LocalDoughBar.current
+    SideEffect {
+        bar.showSave = true
+        bar.canSave = result is DoughResult.Success
+        bar.save = { savingPreset = true }
+        bar.reset = { resetCount += 1 }
+    }
+    DisposableEffect(Unit) { onDispose { bar.showSave = false } }
 
     val bread = type == DoughType.BREAD
     // Die Felder stehen einmal hier, damit das Formular ohne Scrollen und das mit Karten dieselben benutzen.
@@ -860,6 +918,8 @@ private fun DoughForm(
             PresetCard(
                 entries = entries,
                 index = presetIndex,
+                saving = savingPreset,
+                onSavingChange = { savingPreset = it },
                 canSave = result is DoughResult.Success,
                 onSelect = ::applyPreset,
                 onSave = { name ->
@@ -875,14 +935,11 @@ private fun DoughForm(
                     chosen = -1
                 },
                 compact = pinned,
-                extraActions = listOf(
-                    stringResource(R.string.dough_reset) to { resetCount += 1 },
-                    stringResource(R.string.dough_help_title) to { help = "all" },
-                ),
             )
 
             if (pinned) {
                 // Alles in einem Bild, ohne Scrollen (Entwurf vom 30.10.2026): Felder paarweise, Auswahlen im Format der Felder.
+                // Der Vorteig steht oben im Rezept und abgesetzt in einer Fläche mit Rahmen (Wunsch vom 31.10.2026).
                 val yeastKindChoice: @Composable (Modifier) -> Unit = { m ->
                     CompactChoice(
                         label = stringResource(R.string.dough_section_yeast),
@@ -903,22 +960,22 @@ private fun DoughForm(
                         modifier = m,
                     )
                 }
-                val compactFields = buildList<@Composable (Modifier) -> Unit> {
-                    add(countField)
-                    add(pieceField)
-                    add(waterField)
-                    add(saltField)
-                    add(oilField)
-                    add(prefermentChoice)
-                    if (preferment != Preferment.NONE) {
-                        add(prefermentFlourField)
-                        add(prefermentWaterField)
-                    }
-                    add(yeastKindChoice)
-                    add(yeastField)
+                Card("", highlighted = true) {
+                    prefermentChoice(Modifier.fillMaxWidth())
+                    if (preferment != Preferment.NONE) Fields(prefermentFlourField, prefermentWaterField)
                 }
                 Column(modifier = Modifier.padding(horizontal = Spacing.m)) {
-                    Fields(*compactFields.toTypedArray())
+                    Fields(
+                        countField, pieceField, waterField, saltField, oilField, yeastKindChoice, yeastField,
+                        // Der Hinweis steht neben der Hefemenge, statt eine eigene Zeile zu belegen.
+                        trailing = {
+                            Text(
+                                stringResource(R.string.dough_percent_note),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        },
+                    )
                 }
                 Text(
                     stringResource(R.string.dough_hint),
