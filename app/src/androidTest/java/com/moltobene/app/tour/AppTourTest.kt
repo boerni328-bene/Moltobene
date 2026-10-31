@@ -720,7 +720,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.dough_title))
         composeRule.onNodeWithText(text(R.string.dough_title)).performScrollTo().performClick()
         waitForText(text(R.string.dough_save))
-        waitForText(text(R.string.dough_total_pieces, "1000", 4, "250"), substring = true)
+        waitForText(text(R.string.dough_total_pieces, "1000 g", 4, "250 g"), substring = true)
         screenshot("14a-teigrechner")
 
         // Voreinstellungen (#83, Etappe 3): nebeneinander wählen, eigene speichern, löschen, zurück zu den Standardwerten.

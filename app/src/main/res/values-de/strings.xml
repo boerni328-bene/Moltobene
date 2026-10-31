@@ -331,6 +331,9 @@
     <!-- Einstellungen: Kochen (#68) -->
     <string name="settings_section_cooking">Kochen</string>
     <string name="stepper_side_title">Plus und Minus</string>
+    <string name="weight_unit_title">Gewichte</string>
+    <string name="weight_unit_grams">Gramm (g)</string>
+    <string name="weight_unit_ounces">Unzen (oz)</string>
     <string name="stepper_side_right">Nebeneinander rechts vom Wert</string>
     <string name="stepper_side_left">Nebeneinander links vom Wert</string>
     <string name="screen_on_title">Bildschirm in der Rezeptansicht</string>
@@ -562,8 +565,8 @@
     <string name="dough_preferment_water">Wasser (% davon)</string>
     <string name="dough_section_result">Ergebnis</string>
     <string name="dough_bar_preferment">%1$s: %2$s</string>
-    <string name="dough_total_line">Gesamtteig: %1$s g · %2$s</string>
-    <string name="dough_total_pieces">Gesamtteig: %1$s g (%2$d × %3$s g)</string>
+    <string name="dough_total_line">Gesamtteig: %1$s · %2$s</string>
+    <string name="dough_total_pieces">Gesamtteig: %1$s (%2$d × %3$s)</string>
     <string name="dough_percent_note">Wasser, Salz und Öl\nin % vom Mehl</string>
     <string name="dough_yeast_item">%1$s g %2$s</string>
     <string name="dough_yeast_equal">Gleichwertige Hefemenge: %1$s</string>
@@ -670,8 +673,8 @@
     <string name="dough_ingredient_water">Wasser</string>
     <string name="dough_ingredient_salt">Salz</string>
     <string name="dough_ingredient_oil">Öl</string>
-    <string name="dough_unit_balls">Teigkugeln (je %1$s g)</string>
-    <string name="dough_unit_loaves">Laibe (je %1$s g)</string>
+    <string name="dough_unit_balls">Teigkugeln (je %1$s)</string>
+    <string name="dough_unit_loaves">Laibe (je %1$s)</string>
 
     <!-- Kochbuch: Hinzufügen-Menü, Filter, Ansicht -->
     <string name="add_short">Hinzufügen</string>
@@ -741,7 +744,7 @@
     <string name="dough_ingredient_butter">Butter</string>
     <string name="dough_ingredient_quark">Quark</string>
     <string name="dough_ingredient_baking_powder">Backpulver</string>
-    <string name="dough_unit_portions">Portionen (je %1$s g Mehl)</string>
+    <string name="dough_unit_portions">Portionen (je %1$s Mehl)</string>
     <string name="dough_unit_pan">Backform (%1$s)</string>
     <string name="dough_unit_dough">Teig</string>
     <string name="dough_cake_batter">Rührteig</string>
@@ -775,7 +778,7 @@
     <string name="dough_pan_diameter">Durchmesser</string>
     <string name="dough_pan_length">Länge</string>
     <string name="dough_pan_width">Breite</string>
-    <string name="dough_cake_flour_from_pan">Mehl für diese Backform: etwa %1$s g</string>
+    <string name="dough_cake_flour_from_pan">Mehl für diese Backform: etwa %1$s</string>
     <string name="dough_cake_baking_note">Backzeit und Temperatur ändern sich mit Form und Höhe. Bei größerer Fläche Stäbchenprobe machen, bei höherem Teig länger bei etwas weniger Hitze backen.</string>
 
     <!-- Hinweise beim Übernehmen (#90) -->

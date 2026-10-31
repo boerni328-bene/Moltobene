@@ -6,6 +6,7 @@ import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeSource
 import com.moltobene.app.data.SourceType
 import com.moltobene.app.data.TimelinePhase
+import com.moltobene.app.data.WeightUnit
 import java.util.Locale
 import kotlin.math.roundToLong
 
@@ -27,6 +28,20 @@ object DoughNumbers {
             else -> plain(rounded, 1)
         }
         return separator(text, language)
+    }
+
+    /** Menge einer Zutat mit Einheit, z. B. „595 g“ oder „21 oz“. */
+    fun weight(value: Double, role: LineRole, language: String?, unit: WeightUnit): String =
+        if (unit == WeightUnit.GRAMS) "${grams(value, role, language)} g" else ounces(value, language)
+
+    /** Gewicht ohne Zutat (Gesamtgewicht, Stück) mit höchstens [decimals] Stellen in Gramm, z. B. „1000 g“ oder „35,3 oz“. */
+    fun weight(grams: Double, decimals: Int, language: String?, unit: WeightUnit): String =
+        if (unit == WeightUnit.GRAMS) separator(plain(grams, decimals), language) + " g" else ounces(grams, language)
+
+    /** Unzen: ab einer Unze eine Stelle, darunter zwei (z. B. 1,2 g Hefe = 0,04 oz). */
+    private fun ounces(grams: Double, language: String?): String {
+        val ounces = WeightUnit.OUNCES.fromGrams(grams)
+        return separator(plain(ounces, if (ounces >= 1) 1 else 2), language) + " oz"
     }
 
     /** Anteil in Prozent vom gesamten Mehl mit höchstens einer Stelle, z. B. „30“ oder „0,5“. */
@@ -104,10 +119,11 @@ data class DoughDraft(
             input: LeavenedInput,
             texts: DoughTexts,
             language: String,
+            unit: WeightUnit = WeightUnit.GRAMS,
         ): DoughDraft {
             val draft = build(
                 result, texts, language, input.yeastKind, texts.title(input.type, input.preferment),
-                DoughNumbers.separator(DoughNumbers.plain(result.yield.pieceGrams, 1), language),
+                DoughNumbers.weight(result.yield.pieceGrams, 1, language, unit), unit,
             )
             val timeline = DoughTimeline.build(input, texts)
             return draft.copy(timeline = timeline, steps = timeline.map { stepText(it, texts) })
@@ -120,15 +136,27 @@ data class DoughDraft(
             return "${phase.text} ($detail)"
         }
 
-        fun fromPasta(result: DoughResult.Success, input: PastaInput, texts: DoughTexts, language: String): DoughDraft = build(
+        fun fromPasta(
+            result: DoughResult.Success,
+            input: PastaInput,
+            texts: DoughTexts,
+            language: String,
+            unit: WeightUnit = WeightUnit.GRAMS,
+        ): DoughDraft = build(
             result, texts, language, YeastKind.FRESH, texts.pastaTitle(input.kind),
-            DoughNumbers.separator(DoughNumbers.plain(result.yield.pieceGrams, 1), language),
+            DoughNumbers.weight(result.yield.pieceGrams, 1, language, unit), unit,
         )
 
         /** Bei einer Form steht ihr Maß in der Einheit, damit „Backform umrechnen“ sie wieder erkennt. */
-        fun fromCake(result: DoughResult.Success, input: CakeInput, texts: DoughTexts, language: String): DoughDraft {
+        fun fromCake(
+            result: DoughResult.Success,
+            input: CakeInput,
+            texts: DoughTexts,
+            language: String,
+            unit: WeightUnit = WeightUnit.GRAMS,
+        ): DoughDraft {
             val detail = (input.size as? CakeSize.PanSize)?.let { panText(it.pan, language) }.orEmpty()
-            return build(result, texts, language, input.yeastKind, texts.cakeTitle(input.kind), detail)
+            return build(result, texts, language, input.yeastKind, texts.cakeTitle(input.kind), detail, unit)
         }
 
         private fun build(
@@ -138,15 +166,16 @@ data class DoughDraft(
             yeastKind: YeastKind,
             title: String,
             detail: String,
+            unit: WeightUnit,
         ): DoughDraft {
             val lines = mutableListOf<Ingredient>()
             val sections = result.sections
             for (section in sections) {
                 if (sections.size > 1) lines += Ingredient(text = texts.heading(section.kind, section.preferment), isHeading = true)
                 for (line in section.lines) {
-                    val amount = DoughNumbers.grams(line.grams, line.role, language)
+                    val amount = DoughNumbers.weight(line.grams, line.role, language, unit)
                     val percent = DoughNumbers.percent(line.grams / result.flourGrams * 100, language)
-                    lines += Ingredient("$amount g ${texts.ingredient(line.role, yeastKind)} ($percent %)")
+                    lines += Ingredient("$amount ${texts.ingredient(line.role, yeastKind)} ($percent %)")
                 }
             }
             return DoughDraft(

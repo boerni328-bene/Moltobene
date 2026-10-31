@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import com.moltobene.app.R
 import com.moltobene.app.data.Pan
 import com.moltobene.app.data.PanScaling
+import com.moltobene.app.data.WeightUnit
 import com.moltobene.app.data.dough.CakeCalculator
 import com.moltobene.app.data.dough.CakeField
 import com.moltobene.app.data.dough.CakeInput
@@ -39,6 +40,7 @@ import com.moltobene.app.data.dough.CakeSize
 import com.moltobene.app.data.dough.DoughConstants
 import com.moltobene.app.data.dough.DoughField
 import com.moltobene.app.data.dough.DoughIssue
+import com.moltobene.app.data.dough.DoughLimits
 import com.moltobene.app.data.dough.DoughNumbers
 import com.moltobene.app.data.dough.DoughResult
 import com.moltobene.app.data.dough.DoughStepper
@@ -89,7 +91,8 @@ private fun PastaForm(
     var resetCount by rememberSaveable(kind) { mutableStateOf(0) }
     val start = if (resetCount == 0) initial else PastaLimits.defaults(kind)
     var portions by rememberSaveable(kind, resetCount) { mutableStateOf(start.portions.toString()) }
-    var flour by rememberSaveable(kind, resetCount) { mutableStateOf(show(start.flourPerPortion)) }
+    val unit = viewModel.weightUnit
+    var flour by rememberSaveable(kind, resetCount, unit) { mutableStateOf(show(unit.fromGrams(start.flourPerPortion))) }
     var semolina by rememberSaveable(kind, resetCount) { mutableStateOf(show(start.semolina)) }
     var egg by rememberSaveable(kind, resetCount) { mutableStateOf(show(start.egg)) }
     var yolk by rememberSaveable(kind, resetCount) { mutableStateOf(show(start.yolk)) }
@@ -103,7 +106,7 @@ private fun PastaForm(
     val input = PastaInput(
         kind = kind,
         portions = portions.trim().toIntOrNull() ?: 0,
-        flourPerPortion = parseNumber(flour),
+        flourPerPortion = unit.toGrams(parseNumber(flour)),
         semolina = parseNumber(semolina),
         egg = if (kind == PastaKind.EGG) parseNumber(egg) else 0.0,
         yolk = if (kind == PastaKind.EGG) parseNumber(yolk) else 0.0,
@@ -132,8 +135,17 @@ private fun PastaForm(
     val flourField: @Composable (Modifier) -> Unit = { m ->
         NumberField(
             stringResource(R.string.dough_flour_per_portion), flour, { flour = it },
-            issues.forField(DoughField.FLOUR_PER_PORTION), m, suffix = "g",
-            stepping = stepping(DoughField.FLOUR_PER_PORTION, defaults.flourPerPortion),
+            issues.forField(DoughField.FLOUR_PER_PORTION).inUnit(unit), m, suffix = unit.label,
+            stepping = if (unit == WeightUnit.GRAMS) {
+                stepping(DoughField.FLOUR_PER_PORTION, defaults.flourPerPortion)
+            } else {
+                val grams = PastaLimits.range(kind, DoughField.FLOUR_PER_PORTION)
+                Stepping(
+                    0.5, parseNumber(show(unit.fromGrams(defaults.flourPerPortion))),
+                    DoughLimits.Range(unit.fromGrams(grams.min), unit.fromGrams(grams.max)), DoughField.FLOUR_PER_PORTION,
+                    noSlider = true,
+                )
+            },
         )
     }
     val semolinaField: @Composable (Modifier) -> Unit = { m ->
@@ -193,7 +205,7 @@ private fun PastaForm(
 
     FormFrame(
         header = header,
-        summary = if (success != null && draft != null) summaryLine(success, draft) else null,
+        summary = if (success != null && draft != null) summaryLine(success, draft, viewModel.weightUnit) else null,
         totals = resultTotals,
         onSave = { viewModel.savePasta(input, onSaved) },
         onReset = { resetCount += 1 },
@@ -397,6 +409,9 @@ private fun cakeFieldLabel(kind: CakeKind, field: CakeField): Int = when (field)
 private fun fmt(value: Double, decimals: Int = 1): String =
     DoughNumbers.separator(DoughNumbers.plain(value, decimals), Locale.getDefault().language)
 
+/** Mehlmenge mit Einheit in der Sprache des Geräts, z. B. „250 g“ oder „8,8 oz“. */
+private fun flourText(grams: Double, unit: WeightUnit): String = DoughNumbers.weight(grams, 0, Locale.getDefault().language, unit)
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun CakeForm(
@@ -415,8 +430,10 @@ private fun CakeForm(
     var inch by rememberSaveable(kind, resetCount) { mutableStateOf(false) }
     var panA by rememberSaveable(kind, resetCount) { mutableStateOf(fmt(startPan.a)) }
     var panB by rememberSaveable(kind, resetCount) { mutableStateOf(fmt(startPan.b)) }
-    var flour by rememberSaveable(kind, resetCount) {
-        mutableStateOf(fmt((start.size as? CakeSize.FlourGrams)?.grams ?: CakeLimits.referenceFlour(kind), 0))
+    val weight = viewModel.weightUnit
+    var flour by rememberSaveable(kind, resetCount, weight) {
+        val grams = (start.size as? CakeSize.FlourGrams)?.grams ?: CakeLimits.referenceFlour(kind)
+        mutableStateOf(fmt(weight.fromGrams(grams), if (weight == WeightUnit.GRAMS) 0 else 1))
     }
     val fields = CakeLimits.fields(kind)
     val defaults = CakeLimits.defaults(kind)
@@ -437,7 +454,7 @@ private fun CakeForm(
         fun cm(text: String) = PanScaling.toCm(parseNumber(text), inch)
         CakeSize.PanSize(if (round) Pan.round(cm(panA)) else Pan.rectangle(cm(panA), cm(panB)))
     } else {
-        CakeSize.FlourGrams(parseNumber(flour))
+        CakeSize.FlourGrams(weight.toGrams(parseNumber(flour)))
     }
     val input = CakeInput(
         kind = kind, size = size,
@@ -486,8 +503,12 @@ private fun CakeForm(
     val flourField: @Composable (Modifier) -> Unit = { m ->
         NumberField(
             stringResource(R.string.dough_label_flour), flour, { flour = it },
-            issues.forField(DoughField.FLOUR_GRAMS), m, suffix = "g",
-            stepping = Stepping(DoughStepper.stepFor(DoughField.FLOUR_GRAMS), CakeLimits.referenceFlour(kind), null, DoughField.FLOUR_GRAMS),
+            issues.forField(DoughField.FLOUR_GRAMS).inUnit(weight), m, suffix = weight.label,
+            stepping = if (weight == WeightUnit.GRAMS) {
+                Stepping(DoughStepper.stepFor(DoughField.FLOUR_GRAMS), CakeLimits.referenceFlour(kind), null, DoughField.FLOUR_GRAMS)
+            } else {
+                Stepping(0.5, parseNumber(fmt(weight.fromGrams(CakeLimits.referenceFlour(kind)), 1)), null, DoughField.FLOUR_GRAMS, noSlider = true)
+            },
         )
     }
     val yeastAmountField: @Composable (Modifier) -> Unit = { m ->
@@ -525,7 +546,7 @@ private fun CakeForm(
 
     FormFrame(
         header = header,
-        summary = if (success != null && draft != null) summaryLine(success, draft) else null,
+        summary = if (success != null && draft != null) summaryLine(success, draft, viewModel.weightUnit) else null,
         totals = resultTotals,
         onSave = { viewModel.saveCake(input, onSaved) },
         onReset = { resetCount += 1 },
@@ -607,7 +628,7 @@ private fun CakeForm(
                 Fields(*compactFields.toTypedArray())
                 if (byPan && success != null) {
                     Text(
-                        stringResource(R.string.dough_cake_flour_from_pan, fmt(success.flourGrams, 0)),
+                        stringResource(R.string.dough_cake_flour_from_pan, flourText(success.flourGrams, weight)),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -645,7 +666,7 @@ private fun CakeForm(
                 }
                 success?.let {
                     Text(
-                        stringResource(R.string.dough_cake_flour_from_pan, fmt(it.flourGrams, 0)),
+                        stringResource(R.string.dough_cake_flour_from_pan, flourText(it.flourGrams, weight)),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

@@ -73,6 +73,7 @@ import com.moltobene.app.R
 import com.moltobene.app.data.Appearance
 import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.StepperSide
+import com.moltobene.app.data.WeightUnit
 import com.moltobene.app.data.StartScreen
 import com.moltobene.app.data.backup.BackupManager
 import com.moltobene.app.data.backup.BackupReader
@@ -113,6 +114,7 @@ fun SettingsScreen(
     val appearance by viewModel.appearance.collectAsStateWithLifecycle()
     val screenOn by viewModel.screenOn.collectAsStateWithLifecycle()
     val stepperSide by viewModel.stepperSide.collectAsStateWithLifecycle()
+    val weightUnit by viewModel.weightUnit.collectAsStateWithLifecycle()
     val startScreen by viewModel.startScreen.collectAsStateWithLifecycle()
     val speechSettings by viewModel.speechSettings.collectAsStateWithLifecycle()
     // Liste mit Gruppen (Entwurf vom 22.10.2026): Eine Gruppe öffnet sich als eigene Ansicht, Zurück führt zur Liste.
@@ -223,7 +225,12 @@ fun SettingsScreen(
                 CookingSection(screenOn = screenOn ?: ScreenOn.STAYS_ON, onScreenOn = viewModel::setScreenOn)
             }
             SettingsGroup(stringResource(R.string.dough_title), R.drawable.ic_calculate) {
-                DoughSection(stepperSide = stepperSide ?: StepperSide.RIGHT, onStepperSide = viewModel::setStepperSide)
+                DoughSection(
+                    stepperSide = stepperSide ?: StepperSide.RIGHT,
+                    onStepperSide = viewModel::setStepperSide,
+                    weightUnit = weightUnit ?: WeightUnit.GRAMS,
+                    onWeightUnit = viewModel::setWeightUnit,
+                )
             }
             SettingsGroup(stringResource(R.string.settings_section_speech), R.drawable.ic_volume_up) {
                 SpeechSection(

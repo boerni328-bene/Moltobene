@@ -97,6 +97,7 @@ import com.moltobene.app.data.dough.DoughPresets
 import com.moltobene.app.data.dough.DoughResult
 import com.moltobene.app.data.dough.DoughStepper
 import com.moltobene.app.data.StepperSide
+import com.moltobene.app.data.WeightUnit
 import com.moltobene.app.data.dough.DoughType
 import com.moltobene.app.data.dough.LeavenedInput
 import com.moltobene.app.data.dough.LineRole
@@ -342,6 +343,8 @@ internal class Stepping(
     val default: Double? = null,
     val range: DoughLimits.Range? = null,
     val field: DoughField? = null,
+    /** Kein Regler (z. B. beim Gewicht in Unzen, wo die üblichen Bereiche in Gramm angegeben sind). */
+    val noSlider: Boolean = false,
 )
 
 /** Sind die Regler eingeschaltet? Gilt für alle Felder des Teigrechners (#83, Etappe 2). */
@@ -391,7 +394,7 @@ internal fun NumberField(
         return
     }
     fun text(number: Double) = if (integer) number.toLong().toString() else show(number)
-    val bounds = if (LocalDoughSliders.current && stepping.field != null) DoughStepper.sliderBounds(stepping.field, stepping.range) else null
+    val bounds = if (LocalDoughSliders.current && stepping.field != null && !stepping.noSlider) DoughStepper.sliderBounds(stepping.field, stepping.range) else null
     // Eine Bedienung pro Wert (#86): Regler mit antippbarer Zahl; Plus und Minus nur bei kleinen ganzen Zahlen
     // (Anzahl) und wo es keinen Regler gibt.
     val compact = LocalDoughCompactField.current
@@ -743,7 +746,9 @@ private fun DoughForm(
     var resetCount by rememberSaveable(type) { mutableStateOf(0) }
     val start = if (resetCount == 0) initial else DoughLimits.defaults(type)
     var count by rememberSaveable(type, resetCount) { mutableStateOf(start.count.toString()) }
-    var piece by rememberSaveable(type, resetCount) { mutableStateOf(show(start.pieceGrams)) }
+    // Gewichte in Gramm oder Unzen (Einstellung); wechselt die Einheit, beginnt das Feld neu mit den gemerkten Werten.
+    val unit = viewModel.weightUnit
+    var piece by rememberSaveable(type, resetCount, unit) { mutableStateOf(show(unit.fromGrams(start.pieceGrams))) }
     var water by rememberSaveable(type, resetCount) { mutableStateOf(show(start.water)) }
     var salt by rememberSaveable(type, resetCount) { mutableStateOf(show(start.salt)) }
     var oil by rememberSaveable(type, resetCount) { mutableStateOf(show(start.oil)) }
@@ -767,7 +772,7 @@ private fun DoughForm(
     val input = LeavenedInput(
         type = type,
         count = count.trim().toIntOrNull() ?: 0,
-        pieceGrams = parseNumber(piece),
+        pieceGrams = unit.toGrams(parseNumber(piece)),
         water = parseNumber(water),
         salt = parseNumber(salt),
         oil = parseNumber(oil),
@@ -785,6 +790,23 @@ private fun DoughForm(
     val issues = (result as? DoughResult.Invalid)?.issues.orEmpty()
     fun issueFor(field: DoughField): DoughIssue? = issues.firstOrNull {
         (it is DoughIssue.NotANumber && it.field == field) || (it is DoughIssue.OutOfRange && it.field == field)
+    }
+
+    // Gewicht je Stück in der gewählten Einheit: Grenzen und Standardwert umgerechnet, Unzen ohne Regler.
+    fun pieceIssue(): DoughIssue? = issueFor(DoughField.PIECE_GRAMS)?.let {
+        if (it is DoughIssue.OutOfRange && unit != WeightUnit.GRAMS) {
+            DoughIssue.OutOfRange(it.field, unit.fromGrams(it.min), unit.fromGrams(it.max))
+        } else {
+            it
+        }
+    }
+    fun pieceStepping(): Stepping {
+        if (unit == WeightUnit.GRAMS) return stepping(DoughField.PIECE_GRAMS, defaults.pieceGrams)
+        val grams = DoughLimits.range(type, DoughField.PIECE_GRAMS)
+        return Stepping(
+            0.5, parseNumber(show(unit.fromGrams(defaults.pieceGrams))),
+            DoughLimits.Range(unit.fromGrams(grams.min), unit.fromGrams(grams.max)), DoughField.PIECE_GRAMS, noSlider = true,
+        )
     }
 
     // Gültige Werte merken, damit sie beim nächsten Öffnen wieder da sind.
@@ -844,8 +866,8 @@ private fun DoughForm(
     val pieceField: @Composable (Modifier) -> Unit = { m ->
         NumberField(
             stringResource(R.string.dough_piece), piece, { piece = it },
-            issueFor(DoughField.PIECE_GRAMS), m, suffix = "g",
-            stepping = stepping(DoughField.PIECE_GRAMS, defaults.pieceGrams),
+            pieceIssue(), m, suffix = unit.label,
+            stepping = pieceStepping(),
         )
     }
     val waterField: @Composable (Modifier) -> Unit = { m ->
@@ -992,7 +1014,7 @@ private fun DoughForm(
         if (pinned) {
             header()
             ResultTop(
-                summary = if (success != null) leavenedSummary(success, input) else null,
+                summary = if (success != null) leavenedSummary(success, input, unit) else null,
                 totals = resultTotals,
                 preferment = prefermentBar,
             )
@@ -1251,7 +1273,7 @@ private fun DoughForm(
             SaveBar(enabled = success != null, onSave = { viewModel.saveAsRecipe(input, onSaved) })
         } else {
             ResultBar(
-                summary = if (success != null) leavenedSummary(success, input) else null,
+                summary = if (success != null) leavenedSummary(success, input, unit) else null,
                 totals = resultTotals,
                 onSave = { viewModel.saveAsRecipe(input, onSaved) },
                 preferment = prefermentBar,
@@ -1331,9 +1353,9 @@ private fun prefermentExplanation(preferment: Preferment): Int = when (prefermen
 
 /** „1000 g Teig · 4 Teigkugeln (je 250 g)“. */
 @Composable
-internal fun summaryLine(result: DoughResult.Success, draft: DoughDraft): String = stringResource(
+internal fun summaryLine(result: DoughResult.Success, draft: DoughDraft, unit: WeightUnit): String = stringResource(
     R.string.dough_total_line,
-    DoughNumbers.separator(DoughNumbers.plain(result.totalGrams, 0), draft.language),
+    DoughNumbers.weight(result.totalGrams, 0, draft.language, unit),
     "${draft.servings} ${draft.servingsUnit}",
 )
 
@@ -1416,9 +1438,16 @@ internal fun TotalsCard(items: List<TotalItem>) {
 
 /** Pizza und Brot: „Gesamtteig: 1000 g (4 × 250 g)“. */
 @Composable
-internal fun leavenedSummary(result: DoughResult.Success, input: LeavenedInput): String = stringResource(
-    R.string.dough_total_pieces,
-    DoughNumbers.separator(DoughNumbers.plain(result.totalGrams, 0), LocalConfiguration.current.locales[0].language),
-    input.count,
-    show(input.pieceGrams),
-)
+internal fun leavenedSummary(result: DoughResult.Success, input: LeavenedInput, unit: WeightUnit): String {
+    val language = LocalConfiguration.current.locales[0].language
+    return stringResource(
+        R.string.dough_total_pieces,
+        DoughNumbers.weight(result.totalGrams, 0, language, unit),
+        input.count,
+        DoughNumbers.weight(input.pieceGrams, 1, language, unit),
+    )
+}
+
+/** Grenzen einer Meldung in der gewählten Gewichtseinheit (die Grenzen selbst gelten in Gramm). */
+internal fun DoughIssue?.inUnit(unit: WeightUnit): DoughIssue? =
+    if (this is DoughIssue.OutOfRange && unit != WeightUnit.GRAMS) DoughIssue.OutOfRange(field, unit.fromGrams(min), unit.fromGrams(max)) else this

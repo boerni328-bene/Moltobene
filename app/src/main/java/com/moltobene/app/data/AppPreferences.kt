@@ -44,6 +44,11 @@ class AppPreferences(context: Context) {
     /** „Plus und Minus“ im Teigrechner; null, bis [loadAppearance] sie gelesen hat (dann gilt „rechts“). */
     val stepperSide: StateFlow<StepperSide?> = stepperSideState.asStateFlow()
 
+    private val weightUnitState = MutableStateFlow<WeightUnit?>(null)
+
+    /** „Gewichte“ im Teigrechner; null, bis [loadAppearance] sie gelesen hat (dann gilt „Gramm“). */
+    val weightUnit: StateFlow<WeightUnit?> = weightUnitState.asStateFlow()
+
     private val speechSettingsState = MutableStateFlow(SpeechSettings())
 
     /** Stimme, Tempo und Tonhöhe beim Vorlesen (#85); bis [loadAppearance] sie gelesen hat, gelten die Standardwerte. */
@@ -68,6 +73,8 @@ class AppPreferences(context: Context) {
         screenOnState.compareAndSet(null, screen)
         val side = runCatching { StepperSide.fromKey(prefs.getString(KEY_STEPPER_SIDE, null)) }.getOrDefault(StepperSide.RIGHT)
         stepperSideState.compareAndSet(null, side)
+        val weight = runCatching { WeightUnit.fromKey(prefs.getString(KEY_WEIGHT_UNIT, null)) }.getOrDefault(WeightUnit.GRAMS)
+        weightUnitState.compareAndSet(null, weight)
         val speech = runCatching { SpeechSettings.decode(prefs.getString(KEY_SPEECH_SETTINGS, null)) }.getOrDefault(SpeechSettings())
         if (!speechSettingsTouched) speechSettingsState.value = speech
     }
@@ -99,6 +106,12 @@ class AppPreferences(context: Context) {
     suspend fun setStartScreen(startScreen: StartScreen) {
         startScreenState.value = startScreen
         withContext(Dispatchers.IO) { prefs.edit { putString(KEY_START_SCREEN, startScreen.key) } }
+    }
+
+    /** Gilt sofort, gespeichert wird danach. */
+    suspend fun setWeightUnit(unit: WeightUnit) {
+        weightUnitState.value = unit
+        withContext(Dispatchers.IO) { prefs.edit { putString(KEY_WEIGHT_UNIT, unit.key) } }
     }
 
     /** Gilt sofort, gespeichert wird danach. */
@@ -238,6 +251,7 @@ class AppPreferences(context: Context) {
         const val KEY_PALETTE = "palette"
         const val KEY_SCREEN_ON = "screen_on"
         const val KEY_STEPPER_SIDE = "stepper_side"
+        const val KEY_WEIGHT_UNIT = "weight_unit"
         const val KEY_SPEECH_SETTINGS = "speech_settings"
         const val KEY_START_SCREEN = "start_screen"
         const val KEY_RECENT_RECIPES = "recent_recipes"

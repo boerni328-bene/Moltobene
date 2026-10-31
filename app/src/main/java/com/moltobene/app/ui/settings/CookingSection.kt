@@ -15,6 +15,7 @@ import com.moltobene.app.R
 import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.StartScreen
 import com.moltobene.app.data.StepperSide
+import com.moltobene.app.data.WeightUnit
 
 /**
  * „Kochen“ in den Einstellungen (#68): wie lange der Bildschirm in der Rezeptansicht anbleibt. Später kommt hier auch
@@ -47,7 +48,12 @@ private fun label(choice: ScreenOn): String {
 
 /** „Teigrechner“ in den Einstellungen: auf welcher Seite des Werts Minus und Plus nebeneinander stehen. */
 @Composable
-internal fun DoughSection(stepperSide: StepperSide, onStepperSide: (StepperSide) -> Unit) {
+internal fun DoughSection(
+    stepperSide: StepperSide,
+    onStepperSide: (StepperSide) -> Unit,
+    weightUnit: WeightUnit,
+    onWeightUnit: (WeightUnit) -> Unit,
+) {
     GroupLabel(stringResource(R.string.stepper_side_title))
     Column(modifier = Modifier.selectableGroup()) {
         StepperSide.entries.forEach { choice ->
@@ -58,6 +64,19 @@ internal fun DoughSection(stepperSide: StepperSide, onStepperSide: (StepperSide)
                 },
                 leadingContent = { RadioButton(selected = selected, onClick = null) },
                 modifier = Modifier.selectable(selected = selected, role = Role.RadioButton, onClick = { onStepperSide(choice) }),
+            )
+        }
+    }
+    GroupLabel(stringResource(R.string.weight_unit_title))
+    Column(modifier = Modifier.selectableGroup()) {
+        WeightUnit.entries.forEach { choice ->
+            val selected = weightUnit == choice
+            ListItem(
+                headlineContent = {
+                    Text(stringResource(if (choice == WeightUnit.GRAMS) R.string.weight_unit_grams else R.string.weight_unit_ounces))
+                },
+                leadingContent = { RadioButton(selected = selected, onClick = null) },
+                modifier = Modifier.selectable(selected = selected, role = Role.RadioButton, onClick = { onWeightUnit(choice) }),
             )
         }
     }

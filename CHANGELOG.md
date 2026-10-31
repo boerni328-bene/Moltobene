@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.68.0] – 2026-10-31 (versionCode 115)
+
+### Neu
+- **Gewichte in Gramm oder Unzen.** Unter Einstellungen → Teigrechner → „Gewichte“ lässt sich zwischen Gramm (g) und Unzen (oz) wählen. Die Einheit gilt für das Gewicht je Stück, Mehl je Portion und Mehl beim Kuchen, für alle Mengen und Summen im Teigrechner und für das gespeicherte Rezept („Teigkugeln (je 8,8 oz)“). Gerechnet wird weiter in Gramm. Wer die Einheit wechselt, beginnt im Teigrechner bei den gemerkten Werten.
+
 ## [0.67.0] – 2026-10-31 (versionCode 114)
 
 ### Neu

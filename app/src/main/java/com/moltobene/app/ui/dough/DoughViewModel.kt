@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.moltobene.app.R
 import com.moltobene.app.data.AppPreferences
 import com.moltobene.app.data.RecipeRepository
+import com.moltobene.app.data.WeightUnit
 import com.moltobene.app.data.dough.CakeCalculator
 import com.moltobene.app.data.dough.CakeInput
 import com.moltobene.app.data.dough.CakeKind
@@ -146,8 +147,16 @@ class DoughViewModel(
 
     private val texts = AndroidDoughTexts(context.applicationContext)
 
+    /** „Gewichte“ aus den Einstellungen (Gramm oder Unzen); folgt ihrer Änderung, auch bei offenem Teigrechner. */
+    var weightUnit by mutableStateOf(preferences.weightUnit.value ?: WeightUnit.GRAMS)
+        private set
+
     /** Eigene Voreinstellungen je Teigart (#83, Etappe 3); nur auf dem Handy, nicht in der Sicherung. */
     private val ownPresets = mutableStateMapOf<String, List<DoughPresets.Own>>()
+
+    init {
+        viewModelScope.launch { preferences.weightUnit.collect { unit -> if (unit != null) weightUnit = unit } }
+    }
 
     fun own(type: DoughType): List<DoughPresets.Own> = ownPresets[type.key].orEmpty()
 
@@ -177,7 +186,7 @@ class DoughViewModel(
 
     /** Der Entwurf zum Ergebnis, für die Anzeige und zum Speichern. */
     fun draft(result: DoughResult.Success, input: LeavenedInput): DoughDraft =
-        DoughDraft.from(result, input, texts, if (Locale.getDefault().language == "de") "de" else "en")
+        DoughDraft.from(result, input, texts, language, weightUnit)
 
     /** Summen über Vorteig und Hauptteig, z. B. „594 g“ – „Mehl“; für die Leiste unten und die Karte bei großer Schrift. */
     fun totals(result: DoughResult.Success, input: LeavenedInput): List<TotalItem> = totalItems(result, input.yeastKind)
@@ -186,7 +195,7 @@ class DoughViewModel(
     fun prefermentItems(result: DoughResult.Success, input: LeavenedInput): List<TotalItem> {
         val lines = result.sections.firstOrNull { it.kind == SectionKind.PREFERMENT }?.lines.orEmpty()
         return lines.filter { it.grams > 0 }.map {
-            TotalItem("${DoughNumbers.grams(it.grams, it.role, language)} g", texts.ingredient(it.role, input.yeastKind))
+            TotalItem(DoughNumbers.weight(it.grams, it.role, language, weightUnit), texts.ingredient(it.role, input.yeastKind))
         }
     }
 
@@ -194,7 +203,7 @@ class DoughViewModel(
         val lines = result.sections.flatMap { it.lines }
         return TOTALS_ORDER.mapNotNull { role ->
             val grams = lines.filter { it.role == role }.sumOf { it.grams }
-            if (grams <= 0) null else TotalItem("${DoughNumbers.grams(grams, role, language)} g", texts.ingredient(role, yeastKind))
+            if (grams <= 0) null else TotalItem(DoughNumbers.weight(grams, role, language, weightUnit), texts.ingredient(role, yeastKind))
         }
     }
 
@@ -206,7 +215,7 @@ class DoughViewModel(
         viewModelScope.launch { preferences.setDoughMemory(PastaMemory.key(input.kind), PastaMemory.encode(input)) }
     }
 
-    fun draftPasta(result: DoughResult.Success, input: PastaInput): DoughDraft = DoughDraft.fromPasta(result, input, texts, language)
+    fun draftPasta(result: DoughResult.Success, input: PastaInput): DoughDraft = DoughDraft.fromPasta(result, input, texts, language, weightUnit)
 
     fun savePasta(input: PastaInput, onSaved: (String) -> Unit) {
         val result = PastaCalculator.calculate(input) as? DoughResult.Success ?: return
@@ -219,7 +228,7 @@ class DoughViewModel(
         viewModelScope.launch { preferences.setDoughMemory(CakeMemory.key(input.kind), CakeMemory.encode(input)) }
     }
 
-    fun draftCake(result: DoughResult.Success, input: CakeInput): DoughDraft = DoughDraft.fromCake(result, input, texts, language)
+    fun draftCake(result: DoughResult.Success, input: CakeInput): DoughDraft = DoughDraft.fromCake(result, input, texts, language, weightUnit)
 
     fun saveCake(input: CakeInput, onSaved: (String) -> Unit) {
         val result = CakeCalculator.calculate(input) as? DoughResult.Success ?: return

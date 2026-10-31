@@ -12,6 +12,7 @@ import com.moltobene.app.data.Appearance
 import com.moltobene.app.data.Palette
 import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.StepperSide
+import com.moltobene.app.data.WeightUnit
 import com.moltobene.app.data.StartScreen
 import com.moltobene.app.data.StorageFull
 import com.moltobene.app.data.StorageUsage
@@ -144,6 +145,13 @@ class SettingsViewModel(
 
     fun setStepperSide(side: StepperSide) {
         viewModelScope.launch { runCatching { preferences.setStepperSide(side) } }
+    }
+
+    /** „Gewichte“ im Teigrechner; gilt sofort. */
+    val weightUnit: StateFlow<WeightUnit?> = preferences.weightUnit
+
+    fun setWeightUnit(unit: WeightUnit) {
+        viewModelScope.launch { runCatching { preferences.setWeightUnit(unit) } }
     }
 
     /** Stimme, Tempo und Tonhöhe beim Vorlesen (#85); gilt sofort beim nächsten Vorlesen. */

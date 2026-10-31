@@ -331,6 +331,9 @@
     <!-- Einstellungen: Kochen (#68) -->
     <string name="settings_section_cooking">Cooking</string>
     <string name="stepper_side_title">Plus and minus</string>
+    <string name="weight_unit_title">Weights</string>
+    <string name="weight_unit_grams">Grams (g)</string>
+    <string name="weight_unit_ounces">Ounces (oz)</string>
     <string name="stepper_side_right">Side by side, right of the value</string>
     <string name="stepper_side_left">Side by side, left of the value</string>
     <string name="screen_on_title">Screen in recipe view</string>
@@ -564,8 +567,8 @@
     <string name="dough_preferment_water">Water (% of that)</string>
     <string name="dough_section_result">Result</string>
     <string name="dough_bar_preferment">%1$s: %2$s</string>
-    <string name="dough_total_line">Total dough: %1$s g · %2$s</string>
-    <string name="dough_total_pieces">Total dough: %1$s g (%2$d × %3$s g)</string>
+    <string name="dough_total_line">Total dough: %1$s · %2$s</string>
+    <string name="dough_total_pieces">Total dough: %1$s (%2$d × %3$s)</string>
     <string name="dough_percent_note">Water, salt and oil\nin % of flour</string>
     <string name="dough_yeast_item">%1$s g %2$s</string>
     <string name="dough_yeast_equal">The same amount of yeast: %1$s</string>
@@ -672,8 +675,8 @@
     <string name="dough_ingredient_water">water</string>
     <string name="dough_ingredient_salt">salt</string>
     <string name="dough_ingredient_oil">oil</string>
-    <string name="dough_unit_balls">dough balls (%1$s g each)</string>
-    <string name="dough_unit_loaves">loaves (%1$s g each)</string>
+    <string name="dough_unit_balls">dough balls (%1$s each)</string>
+    <string name="dough_unit_loaves">loaves (%1$s each)</string>
 
     <!-- Collection: add menu, filter, view -->
     <string name="add_short">Add</string>
@@ -743,7 +746,7 @@
     <string name="dough_ingredient_butter">butter</string>
     <string name="dough_ingredient_quark">quark</string>
     <string name="dough_ingredient_baking_powder">baking powder</string>
-    <string name="dough_unit_portions">servings (%1$s g flour each)</string>
+    <string name="dough_unit_portions">servings (%1$s flour each)</string>
     <string name="dough_unit_pan">pan (%1$s)</string>
     <string name="dough_unit_dough">dough</string>
     <string name="dough_cake_batter">Batter cake</string>
@@ -777,7 +780,7 @@
     <string name="dough_pan_diameter">Diameter</string>
     <string name="dough_pan_length">Length</string>
     <string name="dough_pan_width">Width</string>
-    <string name="dough_cake_flour_from_pan">Flour for this pan: about %1$s g</string>
+    <string name="dough_cake_flour_from_pan">Flour for this pan: about %1$s</string>
     <string name="dough_cake_baking_note">Baking time and temperature change with pan size and depth. For a larger pan, check with a skewer; for deeper batter, bake longer at slightly lower heat.</string>
 
     <!-- Hinweise beim Übernehmen (#90) -->
