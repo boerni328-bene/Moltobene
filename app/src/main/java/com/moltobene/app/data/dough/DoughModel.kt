@@ -72,9 +72,14 @@ data class LeavenedInput(
     val prefermentFlour: Double,
     /** Wasser im Vorteig in % vom Mehl im Vorteig. */
     val prefermentWater: Double,
+    /** Weitere Zutaten in % vom gesamten Mehl (Brot und Pizza); 0 heißt: nicht dabei. Ihr Wasseranteil zählt nicht zum Wasser. */
+    val malt: Double = 0.0,
+    val yogurt: Double = 0.0,
+    val milk: Double = 0.0,
+    val sugar: Double = 0.0,
 ) : DoughInput
 
-enum class LineRole { FLOUR, WATER, SALT, OIL, YEAST, SEMOLINA, EGG, YOLK, MILK, LIQUID, SUGAR, BUTTER, QUARK, BAKING_POWDER }
+enum class LineRole { FLOUR, WATER, SALT, OIL, YEAST, SEMOLINA, EGG, YOLK, MILK, LIQUID, SUGAR, BUTTER, QUARK, BAKING_POWDER, MALT, YOGURT }
 
 /** Eine Zutat in Gramm, ungerundet; gerundet wird erst beim Schreiben ([DoughNumbers]). */
 data class DoughLine(val role: LineRole, val grams: Double)
@@ -91,7 +96,7 @@ data class DoughYield(val count: Int, val kind: YieldKind, val pieceGrams: Doubl
 
 enum class DoughField {
     COUNT, PIECE_GRAMS, WATER, SALT, OIL, YEAST, PREFERMENT_FLOUR, PREFERMENT_WATER,
-    FLOUR_PER_PORTION, SEMOLINA, WHOLE_EGG, YOLK, FLOUR_GRAMS, FAT, SUGAR, EGG, MILK, QUARK, BAKING_POWDER, PAN_SIZE,
+    FLOUR_PER_PORTION, SEMOLINA, WHOLE_EGG, YOLK, FLOUR_GRAMS, FAT, SUGAR, EGG, MILK, QUARK, BAKING_POWDER, PAN_SIZE, MALT, YOGURT,
 }
 
 /** Warum eine Eingabe nicht rechnet. */

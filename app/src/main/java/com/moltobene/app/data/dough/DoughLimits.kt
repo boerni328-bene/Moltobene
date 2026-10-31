@@ -24,17 +24,23 @@ object DoughLimits {
             DoughField.YEAST -> yeast(5.0, preferment)
             DoughField.PREFERMENT_FLOUR -> Range(1.0, 100.0)
             DoughField.PREFERMENT_WATER -> Range(40.0, 125.0)
+            DoughField.MALT -> Range(0.0, 5.0)
+            DoughField.YOGURT, DoughField.MILK -> Range(0.0, 60.0)
+            DoughField.SUGAR -> Range(0.0, 20.0)
             else -> unsupported(type, field)
         }
         DoughType.BREAD -> when (field) {
             DoughField.COUNT -> Range(1.0, 20.0)
             DoughField.PIECE_GRAMS -> Range(200.0, 3000.0)
-            DoughField.WATER -> Range(50.0, 110.0)
+            DoughField.WATER -> Range(30.0, 110.0)
             DoughField.SALT -> Range(0.0, 3.5)
             DoughField.OIL -> Range(0.0, 10.0)
             DoughField.YEAST -> yeast(3.0, preferment)
             DoughField.PREFERMENT_FLOUR -> Range(1.0, 100.0)
             DoughField.PREFERMENT_WATER -> Range(40.0, 125.0)
+            DoughField.MALT -> Range(0.0, 5.0)
+            DoughField.YOGURT, DoughField.MILK -> Range(0.0, 60.0)
+            DoughField.SUGAR -> Range(0.0, 20.0)
             else -> unsupported(type, field)
         }
         // Pasta und Kuchen haben eigene Eingaben und Grenzen ([PastaLimits], [CakeLimits]).

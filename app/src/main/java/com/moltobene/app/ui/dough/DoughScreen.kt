@@ -752,6 +752,12 @@ private fun DoughForm(
     var prefermentKey by rememberSaveable(type, resetCount) { mutableStateOf(start.preferment.key) }
     var prefermentFlour by rememberSaveable(type, resetCount) { mutableStateOf(show(start.prefermentFlour)) }
     var prefermentWater by rememberSaveable(type, resetCount) { mutableStateOf(show(start.prefermentWater)) }
+    var maltText by rememberSaveable(type, resetCount) { mutableStateOf(show(start.malt)) }
+    var yogurtText by rememberSaveable(type, resetCount) { mutableStateOf(show(start.yogurt)) }
+    var milkText by rememberSaveable(type, resetCount) { mutableStateOf(show(start.milk)) }
+    var sugarText by rememberSaveable(type, resetCount) { mutableStateOf(show(start.sugar)) }
+    // Weitere Zutaten erscheinen, sobald sie eine Menge haben oder über „Weitere Zutat“ hinzugefügt wurden.
+    var addedExtras by rememberSaveable(type, resetCount) { mutableStateOf("") }
 
     val yeastKind = YeastKind.fromKey(yeastKindKey) ?: YeastKind.FRESH
     val preferment = Preferment.fromKey(prefermentKey) ?: Preferment.NONE
@@ -770,6 +776,10 @@ private fun DoughForm(
         preferment = preferment,
         prefermentFlour = parseNumber(prefermentFlour),
         prefermentWater = parseNumber(prefermentWater),
+        malt = parseNumber(maltText),
+        yogurt = parseNumber(yogurtText),
+        milk = parseNumber(milkText),
+        sugar = parseNumber(sugarText),
     )
     val result = DoughCalculator.calculate(input)
     val issues = (result as? DoughResult.Invalid)?.issues.orEmpty()
@@ -802,6 +812,10 @@ private fun DoughForm(
         prefermentKey = preset.preferment.key
         prefermentFlour = show(preset.prefermentFlour)
         prefermentWater = show(preset.prefermentWater)
+        maltText = show(preset.malt)
+        yogurtText = show(preset.yogurt)
+        milkText = show(preset.milk)
+        sugarText = show(preset.sugar)
     }
 
     // Hinweise „Was bewirkt das?“ (Teigwissen, #84): welche Karte gerade erklärt wird.
@@ -872,6 +886,80 @@ private fun DoughForm(
             issueFor(DoughField.PREFERMENT_WATER), m, suffix = "%",
             stepping = stepping(DoughField.PREFERMENT_WATER, DoughLimits.defaultPrefermentWater(preferment)),
         )
+    }
+    // Weitere Zutaten (Brot und Pizza): Menge in % vom Mehl; das Feld erscheint mit einer Menge oder nach „Weitere Zutat“.
+    val extraKeys = listOf("malt", "sugar", "yogurt", "milk")
+    fun extraText(key: String) = when (key) {
+        "malt" -> maltText
+        "yogurt" -> yogurtText
+        "milk" -> milkText
+        else -> sugarText
+    }
+    fun setExtra(key: String, text: String) {
+        when (key) {
+            "malt" -> maltText = text
+            "yogurt" -> yogurtText = text
+            "milk" -> milkText = text
+            else -> sugarText = text
+        }
+    }
+    val addedKeys = addedExtras.split(',')
+    val shownExtras = extraKeys.filter { key -> key in addedKeys || parseNumber(extraText(key)).let { !it.isFinite() || it > 0 } }
+    val extraField: (String) -> @Composable (Modifier) -> Unit = { key ->
+        { m ->
+            val field = when (key) {
+                "malt" -> DoughField.MALT
+                "yogurt" -> DoughField.YOGURT
+                "milk" -> DoughField.MILK
+                else -> DoughField.SUGAR
+            }
+            val label = when (key) {
+                "malt" -> R.string.dough_label_malt
+                "yogurt" -> R.string.dough_label_yogurt
+                "milk" -> R.string.dough_label_milk
+                else -> R.string.dough_label_sugar
+            }
+            NumberField(
+                stringResource(label), extraText(key), { setExtra(key, it) }, issueFor(field), m, suffix = "%",
+                stepping = stepping(field, 0.0),
+            )
+        }
+    }
+    val extrasNote = parseNumber(yogurtText) > 0 || parseNumber(milkText) > 0
+    // Wählt eine weitere Zutat aus; fehlt keine mehr, entfällt der Knopf.
+    val addExtraButton: @Composable () -> Unit = {
+        val open = extraKeys.filter { it !in shownExtras }
+        if (open.isNotEmpty()) {
+            var menu by rememberSaveable { mutableStateOf(false) }
+            Box {
+                TextButton(onClick = { menu = true }) {
+                    Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.padding(end = Spacing.xs))
+                    Text(stringResource(R.string.dough_add_extra))
+                }
+                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                    for (key in open) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    stringResource(
+                                        when (key) {
+                                            "malt" -> R.string.dough_label_malt
+                                            "yogurt" -> R.string.dough_label_yogurt
+                                            "milk" -> R.string.dough_label_milk
+                                            else -> R.string.dough_label_sugar
+                                        },
+                                    ),
+                                )
+                            },
+                            onClick = {
+                                menu = false
+                                addedExtras = (addedKeys + key).filter { it.isNotEmpty() }.joinToString(",")
+                            },
+                        )
+                    }
+                }
+            }
+        }
     }
     fun selectYeastKind(kind: YeastKind) {
         // Die Menge bleibt gleichwertig, wenn die Hefeart wechselt.
@@ -991,6 +1079,7 @@ private fun DoughForm(
                 Column(modifier = Modifier.padding(horizontal = Spacing.m)) {
                     Fields(
                         countField, pieceField, waterField, saltField, oilField, yeastKindChoice, yeastField,
+                        *shownExtras.map(extraField).toTypedArray(),
                         // Der Hinweis steht neben der Hefemenge, statt eine eigene Zeile zu belegen.
                         trailing = {
                             Text(
@@ -1000,6 +1089,20 @@ private fun DoughForm(
                             )
                         },
                     )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = Spacing.s),
+                ) {
+                    addExtraButton()
+                    if (extrasNote) {
+                        Text(
+                            stringResource(R.string.dough_extras_note),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
                 }
                 Text(
                     stringResource(R.string.dough_hint),
@@ -1039,6 +1142,18 @@ private fun DoughForm(
                     Text(stringResource(R.string.dough_help_term_open, stringResource(AndroidDoughTexts.yeastName(yeastKind))))
                 }
                 yeastField(Modifier.fillMaxWidth())
+            }
+
+            Card(stringResource(R.string.dough_section_extras)) {
+                for (key in shownExtras) extraField(key)(Modifier.fillMaxWidth())
+                if (extrasNote) {
+                    Text(
+                        stringResource(R.string.dough_extras_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                addExtraButton()
             }
 
             // Der Vorteig ist hervorgehoben (Rahmen in der Hauptfarbe): Auswahl, Anteile und die Mengen des Vorteigs als Kacheln,

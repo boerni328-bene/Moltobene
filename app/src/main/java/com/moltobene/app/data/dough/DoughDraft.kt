@@ -16,8 +16,8 @@ object DoughNumbers {
     fun grams(value: Double, role: LineRole, language: String?): String {
         val step = when (role) {
             LineRole.FLOUR, LineRole.WATER, LineRole.SEMOLINA, LineRole.EGG, LineRole.YOLK, LineRole.MILK, LineRole.LIQUID,
-            LineRole.SUGAR, LineRole.BUTTER, LineRole.QUARK -> 1.0
-            LineRole.SALT, LineRole.OIL, LineRole.BAKING_POWDER -> 0.5
+            LineRole.SUGAR, LineRole.BUTTER, LineRole.QUARK, LineRole.YOGURT -> 1.0
+            LineRole.SALT, LineRole.OIL, LineRole.BAKING_POWDER, LineRole.MALT -> 0.5
             LineRole.YEAST -> 0.1
         }
         val rounded = (value / step).roundToLong() * step

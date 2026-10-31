@@ -810,6 +810,14 @@ class AppTourTest(private val variant: DisplayVariant) {
 
         screenshot("14b-teigrechner-biga")
 
+        // Weitere Zutaten: „Weitere Zutat“ öffnet die Auswahl; das Feld erscheint mit seiner Menge, Hinweis zum Wasser im Joghurt.
+        composeRule.onNodeWithText(text(R.string.dough_add_extra)).performScrollTo().performClick()
+        composeRule.onNodeWithText(text(R.string.dough_label_yogurt)).performClick()
+        field(R.string.dough_label_yogurt).performScrollTo().performTextClearance()
+        field(R.string.dough_label_yogurt).performTextInput("20")
+        waitForText(text(R.string.dough_extras_note))
+        screenshot("14t-teigrechner-zutaten")
+
         composeRule.onNodeWithText(text(R.string.dough_save)).performClick()
         composeRule.waitUntil(10_000) {
             runBlocking { container().repository.getAll().any { it.isDraft && it.ingredients.any { line -> line.isHeading } } }

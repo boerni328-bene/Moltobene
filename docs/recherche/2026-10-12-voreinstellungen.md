@@ -28,5 +28,5 @@ Gerundete Richtwerte in eigener Festlegung nach gängigen Angaben für diese Sti
 ## Ergänzt am 31.10.2026 (Version 0.66.0, Wunsch des Projektinhabers)
 Ebenfalls gerundete Richtwerte in eigener Festlegung, vor einer Veröffentlichung gegenlesen. Mehl, Zucker, Milch, Joghurt, Malz und Streusalz sind nicht eingerechnet.
 - **Pizza:** Pinsa romana (Wasser 80 %, Salz 2,2 %, Öl 2 %, Frischhefe 0,2 %), Grandma (65 %, 2 %, 3 %, Instanthefe 0,7 %), Chicago Deep Dish (52 %, 1,8 %, 8 %, Instanthefe 0,7 %).
-- **Brot:** Ciabatta (78 %, 2 %, 2 %, Frischhefe 0,5 %), Baguette (68 %, 2 %, 0 %, 0,5 %), Semmel (58 %, 2 %, 2 %, 2 %), Bürli (62 %, 2 %, 2 %, 1,5 %), Salzstängel (52 %, 2 %, 4 %, 2 %), Laugen (54 %, 2 %, 4 %, 1,5 %), Naan (50 %, 1,8 %, 5 %, Instanthefe 1,2 %), Toastbrot (58 %, 2 %, 5 %, Frischhefe 2 %), Bagel (55 %, 2 %, 0 %, 1 %).
+- **Brot:** Ciabatta (78 %, 2 %, 2 %, Frischhefe 0,5 %), Baguette (68 %, 2 %, 0 %, 0,5 %), Semmel (58 %, 2 %, 2 %, 2 %, Backmalz 1 %), Bürli (62 %, 2 %, 2 %, 1,5 %), Salzstängel (52 %, 2 %, 4 %, 2 %), Laugen (54 %, 2 %, 4 %, 1,5 %), Naan (Wasser 35 %, 1,8 %, 5 %, Instanthefe 1,2 %, Joghurt 25 %), Toastbrot (Wasser 38 %, 2 %, 5 %, Frischhefe 2 %, Milch 20 %, Zucker 4 %), Bagel (55 %, 2 %, 0 %, 1 %, Backmalz 1 %).
 - „Brötchen“ ist als „Semmel“ enthalten.

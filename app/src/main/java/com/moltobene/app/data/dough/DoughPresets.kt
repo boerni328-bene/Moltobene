@@ -45,13 +45,13 @@ object DoughPresets {
             ),
             Shipped("ciabatta", base(type, water = 78.0, salt = 2.0, oil = 2.0, yeast = 0.5)),
             Shipped("baguette", base(type, water = 68.0, salt = 2.0, oil = 0.0, yeast = 0.5)),
-            Shipped("semmel", base(type, water = 58.0, salt = 2.0, oil = 2.0, yeast = 2.0)),
+            Shipped("semmel", base(type, water = 58.0, salt = 2.0, oil = 2.0, yeast = 2.0, malt = 1.0)),
             Shipped("buerli", base(type, water = 62.0, salt = 2.0, oil = 2.0, yeast = 1.5)),
             Shipped("salt_stick", base(type, water = 52.0, salt = 2.0, oil = 4.0, yeast = 2.0)),
             Shipped("lye", base(type, water = 54.0, salt = 2.0, oil = 4.0, yeast = 1.5)),
-            Shipped("naan", base(type, water = 50.0, salt = 1.8, oil = 5.0, yeast = 1.2, yeastKind = YeastKind.INSTANT_DRY)),
-            Shipped("toast", base(type, water = 58.0, salt = 2.0, oil = 5.0, yeast = 2.0)),
-            Shipped("bagel", base(type, water = 55.0, salt = 2.0, oil = 0.0, yeast = 1.0)),
+            Shipped("naan", base(type, water = 35.0, salt = 1.8, oil = 5.0, yeast = 1.2, yeastKind = YeastKind.INSTANT_DRY, yogurt = 25.0)),
+            Shipped("toast", base(type, water = 38.0, salt = 2.0, oil = 5.0, yeast = 2.0, milk = 20.0, sugar = 4.0)),
+            Shipped("bagel", base(type, water = 55.0, salt = 2.0, oil = 0.0, yeast = 1.0, malt = 1.0)),
         )
         DoughType.PASTA, DoughType.CAKE -> emptyList()
     }
@@ -66,9 +66,14 @@ object DoughPresets {
         preferment: Preferment = Preferment.NONE,
         prefermentFlour: Double = 30.0,
         prefermentWater: Double = 100.0,
+        malt: Double = 0.0,
+        yogurt: Double = 0.0,
+        milk: Double = 0.0,
+        sugar: Double = 0.0,
     ): LeavenedInput = DoughLimits.defaults(type).copy(
         water = water, salt = salt, oil = oil, yeastKind = yeastKind, yeast = yeast, preferment = preferment,
         prefermentFlour = prefermentFlour, prefermentWater = prefermentWater,
+        malt = malt, yogurt = yogurt, milk = milk, sugar = sugar,
     )
 
     /** Die Werte der Voreinstellung [preset] auf die Eingaben [current] anwenden; Anzahl und Stückgewicht bleiben. */
@@ -81,6 +86,10 @@ object DoughPresets {
         preferment = preset.preferment,
         prefermentFlour = preset.prefermentFlour,
         prefermentWater = preset.prefermentWater,
+        malt = preset.malt,
+        yogurt = preset.yogurt,
+        milk = preset.milk,
+        sugar = preset.sugar,
     )
 
     /**
@@ -93,7 +102,9 @@ object DoughPresets {
         val withPreferment = current.preferment == Preferment.NONE ||
             (same(current.prefermentFlour, preset.prefermentFlour) && same(current.prefermentWater, preset.prefermentWater))
         return same(current.water, preset.water) && same(current.salt, preset.salt) && same(current.oil, preset.oil) &&
-            same(current.yeast, preset.yeast) && withPreferment
+            same(current.yeast, preset.yeast) && withPreferment &&
+            same(current.malt, preset.malt) && same(current.yogurt, preset.yogurt) && same(current.milk, preset.milk) &&
+            same(current.sugar, preset.sugar)
     }
 
     /**

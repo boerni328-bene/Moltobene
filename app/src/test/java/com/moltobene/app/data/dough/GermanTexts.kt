@@ -29,6 +29,8 @@ internal object GermanTexts : DoughTexts {
         LineRole.BUTTER -> "Butter"
         LineRole.QUARK -> "Quark"
         LineRole.BAKING_POWDER -> "Backpulver"
+        LineRole.MALT -> "Backmalz"
+        LineRole.YOGURT -> "Joghurt"
     }
 
     override fun servingsUnit(kind: YieldKind, detail: String) = when (kind) {

@@ -3,6 +3,15 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.67.0] – 2026-10-31 (versionCode 114)
+
+### Neu
+- **Weitere Zutaten im Teigrechner (Brot und Pizza):** Backmalz, Joghurt, Milch und Zucker, jeweils in % vom Mehl. Über „Weitere Zutat“ erscheint das Feld mit Plus und Minus; mit einer Menge von 0 verschwindet es wieder. Die Zutaten stehen im gespeicherten Rezept und in den Gesamtmengen. Das Wasser in Joghurt und Milch zählt nicht zum Wasser; ein Hinweis steht dabei.
+- Die Voreinstellungen Semmel und Bagel enthalten Backmalz, Naan Joghurt und Toastbrot Milch und Zucker.
+
+### Geändert
+- Beim Brot darf das Wasser jetzt auch unter 50 % liegen (bis 30 %), damit Teige mit viel Joghurt oder Milch möglich sind.
+
 ## [0.66.0] – 2026-10-31 (versionCode 113)
 
 ### Neu

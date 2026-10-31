@@ -18,6 +18,10 @@ object DoughMemory {
         "preferment=${input.preferment.key}",
         "prefermentFlour=${input.prefermentFlour}",
         "prefermentWater=${input.prefermentWater}",
+        "malt=${input.malt}",
+        "yogurt=${input.yogurt}",
+        "milk=${input.milk}",
+        "sugar=${input.sugar}",
     ).joinToString(";")
 
     /** Die gemerkten Werte für [type]; ohne oder mit kaputtem [text] die Standardwerte. */
@@ -48,6 +52,10 @@ object DoughMemory {
             preferment = preferment,
             prefermentFlour = number("prefermentFlour", DoughField.PREFERMENT_FLOUR, defaults.prefermentFlour),
             prefermentWater = number("prefermentWater", DoughField.PREFERMENT_WATER, defaults.prefermentWater),
+            malt = number("malt", DoughField.MALT, 0.0),
+            yogurt = number("yogurt", DoughField.YOGURT, 0.0),
+            milk = number("milk", DoughField.MILK, 0.0),
+            sugar = number("sugar", DoughField.SUGAR, 0.0),
         )
     }
 }

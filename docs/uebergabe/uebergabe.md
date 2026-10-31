@@ -1,6 +1,6 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 31.10.2026 · `main` = Version 0.65.0; Zweig `teigrechner-vorlagen` = 0.66.0 (versionCode 113, im Bau). Danach geplant: 0.67.0 Zutaten (Backmalz, Joghurt …), 0.68.0 Einheiten (g ↔ oz/lb, °C ↔ °F), Wunsch des Inhabers · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`.
+Stand: 31.10.2026 · `main` = Version 0.67.0 (Zutaten Backmalz, Joghurt, Milch, Zucker); Zweig `teigrechner-einheiten` = 0.68.0 (Gewichte in Gramm/Unzen, im Test) · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`.
 
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud (neuer Kernsatz seit 0.59.2). Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.

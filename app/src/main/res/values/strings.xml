@@ -756,6 +756,13 @@
     <string name="dough_label_sugar">Sugar</string>
     <string name="dough_label_eggs">Eggs</string>
     <string name="dough_label_milk">Milk</string>
+    <string name="dough_label_malt">Baking malt</string>
+    <string name="dough_label_yogurt">Yogurt</string>
+    <string name="dough_ingredient_malt">baking malt</string>
+    <string name="dough_ingredient_yogurt">yogurt</string>
+    <string name="dough_add_extra">Add ingredient</string>
+    <string name="dough_section_extras">More ingredients</string>
+    <string name="dough_extras_note">The water in yogurt and milk does not count as water.</string>
     <string name="dough_label_liquid">Water or milk</string>
     <string name="dough_label_quark">Quark</string>
     <string name="dough_label_baking_powder">Baking powder</string>

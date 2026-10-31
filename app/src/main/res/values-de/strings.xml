@@ -754,6 +754,13 @@
     <string name="dough_label_sugar">Zucker</string>
     <string name="dough_label_eggs">Eier</string>
     <string name="dough_label_milk">Milch</string>
+    <string name="dough_label_malt">Backmalz</string>
+    <string name="dough_label_yogurt">Joghurt</string>
+    <string name="dough_ingredient_malt">Backmalz</string>
+    <string name="dough_ingredient_yogurt">Joghurt</string>
+    <string name="dough_add_extra">Weitere Zutat</string>
+    <string name="dough_section_extras">Weitere Zutaten</string>
+    <string name="dough_extras_note">Das Wasser in Joghurt und Milch zählt nicht zum Wasser.</string>
     <string name="dough_label_liquid">Wasser oder Milch</string>
     <string name="dough_label_quark">Quark</string>
     <string name="dough_label_baking_powder">Backpulver</string>

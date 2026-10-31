@@ -169,4 +169,26 @@ class DoughCalculatorTest {
             }
         }
     }
+
+    @Test
+    fun weitereZutatenRechnenMitUndLiegenImHauptteig() {
+        // Backmalz 1 %, Joghurt 25 %, Zucker 4 % und Milch 20 % kommen zum Mehl-Nenner dazu: F = T ÷ (1 + Summe der Anteile).
+        val input = pizza(count = 1, grams = 1000.0, water = 65.0, salt = 2.0, yeast = 1.0, type = DoughType.BREAD)
+            .copy(malt = 1.0, yogurt = 25.0, sugar = 4.0, milk = 20.0)
+        val result = success(input)
+        val flour = 1000.0 / (1 + 0.65 + 0.02 + 0.01 + 0.01 + 0.25 + 0.04 + 0.20)
+        assertEquals(flour, result.flourGrams, 1e-9)
+        assertEquals(flour * 0.01, result.grams(SectionKind.PLAIN, LineRole.MALT), 1e-9)
+        assertEquals(flour * 0.25, result.grams(SectionKind.PLAIN, LineRole.YOGURT), 1e-9)
+        assertEquals(flour * 0.04, result.grams(SectionKind.PLAIN, LineRole.SUGAR), 1e-9)
+        assertEquals(flour * 0.20, result.grams(SectionKind.PLAIN, LineRole.MILK), 1e-9)
+        assertEquals(1000.0, result.sections.flatMap { it.lines }.sumOf { it.grams }, 1e-6)
+        assertEquals(DoughMemory.decode(DoughType.BREAD, DoughMemory.encode(input)), input)
+    }
+
+    @Test
+    fun weitereZutatenAusserhalbDerGrenzenRechnenNicht() {
+        assertTrue(issues(pizza(type = DoughType.BREAD).copy(malt = 6.0)).single() is DoughIssue.OutOfRange)
+        assertTrue(issues(pizza().copy(yogurt = 61.0)).single() is DoughIssue.OutOfRange)
+    }
 }
