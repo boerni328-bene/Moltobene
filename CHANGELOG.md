@@ -3,6 +3,15 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.66.0] – 2026-10-31 (versionCode 113)
+
+### Neu
+- **Viele neue Voreinstellungen.** Pizza: Pinsa romana, Grandma, Chicago Deep Dish (zusätzlich zu New York, Detroit und Focaccia). Brot: Ciabatta, Baguette, Semmel, Bürli, Salzstängel, Laugen, Naan, Toastbrot und Bagel. Die Werte sind gerundete Richtwerte (Herkunft in `docs/recherche/2026-10-12-voreinstellungen.md`).
+
+### Geändert
+- **Voreinstellungen nebeneinander statt mit Pfeilen.** Alle Einträge stehen in einer Reihe, durch senkrechte Striche getrennt und seitlich zu verschieben. Der gewählte steht fett in größerer Schrift. Sind die Werte keine der Voreinstellungen, steht „Eigene Werte“ vorn.
+- **Werte rechtsbündig.** Die Zahlen in den Feldern mit Minus und Plus stehen rechts, direkt an den Knöpfen.
+
 ## [0.65.0] – 2026-10-31 (versionCode 112)
 
 ### Neu

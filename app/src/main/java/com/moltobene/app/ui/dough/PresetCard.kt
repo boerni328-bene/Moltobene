@@ -1,6 +1,7 @@
 package com.moltobene.app.ui.dough
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,21 +10,26 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -32,15 +38,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.moltobene.app.R
-import com.moltobene.app.data.StepperSide
 import com.moltobene.app.data.dough.DoughPresets
 import com.moltobene.app.data.dough.DoughType
 import com.moltobene.app.data.dough.LeavenedInput
@@ -58,6 +58,18 @@ internal fun shippedPresetName(key: String): String = stringResource(
         "new_york" -> R.string.dough_preset_new_york
         "detroit" -> R.string.dough_preset_detroit
         "focaccia" -> R.string.dough_preset_focaccia
+        "pinsa" -> R.string.dough_preset_pinsa
+        "grandma" -> R.string.dough_preset_grandma
+        "chicago" -> R.string.dough_preset_chicago
+        "ciabatta" -> R.string.dough_preset_ciabatta
+        "baguette" -> R.string.dough_preset_baguette
+        "semmel" -> R.string.dough_preset_semmel
+        "buerli" -> R.string.dough_preset_buerli
+        "salt_stick" -> R.string.dough_preset_salt_stick
+        "lye" -> R.string.dough_preset_lye
+        "naan" -> R.string.dough_preset_naan
+        "toast" -> R.string.dough_preset_toast
+        "bagel" -> R.string.dough_preset_bagel
         "white_bread" -> R.string.dough_preset_white_bread
         "poolish_bread" -> R.string.dough_preset_poolish_bread
         else -> R.string.dough_preset_default
@@ -72,10 +84,10 @@ internal fun presetEntries(type: DoughType, own: List<DoughPresets.Own>): List<P
 }
 
 /**
- * Voreinstellungen (#83, Etappe 3): Pfeile zum Durchschalten, Antippen des Namens öffnet die Liste. Bei normaler Schrift
- * stehen beide Pfeile nebeneinander auf der gewählten Seite (wie Minus und Plus, [LocalStepperSide]) und bei einer eigenen
- * Voreinstellung ein Symbol zum Löschen; Speichern und Zurücksetzen liegen oben in der Leiste. Bei großer Schrift bleiben
- * die Knöpfe in der Karte. [index] −1 heißt: die Werte sind keine der Einträge.
+ * Voreinstellungen (#83, Etappe 3): alle Einträge nebeneinander, durch senkrechte Striche getrennt und seitlich zu
+ * verschieben; der gewählte steht fett in größerer Schrift und wird ins Bild geholt. Bei einer eigenen Voreinstellung
+ * gibt es ein Symbol zum Löschen; Speichern und Zurücksetzen liegen oben in der Leiste. Bei großer Schrift bleiben die
+ * Knöpfe in der Karte. [index] −1 heißt: die Werte sind keine der Einträge, dann steht „Eigene Werte“ vorn.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -90,89 +102,38 @@ internal fun PresetCard(
     onDelete: (String) -> Unit,
     compact: Boolean = false,
 ) {
-    var menuOpen by rememberSaveable { mutableStateOf(false) }
     var deleting by rememberSaveable { mutableStateOf(false) }
     // Sind die Werte keine der Voreinstellungen (eigene Änderungen), wird vor dem Ersetzen nachgefragt.
     var pending by rememberSaveable { mutableStateOf(-1) }
     fun choose(i: Int) {
         when {
-            i < 0 -> Unit
+            i < 0 || i == index -> Unit
             index < 0 -> pending = i
             else -> onSelect(i)
         }
     }
-    val name = entries.getOrNull(index)?.name ?: stringResource(R.string.dough_preset_custom)
-    val position = if (index >= 0) stringResource(R.string.dough_preset_position, index + 1, entries.size) else null
-    val description = listOfNotNull(stringResource(R.string.dough_preset_choose, name), position).joinToString(", ")
     val isOwn = entries.getOrNull(index)?.ownName != null
-    val arrowsLeft = compact && LocalStepperSide.current == StepperSide.LEFT
-
-    val previous: @Composable () -> Unit = {
-        IconButton(onClick = { choose(DoughPresets.step(index, entries.size, -1)) }) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.dough_preset_previous))
-        }
-    }
-    val next: @Composable () -> Unit = {
-        IconButton(onClick = { choose(DoughPresets.step(index, entries.size, +1)) }) {
-            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = stringResource(R.string.dough_preset_next))
-        }
-    }
     val picker: @Composable (Modifier) -> Unit = { modifier ->
-        Box(modifier = modifier) {
-            // Name fett, dahinter in Klammern die Stelle in der Liste; linksbündig auf einer Linie mit den Feldern.
-            // Die Klammer steht in normaler Schrift, etwas kleiner als der Name.
-            val label = if (position != null) stringResource(R.string.dough_preset_label, name, position) else name
-            val start = label.indexOf(name)
-            val small = MaterialTheme.typography.bodyLarge.toSpanStyle()
-            val styled = buildAnnotatedString {
-                append(label)
-                if (start >= 0) {
-                    if (start + name.length < label.length) addStyle(small, start + name.length, label.length)
-                    addStyle(SpanStyle(fontWeight = FontWeight.Bold), start, start + name.length)
-                }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = modifier.horizontalScroll(rememberScrollState()).selectableGroup(),
+        ) {
+            if (index < 0) {
+                PresetItem(stringResource(R.string.dough_preset_custom), selected = true, onClick = {})
             }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 48.dp)
-                    .semantics(mergeDescendants = true) {
-                        role = Role.DropdownList
-                        contentDescription = description
-                    }
-                    .clickable { menuOpen = true }
-                    .padding(start = Spacing.s),
-            ) {
-                Text(styled, style = MaterialTheme.typography.titleLarge)
-            }
-            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                entries.forEachIndexed { i, entry ->
-                    DropdownMenuItem(
-                        text = { Text(if (i == index) "✓ ${entry.name}" else entry.name) },
-                        onClick = {
-                            menuOpen = false
-                            choose(i)
-                        },
-                    )
-                }
+            entries.forEachIndexed { i, entry ->
+                if (i > 0 || index < 0) VerticalDivider(modifier = Modifier.height(24.dp))
+                PresetItem(entry.name, selected = i == index, onClick = { choose(i) })
             }
         }
     }
     if (compact) {
-        // Eine Zeile ohne Karte (ohne Scrollen, Entwurf vom 30.10.2026): Name, beide Pfeile nebeneinander, Löschen bei eigenen.
+        // Eine Zeile ohne Karte (ohne Scrollen, Entwurf vom 30.10.2026): die Einträge und bei eigenen das Löschen.
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.s),
         ) {
-            if (arrowsLeft) {
-                previous()
-                next()
-            }
             picker(Modifier.weight(1f))
-            if (!arrowsLeft) {
-                previous()
-                next()
-            }
             if (isOwn) {
                 IconButton(onClick = { deleting = true }) {
                     Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.dough_preset_delete))
@@ -181,11 +142,7 @@ internal fun PresetCard(
         }
     } else {
         Card("") {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                previous()
-                picker(Modifier.weight(1f))
-                next()
-            }
+            picker(Modifier.fillMaxWidth())
             // Bei großer Schrift passen die Knöpfe nicht nebeneinander; sie rutschen in die nächste Zeile.
             FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
                 TextButton(onClick = { onSavingChange(true) }, enabled = canSave) { Text(stringResource(R.string.dough_preset_save)) }
@@ -239,6 +196,30 @@ internal fun PresetCard(
     }
 }
 
+
+/** Ein Eintrag der Reihe: der gewählte fett und größer, die anderen ruhiger; der gewählte rückt ins Bild. */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun PresetItem(name: String, selected: Boolean, onClick: () -> Unit) {
+    val requester = remember { BringIntoViewRequester() }
+    LaunchedEffect(selected) { if (selected) requester.bringIntoView() }
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .bringIntoViewRequester(requester)
+            .heightIn(min = 48.dp)
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
+            .padding(horizontal = Spacing.s),
+    ) {
+        Text(
+            name,
+            style = if (selected) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium,
+            fontWeight = if (selected) FontWeight.Bold else null,
+            color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+        )
+    }
+}
 @Composable
 private fun SavePresetDialog(
     existing: List<String>,

@@ -723,43 +723,39 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.dough_total_pieces, "1000", 4, "250"), substring = true)
         screenshot("14a-teigrechner")
 
-        // Voreinstellungen (#83, Etappe 3): weiterschalten, eigene speichern, löschen, zurück zu den Standardwerten.
+        // Voreinstellungen (#83, Etappe 3): nebeneinander wählen, eigene speichern, löschen, zurück zu den Standardwerten.
         // Die gemerkten Werte des vorigen Durchgangs bleiben stehen; „Zurücksetzen“ führt zu den Standardwerten.
         doughPresetAction(R.string.dough_reset)
-        waitForText(text(R.string.dough_preset_default), substring = true)
-        composeRule.onNodeWithText(text(R.string.dough_preset_position, 1, 6), substring = true).assertExists()
+        waitForText(text(R.string.dough_preset_default))
         // Eigene Änderungen: vor dem Ersetzen durch eine Voreinstellung wird nachgefragt.
-        // Wasseranteil ändern: Der Wert weicht vom Standard ab (Eingabe per Tippen, Regler und Zahl gehören zusammen, #86).
+        // Wasser ändern: Der Wert weicht vom Standard ab (Eingabe per Tippen, Regler und Zahl gehören zusammen, #86).
         field(R.string.dough_water).performScrollTo().performTextClearance()
         field(R.string.dough_water).performTextInput("66")
-        composeRule.onNodeWithContentDescription(text(R.string.dough_preset_next)).performScrollTo().performClick()
+        choosePreset(R.string.dough_preset_neapolitan)
         waitForText(text(R.string.dough_preset_replace_title))
         screenshot("14o-teigrechner-voreinstellung-ersetzen")
         composeRule.onNode(hasText(text(R.string.cancel)) and hasClickAction()).performClick()
         waitUntilGone(text(R.string.dough_preset_replace_title))
         composeRule.onNodeWithText(text(R.string.dough_preset_custom)).assertExists()
-        composeRule.onNodeWithContentDescription(text(R.string.dough_preset_next)).performScrollTo().performClick()
+        choosePreset(R.string.dough_preset_neapolitan)
         waitForText(text(R.string.dough_preset_replace_title))
         composeRule.onNode(hasText(text(R.string.dough_preset_replace_confirm)) and hasClickAction()).performClick()
-        // Von „Eigene Werte“ geht „Weiter“ auf den ersten Eintrag; danach passen die Werte, es kommt keine Nachfrage mehr.
-        waitForText(text(R.string.dough_preset_position, 1, 6), substring = true)
-        composeRule.onNodeWithContentDescription(text(R.string.dough_preset_next)).performScrollTo().performClick()
-        waitForText(text(R.string.dough_preset_neapolitan), substring = true)
-        composeRule.onNodeWithText(text(R.string.dough_preset_position, 2, 6), substring = true).assertExists()
+        // Danach passen die Werte zur Voreinstellung; „Eigene Werte“ verschwindet und es kommt keine Nachfrage mehr.
+        waitUntilGone(text(R.string.dough_preset_custom))
         screenshot("14l-teigrechner-voreinstellung")
         doughPresetAction(R.string.dough_preset_save)
         waitForText(text(R.string.dough_preset_save_title))
         field(R.string.dough_preset_name).performTextInput("Mein Teig")
         screenshot("14m-teigrechner-voreinstellung-speichern")
         composeRule.onNode(hasText(text(R.string.save)) and hasClickAction()).performClick()
-        waitForText("Mein Teig", substring = true)
-        composeRule.onNodeWithText(text(R.string.dough_preset_position, 7, 7), substring = true).assertExists()
+        waitUntilGone(text(R.string.dough_preset_save_title))
+        composeRule.onNodeWithText("Mein Teig").assertExists()
         doughPresetAction(R.string.dough_preset_delete)
         waitForText(text(R.string.dough_preset_delete_title, "Mein Teig"))
         composeRule.onNode(hasText(text(R.string.delete)) and hasClickAction()).performClick()
-        waitUntilGone("Mein Teig", substring = true)
-        composeRule.onNodeWithContentDescription(text(R.string.dough_preset_previous)).performScrollTo().performClick()
-        waitForText(text(R.string.dough_preset_default), substring = true)
+        waitUntilGone("Mein Teig")
+        choosePreset(R.string.dough_preset_default)
+        waitForText(text(R.string.dough_preset_default))
 
         // Teigwissen (#84, Etappe 1): „Was bewirkt das?“ an der Karte „Teig“ (bei normaler Schrift im Menü) öffnet kurze Hinweise.
         if (variant == DisplayVariant.LARGE_TEXT) {
@@ -1500,6 +1496,11 @@ class AppTourTest(private val variant: DisplayVariant) {
         } else {
             composeRule.onNodeWithContentDescription(text(label)).performClick()
         }
+    }
+
+    /** Eintrag der Voreinstellungsreihe wählen; per Bedienungshilfe, weil er bei großer Schrift teils außerhalb der Reihe liegt. */
+    private fun choosePreset(@StringRes name: Int) {
+        composeRule.onNodeWithText(text(name)).performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
     }
 
     private fun field(@StringRes label: Int) = composeRule.onNode(hasSetTextAction() and (hasText(text(label)) or hasContentDescription(text(label))))

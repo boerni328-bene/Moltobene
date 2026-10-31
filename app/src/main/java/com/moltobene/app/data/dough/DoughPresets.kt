@@ -29,6 +29,9 @@ object DoughPresets {
             Shipped("sheet_pan", base(type, water = 70.0, salt = 2.0, oil = 5.0, yeast = 0.9, yeastKind = YeastKind.INSTANT_DRY)),
             Shipped("detroit", base(type, water = 72.0, salt = 2.0, oil = 2.0, yeast = 0.8, yeastKind = YeastKind.INSTANT_DRY)),
             Shipped("focaccia", base(type, water = 75.0, salt = 2.2, oil = 4.0, yeast = 1.0)),
+            Shipped("pinsa", base(type, water = 80.0, salt = 2.2, oil = 2.0, yeast = 0.2)),
+            Shipped("grandma", base(type, water = 65.0, salt = 2.0, oil = 3.0, yeast = 0.7, yeastKind = YeastKind.INSTANT_DRY)),
+            Shipped("chicago", base(type, water = 52.0, salt = 1.8, oil = 8.0, yeast = 0.7, yeastKind = YeastKind.INSTANT_DRY)),
         )
         DoughType.BREAD -> listOf(
             Shipped("default", DoughLimits.defaults(type)),
@@ -40,6 +43,15 @@ object DoughPresets {
                     preferment = Preferment.POOLISH, prefermentFlour = 30.0, prefermentWater = 100.0,
                 ),
             ),
+            Shipped("ciabatta", base(type, water = 78.0, salt = 2.0, oil = 2.0, yeast = 0.5)),
+            Shipped("baguette", base(type, water = 68.0, salt = 2.0, oil = 0.0, yeast = 0.5)),
+            Shipped("semmel", base(type, water = 58.0, salt = 2.0, oil = 2.0, yeast = 2.0)),
+            Shipped("buerli", base(type, water = 62.0, salt = 2.0, oil = 2.0, yeast = 1.5)),
+            Shipped("salt_stick", base(type, water = 52.0, salt = 2.0, oil = 4.0, yeast = 2.0)),
+            Shipped("lye", base(type, water = 54.0, salt = 2.0, oil = 4.0, yeast = 1.5)),
+            Shipped("naan", base(type, water = 50.0, salt = 1.8, oil = 5.0, yeast = 1.2, yeastKind = YeastKind.INSTANT_DRY)),
+            Shipped("toast", base(type, water = 58.0, salt = 2.0, oil = 5.0, yeast = 2.0)),
+            Shipped("bagel", base(type, water = 55.0, salt = 2.0, oil = 0.0, yeast = 1.0)),
         )
         DoughType.PASTA, DoughType.CAKE -> emptyList()
     }

@@ -522,7 +522,7 @@ private fun StepperField(
                     singleLine = true,
                     textStyle = MaterialTheme.typography.titleMedium.copy(
                         color = colors.onSurface,
-                        textAlign = TextAlign.Start,
+                        textAlign = TextAlign.End,
                         fontWeight = if (changed) FontWeight.Bold else null,
                     ),
                     keyboardOptions = KeyboardOptions(keyboardType = if (integer) KeyboardType.Number else KeyboardType.Decimal),
