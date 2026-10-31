@@ -35,8 +35,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.moltobene.app.R
 import com.moltobene.app.data.StepperSide
@@ -54,6 +55,9 @@ internal fun shippedPresetName(key: String): String = stringResource(
     when (key) {
         "neapolitan" -> R.string.dough_preset_neapolitan
         "sheet_pan" -> R.string.dough_preset_sheet_pan
+        "new_york" -> R.string.dough_preset_new_york
+        "detroit" -> R.string.dough_preset_detroit
+        "focaccia" -> R.string.dough_preset_focaccia
         "white_bread" -> R.string.dough_preset_white_bread
         "poolish_bread" -> R.string.dough_preset_poolish_bread
         else -> R.string.dough_preset_default
@@ -115,9 +119,20 @@ internal fun PresetCard(
     }
     val picker: @Composable (Modifier) -> Unit = { modifier ->
         Box(modifier = modifier) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
+            // Name fett, dahinter in Klammern die Stelle in der Liste; linksbündig auf einer Linie mit den Feldern.
+            // Die Klammer steht in normaler Schrift, etwas kleiner als der Name.
+            val label = if (position != null) stringResource(R.string.dough_preset_label, name, position) else name
+            val start = label.indexOf(name)
+            val small = MaterialTheme.typography.bodyLarge.toSpanStyle()
+            val styled = buildAnnotatedString {
+                append(label)
+                if (start >= 0) {
+                    if (start + name.length < label.length) addStyle(small, start + name.length, label.length)
+                    addStyle(SpanStyle(fontWeight = FontWeight.Bold), start, start + name.length)
+                }
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 48.dp)
@@ -125,18 +140,10 @@ internal fun PresetCard(
                         role = Role.DropdownList
                         contentDescription = description
                     }
-                    .clickable { menuOpen = true },
+                    .clickable { menuOpen = true }
+                    .padding(start = Spacing.s),
             ) {
-                Text(
-                    name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                )
-                if (position != null) {
-                    Text(
-                        position, style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                Text(styled, style = MaterialTheme.typography.titleLarge)
             }
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                 entries.forEachIndexed { i, entry ->

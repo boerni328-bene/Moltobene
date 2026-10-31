@@ -3,6 +3,18 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.65.0] – 2026-10-31 (versionCode 112)
+
+### Neu
+- **Neue Voreinstellungen für Pizza:** „New York“, „Detroit“ und „Focaccia“. Die Werte sind gerundete Richtwerte (Herkunft in `docs/recherche/2026-10-12-voreinstellungen.md`).
+
+### Geändert
+- **Vorteig als vier Schaltflächen** (Ohne, Biga, Poolish, Sauerteig) wie die Teigart oben, nur dezenter.
+- **Voreinstellung größer und linksbündig:** Name fett in größerer Schrift, dahinter in Klammern die Stelle, zum Beispiel „Standardwerte (1 von 6)“.
+- **Gesamtteig in der Ergebniszeile:** „Gesamtteig: 1000 g (4 × 250 g)“ statt „4 Teigkugeln (je 250 g)“.
+- **Kürzere Namen:** „Instanthefe“ und „Aktivhefe“ statt „Trockenhefe (Instant)“ und „Aktive Trockenhefe“; beim Vorteig heißt es „Wasser (% davon)“.
+- Der Hinweis „Wasser, Salz und Öl in % vom Mehl“ bricht nach „Öl“ um.
+
 ## [0.64.0] – 2026-10-31 (versionCode 111)
 
 ### Geändert

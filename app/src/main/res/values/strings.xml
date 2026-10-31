@@ -561,11 +561,12 @@
     <string name="dough_explain_poolish">Poolish: Liquid preferment with as much water as flour.</string>
     <string name="dough_explain_sourdough">Sourdough starter: Flour and water, fermented without added yeast. Yeast can still be added to the final dough.</string>
     <string name="dough_preferment_flour">Flour (% of total)</string>
-    <string name="dough_preferment_water">Water (% of its flour)</string>
+    <string name="dough_preferment_water">Water (% of that)</string>
     <string name="dough_section_result">Result</string>
     <string name="dough_bar_preferment">%1$s: %2$s</string>
-    <string name="dough_total_line">%1$s g dough · %2$s</string>
-    <string name="dough_percent_note">Water, salt and oil in % of flour</string>
+    <string name="dough_total_line">Total dough: %1$s g · %2$s</string>
+    <string name="dough_total_pieces">Total dough: %1$s g (%2$d × %3$s g)</string>
+    <string name="dough_percent_note">Water, salt and oil\nin % of flour</string>
     <string name="dough_yeast_item">%1$s g %2$s</string>
     <string name="dough_yeast_equal">The same amount of yeast: %1$s</string>
     <string name="dough_invalid">Check the entries marked in red.</string>
@@ -635,6 +636,10 @@
     <string name="dough_preset_sheet_pan">Sheet-pan pizza</string>
     <string name="dough_preset_white_bread">White bread</string>
     <string name="dough_preset_poolish_bread">Bread with poolish</string>
+    <string name="dough_preset_new_york">New York</string>
+    <string name="dough_preset_detroit">Detroit</string>
+    <string name="dough_preset_focaccia">Focaccia</string>
+    <string name="dough_preset_label">%1$s (%2$s)</string>
     <string name="dough_preset_save">Save as preset</string>
     <string name="dough_preset_save_title">Save preset</string>
     <string name="dough_preset_name">Name</string>

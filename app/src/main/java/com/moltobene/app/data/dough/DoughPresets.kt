@@ -25,7 +25,10 @@ object DoughPresets {
         DoughType.PIZZA -> listOf(
             Shipped("default", DoughLimits.defaults(type)),
             Shipped("neapolitan", base(type, water = 60.0, salt = 2.8, oil = 0.0, yeast = 0.2)),
+            Shipped("new_york", base(type, water = 62.0, salt = 2.0, oil = 2.0, yeast = 0.5)),
             Shipped("sheet_pan", base(type, water = 70.0, salt = 2.0, oil = 5.0, yeast = 0.9, yeastKind = YeastKind.INSTANT_DRY)),
+            Shipped("detroit", base(type, water = 72.0, salt = 2.0, oil = 2.0, yeast = 0.8, yeastKind = YeastKind.INSTANT_DRY)),
+            Shipped("focaccia", base(type, water = 75.0, salt = 2.2, oil = 4.0, yeast = 1.0)),
         )
         DoughType.BREAD -> listOf(
             Shipped("default", DoughLimits.defaults(type)),

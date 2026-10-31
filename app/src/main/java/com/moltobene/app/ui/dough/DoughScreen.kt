@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -892,7 +893,6 @@ private fun DoughForm(
     // bei großer Schrift bleibt es bei der Leiste unten, damit zum Scrollen genug Platz bleibt.
     val pinned = !isLargeText()
     val success = result as? DoughResult.Success
-    val resultDraft = success?.let { viewModel.draft(it, input) }
     val resultTotals = success?.let { viewModel.totals(it, input) }
     val prefermentItems = success?.let { viewModel.prefermentItems(it, input) }.orEmpty()
     val prefermentBar = if (prefermentItems.isEmpty()) null else stringResource(
@@ -904,7 +904,7 @@ private fun DoughForm(
         if (pinned) {
             header()
             ResultTop(
-                summary = if (success != null && resultDraft != null) summaryLine(success, resultDraft) else null,
+                summary = if (success != null) leavenedSummary(success, input) else null,
                 totals = resultTotals,
                 preferment = prefermentBar,
             )
@@ -950,15 +950,39 @@ private fun DoughForm(
                         modifier = m,
                     )
                 }
+                // Vier Schaltflächen wie die Teigart oben, nur dezenter (kleinere Schrift, ruhige Farben).
                 val prefermentChoice: @Composable (Modifier) -> Unit = { m ->
-                    CompactChoice(
-                        label = stringResource(R.string.dough_section_preferment),
-                        options = Preferment.entries,
-                        selected = preferment,
-                        optionLabel = { stringResource(prefermentLabel(it)) },
-                        onSelect = ::selectPreferment,
-                        modifier = m,
-                    )
+                    Column(modifier = m) {
+                        Text(
+                            stringResource(R.string.dough_section_preferment),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                            Preferment.entries.forEachIndexed { i, option ->
+                                SegmentedButton(
+                                    selected = option == preferment,
+                                    onClick = { selectPreferment(option) },
+                                    shape = SegmentedButtonDefaults.itemShape(i, Preferment.entries.size),
+                                    icon = {},
+                                    colors = SegmentedButtonDefaults.colors(
+                                        activeContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                        inactiveContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                        activeBorderColor = MaterialTheme.colorScheme.outline,
+                                        inactiveBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                    ),
+                                    contentPadding = PaddingValues(horizontal = Spacing.xs),
+                                ) {
+                                    Text(
+                                        stringResource(prefermentLabel(option)),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = if (option == preferment) FontWeight.Bold else null,
+                                        maxLines = 1,
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
                 Card("", highlighted = true) {
                     prefermentChoice(Modifier.fillMaxWidth())
@@ -1112,7 +1136,7 @@ private fun DoughForm(
             SaveBar(enabled = success != null, onSave = { viewModel.saveAsRecipe(input, onSaved) })
         } else {
             ResultBar(
-                summary = if (success != null && resultDraft != null) summaryLine(success, resultDraft) else null,
+                summary = if (success != null) leavenedSummary(success, input) else null,
                 totals = resultTotals,
                 onSave = { viewModel.saveAsRecipe(input, onSaved) },
                 preferment = prefermentBar,
@@ -1274,3 +1298,12 @@ internal fun TotalsCard(items: List<TotalItem>) {
         }
     }
 }
+
+/** Pizza und Brot: „Gesamtteig: 1000 g (4 × 250 g)“. */
+@Composable
+internal fun leavenedSummary(result: DoughResult.Success, input: LeavenedInput): String = stringResource(
+    R.string.dough_total_pieces,
+    DoughNumbers.separator(DoughNumbers.plain(result.totalGrams, 0), LocalConfiguration.current.locales[0].language),
+    input.count,
+    show(input.pieceGrams),
+)

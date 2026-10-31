@@ -18,3 +18,9 @@ Die Werte sind **gerundete Richtwerte in eigener Festlegung**, nicht aus Bücher
 
 ## Sicherheit
 - Alle Werte liegen innerhalb der Grenzen von `DoughLimits`; `DoughPresetsTest` prüft das und dass jede Voreinstellung rechnet.
+
+## Ergänzt am 31.10.2026 (Version 0.65.0, Wunsch des Projektinhabers)
+Gerundete Richtwerte in eigener Festlegung nach gängigen Angaben für diese Stile; nicht aus einer einzelnen Quelle übernommen, vor einer Veröffentlichung gegenlesen.
+- **New York:** Wasser 62 %, Salz 2 %, Öl 2 %, Frischhefe 0,5 % (Teig, der ein bis drei Tage kalt reift).
+- **Detroit:** Wasser 72 %, Salz 2 %, Öl 2 %, Instanthefe 0,8 % (feuchter Teig in der Form).
+- **Focaccia:** Wasser 75 %, Salz 2,2 %, Öl 4 %, Frischhefe 1 % (zusätzlich Öl in der Form und obenauf, nicht eingerechnet).

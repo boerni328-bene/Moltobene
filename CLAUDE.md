@@ -116,8 +116,8 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 | Hauptteig | final dough | |
 | Biga, Poolish | biga, poolish | – (Namen, nicht übersetzen: `translatable="false"`) |
 | Frischhefe | fresh yeast | |
-| Trockenhefe (Instant) | instant yeast | |
-| Aktive Trockenhefe | active dry yeast | |
+| Instanthefe (Entscheidung 31.10.2026, kürzer als „Trockenhefe (Instant)“) | instant yeast | Trockenhefe (Instant) |
+| Aktivhefe | active dry yeast | Aktive Trockenhefe |
 | Sauerteig | sourdough starter | |
 | Backform (mit „Ø 26 cm“) | pan | Form allein, tin |
 | Blech | baking sheet | |
