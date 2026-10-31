@@ -88,6 +88,12 @@ class AndroidDoughTexts(private val context: Context) : DoughTexts {
             LineRole.BAKING_POWDER -> R.string.dough_ingredient_baking_powder
             LineRole.MALT -> R.string.dough_ingredient_malt
             LineRole.YOGURT -> R.string.dough_ingredient_yogurt
+            LineRole.WHEAT -> R.string.dough_ingredient_wheat
+            LineRole.RYE -> R.string.dough_ingredient_rye
+            LineRole.WHOLE -> R.string.dough_ingredient_whole
+            LineRole.SPELT -> R.string.dough_ingredient_spelt
+            LineRole.HONEY -> R.string.dough_ingredient_honey
+            LineRole.SEEDS -> R.string.dough_ingredient_seeds
         },
     )
 
@@ -260,7 +266,7 @@ class DoughViewModel(
 
 /** Reihenfolge der Summen: Mehl zuerst, dann Flüssiges, Würze, Treibmittel. */
 private val TOTALS_ORDER = listOf(
-    LineRole.SEMOLINA, LineRole.FLOUR, LineRole.BUTTER, LineRole.SUGAR, LineRole.EGG, LineRole.YOLK, LineRole.QUARK,
+    LineRole.SEMOLINA, LineRole.FLOUR, LineRole.WHEAT, LineRole.RYE, LineRole.WHOLE, LineRole.SPELT, LineRole.BUTTER, LineRole.SUGAR, LineRole.HONEY, LineRole.EGG, LineRole.YOLK, LineRole.QUARK, LineRole.SEEDS,
     LineRole.MILK, LineRole.YOGURT, LineRole.LIQUID, LineRole.WATER, LineRole.SALT, LineRole.OIL, LineRole.YEAST, LineRole.MALT,
     LineRole.BAKING_POWDER,
 )

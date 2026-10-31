@@ -30,3 +30,11 @@ Ebenfalls gerundete Richtwerte in eigener Festlegung, vor einer Veröffentlichun
 - **Pizza:** Pinsa romana (Wasser 80 %, Salz 2,2 %, Öl 2 %, Frischhefe 0,2 %), Grandma (65 %, 2 %, 3 %, Instanthefe 0,7 %), Chicago Deep Dish (52 %, 1,8 %, 8 %, Instanthefe 0,7 %).
 - **Brot:** Ciabatta (78 %, 2 %, 2 %, Frischhefe 0,5 %), Baguette (68 %, 2 %, 0 %, 0,5 %), Semmel (58 %, 2 %, 2 %, 2 %, Backmalz 1 %), Bürli (62 %, 2 %, 2 %, 1,5 %), Salzstängel (52 %, 2 %, 4 %, 2 %), Laugen (54 %, 2 %, 4 %, 1,5 %), Naan (Wasser 35 %, 1,8 %, 5 %, Instanthefe 1,2 %, Joghurt 25 %), Toastbrot (Wasser 38 %, 2 %, 5 %, Frischhefe 2 %, Milch 20 %, Zucker 4 %), Bagel (55 %, 2 %, 0 %, 1 %, Backmalz 1 %).
 - „Brötchen“ ist als „Semmel“ enthalten.
+
+## Ergänzt am 01.11.2026 (Version 0.70.0, Wunsch des Projektinhabers)
+Gerundete Richtwerte in eigener Festlegung, vor einer Veröffentlichung gegenlesen (Mehl nach Sorte, Anteile in % vom gesamten Mehl).
+- **Bauernbrot:** Wasser 72 %, Salz 2 %, Frischhefe 0,5 %, Roggen 30 %, Sauerteig als Vorteig mit 20 % des Mehls und 100 % Wasser.
+- **Schwarzbrot:** Wasser 85 %, Salz 2 %, Frischhefe 0,3 %, Roggen 80 %, Sauerteig mit 30 % des Mehls und 100 % Wasser.
+- **Vollkornbrot:** Weizenvollkorn 100 %, Wasser 80 %, Salz 2 %, Frischhefe 1 %.
+- **Dinkelbrot:** Dinkel 100 %, Wasser 62 %, Salz 2 %, Frischhefe 0,8 %.
+- **Wasser je Mehlsorte (`DoughFlours`):** Vorschlag in Prozentpunkten für 100 % der Sorte gegenüber Weizenmehl: Roggen +12, Weizenvollkorn +8, Dinkel −3. Gemeint ist ein Anhaltspunkt; Mehl, Mahlgrad und Teigführung verändern das stark.

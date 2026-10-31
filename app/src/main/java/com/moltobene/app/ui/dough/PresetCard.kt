@@ -58,6 +58,10 @@ internal fun shippedPresetName(key: String): String = stringResource(
         "new_york" -> R.string.dough_preset_new_york
         "detroit" -> R.string.dough_preset_detroit
         "focaccia" -> R.string.dough_preset_focaccia
+        "farmhouse" -> R.string.dough_preset_farmhouse
+        "dark_rye" -> R.string.dough_preset_dark_rye
+        "whole_wheat" -> R.string.dough_preset_whole_wheat
+        "spelt" -> R.string.dough_preset_spelt
         "pinsa" -> R.string.dough_preset_pinsa
         "grandma" -> R.string.dough_preset_grandma
         "chicago" -> R.string.dough_preset_chicago

@@ -22,6 +22,12 @@ object DoughMemory {
         "yogurt=${input.yogurt}",
         "milk=${input.milk}",
         "sugar=${input.sugar}",
+        "rye=${input.rye}",
+        "whole=${input.whole}",
+        "spelt=${input.spelt}",
+        "honey=${input.honey}",
+        "egg=${input.egg}",
+        "seeds=${input.seeds}",
     ).joinToString(";")
 
     /** Die gemerkten Werte für [type]; ohne oder mit kaputtem [text] die Standardwerte. */
@@ -56,6 +62,12 @@ object DoughMemory {
             yogurt = number("yogurt", DoughField.YOGURT, 0.0),
             milk = number("milk", DoughField.MILK, 0.0),
             sugar = number("sugar", DoughField.SUGAR, 0.0),
+            rye = number("rye", DoughField.RYE, 0.0),
+            whole = number("whole", DoughField.WHOLE, 0.0),
+            spelt = number("spelt", DoughField.SPELT, 0.0),
+            honey = number("honey", DoughField.HONEY, 0.0),
+            egg = number("egg", DoughField.EGG, 0.0),
+            seeds = number("seeds", DoughField.SEEDS, 0.0),
         )
     }
 }

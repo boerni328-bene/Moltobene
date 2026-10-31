@@ -23,20 +23,36 @@ object DoughCalculator {
         val salt = input.salt / 100
         val oil = input.oil / 100
         val yeast = input.yeast / 100
-        val extras = listOf(input.malt, input.sugar, input.yogurt, input.milk).sumOf { it } / 100
+        val extras = listOf(input.malt, input.sugar, input.yogurt, input.milk, input.honey, input.egg, input.seeds).sumOf { it } / 100
         val flour = total / (1 + water + salt + oil + yeast + extras)
+        // Mit Roggen, Vollkorn oder Dinkel wird das Mehl nach Sorte aufgeteilt (auch im Vorteig im gleichen Verhältnis); der Rest ist Weizenmehl.
+        val mixed = input.rye + input.whole + input.spelt > 0
+        fun flourLines(grams: Double): List<DoughLine> = if (!mixed) {
+            listOf(DoughLine(LineRole.FLOUR, grams))
+        } else {
+            buildList {
+                val wheat = 100 - input.rye - input.whole - input.spelt
+                if (wheat > 1e-9) add(DoughLine(LineRole.WHEAT, grams * wheat / 100))
+                if (input.rye > 0) add(DoughLine(LineRole.RYE, grams * input.rye / 100))
+                if (input.whole > 0) add(DoughLine(LineRole.WHOLE, grams * input.whole / 100))
+                if (input.spelt > 0) add(DoughLine(LineRole.SPELT, grams * input.spelt / 100))
+            }
+        }
         fun extraLines() = buildList {
             if (input.malt > 0) add(DoughLine(LineRole.MALT, input.malt / 100 * flour))
             if (input.sugar > 0) add(DoughLine(LineRole.SUGAR, input.sugar / 100 * flour))
             if (input.yogurt > 0) add(DoughLine(LineRole.YOGURT, input.yogurt / 100 * flour))
             if (input.milk > 0) add(DoughLine(LineRole.MILK, input.milk / 100 * flour))
+            if (input.honey > 0) add(DoughLine(LineRole.HONEY, input.honey / 100 * flour))
+            if (input.egg > 0) add(DoughLine(LineRole.EGG, input.egg / 100 * flour))
+            if (input.seeds > 0) add(DoughLine(LineRole.SEEDS, input.seeds / 100 * flour))
         }
 
         val sections = if (input.preferment == Preferment.NONE) {
             listOf(
                 DoughSection(
                     SectionKind.PLAIN, Preferment.NONE,
-                    lines(flour, water * flour, salt * flour, oil * flour, yeast * flour, extraLines()),
+                    lines(flourLines(flour), water * flour, salt * flour, oil * flour, yeast * flour, extraLines()),
                 ),
             )
         } else {
@@ -52,12 +68,12 @@ object DoughCalculator {
             listOf(
                 DoughSection(
                     SectionKind.PREFERMENT, input.preferment,
-                    lines(prefermentFlour, prefermentWater, 0.0, 0.0, if (yeastInPreferment) yeast * flour else 0.0),
+                    lines(flourLines(prefermentFlour), prefermentWater, 0.0, 0.0, if (yeastInPreferment) yeast * flour else 0.0),
                 ),
                 DoughSection(
                     SectionKind.MAIN, input.preferment,
                     lines(
-                        flour - prefermentFlour, mainWater.coerceAtLeast(0.0), salt * flour, oil * flour,
+                        flourLines(flour - prefermentFlour), mainWater.coerceAtLeast(0.0), salt * flour, oil * flour,
                         if (yeastInPreferment) 0.0 else yeast * flour, extraLines(),
                     ),
                 ),
@@ -90,6 +106,13 @@ object DoughCalculator {
         check(DoughField.YOGURT, input.yogurt)
         check(DoughField.MILK, input.milk)
         check(DoughField.SUGAR, input.sugar)
+        check(DoughField.RYE, input.rye)
+        check(DoughField.WHOLE, input.whole)
+        check(DoughField.SPELT, input.spelt)
+        check(DoughField.HONEY, input.honey)
+        check(DoughField.EGG, input.egg)
+        check(DoughField.SEEDS, input.seeds)
+        if (issues.isEmpty() && input.rye + input.whole + input.spelt > 100.0 + 1e-9) issues += DoughIssue.FlourMixTooHigh
         if (preferment != Preferment.NONE) {
             check(DoughField.PREFERMENT_FLOUR, input.prefermentFlour)
             check(DoughField.PREFERMENT_WATER, input.prefermentWater)
@@ -110,9 +133,9 @@ object DoughCalculator {
 
     /** Zeilen ohne Menge 0 weglassen; Mehl und Wasser bleiben immer. */
     private fun lines(
-        flour: Double, water: Double, salt: Double, oil: Double, yeast: Double, extras: List<DoughLine> = emptyList(),
+        flour: List<DoughLine>, water: Double, salt: Double, oil: Double, yeast: Double, extras: List<DoughLine> = emptyList(),
     ): List<DoughLine> = buildList {
-        add(DoughLine(LineRole.FLOUR, flour))
+        addAll(flour)
         add(DoughLine(LineRole.WATER, water))
         if (salt > 0) add(DoughLine(LineRole.SALT, salt))
         if (oil > 0) add(DoughLine(LineRole.OIL, oil))

@@ -77,9 +77,17 @@ data class LeavenedInput(
     val yogurt: Double = 0.0,
     val milk: Double = 0.0,
     val sugar: Double = 0.0,
+    /** Mehlsorten als Anteil am gesamten Mehl in % (der Rest ist Weizenmehl); Roggen, Vollkorn und Dinkel nehmen verschieden viel Wasser auf. */
+    val rye: Double = 0.0,
+    val whole: Double = 0.0,
+    val spelt: Double = 0.0,
+    /** Weitere Zutaten in % vom Mehl: Honig, Eier und Saaten (Körner, Kerne). */
+    val honey: Double = 0.0,
+    val egg: Double = 0.0,
+    val seeds: Double = 0.0,
 ) : DoughInput
 
-enum class LineRole { FLOUR, WATER, SALT, OIL, YEAST, SEMOLINA, EGG, YOLK, MILK, LIQUID, SUGAR, BUTTER, QUARK, BAKING_POWDER, MALT, YOGURT }
+enum class LineRole { FLOUR, WATER, SALT, OIL, YEAST, SEMOLINA, EGG, YOLK, MILK, LIQUID, SUGAR, BUTTER, QUARK, BAKING_POWDER, MALT, YOGURT, WHEAT, RYE, WHOLE, SPELT, HONEY, SEEDS }
 
 /** Eine Zutat in Gramm, ungerundet; gerundet wird erst beim Schreiben ([DoughNumbers]). */
 data class DoughLine(val role: LineRole, val grams: Double)
@@ -96,7 +104,7 @@ data class DoughYield(val count: Int, val kind: YieldKind, val pieceGrams: Doubl
 
 enum class DoughField {
     COUNT, PIECE_GRAMS, WATER, SALT, OIL, YEAST, PREFERMENT_FLOUR, PREFERMENT_WATER,
-    FLOUR_PER_PORTION, SEMOLINA, WHOLE_EGG, YOLK, FLOUR_GRAMS, FAT, SUGAR, EGG, MILK, QUARK, BAKING_POWDER, PAN_SIZE, MALT, YOGURT,
+    FLOUR_PER_PORTION, SEMOLINA, WHOLE_EGG, YOLK, FLOUR_GRAMS, FAT, SUGAR, EGG, MILK, QUARK, BAKING_POWDER, PAN_SIZE, MALT, YOGURT, RYE, WHOLE, SPELT, HONEY, SEEDS,
 }
 
 /** Warum eine Eingabe nicht rechnet. */
@@ -112,6 +120,9 @@ sealed interface DoughIssue {
 
     /** Beim Eierteig braucht es genug Ei und Eigelb zusammen, sonst gibt es keinen Teig. */
     data class TooLittleLiquid(val neededPercent: Double) : DoughIssue
+
+    /** Roggen, Vollkorn und Dinkel zusammen sind mehr als das ganze Mehl. */
+    data object FlourMixTooHigh : DoughIssue
 
     /** Die Backform ist ungültig (zu klein, zu groß oder keine Zahl). */
     data object PanInvalid : DoughIssue

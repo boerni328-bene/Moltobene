@@ -90,6 +90,7 @@ import com.moltobene.app.R
 import com.moltobene.app.data.dough.DoughDraft
 import com.moltobene.app.data.dough.DoughCalculator
 import com.moltobene.app.data.dough.DoughField
+import com.moltobene.app.data.dough.DoughFlours
 import com.moltobene.app.data.dough.DoughIssue
 import com.moltobene.app.data.dough.DoughLimits
 import com.moltobene.app.data.dough.DoughNumbers
@@ -531,7 +532,7 @@ private fun StepperField(
                     keyboardOptions = KeyboardOptions(keyboardType = if (integer) KeyboardType.Number else KeyboardType.Decimal),
                     cursorBrush = SolidColor(colors.primary),
                     visualTransformation = if (suffix != null) SuffixTransformation(suffix) else VisualTransformation.None,
-                    modifier = Modifier.weight(1f).padding(horizontal = Spacing.s).semantics { contentDescription = label },
+                    modifier = Modifier.weight(1f).padding(horizontal = Spacing.xs).semantics { contentDescription = label },
                 )
                 if (!left) buttons()
             }
@@ -730,6 +731,7 @@ internal fun issueText(issue: DoughIssue): String? = when (issue) {
         stringResource(R.string.dough_error_preferment, show(issue.neededPercent), show(issue.totalPercent))
     is DoughIssue.TooLittleLiquid -> stringResource(R.string.dough_error_liquid, show(issue.neededPercent))
     DoughIssue.PanInvalid -> stringResource(R.string.dough_error_pan)
+    DoughIssue.FlourMixTooHigh -> stringResource(R.string.dough_error_flour_mix)
     DoughIssue.Inconsistent -> null
 }
 
@@ -761,6 +763,12 @@ private fun DoughForm(
     var yogurtText by rememberSaveable(type, resetCount) { mutableStateOf(show(start.yogurt)) }
     var milkText by rememberSaveable(type, resetCount) { mutableStateOf(show(start.milk)) }
     var sugarText by rememberSaveable(type, resetCount) { mutableStateOf(show(start.sugar)) }
+    var ryeText by rememberSaveable(type, resetCount) { mutableStateOf(show(start.rye)) }
+    var wholeText by rememberSaveable(type, resetCount) { mutableStateOf(show(start.whole)) }
+    var speltText by rememberSaveable(type, resetCount) { mutableStateOf(show(start.spelt)) }
+    var honeyText by rememberSaveable(type, resetCount) { mutableStateOf(show(start.honey)) }
+    var eggText by rememberSaveable(type, resetCount) { mutableStateOf(show(start.egg)) }
+    var seedsText by rememberSaveable(type, resetCount) { mutableStateOf(show(start.seeds)) }
     // Weitere Zutaten erscheinen, sobald sie eine Menge haben oder über „Weitere Zutat“ hinzugefügt wurden.
     var addedExtras by rememberSaveable(type, resetCount) { mutableStateOf("") }
 
@@ -785,11 +793,18 @@ private fun DoughForm(
         yogurt = parseNumber(yogurtText),
         milk = parseNumber(milkText),
         sugar = parseNumber(sugarText),
+        rye = parseNumber(ryeText),
+        whole = parseNumber(wholeText),
+        spelt = parseNumber(speltText),
+        honey = parseNumber(honeyText),
+        egg = parseNumber(eggText),
+        seeds = parseNumber(seedsText),
     )
     val result = DoughCalculator.calculate(input)
     val issues = (result as? DoughResult.Invalid)?.issues.orEmpty()
     fun issueFor(field: DoughField): DoughIssue? = issues.firstOrNull {
-        (it is DoughIssue.NotANumber && it.field == field) || (it is DoughIssue.OutOfRange && it.field == field)
+        (it is DoughIssue.NotANumber && it.field == field) || (it is DoughIssue.OutOfRange && it.field == field) ||
+            (it is DoughIssue.FlourMixTooHigh && field in listOf(DoughField.RYE, DoughField.WHOLE, DoughField.SPELT))
     }
 
     // Gewicht je Stück in der gewählten Einheit: Grenzen und Standardwert umgerechnet, Unzen ohne Regler.
@@ -838,6 +853,12 @@ private fun DoughForm(
         yogurtText = show(preset.yogurt)
         milkText = show(preset.milk)
         sugarText = show(preset.sugar)
+        ryeText = show(preset.rye)
+        wholeText = show(preset.whole)
+        speltText = show(preset.spelt)
+        honeyText = show(preset.honey)
+        eggText = show(preset.egg)
+        seedsText = show(preset.seeds)
     }
 
     // Hinweise „Was bewirkt das?“ (Teigwissen, #84): welche Karte gerade erklärt wird.
@@ -909,48 +930,51 @@ private fun DoughForm(
             stepping = stepping(DoughField.PREFERMENT_WATER, DoughLimits.defaultPrefermentWater(preferment)),
         )
     }
-    // Weitere Zutaten (Brot und Pizza): Menge in % vom Mehl; das Feld erscheint mit einer Menge oder nach „Weitere Zutat“.
-    val extraKeys = listOf("malt", "sugar", "yogurt", "milk")
-    fun extraText(key: String) = when (key) {
-        "malt" -> maltText
-        "yogurt" -> yogurtText
-        "milk" -> milkText
-        else -> sugarText
-    }
-    fun setExtra(key: String, text: String) {
-        when (key) {
-            "malt" -> maltText = text
-            "yogurt" -> yogurtText = text
-            "milk" -> milkText = text
-            else -> sugarText = text
-        }
-    }
+    // Mehlsorten und weitere Zutaten (Brot und Pizza): Menge in % vom Mehl; das Feld erscheint mit einer Menge oder nach „Weitere Zutat“.
+    val extras = listOf(
+        ExtraSpec("rye", DoughField.RYE, R.string.dough_label_rye, ryeText) { ryeText = it },
+        ExtraSpec("whole", DoughField.WHOLE, R.string.dough_label_whole, wholeText) { wholeText = it },
+        ExtraSpec("spelt", DoughField.SPELT, R.string.dough_label_spelt, speltText) { speltText = it },
+        ExtraSpec("malt", DoughField.MALT, R.string.dough_label_malt, maltText) { maltText = it },
+        ExtraSpec("seeds", DoughField.SEEDS, R.string.dough_label_seeds, seedsText) { seedsText = it },
+        ExtraSpec("honey", DoughField.HONEY, R.string.dough_label_honey, honeyText) { honeyText = it },
+        ExtraSpec("sugar", DoughField.SUGAR, R.string.dough_label_sugar, sugarText) { sugarText = it },
+        ExtraSpec("yogurt", DoughField.YOGURT, R.string.dough_label_yogurt, yogurtText) { yogurtText = it },
+        ExtraSpec("milk", DoughField.MILK, R.string.dough_label_milk, milkText) { milkText = it },
+        ExtraSpec("egg", DoughField.EGG, R.string.dough_label_eggs, eggText) { eggText = it },
+    )
     val addedKeys = addedExtras.split(',')
-    val shownExtras = extraKeys.filter { key -> key in addedKeys || parseNumber(extraText(key)).let { !it.isFinite() || it > 0 } }
-    val extraField: (String) -> @Composable (Modifier) -> Unit = { key ->
+    val shownExtras = extras.filter { spec -> spec.key in addedKeys || parseNumber(spec.text).let { !it.isFinite() || it > 0 } }
+    val extraField: (ExtraSpec) -> @Composable (Modifier) -> Unit = { spec ->
         { m ->
-            val field = when (key) {
-                "malt" -> DoughField.MALT
-                "yogurt" -> DoughField.YOGURT
-                "milk" -> DoughField.MILK
-                else -> DoughField.SUGAR
-            }
-            val label = when (key) {
-                "malt" -> R.string.dough_label_malt
-                "yogurt" -> R.string.dough_label_yogurt
-                "milk" -> R.string.dough_label_milk
-                else -> R.string.dough_label_sugar
-            }
             NumberField(
-                stringResource(label), extraText(key), { setExtra(key, it) }, issueFor(field), m, suffix = "%",
-                stepping = stepping(field, 0.0),
+                stringResource(spec.label), spec.text, spec.set, issueFor(spec.field), m, suffix = "%",
+                stepping = stepping(spec.field, 0.0),
             )
         }
     }
     val extrasNote = parseNumber(yogurtText) > 0 || parseNumber(milkText) > 0
+    // Mehlsorten nehmen verschieden viel Wasser auf (Richtwerte): ein Vorschlag, den ein Antippen übernimmt.
+    val waterShift = DoughFlours.waterShift(input)
+    val flourHint: @Composable () -> Unit = {
+        if (waterShift != 0.0) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = Spacing.xs)) {
+                Text(
+                    stringResource(R.string.dough_flour_hint, (if (waterShift > 0) "+" else "") + show(waterShift)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+                TextButton(onClick = {
+                    val range = DoughLimits.range(type, DoughField.WATER, preferment)
+                    water = show((parseNumber(water) + waterShift).coerceIn(range.min, range.max))
+                }) { Text(stringResource(R.string.dough_flour_apply)) }
+            }
+        }
+    }
     // Wählt eine weitere Zutat aus; fehlt keine mehr, entfällt der Knopf.
     val addExtraButton: @Composable () -> Unit = {
-        val open = extraKeys.filter { it !in shownExtras }
+        val open = extras.filter { it !in shownExtras }
         if (open.isNotEmpty()) {
             var menu by rememberSaveable { mutableStateOf(false) }
             Box {
@@ -959,23 +983,12 @@ private fun DoughForm(
                     Text(stringResource(R.string.dough_add_extra))
                 }
                 DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                    for (key in open) {
+                    for (spec in open) {
                         DropdownMenuItem(
-                            text = {
-                                Text(
-                                    stringResource(
-                                        when (key) {
-                                            "malt" -> R.string.dough_label_malt
-                                            "yogurt" -> R.string.dough_label_yogurt
-                                            "milk" -> R.string.dough_label_milk
-                                            else -> R.string.dough_label_sugar
-                                        },
-                                    ),
-                                )
-                            },
+                            text = { Text(stringResource(spec.label)) },
                             onClick = {
                                 menu = false
-                                addedExtras = (addedKeys + key).filter { it.isNotEmpty() }.joinToString(",")
+                                addedExtras = (addedKeys + spec.key).filter { it.isNotEmpty() }.joinToString(",")
                             },
                         )
                     }
@@ -1096,7 +1109,11 @@ private fun DoughForm(
                 }
                 Card("", highlighted = true) {
                     prefermentChoice(Modifier.fillMaxWidth())
-                    if (preferment != Preferment.NONE) Fields(prefermentFlourField, prefermentWaterField)
+                    // Untereinander, damit auch „100 %“ in den Feldern Platz hat.
+                    if (preferment != Preferment.NONE) {
+                        prefermentFlourField(Modifier.fillMaxWidth())
+                        prefermentWaterField(Modifier.fillMaxWidth())
+                    }
                 }
                 Column(modifier = Modifier.padding(horizontal = Spacing.m)) {
                     Fields(
@@ -1126,6 +1143,7 @@ private fun DoughForm(
                         )
                     }
                 }
+                Box(modifier = Modifier.padding(horizontal = Spacing.s)) { flourHint() }
                 Text(
                     stringResource(R.string.dough_hint),
                     style = MaterialTheme.typography.bodySmall,
@@ -1167,7 +1185,7 @@ private fun DoughForm(
             }
 
             Card(stringResource(R.string.dough_section_extras)) {
-                for (key in shownExtras) extraField(key)(Modifier.fillMaxWidth())
+                for (spec in shownExtras) extraField(spec)(Modifier.fillMaxWidth())
                 if (extrasNote) {
                     Text(
                         stringResource(R.string.dough_extras_note),
@@ -1175,6 +1193,7 @@ private fun DoughForm(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+                flourHint()
                 addExtraButton()
             }
 
@@ -1451,3 +1470,12 @@ internal fun leavenedSummary(result: DoughResult.Success, input: LeavenedInput, 
 /** Grenzen einer Meldung in der gewählten Gewichtseinheit (die Grenzen selbst gelten in Gramm). */
 internal fun DoughIssue?.inUnit(unit: WeightUnit): DoughIssue? =
     if (this is DoughIssue.OutOfRange && unit != WeightUnit.GRAMS) DoughIssue.OutOfRange(field, unit.fromGrams(min), unit.fromGrams(max)) else this
+
+/** Eine Mehlsorte oder weitere Zutat im Teigrechner: Kennung, Feld, Beschriftung, Eingabetext und wie er sich ändert. */
+private class ExtraSpec(
+    val key: String,
+    val field: DoughField,
+    @androidx.annotation.StringRes val label: Int,
+    val text: String,
+    val set: (String) -> Unit,
+)

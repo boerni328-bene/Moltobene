@@ -44,6 +44,22 @@ object DoughPresets {
             Shipped("naan", base(type, water = 35.0, salt = 1.8, oil = 5.0, yeast = 1.2, yeastKind = YeastKind.INSTANT_DRY, yogurt = 25.0)),
             Shipped("toast", base(type, water = 38.0, salt = 2.0, oil = 5.0, yeast = 2.0, milk = 20.0, sugar = 4.0)),
             Shipped("bagel", base(type, water = 55.0, salt = 2.0, oil = 0.0, yeast = 1.0, malt = 1.0)),
+            Shipped(
+                "farmhouse",
+                base(
+                    type, water = 72.0, salt = 2.0, oil = 0.0, yeast = 0.5, preferment = Preferment.SOURDOUGH,
+                    prefermentFlour = 20.0, prefermentWater = 100.0, rye = 30.0,
+                ),
+            ),
+            Shipped(
+                "dark_rye",
+                base(
+                    type, water = 85.0, salt = 2.0, oil = 0.0, yeast = 0.3, preferment = Preferment.SOURDOUGH,
+                    prefermentFlour = 30.0, prefermentWater = 100.0, rye = 80.0,
+                ),
+            ),
+            Shipped("whole_wheat", base(type, water = 80.0, salt = 2.0, oil = 0.0, yeast = 1.0, whole = 100.0)),
+            Shipped("spelt", base(type, water = 62.0, salt = 2.0, oil = 0.0, yeast = 0.8, spelt = 100.0)),
         )
         DoughType.PASTA, DoughType.CAKE -> emptyList()
     }
@@ -62,10 +78,13 @@ object DoughPresets {
         yogurt: Double = 0.0,
         milk: Double = 0.0,
         sugar: Double = 0.0,
+        rye: Double = 0.0,
+        whole: Double = 0.0,
+        spelt: Double = 0.0,
     ): LeavenedInput = DoughLimits.defaults(type).copy(
         water = water, salt = salt, oil = oil, yeastKind = yeastKind, yeast = yeast, preferment = preferment,
         prefermentFlour = prefermentFlour, prefermentWater = prefermentWater,
-        malt = malt, yogurt = yogurt, milk = milk, sugar = sugar,
+        malt = malt, yogurt = yogurt, milk = milk, sugar = sugar, rye = rye, whole = whole, spelt = spelt,
     )
 
     /** Die Werte der Voreinstellung [preset] auf die Eingaben [current] anwenden; Anzahl und Stückgewicht bleiben. */
@@ -82,6 +101,12 @@ object DoughPresets {
         yogurt = preset.yogurt,
         milk = preset.milk,
         sugar = preset.sugar,
+        rye = preset.rye,
+        whole = preset.whole,
+        spelt = preset.spelt,
+        honey = preset.honey,
+        egg = preset.egg,
+        seeds = preset.seeds,
     )
 
     /**
@@ -96,7 +121,9 @@ object DoughPresets {
         return same(current.water, preset.water) && same(current.salt, preset.salt) && same(current.oil, preset.oil) &&
             same(current.yeast, preset.yeast) && withPreferment &&
             same(current.malt, preset.malt) && same(current.yogurt, preset.yogurt) && same(current.milk, preset.milk) &&
-            same(current.sugar, preset.sugar)
+            same(current.sugar, preset.sugar) &&
+            same(current.rye, preset.rye) && same(current.whole, preset.whole) && same(current.spelt, preset.spelt) &&
+            same(current.honey, preset.honey) && same(current.egg, preset.egg) && same(current.seeds, preset.seeds)
     }
 
     /**

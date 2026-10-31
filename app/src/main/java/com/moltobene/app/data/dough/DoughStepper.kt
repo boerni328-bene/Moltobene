@@ -18,10 +18,10 @@ object DoughStepper {
         DoughField.PIECE_GRAMS, DoughField.FLOUR_PER_PORTION, DoughField.FLOUR_GRAMS -> 10.0
         DoughField.WATER, DoughField.FAT, DoughField.SUGAR, DoughField.EGG, DoughField.MILK, DoughField.QUARK -> 1.0
         DoughField.SALT -> 0.1
-        DoughField.OIL, DoughField.BAKING_POWDER, DoughField.MALT -> 0.5
+        DoughField.OIL, DoughField.BAKING_POWDER, DoughField.MALT, DoughField.HONEY -> 0.5
         DoughField.YEAST -> 0.05
         DoughField.PREFERMENT_FLOUR, DoughField.PREFERMENT_WATER, DoughField.SEMOLINA, DoughField.WHOLE_EGG, DoughField.YOLK,
-        DoughField.YOGURT -> 5.0
+        DoughField.YOGURT, DoughField.RYE, DoughField.WHOLE, DoughField.SPELT, DoughField.SEEDS -> 5.0
         DoughField.PAN_SIZE -> 1.0
     }
 
@@ -61,7 +61,8 @@ object DoughStepper {
             DoughField.FLOUR_PER_PORTION -> DoughLimits.Range(50.0, 200.0)
             DoughField.FLOUR_GRAMS -> DoughLimits.Range(100.0, 1000.0)
             DoughField.SEMOLINA, DoughField.WHOLE_EGG, DoughField.YOLK, DoughField.FAT, DoughField.SUGAR, DoughField.EGG,
-            DoughField.MILK, DoughField.QUARK, DoughField.BAKING_POWDER, DoughField.MALT, DoughField.YOGURT -> null
+            DoughField.MILK, DoughField.QUARK, DoughField.BAKING_POWDER, DoughField.MALT, DoughField.YOGURT, DoughField.RYE, DoughField.WHOLE,
+            DoughField.SPELT, DoughField.HONEY, DoughField.SEEDS -> null
             DoughField.PAN_SIZE -> return null
         }
         if (limits == null) return practical

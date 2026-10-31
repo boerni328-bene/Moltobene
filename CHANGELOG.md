@@ -3,6 +3,13 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.70.0] – 2026-11-01 (versionCode 117)
+
+### Neu
+- **Mehlsorten im Teigrechner (Brot und Pizza):** Roggenmehl, Vollkornmehl und Dinkelmehl lassen sich über „Weitere Zutat“ als Anteil am Mehl hinzufügen; der Rest bleibt Weizenmehl. Im Rezept steht das Mehl nach Sorte aufgeteilt (auch im Vorteig im gleichen Verhältnis). Roggen und Vollkorn nehmen mehr Wasser auf, Dinkel eher weniger: Die App schlägt dafür eine Änderung von „Wasser (Hydration)“ vor, die „Übernehmen“ einträgt. Die Zahlen sind grobe Richtwerte.
+- **Neue Voreinstellungen beim Brot:** Bauernbrot, Schwarzbrot (beide mit Sauerteig und Roggen), Vollkornbrot und Dinkelbrot.
+- **Weitere Zutaten:** Honig, Eier und Saaten (zusätzlich zu Backmalz, Joghurt, Milch und Zucker).
+
 ## [0.69.0] – 2026-11-01 (versionCode 116)
 
 ### Geändert

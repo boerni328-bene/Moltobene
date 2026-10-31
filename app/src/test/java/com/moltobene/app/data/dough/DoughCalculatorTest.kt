@@ -191,4 +191,46 @@ class DoughCalculatorTest {
         assertTrue(issues(pizza(type = DoughType.BREAD).copy(malt = 6.0)).single() is DoughIssue.OutOfRange)
         assertTrue(issues(pizza().copy(yogurt = 61.0)).single() is DoughIssue.OutOfRange)
     }
+
+    @Test
+    fun mehlsortenTeilenDasMehlAufUndBrauchenMehrWasser() {
+        val input = pizza(count = 1, grams = 1000.0, water = 70.0, salt = 2.0, yeast = 1.0, type = DoughType.BREAD)
+            .copy(rye = 30.0, whole = 20.0, honey = 3.0, egg = 10.0, seeds = 15.0)
+        val result = success(input)
+        val flour = result.flourGrams
+        assertEquals(flour * 0.5, result.grams(SectionKind.PLAIN, LineRole.WHEAT), 1e-9)
+        assertEquals(flour * 0.3, result.grams(SectionKind.PLAIN, LineRole.RYE), 1e-9)
+        assertEquals(flour * 0.2, result.grams(SectionKind.PLAIN, LineRole.WHOLE), 1e-9)
+        assertEquals(0.0, result.grams(SectionKind.PLAIN, LineRole.FLOUR), 0.0)
+        assertEquals(flour * 0.03, result.grams(SectionKind.PLAIN, LineRole.HONEY), 1e-9)
+        assertEquals(flour * 0.10, result.grams(SectionKind.PLAIN, LineRole.EGG), 1e-9)
+        assertEquals(flour * 0.15, result.grams(SectionKind.PLAIN, LineRole.SEEDS), 1e-9)
+        assertEquals(1000.0, result.sections.flatMap { it.lines }.sumOf { it.grams }, 1e-6)
+        assertEquals(input, DoughMemory.decode(DoughType.BREAD, DoughMemory.encode(input)))
+    }
+
+    @Test
+    fun mehlsortenMitVorteigTeilenAuchDenVorteigAuf() {
+        val input = pizza(count = 1, grams = 1000.0, water = 80.0, type = DoughType.BREAD, preferment = Preferment.SOURDOUGH, prefermentFlour = 30.0)
+            .copy(rye = 80.0)
+        val result = success(input)
+        assertEquals(result.flourGrams * 0.3 * 0.8, result.grams(SectionKind.PREFERMENT, LineRole.RYE), 1e-9)
+        assertEquals(result.flourGrams * 0.7 * 0.2, result.grams(SectionKind.MAIN, LineRole.WHEAT), 1e-9)
+    }
+
+    @Test
+    fun zuvielMehlMischungRechnetNicht() {
+        val input = pizza(type = DoughType.BREAD).copy(rye = 60.0, whole = 30.0, spelt = 20.0)
+        assertTrue(issues(input).single() is DoughIssue.FlourMixTooHigh)
+    }
+
+    @Test
+    fun wasserVorschlagFuerDieMehlmischung() {
+        val base = pizza(type = DoughType.BREAD)
+        assertEquals(0.0, DoughFlours.waterShift(base), 0.0)
+        assertEquals(3.5, DoughFlours.waterShift(base.copy(rye = 30.0)), 0.0)
+        assertEquals(8.0, DoughFlours.waterShift(base.copy(whole = 100.0)), 0.0)
+        assertEquals(-3.0, DoughFlours.waterShift(base.copy(spelt = 100.0)), 0.0)
+        assertEquals(0.0, DoughFlours.waterShift(base.copy(rye = Double.NaN)), 0.0)
+    }
 }
