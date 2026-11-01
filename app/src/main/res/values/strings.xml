@@ -629,8 +629,6 @@
     <string name="dough_help_active_effect">Coarser granules that are dissolved in lukewarm water before use.</string>
     <string name="dough_help_active_range">About 40% of the amount of fresh yeast, so a little more than instant yeast.</string>
     <string name="dough_help_active_care">Dissolve in water of about 95°F (35°C) until foamy.</string>
-    <string name="dough_preset_custom">Custom values</string>
-    <string name="dough_preset_default">Default values</string>
     <string name="dough_preset_neapolitan">Neapolitan</string>
     <string name="dough_preset_sheet_pan">Sheet-pan pizza</string>
     <string name="dough_preset_white_bread">White bread</string>

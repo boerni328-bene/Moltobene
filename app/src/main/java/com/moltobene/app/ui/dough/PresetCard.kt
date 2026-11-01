@@ -74,8 +74,7 @@ internal fun shippedPresetName(key: String): String = stringResource(
         "naan" -> R.string.dough_preset_naan
         "toast" -> R.string.dough_preset_toast
         "bagel" -> R.string.dough_preset_bagel
-        "white_bread" -> R.string.dough_preset_white_bread
-        else -> R.string.dough_preset_default
+        else -> R.string.dough_preset_white_bread
     },
 )
 
@@ -90,7 +89,7 @@ internal fun presetEntries(type: DoughType, own: List<DoughPresets.Own>): List<P
  * Voreinstellungen (#83, Etappe 3): alle Einträge nebeneinander, durch senkrechte Striche getrennt und seitlich zu
  * verschieben; der gewählte steht fett in größerer Schrift und wird ins Bild geholt. Bei einer eigenen Voreinstellung
  * gibt es ein Symbol zum Löschen; Speichern und Zurücksetzen liegen oben in der Leiste. Bei großer Schrift bleiben die
- * Knöpfe in der Karte. [index] −1 heißt: die Werte sind keine der Einträge, dann steht „Eigene Werte“ vorn.
+ * Knöpfe in der Karte. [index] −1 heißt: die Werte sind keine der Einträge, dann ist keiner gewählt.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -104,14 +103,15 @@ internal fun PresetCard(
     onSave: (String) -> DoughPresets.SaveResult,
     onDelete: (String) -> Unit,
     compact: Boolean = false,
+    /** Wurden Werte von Hand geändert (weder Voreinstellung noch Standardwerte), wird vor dem Ersetzen nachgefragt. */
+    hasOwnChanges: Boolean = false,
 ) {
     var deleting by rememberSaveable { mutableStateOf(false) }
-    // Sind die Werte keine der Voreinstellungen (eigene Änderungen), wird vor dem Ersetzen nachgefragt.
     var pending by rememberSaveable { mutableStateOf(-1) }
     fun choose(i: Int) {
         when {
             i < 0 || i == index -> Unit
-            index < 0 -> pending = i
+            index < 0 && hasOwnChanges -> pending = i
             else -> onSelect(i)
         }
     }
@@ -121,11 +121,8 @@ internal fun PresetCard(
             verticalAlignment = Alignment.CenterVertically,
             modifier = modifier.horizontalScroll(rememberScrollState()).selectableGroup(),
         ) {
-            if (index < 0) {
-                PresetItem(stringResource(R.string.dough_preset_custom), selected = true, onClick = {})
-            }
             entries.forEachIndexed { i, entry ->
-                if (i > 0 || index < 0) VerticalDivider(modifier = Modifier.height(24.dp))
+                if (i > 0) VerticalDivider(modifier = Modifier.height(24.dp))
                 PresetItem(entry.name, selected = i == index, onClick = { choose(i) })
             }
         }

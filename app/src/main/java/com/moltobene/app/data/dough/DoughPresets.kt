@@ -33,7 +33,6 @@ object DoughPresets {
             Shipped("chicago", base(type, water = 52.0, salt = 1.8, oil = 8.0, yeast = 0.7, yeastKind = YeastKind.INSTANT_DRY)),
         )
         DoughType.BREAD -> listOf(
-            Shipped("default", DoughLimits.defaults(type)),
             Shipped("white_bread", base(type, water = 65.0, salt = 2.0, oil = 0.0, yeast = 1.0)),
             Shipped("ciabatta", base(type, water = 78.0, salt = 2.0, oil = 2.0, yeast = 0.5)),
             Shipped("baguette", base(type, water = 68.0, salt = 2.0, oil = 0.0, yeast = 0.5)),

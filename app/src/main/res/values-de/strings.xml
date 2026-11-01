@@ -627,8 +627,6 @@
     <string name="dough_help_active_effect">Gröbere Körnchen, die vor dem Gebrauch in lauwarmem Wasser aufgelöst werden.</string>
     <string name="dough_help_active_range">Etwa 40 % der Frischhefe-Menge, also etwas mehr als bei Instanthefe.</string>
     <string name="dough_help_active_care">In Wasser von etwa 35 °C auflösen, bis sie schäumt.</string>
-    <string name="dough_preset_custom">Eigene Werte</string>
-    <string name="dough_preset_default">Standardwerte</string>
     <string name="dough_preset_neapolitan">Neapolitanisch</string>
     <string name="dough_preset_sheet_pan">Pizza vom Blech</string>
     <string name="dough_preset_white_bread">Weißbrot</string>

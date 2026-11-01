@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.70.1] – 2026-11-01 (versionCode 118)
+
+### Behoben
+- **Teigrechner:** Tippen neben ein Zahlenfeld schließt die Tastatur wieder.
+- **Teigrechner:** Nach „Zurücksetzen“ lässt sich wieder jede andere Voreinstellung wählen, bei Pizza und Brot. Die Einträge „Standardwerte“ und „Eigene Werte“ gibt es nicht mehr in der Reihe; nachgefragt wird nur noch, wenn Werte von Hand geändert wurden.
+
 ## [0.70.0] – 2026-11-01 (versionCode 117)
 
 ### Neu

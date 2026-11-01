@@ -65,7 +65,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.focus.LocalFocusManager
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -196,7 +200,18 @@ fun DoughScreen(
         CompositionLocalProvider(
             LocalDoughSliders provides true, LocalStepperSide provides stepperSide, LocalDoughBar provides bar,
         ) {
-            Column(modifier = Modifier.padding(padding).fillMaxSize().readingWidth()) {
+            // Tippen neben ein Feld schließt die Tastatur wieder.
+            val focusManager = LocalFocusManager.current
+            val keyboard = LocalSoftwareKeyboardController.current
+            Column(
+                modifier = Modifier.padding(padding).fillMaxSize().readingWidth()
+                    .pointerInput(Unit) {
+                        detectTapGestures {
+                            focusManager.clearFocus()
+                            keyboard?.hide()
+                        }
+                    },
+            ) {
                 val header: @Composable () -> Unit = {
                     Header(type) { typeKey = it.key }
                 }
@@ -1044,6 +1059,7 @@ private fun DoughForm(
                 saving = savingPreset,
                 onSavingChange = { savingPreset = it },
                 canSave = result is DoughResult.Success,
+                hasOwnChanges = !DoughPresets.matches(input, defaults),
                 onSelect = ::applyPreset,
                 onSave = { name ->
                     val saved = viewModel.saveOwnPreset(type, name, input)

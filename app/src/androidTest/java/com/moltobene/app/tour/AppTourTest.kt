@@ -737,12 +737,11 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("14o-teigrechner-voreinstellung-ersetzen")
         composeRule.onNode(hasText(text(R.string.cancel)) and hasClickAction()).performClick()
         waitUntilGone(text(R.string.dough_preset_replace_title))
-        composeRule.onNodeWithText(text(R.string.dough_preset_custom)).assertExists()
         choosePreset(R.string.dough_preset_neapolitan)
         waitForText(text(R.string.dough_preset_replace_title))
         composeRule.onNode(hasText(text(R.string.dough_preset_replace_confirm)) and hasClickAction()).performClick()
-        // Danach passen die Werte zur Voreinstellung; „Eigene Werte“ verschwindet und es kommt keine Nachfrage mehr.
-        waitUntilGone(text(R.string.dough_preset_custom))
+        // Danach passen die Werte zur Voreinstellung und es kommt keine Nachfrage mehr.
+        waitUntilGone(text(R.string.dough_preset_replace_title))
         screenshot("14l-teigrechner-voreinstellung")
         doughPresetAction(R.string.dough_preset_save)
         waitForText(text(R.string.dough_preset_save_title))
