@@ -1,6 +1,6 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 01.11.2026 · `main` = Version 0.70.1 (Teigrechner: Tastatur schließt beim Tippen daneben, Voreinstellungen ohne „Standard“/„Eigene Werte“; davor 0.70.0 Mehlsorten), Release folgt aus dem Build auf `main` · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 01.11.2026 · `main` = Version 0.70.2 (Teigrechner: Tastatur schließt beim Tippen daneben, Voreinstellungen ohne „Standard“/„Eigene Werte“; davor 0.70.0 Mehlsorten), Release folgt aus dem Build auf `main` · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud (neuer Kernsatz seit 0.59.2). Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.

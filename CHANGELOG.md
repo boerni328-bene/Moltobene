@@ -3,7 +3,7 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
-## [0.70.1] – 2026-11-01 (versionCode 118)
+## [0.70.2] – 2026-11-02 (versionCode 119)
 
 ### Behoben
 - **Teigrechner:** Tippen neben ein Zahlenfeld schließt die Tastatur wieder.
