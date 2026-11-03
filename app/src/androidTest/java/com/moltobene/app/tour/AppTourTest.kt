@@ -803,7 +803,12 @@ class AppTourTest(private val variant: DisplayVariant) {
                 },
             ).performScrollTo().performClick()
         }
-        composeRule.onAllNodes(hasText(text(R.string.dough_pre_biga)) and hasClickAction())[0].performScrollTo().performClick()
+        composeRule.runOnUiThread {
+            WindowCompat.getInsetsController(activity.window, activity.window.decorView).hide(WindowInsetsCompat.Type.ime())
+        }
+        composeRule.waitForIdle()
+        composeRule.onAllNodes(hasText(text(R.string.dough_pre_biga)) and hasClickAction())[0]
+            .performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
         // Mit Vorteig erscheinen seine Felder; bei großer Schrift steht die Erklärung dabei.
         // (Der Feldname enthält „%“; deshalb ohne Formatierung lesen.)
         try {
