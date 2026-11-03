@@ -333,6 +333,133 @@
           ]
         }
       }
+    },
+    {
+      "id": "yeast_types",
+      "texts": {
+        "de": {
+          "title": "Hefearten: Frischhefe, Instanthefe und Aktivhefe",
+          "summary": "Eigenschaften, Mengenverhältnisse und Haltbarkeit der drei Hefearten im Vergleich.",
+          "sections": [
+            {
+              "heading": "Die drei Hefearten",
+              "rows": [
+                {"label": "Frischhefe", "text": "Gepresste, feuchte Hefe aus lebenden Zellen, meist als 42-g-Würfel im Kühlregal. Sie startet zuverlässig und zügig, auch in kühlen Teigen, und ist der Maßstab für die Umrechnung."},
+                {"label": "Instanthefe", "text": "Feine, trockene Körnchen, die ohne Auflösen direkt unter das Mehl gemischt werden. Sie ist stärker als Frischhefe, wirkt anfangs etwas verzögert und eignet sich gut für lange Gehzeiten im Kühlschrank."},
+                {"label": "Aktivhefe", "text": "Gröbere Körnchen mit einer Schutzhülle aus abgestorbenen Zellen. Sie wird in lauwarmem Wasser aufgelöst und aktiviert und kommt dadurch etwas später in Gang als Instanthefe."}
+              ]
+            },
+            {
+              "heading": "Mengenverhältnisse",
+              "paragraphs": [
+                "Als Maßstab gilt Frischhefe. Instanthefe braucht etwa ein Drittel der Menge, Aktivhefe etwa 40 %. Als Faustregel steht Frischhefe zu Aktivhefe zu Instanthefe wie 3 zu 1,2 zu 1. Die Werte sind gerundet; der Rechner stellt beim Wechsel der Hefeart automatisch um."
+              ],
+              "rows": [
+                {"label": "42 g Frischhefe (ein Würfel)", "text": "etwa 14 g Instanthefe oder etwa 17 g Aktivhefe"},
+                {"label": "21 g Frischhefe (ein halber Würfel)", "text": "etwa 7 g Instanthefe (ein Päckchen) oder etwa 8 bis 9 g Aktivhefe"},
+                {"label": "10 g Frischhefe", "text": "etwa 3,3 g Instanthefe oder etwa 4 g Aktivhefe"}
+              ]
+            },
+            {
+              "heading": "Wie viel Hefe in den Teig kommt",
+              "paragraphs": [
+                "Bei Pizza und Brot sind etwa 0,2 bis 1 % Frischhefe vom Mehl üblich, wenn der Teig lange im Kühlschrank geht, und etwa 1 bis 2 % bei kurzer Gehzeit bei Raumtemperatur. Süße Hefeteige mit viel Zucker, Butter und Eiern brauchen oft mehr.",
+                "Mehr Hefe verkürzt die Gehzeit, schmeckt aber hefiger. Weniger Hefe und mehr Zeit gibt dem Teig Gelegenheit, Aroma zu entwickeln."
+              ]
+            },
+            {
+              "heading": "Verhalten im Teig",
+              "rows": [
+                {"label": "Temperatur", "text": "Am schnellsten arbeitet Hefe bei etwa 25 bis 35 °C. Kälte bremst sie, stoppt sie aber nicht. Ab etwa 50 °C sterben die Zellen."},
+                {"label": "Salz", "text": "Salz bremst die Gärung. Bei üblichen 2 bis 3 % vom Mehl ist das erwünscht; viel Salz in direktem Kontakt mit der Hefe schadet den Zellen."},
+                {"label": "Zucker", "text": "Wenig Zucker füttert die Hefe, sehr viel Zucker (etwa ab 8 bis 10 % vom Mehl) bremst sie."},
+                {"label": "Zeit", "text": "Frischhefe und Instanthefe sind bei gleicher Wirkung ähnlich schnell; Aktivhefe braucht anfangs länger. Entscheidend ist, dass der Teig sichtbar größer wird."}
+              ]
+            },
+            {
+              "heading": "Haltbarkeit und Lagerung",
+              "rows": [
+                {"label": "Frischhefe", "text": "Im Kühlschrank (2 bis 6 °C) etwa 2 bis 4 Wochen; es gilt das Datum auf der Packung. Schmierig, grau-braun oder streng riechend heißt: verdorben. In Portionen eingefroren hält sie einige Monate, verliert aber etwas Kraft."},
+                {"label": "Instanthefe", "text": "Ungeöffnet meist ein bis zwei Jahre. Geöffnet luftdicht, kühl und trocken lagern, im Kühlschrank hält sie länger; nach einigen Wochen bis Monaten lässt die Kraft nach."},
+                {"label": "Aktivhefe", "text": "Ungeöffnet ein bis zwei Jahre, geöffnet kühl und trocken lagern. Vor dem Gebrauch in Wasser von 35 bis 40 °C aufschäumen lassen; bleibt der Schaum aus, ist sie zu alt."}
+              ]
+            },
+            {
+              "heading": "Hefe prüfen",
+              "paragraphs": [
+                "Eine Prise Hefe in lauwarmem Wasser mit etwas Zucker sollte nach etwa 10 Minuten schäumen. Bleibt der Schaum aus, hat die Hefe an Kraft verloren oder das Wasser war zu heiß oder zu kalt."
+              ]
+            },
+            {
+              "heading": "Gut zu wissen",
+              "paragraphs": [
+                "Alle Zahlen sind gerundete Richtwerte. Die Angaben des Herstellers auf der Packung gehen vor. Gluten steckt im Mehl (Weizen, Dinkel, Roggen), nicht in der Hefe. Die App gibt keine Gesundheitsberatung."
+              ]
+            }
+          ]
+        },
+        "en": {
+          "title": "Yeast types: fresh, instant and active dry yeast",
+          "summary": "Properties, amounts and shelf life of the three yeast types compared.",
+          "sections": [
+            {
+              "heading": "The three yeast types",
+              "rows": [
+                {"label": "Fresh yeast", "text": "Pressed, moist yeast of living cells, usually a 42 g cake in the refrigerated shelf. It starts reliably and quickly, even in cool doughs, and is the reference for conversion."},
+                {"label": "Instant yeast", "text": "Fine, dry granules that are mixed straight into the flour without dissolving. It is stronger than fresh yeast, acts a little slowly at first and suits long rises in the refrigerator."},
+                {"label": "Active dry yeast", "text": "Coarser granules with a protective shell of dead cells. It is dissolved in lukewarm water and activated, so it gets going a little later than instant yeast."}
+              ]
+            },
+            {
+              "heading": "Amounts compared",
+              "paragraphs": [
+                "Fresh yeast is the reference. Instant yeast needs about a third of the amount, active dry yeast about 40%. As a rule of thumb, fresh to active dry to instant is 3 to 1.2 to 1. The values are rounded; the calculator converts automatically when the yeast type changes."
+              ],
+              "rows": [
+                {"label": "42 g fresh yeast (one cake)", "text": "about 14 g instant yeast or about 17 g active dry yeast"},
+                {"label": "21 g fresh yeast (half a cake)", "text": "about 7 g instant yeast (one packet) or about 8 to 9 g active dry yeast"},
+                {"label": "10 g fresh yeast", "text": "about 3.3 g instant yeast or about 4 g active dry yeast"}
+              ]
+            },
+            {
+              "heading": "How much yeast goes into the dough",
+              "paragraphs": [
+                "For pizza and bread, about 0.2 to 1% fresh yeast of the flour is usual when the dough rises for a long time in the refrigerator, and about 1 to 2% with a short rise at room temperature. Sweet yeast doughs with a lot of sugar, butter and eggs often need more.",
+                "More yeast shortens the rising time but tastes more yeasty. Less yeast and more time gives the dough a chance to develop aroma."
+              ]
+            },
+            {
+              "heading": "Behavior in the dough",
+              "rows": [
+                {"label": "Temperature", "text": "Yeast works fastest at about 77 to 95°F (25 to 35°C). Cold slows it but does not stop it. From about 120°F (50°C) the cells die."},
+                {"label": "Salt", "text": "Salt slows fermentation. At the usual 2 to 3% of the flour this is wanted; a lot of salt in direct contact with the yeast harms the cells."},
+                {"label": "Sugar", "text": "A little sugar feeds the yeast; a lot of sugar (from about 8 to 10% of the flour) slows it."},
+                {"label": "Time", "text": "Fresh and instant yeast are similarly fast at the same effect; active dry yeast takes longer at first. What counts is that the dough visibly grows."}
+              ]
+            },
+            {
+              "heading": "Shelf life and storage",
+              "rows": [
+                {"label": "Fresh yeast", "text": "About 2 to 4 weeks in the refrigerator (35 to 43°F, 2 to 6°C); the date on the package counts. Slimy, gray-brown or sharp-smelling means it has gone bad. Frozen in portions it keeps a few months but loses some strength."},
+                {"label": "Instant yeast", "text": "Usually one to two years unopened. Once opened store airtight, cool and dry; it keeps longer in the refrigerator, and its strength fades after a few weeks to months."},
+                {"label": "Active dry yeast", "text": "One to two years unopened; once opened store cool and dry. Let it foam in water of 95 to 105°F (35 to 40°C) before use; if there is no foam, it is too old."}
+              ]
+            },
+            {
+              "heading": "Testing yeast",
+              "paragraphs": [
+                "A pinch of yeast in lukewarm water with a little sugar should foam after about 10 minutes. If there is no foam, the yeast has lost strength or the water was too hot or too cold."
+              ]
+            },
+            {
+              "heading": "Good to know",
+              "paragraphs": [
+                "All numbers are rounded guides. The information from the manufacturer on the package comes first. Gluten is found in the flour (wheat, spelt, rye), not in the yeast. The app does not give health advice."
+              ]
+            }
+          ]
+        }
+      }
     }
   ]
 }

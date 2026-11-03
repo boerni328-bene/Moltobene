@@ -19,7 +19,7 @@ class KnowHowTest {
     @Test
     fun jederArtikelHatBeideSprachenMitGleichemAufbau() {
         assertEquals(articles.map { it.id }.toSet().size, articles.size)
-        assertEquals(listOf("flour_types", "grains", "gluten_strength"), articles.map { it.id })
+        assertEquals(listOf("flour_types", "grains", "gluten_strength", "yeast_types"), articles.map { it.id })
         for (article in articles) {
             val de = article.texts.getValue("de")
             val en = article.texts.getValue("en")

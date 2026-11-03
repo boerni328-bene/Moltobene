@@ -49,11 +49,13 @@ internal enum class HelpTopic(
     ),
 }
 
+private val yeastKinds = listOf(HelpTopic.FRESH_YEAST, HelpTopic.INSTANT_YEAST, HelpTopic.ACTIVE_YEAST)
+
 /** Die Themen, die eine Karte des Formulars erklärt; [key] wird beim Drehen des Handys gemerkt. */
 internal fun helpTopics(key: String?): List<HelpTopic> = when (key) {
-    "all" -> listOf(HelpTopic.WATER, HelpTopic.SALT, HelpTopic.OIL, HelpTopic.YEAST, HelpTopic.PREFERMENT)
+    "all" -> listOf(HelpTopic.YEAST) + yeastKinds + HelpTopic.WATER + HelpTopic.SALT + HelpTopic.OIL + HelpTopic.PREFERMENT
     "dough" -> listOf(HelpTopic.WATER, HelpTopic.SALT, HelpTopic.OIL)
-    "yeast" -> listOf(HelpTopic.YEAST)
+    "yeast" -> listOf(HelpTopic.YEAST) + yeastKinds
     "preferment" -> listOf(HelpTopic.PREFERMENT)
     "biga" -> listOf(HelpTopic.BIGA)
     "poolish" -> listOf(HelpTopic.POOLISH)

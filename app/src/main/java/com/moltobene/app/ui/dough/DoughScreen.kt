@@ -1079,52 +1079,28 @@ private fun DoughForm(
             if (pinned) {
                 // Alles in einem Bild, ohne Scrollen (Entwurf vom 30.10.2026): Felder paarweise, Auswahlen im Format der Felder.
                 // Der Vorteig steht oben im Rezept und abgesetzt in einer Fläche mit Rahmen (Wunsch vom 31.10.2026).
-                val yeastKindChoice: @Composable (Modifier) -> Unit = { m ->
-                    CompactChoice(
+                // Die Hefe steht ganz oben, abgesetzt wie der Vorteig: Hefeart und Menge gehören zusammen.
+                Card("", highlighted = true) {
+                    SubtleChoice(
                         label = stringResource(R.string.dough_section_yeast),
                         options = YeastKind.entries,
                         selected = yeastKind,
                         optionLabel = { stringResource(AndroidDoughTexts.yeastName(it)) },
                         onSelect = ::selectYeastKind,
-                        modifier = m,
+                        modifier = Modifier.fillMaxWidth(),
+                        maxLines = 2,
                     )
-                }
-                // Vier Schaltflächen wie die Teigart oben, nur dezenter (kleinere Schrift, ruhige Farben).
-                val prefermentChoice: @Composable (Modifier) -> Unit = { m ->
-                    Column(modifier = m) {
-                        Text(
-                            stringResource(R.string.dough_section_preferment),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                            Preferment.entries.forEachIndexed { i, option ->
-                                SegmentedButton(
-                                    selected = option == preferment,
-                                    onClick = { selectPreferment(option) },
-                                    shape = SegmentedButtonDefaults.itemShape(i, Preferment.entries.size),
-                                    icon = {},
-                                    colors = SegmentedButtonDefaults.colors(
-                                        activeContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                        inactiveContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                        activeBorderColor = MaterialTheme.colorScheme.outline,
-                                        inactiveBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                    ),
-                                    contentPadding = PaddingValues(horizontal = Spacing.xs),
-                                ) {
-                                    Text(
-                                        stringResource(prefermentLabel(option)),
-                                        style = MaterialTheme.typography.labelMedium,
-                                        fontWeight = if (option == preferment) FontWeight.Bold else null,
-                                        maxLines = 1,
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    yeastField(Modifier.fillMaxWidth())
                 }
                 Card("", highlighted = true) {
-                    prefermentChoice(Modifier.fillMaxWidth())
+                    SubtleChoice(
+                        label = stringResource(R.string.dough_section_preferment),
+                        options = Preferment.entries,
+                        selected = preferment,
+                        optionLabel = { stringResource(prefermentLabel(it)) },
+                        onSelect = ::selectPreferment,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                     // Untereinander, damit auch „100 %“ in den Feldern Platz hat.
                     if (preferment != Preferment.NONE) {
                         prefermentFlourField(Modifier.fillMaxWidth())
@@ -1133,9 +1109,9 @@ private fun DoughForm(
                 }
                 Column(modifier = Modifier.padding(horizontal = Spacing.m)) {
                     Fields(
-                        countField, pieceField, waterField, saltField, yeastKindChoice, yeastField,
+                        countField, pieceField, waterField, saltField,
                         *shownExtras.map(extraField).toTypedArray(), oilField,
-                        // Der Hinweis steht neben der Hefemenge, statt eine eigene Zeile zu belegen.
+                        // Der Hinweis steht neben dem Öl, statt eine eigene Zeile zu belegen.
                         trailing = {
                             Text(
                                 stringResource(R.string.dough_percent_note),
@@ -1169,6 +1145,20 @@ private fun DoughForm(
                 return@Column
             }
 
+            Card(stringResource(R.string.dough_section_yeast), onHelp = { help = "yeast" }) {
+                ChoiceField(
+                    label = stringResource(R.string.dough_section_yeast),
+                    options = YeastKind.entries,
+                    selected = yeastKind,
+                    optionLabel = { stringResource(AndroidDoughTexts.yeastName(it)) },
+                    onSelect = ::selectYeastKind,
+                )
+                TextButton(onClick = { help = yeastKind.key }) {
+                    Text(stringResource(R.string.dough_help_term_open, stringResource(AndroidDoughTexts.yeastName(yeastKind))))
+                }
+                yeastField(Modifier.fillMaxWidth())
+            }
+
             Card(stringResource(R.string.dough_section_dough), onHelp = { help = "dough" }) {
                 Fields(countField, pieceField)
                 Fields(
@@ -1183,20 +1173,6 @@ private fun DoughForm(
                         )
                     },
                 )
-            }
-
-            Card(stringResource(R.string.dough_section_yeast), onHelp = { help = "yeast" }) {
-                ChoiceField(
-                    label = stringResource(R.string.dough_section_yeast),
-                    options = YeastKind.entries,
-                    selected = yeastKind,
-                    optionLabel = { stringResource(AndroidDoughTexts.yeastName(it)) },
-                    onSelect = ::selectYeastKind,
-                )
-                TextButton(onClick = { help = yeastKind.key }) {
-                    Text(stringResource(R.string.dough_help_term_open, stringResource(AndroidDoughTexts.yeastName(yeastKind))))
-                }
-                yeastField(Modifier.fillMaxWidth())
             }
 
             Card(stringResource(R.string.dough_section_extras)) {
@@ -1495,3 +1471,43 @@ private class ExtraSpec(
     val text: String,
     val set: (String) -> Unit,
 )
+
+/** Auswahl als Schaltflächen wie die Teigart oben, nur dezenter (kleinere Schrift, ruhige Farben): Hefeart und Vorteig. */
+@Composable
+private fun <T> SubtleChoice(
+    label: String,
+    options: List<T>,
+    selected: T,
+    optionLabel: @Composable (T) -> String,
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier,
+    maxLines: Int = 1,
+) {
+    Column(modifier = modifier) {
+        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            options.forEachIndexed { i, option ->
+                SegmentedButton(
+                    selected = option == selected,
+                    onClick = { onSelect(option) },
+                    shape = SegmentedButtonDefaults.itemShape(i, options.size),
+                    icon = {},
+                    colors = SegmentedButtonDefaults.colors(
+                        activeContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        inactiveContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        activeBorderColor = MaterialTheme.colorScheme.outline,
+                        inactiveBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    ),
+                    contentPadding = PaddingValues(horizontal = Spacing.xs),
+                ) {
+                    Text(
+                        optionLabel(option),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = if (option == selected) FontWeight.Bold else null,
+                        maxLines = maxLines,
+                    )
+                }
+            }
+        }
+    }
+}

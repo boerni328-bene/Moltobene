@@ -3,6 +3,15 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.71.0] – 2026-11-03 (versionCode 121)
+
+### Neu
+- **Teigwissen: Hefearten.** Neuer Artikel „Hefearten: Frischhefe, Instanthefe und Aktivhefe“ mit Eigenschaften, Verhalten im Teig, Mengenverhältnissen (mit Umrechnungsbeispielen) und Haltbarkeit.
+
+### Geändert
+- **Teigrechner (Pizza und Brot):** Die Hefe steht ganz oben, abgesetzt wie der Vorteig: Auswahl der Hefeart und Hefemenge zusammen in einer Fläche.
+- **Infotext im Teigrechner:** Die drei Hefearten werden genauer beschrieben, mit Eigenschaften, Mengenverhältnissen, Beispielen und Haltbarkeit.
+
 ## [0.70.3] – 2026-11-03 (versionCode 120)
 
 ### Geändert
