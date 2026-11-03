@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.70.3] – 2026-11-03 (versionCode 120)
+
+### Geändert
+- **Teigrechner (Pizza und Brot):** Hefe und Hefemenge stehen jetzt nebeneinander. Das Öl kommt ans Ende der Zutaten, da es nicht immer gebraucht wird.
+
 ## [0.70.2] – 2026-11-02 (versionCode 119)
 
 ### Behoben

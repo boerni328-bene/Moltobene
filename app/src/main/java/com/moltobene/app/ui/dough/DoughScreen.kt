@@ -1133,8 +1133,8 @@ private fun DoughForm(
                 }
                 Column(modifier = Modifier.padding(horizontal = Spacing.m)) {
                     Fields(
-                        countField, pieceField, waterField, saltField, oilField, yeastKindChoice, yeastField,
-                        *shownExtras.map(extraField).toTypedArray(),
+                        countField, pieceField, waterField, saltField, yeastKindChoice, yeastField,
+                        *shownExtras.map(extraField).toTypedArray(), oilField,
                         // Der Hinweis steht neben der Hefemenge, statt eine eigene Zeile zu belegen.
                         trailing = {
                             Text(
@@ -1174,8 +1174,7 @@ private fun DoughForm(
                 Fields(
                     waterField,
                     saltField,
-                    oilField,
-                    // Der Hinweis steht neben dem Öl, statt eine eigene Zeile zu belegen.
+                    // Der Hinweis steht neben dem Salz, statt eine eigene Zeile zu belegen.
                     trailing = {
                         Text(
                             stringResource(R.string.dough_percent_note),
@@ -1202,6 +1201,7 @@ private fun DoughForm(
 
             Card(stringResource(R.string.dough_section_extras)) {
                 for (spec in shownExtras) extraField(spec)(Modifier.fillMaxWidth())
+                oilField(Modifier.fillMaxWidth())
                 if (extrasNote) {
                     Text(
                         stringResource(R.string.dough_extras_note),
