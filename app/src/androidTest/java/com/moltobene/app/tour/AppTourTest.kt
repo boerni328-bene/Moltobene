@@ -803,10 +803,15 @@ class AppTourTest(private val variant: DisplayVariant) {
                 },
             ).performScrollTo().performClick()
         }
-        composeRule.onAllNodesWithText(text(R.string.dough_pre_biga))[0].performScrollTo().performClick()
+        composeRule.onAllNodes(hasText(text(R.string.dough_pre_biga)) and hasClickAction())[0].performScrollTo().performClick()
         // Mit Vorteig erscheinen seine Felder; bei großer Schrift steht die Erklärung dabei.
         // (Der Feldname enthält „%“; deshalb ohne Formatierung lesen.)
-        waitForText(activity.resources.getText(R.string.dough_preferment_flour).toString())
+        try {
+            waitForText(activity.resources.getText(R.string.dough_preferment_flour).toString())
+        } catch (e: Throwable) {
+            screenshot("14b-fehler-vorteig")
+            throw e
+        }
 
         screenshot("14b-teigrechner-biga")
 
