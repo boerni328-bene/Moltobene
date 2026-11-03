@@ -35,6 +35,7 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.printToString
 import androidx.compose.ui.test.performTextReplacement
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -807,7 +808,7 @@ class AppTourTest(private val variant: DisplayVariant) {
             WindowCompat.getInsetsController(activity.window, activity.window.decorView).hide(WindowInsetsCompat.Type.ime())
         }
         composeRule.waitForIdle()
-        composeRule.onAllNodes(hasText(text(R.string.dough_pre_biga)) and hasClickAction())[0]
+        composeRule.onAllNodes(hasText(text(R.string.dough_pre_biga)) and isSelectable())[0]
             .performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
         // Mit Vorteig erscheinen seine Felder; bei großer Schrift steht die Erklärung dabei.
         // (Der Feldname enthält „%“; deshalb ohne Formatierung lesen.)
@@ -815,7 +816,8 @@ class AppTourTest(private val variant: DisplayVariant) {
             waitForText(activity.resources.getText(R.string.dough_preferment_flour).toString())
         } catch (e: Throwable) {
             screenshot("14b-fehler-vorteig")
-            throw e
+            val nodes = composeRule.onAllNodes(hasText(text(R.string.dough_pre_biga)), useUnmergedTree = true).printToString()
+            throw AssertionError("Vorteig-Feld fehlt nach Biga. Knoten mit Biga: $nodes", e)
         }
 
         screenshot("14b-teigrechner-biga")
