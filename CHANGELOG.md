@@ -3,6 +3,10 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.71.1] – 2026-11-03 (versionCode 122)
+
+Keine sichtbaren Änderungen an der App außer kleinen Textkorrekturen: Die Beschreibungen der Hefearten im Infotext kommen ohne feste Minutenangaben aus (Version 0.71.0 wurde wegen der automatischen Prüfungen nicht veröffentlicht, ihre Neuerungen stehen unten und sind hier enthalten).
+
 ## [0.71.0] – 2026-11-03 (versionCode 121)
 
 ### Neu
