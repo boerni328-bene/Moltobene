@@ -25,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.moltobene.app.R
@@ -666,10 +667,12 @@ private fun CakeForm(
                     }
                 }
             }.joinToString(SUMMARY_SEPARATOR)
+            // Sprache wie im übrigen Teigrechner beobachtbar lesen (Lint „NonObservableLocale“).
+            val language = LocalConfiguration.current.locales[0].language
             val yeastSummary = listOfNotNull(
                 stringResource(AndroidDoughTexts.yeastName(yeastKind)),
                 stringResource(R.string.dough_summary_of_flour, "${yeast.trim()} %"),
-                success?.let { DoughNumbers.weight(DoughSummary.yeastGrams(it), LineRole.YEAST, Locale.getDefault().language, weight) },
+                success?.let { DoughNumbers.weight(DoughSummary.yeastGrams(it), LineRole.YEAST, language, weight) },
             ).joinToString(SUMMARY_SEPARATOR)
             val ingredientsSummary = fields.filter { it != CakeField.YEAST }
                 .map { summaryValue(cakeFieldLabel(kind, it), cakeValue(it)) }
