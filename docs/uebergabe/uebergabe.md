@@ -1,6 +1,6 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 04.11.2026 · `main` = Version 0.71.1 · Arbeitszweig `claude/trusting-galileo-xg0tgz` = Version 0.72.0 (Teigrechner „Aufklappen“), Build auf dem Zweig läuft · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 04.11.2026 · `main` = Version 0.71.1 · Arbeitszweig `claude/trusting-galileo-xg0tgz` = Version 0.72.0 (Teigrechner „Aufklappen“), Build auf dem Zweig grün (Lauf 385, inkl. Testlauf), noch nicht auf `main` · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
@@ -10,7 +10,8 @@ Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die
 - Umgesetzt: bei normaler Schrift Bereiche Hefe, Vorteig, Teig (`ui/dough/DoughSection.kt`; immer einer offen, Standard „Teig“; Zusammenfassung je Bereich, z. B. „Biga · Mehl 30 % · Wasser 50 % · 277 g“). Ergebniskarte `ResultTop`: Gesamtteig als erste, hervorgehobene Kachel, darunter „Biga: …“ und neu „Hauptteig: Biga, 429 g Mehl, 276 g Wasser, 17 g Salz“ (`data/dough/DoughSummary.kt`, Test `DoughSummaryTest`). Pasta: Größe + Zutaten; Kuchen: Größe, Hefe (nur Hefeteig), Zutaten; Standard offen „Zutaten“. Große Schrift unverändert (Karten zum Scrollen).
 - Bewusst so: Bei Biga/Poolish steckt die ganze Hefe im Vorteig (Rechnung unverändert); Hefe in der Zeile „Hauptteig“ gibt es nur beim Sauerteig. Zusätzliche Hefe im Hauptteig bei Biga wäre eine neue Einstellung (Inhaber fragen). „Neu in Version“ nicht geändert (wie 0.61–0.71).
 - Rundgang: `openDoughSection(...)` in `AppTourTest` klappt „Vorteig“ vor Biga und „Teig“ vor „Weitere Zutat“ auf; erste Prüfung wartet auf „4 × 250 g“ (`dough_summary_pieces`).
-- **Nächster Schritt:** Build auf dem Zweig grün bekommen, Bildschirmfotos prüfen, Inhaber prüft; nach seiner Freigabe auf `main` übernehmen (Squash-Merge), dann entsteht das Release.
+- Build: Lauf 384 rot nur wegen Lint `NonObservableLocale` (`Locale.getDefault()` direkt in einer Composable; behoben mit `LocalConfiguration`), Lauf 385 grün (Lint, Unit-Tests, Release-APK, Rundgang). Bildschirmfotos (Artefakt „bildschirmfotos-0.72.0“) in der Cloud-Sitzung nicht ladbar: Host `productionresultssa4.blob.core.windows.net` von den Netzwerkregeln gesperrt.
+- **Nächster Schritt:** Inhaber sieht die Bildschirmfotos auf GitHub an bzw. prüft nach dem Release auf dem Handy; nach seiner Freigabe auf `main` übernehmen (Squash-Merge), dann entsteht das Release. Offene Frage an ihn: zusätzliche Hefe im Hauptteig bei Biga/Poolish als neue Einstellung?
 
 ## Offen / zurückgestellt
 - Schrift 200 % verbessern (Inhaber: „später“; Bildschirm und Gerät nannte er nicht).
