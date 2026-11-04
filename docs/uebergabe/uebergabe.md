@@ -1,6 +1,6 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 04.11.2026 · `main` = Version 0.72.0 (Teigrechner „Aufklappen“, Freigabe des Inhabers vom 04.11.2026), Release v0.72.0 folgt aus dem Build auf `main` · Arbeitszweig `claude/trusting-galileo-xg0tgz` (gleicher Inhalt, per Squash übernommen) · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 04.11.2026 · `main` = Version 0.73.0 (zusätzliche Hefe im Hauptteig, Freigabe des Inhabers vom 04.11.2026; davor 0.72.0 Teigrechner „Aufklappen“), Release v0.73.0 folgt aus dem Build auf `main` · Arbeitszweig `claude/trusting-galileo-xg0tgz` (gleicher Inhalt, per Squash übernommen) · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
@@ -11,7 +11,8 @@ Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die
 - Bewusst so: Bei Biga/Poolish steckt die ganze Hefe im Vorteig (Rechnung unverändert); Hefe in der Zeile „Hauptteig“ gibt es nur beim Sauerteig. Zusätzliche Hefe im Hauptteig bei Biga wäre eine neue Einstellung (Inhaber fragen). „Neu in Version“ nicht geändert (wie 0.61–0.71).
 - Rundgang: `openDoughSection(...)` in `AppTourTest` klappt „Vorteig“ vor Biga und „Teig“ vor „Weitere Zutat“ auf; erste Prüfung wartet auf „4 × 250 g“ (`dough_summary_pieces`).
 - Build: Lauf 384 rot nur wegen Lint `NonObservableLocale` (`Locale.getDefault()` direkt in einer Composable; behoben mit `LocalConfiguration`), Lauf 385 grün (Lint, Unit-Tests, Release-APK, Rundgang). Bildschirmfotos (Artefakt „bildschirmfotos-0.72.0“) in der Cloud-Sitzung nicht ladbar: Host `productionresultssa4.blob.core.windows.net` von den Netzwerkregeln gesperrt.
-- **Nächster Schritt:** Build auf `main` prüfen (Release v0.72.0); Inhaber prüft auf dem Handy. Offene Frage an ihn: zusätzliche Hefe im Hauptteig bei Biga/Poolish als neue Einstellung?
+- 0.73.0 (auf `main`, Wunsch vom 04.11.2026): Bei Biga/Poolish zweites Hefefeld „Zusätzlich im Hauptteig (% vom Mehl)“, das erste heißt dann „Im Vorteig (% vom Mehl)“. Wert `LeavenedInput.mainYeast` (`DoughField.MAIN_YEAST`, Pizza bis 5 %, Brot bis 3 %), nur bei `Preferment.carriesYeast` gerechnet und geprüft; gemerkt als `mainYeast=` (ältere Werte → 0); Voreinstellungen vergleichen ihn nur mit Biga/Poolish. Zusammenfassung „Frischhefe · Vorteig 0,2 % · Hauptteig 0,1 % · 1,8 g“.
+- **Nächster Schritt:** Build auf `main` prüfen (Release v0.73.0); Inhaber prüft 0.72.0/0.73.0 auf dem Handy.
 
 ## Offen / zurückgestellt
 - Schrift 200 % verbessern (Inhaber: „später“; Bildschirm und Gerät nannte er nicht).

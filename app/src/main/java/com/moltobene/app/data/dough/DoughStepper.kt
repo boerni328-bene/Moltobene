@@ -19,7 +19,7 @@ object DoughStepper {
         DoughField.WATER, DoughField.FAT, DoughField.SUGAR, DoughField.EGG, DoughField.MILK, DoughField.QUARK -> 1.0
         DoughField.SALT -> 0.1
         DoughField.OIL, DoughField.BAKING_POWDER, DoughField.MALT, DoughField.HONEY -> 0.5
-        DoughField.YEAST -> 0.05
+        DoughField.YEAST, DoughField.MAIN_YEAST -> 0.05
         DoughField.PREFERMENT_FLOUR, DoughField.PREFERMENT_WATER, DoughField.SEMOLINA, DoughField.WHOLE_EGG, DoughField.YOLK,
         DoughField.YOGURT, DoughField.RYE, DoughField.WHOLE, DoughField.SPELT, DoughField.SEEDS -> 5.0
         DoughField.PAN_SIZE -> 1.0
@@ -55,7 +55,7 @@ object DoughStepper {
             DoughField.WATER -> DoughLimits.Range(50.0, 90.0)
             DoughField.SALT -> DoughLimits.Range(0.0, 4.0)
             DoughField.OIL -> DoughLimits.Range(0.0, 8.0)
-            DoughField.YEAST -> DoughLimits.Range(0.0, 2.0)
+            DoughField.YEAST, DoughField.MAIN_YEAST -> DoughLimits.Range(0.0, 2.0)
             DoughField.PREFERMENT_FLOUR -> DoughLimits.Range(5.0, 100.0)
             DoughField.PREFERMENT_WATER -> DoughLimits.Range(40.0, 120.0)
             DoughField.FLOUR_PER_PORTION -> DoughLimits.Range(50.0, 200.0)
@@ -73,10 +73,10 @@ object DoughStepper {
     }
 
     /** Schrittweite des Reglers; bei der Hefe feiner als bei Plus/Minus, damit kleine Mengen treffbar sind. */
-    fun sliderStepFor(field: DoughField): Double = if (field == DoughField.YEAST) 0.01 else stepFor(field)
+    fun sliderStepFor(field: DoughField): Double = if (isCurved(field)) 0.01 else stepFor(field)
 
     /** Die Hefe hat eine gestauchte Skala: feine Schritte im unteren Bereich, wo die üblichen Mengen liegen. */
-    fun isCurved(field: DoughField): Boolean = field == DoughField.YEAST
+    fun isCurved(field: DoughField): Boolean = field == DoughField.YEAST || field == DoughField.MAIN_YEAST
 
     /** Stellung des Reglers (0 bis 1) für einen Wert; Werte außerhalb des Bereichs stehen am Rand. */
     fun positionOf(value: Double, bounds: DoughLimits.Range, curved: Boolean): Float {

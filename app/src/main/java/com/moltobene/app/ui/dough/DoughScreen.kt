@@ -773,6 +773,8 @@ private fun DoughForm(
     var oil by rememberSaveable(type, resetCount) { mutableStateOf(show(start.oil)) }
     var yeastKindKey by rememberSaveable(type, resetCount) { mutableStateOf(start.yeastKind.key) }
     var yeast by rememberSaveable(type, resetCount) { mutableStateOf(show(start.yeast)) }
+    // Zusätzliche Hefe im Hauptteig, nur bei Biga und Poolish (Wunsch vom 04.11.2026).
+    var mainYeast by rememberSaveable(type, resetCount) { mutableStateOf(show(start.mainYeast)) }
     var prefermentKey by rememberSaveable(type, resetCount) { mutableStateOf(start.preferment.key) }
     var prefermentFlour by rememberSaveable(type, resetCount) { mutableStateOf(show(start.prefermentFlour)) }
     var prefermentWater by rememberSaveable(type, resetCount) { mutableStateOf(show(start.prefermentWater)) }
@@ -821,6 +823,7 @@ private fun DoughForm(
         honey = parseNumber(honeyText),
         egg = parseNumber(eggText),
         seeds = parseNumber(seedsText),
+        mainYeast = parseNumber(mainYeast),
     )
     val result = DoughCalculator.calculate(input)
     val issues = (result as? DoughResult.Invalid)?.issues.orEmpty()
@@ -881,6 +884,7 @@ private fun DoughForm(
         honeyText = show(preset.honey)
         eggText = show(preset.egg)
         seedsText = show(preset.seeds)
+        mainYeast = show(preset.mainYeast)
     }
 
     // Hinweise „Was bewirkt das?“ (Teigwissen, #84): welche Karte gerade erklärt wird.
@@ -933,9 +937,18 @@ private fun DoughForm(
     }
     val yeastField: @Composable (Modifier) -> Unit = { m ->
         NumberField(
-            stringResource(R.string.dough_yeast_amount), yeast, { yeast = it },
+            // Mit Biga oder Poolish gibt es zwei Hefefelder; das erste nennt dann den Vorteig.
+            stringResource(if (preferment.carriesYeast) R.string.dough_yeast_in_preferment else R.string.dough_yeast_amount),
+            yeast, { yeast = it },
             issueFor(DoughField.YEAST), m, suffix = "%",
             stepping = stepping(DoughField.YEAST, YeastKind.FRESH.convert(defaults.yeast, yeastKind)),
+        )
+    }
+    val mainYeastField: @Composable (Modifier) -> Unit = { m ->
+        NumberField(
+            stringResource(R.string.dough_yeast_main), mainYeast, { mainYeast = it },
+            issueFor(DoughField.MAIN_YEAST), m, suffix = "%",
+            stepping = stepping(DoughField.MAIN_YEAST, 0.0),
         )
     }
     val prefermentFlourField: @Composable (Modifier) -> Unit = { m ->
@@ -1019,14 +1032,14 @@ private fun DoughForm(
         }
     }
     fun selectYeastKind(kind: YeastKind) {
-        // Die Menge bleibt gleichwertig, wenn die Hefeart wechselt.
-        val current = parseNumber(yeast)
-        if (current.isFinite()) {
-            yeast = DoughNumbers.separator(
-                DoughNumbers.plain(yeastKind.convert(current, kind), 3),
-                Locale.getDefault().language,
-            )
+        // Die Mengen bleiben gleichwertig, wenn die Hefeart wechselt (auch die zusätzliche im Hauptteig).
+        fun converted(text: String): String {
+            val current = parseNumber(text)
+            if (!current.isFinite()) return text
+            return DoughNumbers.separator(DoughNumbers.plain(yeastKind.convert(current, kind), 3), Locale.getDefault().language)
         }
+        yeast = converted(yeast)
+        mainYeast = converted(mainYeast)
         yeastKindKey = kind.key
     }
     fun selectPreferment(option: Preferment) {
@@ -1055,11 +1068,18 @@ private fun DoughForm(
     )
     val language = LocalConfiguration.current.locales[0].language
     // Zusammenfassungen der Bereiche (Entwurf 5): was eingestellt ist, auch wenn der Bereich zu ist.
-    val yeastSummary = listOfNotNull(
-        stringResource(AndroidDoughTexts.yeastName(yeastKind)),
-        stringResource(R.string.dough_summary_of_flour, "${yeast.trim()} %"),
-        success?.let { DoughNumbers.weight(DoughSummary.yeastGrams(it), LineRole.YEAST, language, unit) },
-    ).joinToString(SUMMARY_SEPARATOR)
+    // Mit zusätzlicher Hefe im Hauptteig: „Frischhefe · Vorteig 0,2 % · Hauptteig 0,1 % · 1,8 g“ (Gramm insgesamt).
+    val withMainYeast = preferment.carriesYeast && parseNumber(mainYeast).let { !it.isFinite() || it > 0 }
+    val yeastSummary = buildList {
+        add(stringResource(AndroidDoughTexts.yeastName(yeastKind)))
+        if (withMainYeast) {
+            add(summaryValue(R.string.dough_section_preferment, yeast))
+            add(summaryValue(R.string.dough_main_dough, mainYeast))
+        } else {
+            add(stringResource(R.string.dough_summary_of_flour, "${yeast.trim()} %"))
+        }
+        if (success != null) add(DoughNumbers.weight(DoughSummary.yeastGrams(success), LineRole.YEAST, language, unit))
+    }.joinToString(SUMMARY_SEPARATOR)
     // Beim Vorteig am Schluss sein Gesamtgewicht, wie die Hefemenge darüber (Wunsch vom 04.11.2026).
     val prefermentSummary = if (preferment == Preferment.NONE) {
         prefermentName
@@ -1140,6 +1160,7 @@ private fun DoughForm(
                             maxLines = 2,
                         )
                         yeastField(Modifier.fillMaxWidth())
+                        if (preferment.carriesYeast) mainYeastField(Modifier.fillMaxWidth())
                         if (success != null) YeastEquivalent(success, yeastKind)
                     }
                     DoughSection(
@@ -1217,6 +1238,7 @@ private fun DoughForm(
                     Text(stringResource(R.string.dough_help_term_open, stringResource(AndroidDoughTexts.yeastName(yeastKind))))
                 }
                 yeastField(Modifier.fillMaxWidth())
+                if (preferment.carriesYeast) mainYeastField(Modifier.fillMaxWidth())
             }
 
             Card(stringResource(R.string.dough_section_dough), onHelp = { help = "dough" }) {

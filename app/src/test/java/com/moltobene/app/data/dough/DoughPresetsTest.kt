@@ -147,4 +147,16 @@ class DoughPresetsTest {
     fun schluesselJeTeigart() {
         assertNotEquals(DoughPresets.key(pizza), DoughPresets.key(bread))
     }
+
+    @Test
+    fun zusaetzlicheHefeZaehltNurBeiBigaUndPoolish() {
+        val neapolitan = DoughPresets.shipped(pizza).first { it.key == "neapolitan" }.input
+        // Ohne Vorteig wirkt sie nicht; die Voreinstellung bleibt erkannt.
+        assertTrue(DoughPresets.matches(neapolitan.copy(mainYeast = 0.1), neapolitan))
+        val biga = neapolitan.copy(preferment = Preferment.BIGA, prefermentWater = 50.0)
+        assertTrue(DoughPresets.matches(biga, biga))
+        assertFalse(DoughPresets.matches(biga.copy(mainYeast = 0.1), biga))
+        // Anwenden übernimmt den Wert der Voreinstellung.
+        assertEquals(0.0, DoughPresets.apply(biga.copy(mainYeast = 0.1), neapolitan).mainYeast, 0.0)
+    }
 }

@@ -554,6 +554,9 @@
     <string name="dough_yeast_instant">Instant yeast</string>
     <string name="dough_yeast_active">Active dry yeast</string>
     <string name="dough_yeast_amount">Amount (% of flour)</string>
+    <string name="dough_yeast_in_preferment">In preferment (% of flour)</string>
+    <string name="dough_yeast_main">Extra in final dough (% of flour)</string>
+    <string name="dough_main_dough">Final dough</string>
     <string name="dough_section_preferment">Preferment</string>
     <string name="dough_explain_preferment">Preferment: Part of the flour, water and yeast is mixed ahead of time. This gives more flavor and a lighter dough.</string>
     <string name="dough_pre_none">None</string>

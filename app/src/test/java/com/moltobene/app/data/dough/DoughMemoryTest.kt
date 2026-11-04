@@ -45,4 +45,15 @@ class DoughMemoryTest {
         assertEquals(0.0, DoughMemory.decode(DoughType.BREAD, "preferment=sourdough;yeast=0.0").yeast, 0.0)
         assertEquals(DoughLimits.defaults(DoughType.BREAD).yeast, DoughMemory.decode(DoughType.BREAD, "yeast=0.0").yeast, 0.0)
     }
+
+    @Test
+    fun zusaetzlicheHefeWirdGemerktUndFehltBeiAltenWerten() {
+        val input = DoughLimits.defaults(DoughType.PIZZA).copy(preferment = Preferment.BIGA, prefermentWater = 50.0, mainYeast = 0.15)
+        assertEquals(input, DoughMemory.decode(DoughType.PIZZA, DoughMemory.encode(input)))
+        // Gemerkte Werte bis 0.72.0 kennen sie nicht: Sie beginnt bei 0.
+        val old = DoughMemory.encode(input).replace(";mainYeast=0.15", "")
+        assertEquals(0.0, DoughMemory.decode(DoughType.PIZZA, old).mainYeast, 0.0)
+        // Außerhalb der Grenzen gilt ebenfalls 0.
+        assertEquals(0.0, DoughMemory.decode(DoughType.PIZZA, "preferment=biga;mainYeast=9").mainYeast, 0.0)
+    }
 }
