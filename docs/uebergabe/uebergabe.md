@@ -1,6 +1,6 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 01.11.2026 · `main` = Version 0.71.1 (0.71.0 Build rot wegen Textregeln, nie veröffentlicht) (Teigrechner: Hefe oben wie Vorteig, Hefearten im Infotext und Teigwissen; 0.70.3 Hefe neben Hefemenge, Öl zuletzt; 0.70.2 Tastatur schließt beim Tippen daneben, Voreinstellungen ohne „Standard“/„Eigene Werte“; davor 0.70.0 Mehlsorten), Release folgt aus dem Build auf `main` · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 04.11.2026 · Arbeitszweig `claude/trusting-galileo-xg0tgz` (nur diese Datei geändert) · `main` = Version 0.71.1 (0.71.0 Build rot wegen Textregeln, nie veröffentlicht) (Teigrechner: Hefe oben wie Vorteig, Hefearten im Infotext und Teigwissen; 0.70.3 Hefe neben Hefemenge, Öl zuletzt; 0.70.2 Tastatur schließt beim Tippen daneben, Voreinstellungen ohne „Standard“/„Eigene Werte“; davor 0.70.0 Mehlsorten), Release folgt aus dem Build auf `main` · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud (neuer Kernsatz seit 0.59.2). Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
@@ -19,6 +19,7 @@ Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die
 - Lehre: Eigenschaften in ViewModels vor dem `init`-Block deklarieren (sonst NullPointerException).
 
 ## Offen / zurückgestellt
+- **Teigrechner (Pizza/Brot) wieder auf einen Bildschirm (04.11.2026):** Inhaber muss auf seinem Handy für „Wasser (Hydration)“ und Öl scrollen. Fünf bedienbare Entwürfe (360 × 712 dp = Testhandy ohne Status-/Gestenleiste, vollster Fall mit Biga) auf der privaten Seite https://claude.ai/artifact/RAw2psMZkncGoKijB3sHSq: 1 Zwei Spalten (seine Idee: Vorteig links, Hefe rechts untereinander; Zeilen nur 42 dp, Hinweise ins Info-Fenster), 2 Kompakt (Reihenfolge wie heute, Hefe in einer Zeile mit Kurzwörtern „Frisch/Instant/Aktiv“, Beschriftung im Feldrahmen), 3 Prozentbalken (Regler statt Plus/Minus bei Prozenten), 4 Kacheln (3 Spalten, Gramm in jeder Kachel, keine Ergebniskacheln), 5 Aufklappen (Hefe/Vorteig/Teig, einer offen). Gemeinsam: Kopfleiste 56 dp, Gesamtteig als erste Ergebniskachel statt eigener Zeile, Feldbeschriftung im Rahmen. **Nächster Schritt:** Inhaber wählt (oder mischt); erst dann umsetzen (große Schrift bleibt beim Scrollen mit Karten).
 - Schrift 200 % verbessern (Inhaber: „später“; Bildschirm und Gerät nannte er nicht).
 - YouTube-Link: Feld „Video“ unter „Quelle“ gibt es schon; Inhaber nennt bei Bedarf ein Rezept, bei dem er fehlt.
 - (erledigt in 0.60.1: Foto bei Handy quer flacher)
