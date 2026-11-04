@@ -233,4 +233,30 @@ class DoughCalculatorTest {
         assertEquals(-3.0, DoughFlours.waterShift(base.copy(spelt = 100.0)), 0.0)
         assertEquals(0.0, DoughFlours.waterShift(base.copy(rye = Double.NaN)), 0.0)
     }
+
+    @Test
+    fun zusaetzlicheHefeImHauptteigBeiBiga() {
+        // Wunsch vom 04.11.2026: 0,2 % Hefe in der Biga und 0,1 % zusätzlich im Hauptteig, beides vom gesamten Mehl.
+        val result = success(pizza(preferment = Preferment.BIGA, prefermentWater = 50.0).copy(mainYeast = 0.1))
+        val flour = 1000.0 / (1 + 0.65 + 0.03 + 0.002 + 0.001)
+        assertEquals(flour, result.flourGrams, 1e-9)
+        assertEquals(flour * 0.002, result.grams(SectionKind.PREFERMENT, LineRole.YEAST), 1e-9)
+        assertEquals(flour * 0.001, result.grams(SectionKind.MAIN, LineRole.YEAST), 1e-9)
+        assertEquals(1000.0, result.sections.flatMap { it.lines }.sumOf { it.grams }, 1e-6)
+    }
+
+    @Test
+    fun zusaetzlicheHefeWirktNurBeiBigaUndPoolish() {
+        for (preferment in listOf(Preferment.NONE, Preferment.SOURDOUGH)) {
+            val plain = success(pizza(preferment = preferment))
+            val extra = success(pizza(preferment = preferment).copy(mainYeast = 1.0))
+            assertEquals(preferment.key, plain, extra)
+        }
+        // Geprüft wird sie nur, wo sie wirkt.
+        assertTrue(
+            issues(pizza(preferment = Preferment.POOLISH).copy(mainYeast = 6.0))
+                .contains(DoughIssue.OutOfRange(DoughField.MAIN_YEAST, 0.0, 5.0)),
+        )
+        assertTrue(DoughCalculator.calculate(pizza().copy(mainYeast = 6.0)) is DoughResult.Success)
+    }
 }

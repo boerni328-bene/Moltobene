@@ -106,6 +106,7 @@ object DoughPresets {
         honey = preset.honey,
         egg = preset.egg,
         seeds = preset.seeds,
+        mainYeast = preset.mainYeast,
     )
 
     /**
@@ -117,8 +118,10 @@ object DoughPresets {
         fun same(a: Double, b: Double) = a.isFinite() && kotlin.math.abs(a - b) < 0.0051
         val withPreferment = current.preferment == Preferment.NONE ||
             (same(current.prefermentFlour, preset.prefermentFlour) && same(current.prefermentWater, preset.prefermentWater))
+        // Zusätzliche Hefe im Hauptteig zählt nur bei Biga und Poolish, sonst wirkt sie nicht.
+        val withMainYeast = !current.preferment.carriesYeast || same(current.mainYeast, preset.mainYeast)
         return same(current.water, preset.water) && same(current.salt, preset.salt) && same(current.oil, preset.oil) &&
-            same(current.yeast, preset.yeast) && withPreferment &&
+            same(current.yeast, preset.yeast) && withPreferment && withMainYeast &&
             same(current.malt, preset.malt) && same(current.yogurt, preset.yogurt) && same(current.milk, preset.milk) &&
             same(current.sugar, preset.sugar) &&
             same(current.rye, preset.rye) && same(current.whole, preset.whole) && same(current.spelt, preset.spelt) &&

@@ -554,6 +554,9 @@
     <string name="dough_yeast_instant">Instanthefe</string>
     <string name="dough_yeast_active">Aktivhefe</string>
     <string name="dough_yeast_amount">Menge (% vom Mehl)</string>
+    <string name="dough_yeast_in_preferment">Im Vorteig (% vom Mehl)</string>
+    <string name="dough_yeast_main">Zusätzlich im Hauptteig (% vom Mehl)</string>
+    <string name="dough_main_dough">Hauptteig</string>
     <string name="dough_section_preferment">Vorteig</string>
     <string name="dough_explain_preferment">Vorteig: Ein Teil von Mehl, Wasser und Hefe wird vorher angesetzt. Das gibt mehr Geschmack und einen lockereren Teig.</string>
     <string name="dough_pre_none">Ohne</string>

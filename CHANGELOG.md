@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.73.0] – 2026-11-04 (versionCode 124)
+
+### Neu
+- **Teigrechner: zusätzliche Hefe im Hauptteig.** Bei Biga und Poolish gibt es im Bereich „Hefe“ ein zweites Feld „Zusätzlich im Hauptteig (% vom Mehl)“. Die Hefe im ersten Feld („Im Vorteig“) kommt wie bisher in den Vorteig, die zusätzliche erst beim Kneten in den Hauptteig. Sie steht oben in der Zeile „Hauptteig“, im gespeicherten Rezept unter „Für den Hauptteig“ und zählt bei den Gesamtmengen mit. Die Zusammenfassung zeigt dann beide Mengen, zum Beispiel „Frischhefe · Vorteig 0,2 % · Hauptteig 0,1 % · 1,8 g“. Anfangs steht sie auf 0, dann ändert sich nichts.
+
 ## [0.72.0] – 2026-11-04 (versionCode 123)
 
 ### Neu

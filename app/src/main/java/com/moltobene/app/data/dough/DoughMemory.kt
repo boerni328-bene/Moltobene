@@ -28,6 +28,7 @@ object DoughMemory {
         "honey=${input.honey}",
         "egg=${input.egg}",
         "seeds=${input.seeds}",
+        "mainYeast=${input.mainYeast}",
     ).joinToString(";")
 
     /** Die gemerkten Werte für [type]; ohne oder mit kaputtem [text] die Standardwerte. */
@@ -68,6 +69,8 @@ object DoughMemory {
             honey = number("honey", DoughField.HONEY, 0.0),
             egg = number("egg", DoughField.EGG, 0.0),
             seeds = number("seeds", DoughField.SEEDS, 0.0),
+            // Neu in 0.73.0; ältere gemerkte Werte haben ihn nicht und beginnen bei 0.
+            mainYeast = number("mainYeast", DoughField.MAIN_YEAST, 0.0),
         )
     }
 }

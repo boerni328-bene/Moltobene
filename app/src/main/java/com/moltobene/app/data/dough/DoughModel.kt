@@ -44,6 +44,9 @@ enum class Preferment(val key: String) {
     SOURDOUGH("sourdough"),
     ;
 
+    /** Biga und Poolish tragen die Hefe; nur bei ihnen kann zusätzlich Hefe in den Hauptteig kommen. */
+    val carriesYeast: Boolean get() = this == BIGA || this == POOLISH
+
     companion object {
         fun fromKey(key: String?): Preferment? = entries.firstOrNull { it.key == key }
     }
@@ -85,6 +88,11 @@ data class LeavenedInput(
     val honey: Double = 0.0,
     val egg: Double = 0.0,
     val seeds: Double = 0.0,
+    /**
+     * Zusätzliche Hefe im Hauptteig in % vom gesamten Mehl, gleiche Hefeart (Wunsch vom 04.11.2026). Gilt nur bei Biga
+     * und Poolish, deren Hefe ([yeast]) ganz in den Vorteig kommt; beim Sauerteig und ohne Vorteig ohne Wirkung.
+     */
+    val mainYeast: Double = 0.0,
 ) : DoughInput
 
 enum class LineRole { FLOUR, WATER, SALT, OIL, YEAST, SEMOLINA, EGG, YOLK, MILK, LIQUID, SUGAR, BUTTER, QUARK, BAKING_POWDER, MALT, YOGURT, WHEAT, RYE, WHOLE, SPELT, HONEY, SEEDS }
@@ -105,6 +113,7 @@ data class DoughYield(val count: Int, val kind: YieldKind, val pieceGrams: Doubl
 enum class DoughField {
     COUNT, PIECE_GRAMS, WATER, SALT, OIL, YEAST, PREFERMENT_FLOUR, PREFERMENT_WATER,
     FLOUR_PER_PORTION, SEMOLINA, WHOLE_EGG, YOLK, FLOUR_GRAMS, FAT, SUGAR, EGG, MILK, QUARK, BAKING_POWDER, PAN_SIZE, MALT, YOGURT, RYE, WHOLE, SPELT, HONEY, SEEDS,
+    MAIN_YEAST,
 }
 
 /** Warum eine Eingabe nicht rechnet. */

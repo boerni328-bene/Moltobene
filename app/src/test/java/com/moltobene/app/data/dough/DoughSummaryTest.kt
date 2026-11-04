@@ -60,4 +60,16 @@ class DoughSummaryTest {
             assertEquals(preferment.key, result.flourGrams * 0.002, DoughSummary.yeastGrams(result), 1e-9)
         }
     }
+
+    @Test
+    fun zusaetzlicheHefeStehtZuerstImHauptteig() {
+        val input = LeavenedInput(
+            DoughType.PIZZA, 4, 250.0, 60.0, 2.8, 0.0, YeastKind.FRESH, 0.2, Preferment.BIGA, 30.0, 50.0, mainYeast = 0.1,
+        )
+        val result = DoughCalculator.calculate(input) as DoughResult.Success
+        val lines = DoughSummary.mainLines(result)
+        assertEquals(listOf(LineRole.YEAST, LineRole.FLOUR, LineRole.WATER, LineRole.SALT), lines.map { it.role })
+        assertEquals(result.flourGrams * 0.001, lines.first().grams, 1e-9)
+        assertEquals(result.flourGrams * 0.003, DoughSummary.yeastGrams(result), 1e-9)
+    }
 }

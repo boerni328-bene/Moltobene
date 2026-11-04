@@ -5,12 +5,13 @@ package com.moltobene.app.data.dough
  * [DoughResult.Invalid], nie eine negative Menge, „NaN“ oder einen Absturz. Gerechnet wird ungerundet; gerundet wird
  * erst beim Schreiben des Rezepts ([DoughNumbers]).
  *
- * Alle Prozente beziehen sich auf das gesamte Mehl F. Mit dem Gewicht T des ganzen Teigs, Wasser h, Salz s, Öl o und
- * Hefe y (jeweils als Anteil, 65 % = 0,65) ist F = T ÷ (1 + h + s + o + y).
+ * Alle Prozente beziehen sich auf das gesamte Mehl F. Mit dem Gewicht T des ganzen Teigs, Wasser h, Salz s, Öl o,
+ * Hefe y und bei Biga und Poolish zusätzlicher Hefe im Hauptteig yH (jeweils als Anteil, 65 % = 0,65) ist
+ * F = T ÷ (1 + h + s + o + y + yH).
  *
- * Vorteig: Mehl Fp = p · F, Wasser Wp = Fp · hp. Biga und Poolish tragen die ganze Hefe; Sauerteig ist Anstellgut aus
- * Mehl und Wasser ohne Hefefaktor – seine Hefe (falls gewünscht) steht im Hauptteig. Der Hauptteig ist der Rest, das
- * Wasser im Vorteig zählt zum Gesamtwasser.
+ * Vorteig: Mehl Fp = p · F, Wasser Wp = Fp · hp. Biga und Poolish tragen die Hefe y, die zusätzliche Hefe yH kommt in
+ * den Hauptteig; Sauerteig ist Anstellgut aus Mehl und Wasser ohne Hefefaktor – seine Hefe (falls gewünscht) steht im
+ * Hauptteig. Der Hauptteig ist der Rest, das Wasser im Vorteig zählt zum Gesamtwasser.
  */
 object DoughCalculator {
 
@@ -23,8 +24,10 @@ object DoughCalculator {
         val salt = input.salt / 100
         val oil = input.oil / 100
         val yeast = input.yeast / 100
+        // Zusätzliche Hefe im Hauptteig gibt es nur bei Biga und Poolish (Wunsch vom 04.11.2026).
+        val mainYeast = if (input.preferment.carriesYeast) input.mainYeast / 100 else 0.0
         val extras = listOf(input.malt, input.sugar, input.yogurt, input.milk, input.honey, input.egg, input.seeds).sumOf { it } / 100
-        val flour = total / (1 + water + salt + oil + yeast + extras)
+        val flour = total / (1 + water + salt + oil + yeast + mainYeast + extras)
         // Mit Roggen, Vollkorn oder Dinkel wird das Mehl nach Sorte aufgeteilt (auch im Vorteig im gleichen Verhältnis); der Rest ist Weizenmehl.
         val mixed = input.rye + input.whole + input.spelt > 0
         fun flourLines(grams: Double): List<DoughLine> = if (!mixed) {
@@ -74,7 +77,7 @@ object DoughCalculator {
                     SectionKind.MAIN, input.preferment,
                     lines(
                         flourLines(flour - prefermentFlour), mainWater.coerceAtLeast(0.0), salt * flour, oil * flour,
-                        if (yeastInPreferment) 0.0 else yeast * flour, extraLines(),
+                        if (yeastInPreferment) mainYeast * flour else yeast * flour, extraLines(),
                     ),
                 ),
             )
@@ -117,6 +120,7 @@ object DoughCalculator {
             check(DoughField.PREFERMENT_FLOUR, input.prefermentFlour)
             check(DoughField.PREFERMENT_WATER, input.prefermentWater)
         }
+        if (preferment.carriesYeast) check(DoughField.MAIN_YEAST, input.mainYeast)
         if (issues.isEmpty() && input.count * input.pieceGrams > DoughLimits.MAX_TOTAL_GRAMS) {
             issues += DoughIssue.OutOfRange(DoughField.PIECE_GRAMS, DoughLimits.range(type, DoughField.PIECE_GRAMS).min, DoughLimits.MAX_TOTAL_GRAMS / input.count)
         }
