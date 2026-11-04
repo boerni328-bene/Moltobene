@@ -1060,7 +1060,7 @@ private fun DoughForm(
                 onSavingChange = { savingPreset = it },
                 canSave = result is DoughResult.Success,
                 hasOwnChanges = !DoughPresets.matches(input, defaults),
-                onSelect = ::applyPreset,
+                onSelect = { applyPreset(it) },
                 onSave = { name ->
                     val saved = viewModel.saveOwnPreset(type, name, input)
                     if (saved == DoughPresets.SaveResult.SAVED) {
@@ -1086,7 +1086,7 @@ private fun DoughForm(
                         options = YeastKind.entries,
                         selected = yeastKind,
                         optionLabel = { stringResource(AndroidDoughTexts.yeastName(it)) },
-                        onSelect = ::selectYeastKind,
+                        onSelect = { selectYeastKind(it) },
                         modifier = Modifier.fillMaxWidth(),
                         maxLines = 2,
                     )
@@ -1098,7 +1098,7 @@ private fun DoughForm(
                         options = Preferment.entries,
                         selected = preferment,
                         optionLabel = { stringResource(prefermentLabel(it)) },
-                        onSelect = ::selectPreferment,
+                        onSelect = { selectPreferment(it) },
                         modifier = Modifier.fillMaxWidth(),
                     )
                     // Untereinander, damit auch „100 %“ in den Feldern Platz hat.
@@ -1151,7 +1151,7 @@ private fun DoughForm(
                     options = YeastKind.entries,
                     selected = yeastKind,
                     optionLabel = { stringResource(AndroidDoughTexts.yeastName(it)) },
-                    onSelect = ::selectYeastKind,
+                    onSelect = { selectYeastKind(it) },
                 )
                 TextButton(onClick = { help = yeastKind.key }) {
                     Text(stringResource(R.string.dough_help_term_open, stringResource(AndroidDoughTexts.yeastName(yeastKind))))
@@ -1197,7 +1197,7 @@ private fun DoughForm(
                     options = Preferment.entries,
                     selected = preferment,
                     optionLabel = { stringResource(prefermentLabel(it)) },
-                    onSelect = ::selectPreferment,
+                    onSelect = { selectPreferment(it) },
                 )
                 if (preferment != Preferment.NONE) {
                     TextButton(onClick = { help = preferment.key }) {
