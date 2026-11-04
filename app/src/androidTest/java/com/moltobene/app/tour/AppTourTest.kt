@@ -721,7 +721,9 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.dough_title))
         composeRule.onNodeWithText(text(R.string.dough_title)).performScrollTo().performClick()
         waitForText(text(R.string.dough_save))
-        waitForText(text(R.string.dough_total_pieces, "1000 g", 4, "250 g"), substring = true)
+        // Bei normaler Schrift steht „4 × 250 g“ in der Zusammenfassung des Bereichs „Teig“ (Entwurf 5, „Aufklappen“),
+        // bei großer Schrift in der Ergebniszeile unten („Gesamtteig: 1000 g (4 × 250 g)“).
+        waitForText(text(R.string.dough_summary_pieces, "4", "250 g"), substring = true)
         screenshot("14a-teigrechner")
 
         // Voreinstellungen (#83, Etappe 3): nebeneinander wählen, eigene speichern, löschen, zurück zu den Standardwerten.
@@ -803,6 +805,8 @@ class AppTourTest(private val variant: DisplayVariant) {
                 },
             ).performScrollTo().performClick()
         }
+        // Bei normaler Schrift liegt die Auswahl im Bereich „Vorteig“, der dafür aufgeklappt wird.
+        openDoughSection(R.string.dough_section_preferment)
         composeRule.onAllNodesWithText(text(R.string.dough_pre_biga))[0].performScrollTo().performClick()
         // Mit Vorteig erscheinen seine Felder; bei großer Schrift steht die Erklärung dabei.
         // (Der Feldname enthält „%“; deshalb ohne Formatierung lesen.)
@@ -810,6 +814,8 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("14b-teigrechner-biga")
 
         // Weitere Zutaten: „Weitere Zutat“ öffnet die Auswahl; das Feld erscheint mit seiner Menge, Hinweis zum Wasser im Joghurt.
+        // Bei normaler Schrift steht der Knopf im Bereich „Teig“.
+        openDoughSection(R.string.dough_section_dough)
         composeRule.onNodeWithText(text(R.string.dough_add_extra)).performScrollTo().performClick()
         composeRule.onNodeWithText(text(R.string.dough_label_yogurt)).performClick()
         field(R.string.dough_label_yogurt).performScrollTo().performTextClearance()
@@ -1502,6 +1508,20 @@ class AppTourTest(private val variant: DisplayVariant) {
             composeRule.onNodeWithText(text(label)).performScrollTo().performClick()
         } else {
             composeRule.onNodeWithContentDescription(text(label)).performClick()
+        }
+    }
+
+    /**
+     * Öffnet bei normaler Schrift einen Bereich des Teigrechners (Entwurf 5 „Aufklappen“), falls er zu ist. Bei großer
+     * Schrift stehen alle Karten offen untereinander.
+     */
+    private fun openDoughSection(@StringRes title: Int) {
+        if (variant == DisplayVariant.LARGE_TEXT) return
+        val header = composeRule.onNode(hasText(text(title)) and hasClickAction())
+        val state = header.fetchSemanticsNode().config.getOrNull(SemanticsProperties.StateDescription)
+        if (state != text(R.string.basics_expanded)) {
+            header.performScrollTo().performClick()
+            composeRule.waitForIdle()
         }
     }
 

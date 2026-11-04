@@ -25,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.moltobene.app.R
@@ -44,6 +45,7 @@ import com.moltobene.app.data.dough.DoughLimits
 import com.moltobene.app.data.dough.DoughNumbers
 import com.moltobene.app.data.dough.DoughResult
 import com.moltobene.app.data.dough.DoughStepper
+import com.moltobene.app.data.dough.DoughSummary
 import com.moltobene.app.data.dough.PastaCalculator
 import com.moltobene.app.data.dough.PastaInput
 import com.moltobene.app.data.dough.PastaKind
@@ -206,15 +208,16 @@ private fun PastaForm(
     FormFrame(
         header = header,
         summary = if (success != null && draft != null) summaryLine(success, draft, viewModel.weightUnit) else null,
+        total = success?.let { weightText(it.totalGrams, unit) },
         totals = resultTotals,
         onSave = { viewModel.savePasta(input, onSaved) },
         onReset = { resetCount += 1 },
         extra = resultTotals,
         compact = {
-            // Alles in einem Bild (Entwurf vom 30.10.2026): die Teigart als Reihe oben, die Felder paarweise.
-            val compactFields = buildList<@Composable (Modifier) -> Unit> {
-                add(portionsField)
-                add(flourField)
+            // Entwurf 5 „Aufklappen“ wie bei Pizza und Brot (Wunsch vom 04.11.2026): oben die Teigart als Reihe, darunter die
+            // Bereiche Größe und Zutaten mit Zusammenfassung; immer einer ist offen.
+            var openSection by rememberSaveable { mutableStateOf(SECTION_INGREDIENTS) }
+            val ingredientFields = buildList<@Composable (Modifier) -> Unit> {
                 add(semolinaField)
                 add(waterField)
                 if (kind == PastaKind.EGG) {
@@ -224,15 +227,46 @@ private fun PastaForm(
                 add(saltField)
                 add(oilField)
             }
-            Column(modifier = Modifier.padding(horizontal = Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            val sizeSummary = stringResource(R.string.dough_summary_portions, portions.trim(), "${flour.trim()} ${unit.label}")
+            val ingredientsSummary = buildList {
+                add(summaryValue(R.string.dough_semolina, semolina))
+                add(summaryValue(R.string.dough_ingredient_water, water))
+                if (kind == PastaKind.EGG) {
+                    add(summaryValue(R.string.dough_egg_whole, egg))
+                    add(summaryValue(R.string.dough_yolk, yolk))
+                }
+                add(summaryValue(R.string.dough_salt, salt))
+                add(summaryValue(R.string.dough_oil, oil))
+            }.joinToString(SUMMARY_SEPARATOR)
+            Column(modifier = Modifier.padding(horizontal = Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
                 KindRow(
                     options = PastaKind.entries,
                     selected = kind,
                     label = { stringResource(if (it == PastaKind.EGG) R.string.dough_pasta_egg else R.string.dough_pasta_water) },
                     onSelect = onKind,
                 )
-                Fields(*compactFields.toTypedArray())
-                if (kind == PastaKind.EGG) eggNotes()
+                DoughSection(
+                    title = stringResource(R.string.dough_section_size),
+                    summary = sizeSummary,
+                    expanded = openSection == SECTION_SIZE,
+                    onToggle = { openSection = if (openSection == SECTION_SIZE) "" else SECTION_SIZE },
+                ) {
+                    Fields(portionsField, flourField)
+                }
+                DoughSection(
+                    title = stringResource(R.string.dough_section_ingredients),
+                    summary = ingredientsSummary,
+                    expanded = openSection == SECTION_INGREDIENTS,
+                    onToggle = { openSection = if (openSection == SECTION_INGREDIENTS) "" else SECTION_INGREDIENTS },
+                ) {
+                    Fields(*ingredientFields.toTypedArray())
+                    if (kind == PastaKind.EGG) eggNotes()
+                    Text(
+                        stringResource(R.string.dough_percent_note_all),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         },
     ) {
@@ -294,6 +328,7 @@ internal fun EggHints(eggGrams: Double, yolkGrams: Double) {
 private fun FormFrame(
     header: @Composable () -> Unit,
     summary: String?,
+    total: String?,
     totals: List<TotalItem>?,
     onSave: () -> Unit,
     onReset: () -> Unit,
@@ -318,7 +353,7 @@ private fun FormFrame(
         SideEffect { bar.reset = onReset }
         Column(modifier = Modifier.fillMaxSize()) {
             header()
-            ResultTop(summary = summary, totals = totals)
+            ResultTop(total = total, totals = totals)
             Column(
                 modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(Spacing.xs),
@@ -404,8 +439,8 @@ private fun cakeFieldLabel(kind: CakeKind, field: CakeField): Int = when (field)
 private fun fmt(value: Double, decimals: Int = 1): String =
     DoughNumbers.separator(DoughNumbers.plain(value, decimals), Locale.getDefault().language)
 
-/** Mehlmenge mit Einheit in der Sprache des Geräts, z. B. „250 g“ oder „8,8 oz“. */
-private fun flourText(grams: Double, unit: WeightUnit): String = DoughNumbers.weight(grams, 0, Locale.getDefault().language, unit)
+/** Gewicht mit Einheit in der Sprache des Geräts, z. B. „250 g“ oder „8,8 oz“ (Mehl, Gesamtteig). */
+private fun weightText(grams: Double, unit: WeightUnit): String = DoughNumbers.weight(grams, 0, Locale.getDefault().language, unit)
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -539,16 +574,32 @@ private fun CakeForm(
         }
     }
 
+    // Der eingegebene Text eines Werts, für die Zusammenfassung „Zutaten“.
+    fun cakeValue(field: CakeField): String = when (field) {
+        CakeField.FAT -> fat
+        CakeField.SUGAR -> sugar
+        CakeField.EGG -> egg
+        CakeField.MILK -> milk
+        CakeField.QUARK -> quark
+        CakeField.YEAST -> yeast
+        CakeField.BAKING_POWDER -> baking
+        CakeField.SALT -> salt
+    }
+
     FormFrame(
         header = header,
         summary = if (success != null && draft != null) summaryLine(success, draft, viewModel.weightUnit) else null,
+        total = success?.let { weightText(it.totalGrams, weight) },
         totals = resultTotals,
         onSave = { viewModel.saveCake(input, onSaved) },
         onReset = { resetCount += 1 },
         extra = resultTotals,
         note = R.string.dough_cake_baking_note,
         compact = {
-            // Alles in einem Bild (Entwurf vom 30.10.2026): Größe (runde, eckige Backform oder Mehl) als ein Auswahlfeld.
+            // Entwurf 5 „Aufklappen“ wie bei Pizza und Brot (Wunsch vom 04.11.2026): oben die Kuchenart als Reihe, darunter
+            // die Bereiche Größe, Hefe (nur beim Hefeteig) und Zutaten mit Zusammenfassung; immer einer ist offen.
+            // Die Größe (runde, eckige Backform oder Mehl) bleibt ein Auswahlfeld (Entwurf vom 30.10.2026).
+            var openSection by rememberSaveable { mutableStateOf(SECTION_INGREDIENTS) }
             val sizeChoice: @Composable (Modifier) -> Unit = { m ->
                 CompactChoice(
                     label = stringResource(R.string.dough_section_size),
@@ -576,21 +627,11 @@ private fun CakeForm(
                     options = listOf(false, true),
                     selected = inch,
                     optionLabel = { stringResource(if (it) R.string.dough_unit_inch else R.string.dough_unit_cm) },
-                    onSelect = ::selectUnit,
+                    onSelect = { selectUnit(it) },
                     modifier = m,
                 )
             }
-            val yeastKindChoice: @Composable (Modifier) -> Unit = { m ->
-                CompactChoice(
-                    label = stringResource(R.string.dough_section_yeast),
-                    options = YeastKind.entries,
-                    selected = yeastKind,
-                    optionLabel = { stringResource(AndroidDoughTexts.yeastName(it)) },
-                    onSelect = ::selectYeastKind,
-                    modifier = m,
-                )
-            }
-            val compactFields = buildList<@Composable (Modifier) -> Unit> {
+            val sizeFields = buildList<@Composable (Modifier) -> Unit> {
                 add(sizeChoice)
                 if (!byPan) {
                     add(flourField)
@@ -602,28 +643,95 @@ private fun CakeForm(
                     add(widthField)
                     add(unitChoice)
                 }
-                if (CakeField.YEAST in fields) {
-                    add(yeastKindChoice)
-                    add(yeastAmountField)
-                }
-                addAll(ingredientFields)
             }
-            Column(modifier = Modifier.padding(horizontal = Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            val sizeSummary = buildList {
+                if (!byPan) {
+                    add(summaryValue(R.string.dough_size_flour, flour, weight.label))
+                } else {
+                    add(stringResource(if (round) R.string.dough_size_pan_round else R.string.dough_size_pan_rect))
+                    add(
+                        if (round) {
+                            stringResource(R.string.dough_summary_round, panA.trim(), unit)
+                        } else {
+                            stringResource(R.string.dough_summary_rect, panA.trim(), panB.trim(), unit)
+                        },
+                    )
+                    if (success != null) {
+                        add(
+                            stringResource(
+                                R.string.dough_summary_value,
+                                stringResource(R.string.dough_size_flour),
+                                weightText(success.flourGrams, weight),
+                            ),
+                        )
+                    }
+                }
+            }.joinToString(SUMMARY_SEPARATOR)
+            // Sprache wie im übrigen Teigrechner beobachtbar lesen (Lint „NonObservableLocale“).
+            val language = LocalConfiguration.current.locales[0].language
+            val yeastSummary = listOfNotNull(
+                stringResource(AndroidDoughTexts.yeastName(yeastKind)),
+                stringResource(R.string.dough_summary_of_flour, "${yeast.trim()} %"),
+                success?.let { DoughNumbers.weight(DoughSummary.yeastGrams(it), LineRole.YEAST, language, weight) },
+            ).joinToString(SUMMARY_SEPARATOR)
+            val ingredientsSummary = fields.filter { it != CakeField.YEAST }
+                .map { summaryValue(cakeFieldLabel(kind, it), cakeValue(it)) }
+                .joinToString(SUMMARY_SEPARATOR)
+            Column(modifier = Modifier.padding(horizontal = Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
                 KindRow(
                     options = CakeKind.entries,
                     selected = kind,
                     label = { stringResource(AndroidDoughTexts.cakeKindName(it)) },
                     onSelect = onKind,
                 )
-                Fields(*compactFields.toTypedArray())
-                if (byPan && success != null) {
+                DoughSection(
+                    title = stringResource(R.string.dough_section_size),
+                    summary = sizeSummary,
+                    expanded = openSection == SECTION_SIZE,
+                    onToggle = { openSection = if (openSection == SECTION_SIZE) "" else SECTION_SIZE },
+                ) {
+                    Fields(*sizeFields.toTypedArray())
+                    if (byPan && success != null) {
+                        Text(
+                            stringResource(R.string.dough_cake_flour_from_pan, weightText(success.flourGrams, weight)),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                if (CakeField.YEAST in fields) {
+                    DoughSection(
+                        title = stringResource(R.string.dough_section_yeast),
+                        summary = yeastSummary,
+                        expanded = openSection == SECTION_YEAST,
+                        onToggle = { openSection = if (openSection == SECTION_YEAST) "" else SECTION_YEAST },
+                    ) {
+                        SubtleChoice(
+                            label = "",
+                            options = YeastKind.entries,
+                            selected = yeastKind,
+                            optionLabel = { stringResource(AndroidDoughTexts.yeastName(it)) },
+                            onSelect = { selectYeastKind(it) },
+                            modifier = Modifier.fillMaxWidth(),
+                            maxLines = 2,
+                        )
+                        yeastAmountField(Modifier.fillMaxWidth())
+                    }
+                }
+                DoughSection(
+                    title = stringResource(R.string.dough_section_ingredients),
+                    summary = ingredientsSummary,
+                    expanded = openSection == SECTION_INGREDIENTS,
+                    onToggle = { openSection = if (openSection == SECTION_INGREDIENTS) "" else SECTION_INGREDIENTS },
+                ) {
+                    Fields(*ingredientFields.toTypedArray())
+                    eggHints()
                     Text(
-                        stringResource(R.string.dough_cake_flour_from_pan, flourText(success.flourGrams, weight)),
+                        stringResource(R.string.dough_percent_note_all),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                eggHints()
             }
         },
     ) {
@@ -656,7 +764,7 @@ private fun CakeForm(
                 }
                 success?.let {
                     Text(
-                        stringResource(R.string.dough_cake_flour_from_pan, flourText(it.flourGrams, weight)),
+                        stringResource(R.string.dough_cake_flour_from_pan, weightText(it.flourGrams, weight)),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -673,7 +781,7 @@ private fun CakeForm(
                     options = YeastKind.entries,
                     selected = yeastKind,
                     optionLabel = { stringResource(AndroidDoughTexts.yeastName(it)) },
-                    onSelect = ::selectYeastKind,
+                    onSelect = { selectYeastKind(it) },
                 )
                 yeastAmountField(Modifier.fillMaxWidth())
             }

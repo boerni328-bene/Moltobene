@@ -1,31 +1,24 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 01.11.2026 · `main` = Version 0.71.1 (0.71.0 Build rot wegen Textregeln, nie veröffentlicht) (Teigrechner: Hefe oben wie Vorteig, Hefearten im Infotext und Teigwissen; 0.70.3 Hefe neben Hefemenge, Öl zuletzt; 0.70.2 Tastatur schließt beim Tippen daneben, Voreinstellungen ohne „Standard“/„Eigene Werte“; davor 0.70.0 Mehlsorten), Release folgt aus dem Build auf `main` · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 04.11.2026 · `main` = Version 0.72.0 (Teigrechner „Aufklappen“, Freigabe des Inhabers vom 04.11.2026), Release v0.72.0 folgt aus dem Build auf `main` · Arbeitszweig `claude/trusting-galileo-xg0tgz` (gleicher Inhalt, per Squash übernommen) · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
-Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud (neuer Kernsatz seit 0.59.2). Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
+Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
 
-## Stand 26./27.10.2026 (alles auf `main`, Zweige gelöscht)
-- 0.59.0 Tablet (#91): zweispaltige Rezeptansicht ab 720 dp (`ui/components/WideLayout.kt`), Pfeiltasten (Auf/Ab blättern, Links/Rechts wechseln Reiter), Sprachbefehle beim Vorlesen mit Kopfhörern (`data/speech/Headphones.kt`; über Lautsprecher nur „Stopp“, keine Pausen gewünscht).
-- 0.59.1 (#92–#94): „Aufnehmen“ überlebt Drehen/Falten, Foto-Auswahl-Höhe aus dem freien Platz, Hinweiskarte zur Sicherungsdatei (kein Abgleich, unverschlüsselt).
-- 0.59.2: Kernsatz „… an einem Ort, lokal gespeichert, ohne Cloud.“ (README, CLAUDE.md, Release-Text, App, GitHub-Beschreibung).
-- 0.59.3: Handy quer (Höhe < 480 dp, nicht bei großer Schrift): Kochleiste (Zurück, Weiter, Mikrofon, Vorlesen, „Schritt x von y“) steht oben in der Leiste (`CookingBarTop`, `CookingBarHolder` in `RecipeScreen.kt`). Rundgang-Darstellung `PHONE_LANDSCAPE` (800×360).
-- 0.60.3: Mengen rechtsbündig in eigener Spalte (`ui/components/IngredientLine.kt`, bei großer Schrift aus), Grundrezepte im Design der Rezepte.
-- 0.61.0: Teigrechner Pizza/Brot auf einem Bild (normale Schrift; `CompactChoice`, Voreinstellungszeile mit Menü ⋮), Plus/Minus mit Dauerdruck (`ui/components/RepeatIconButton.kt`). 0.62.0: Pasta und Kuchen ebenso (`FormFrame` in `PastaCakeForms.kt`; beim Kuchen ragen nur die Fußnoten über den Rand). Offen: weitere Verbesserungen am Teigrechner vor 1.0.
-- 0.63.0: Teigrechner: geänderte Werte fett (keine „Standard“-Zeile je Wert, nur gemeinsames Zurücksetzen), Minus und Plus nebeneinander, Seite wählbar unter Einstellungen → Teigrechner (`StepperSide`, `LocalStepperSide`).
-- 0.64.0: Teigrechner-Kopfleiste (Speichern, Zurücksetzen, Info mit „Was bewirkt das?“ + Knopf zum Teigwissen; `DoughBarActions`/`LocalDoughBar`), Voreinstellungs-Pfeile nebeneinander, Vorteig-Kasten oben, „Wasser (Hydration)“.
-- 0.60.1: Listenmenü ohne Schriftgröße (Wunsch Inhaber), Foto Handy quer flacher.
-- 0.60.0: Menü beim langen Berühren eines Rezepts im Kochbuch (gleich wie ⋮ im Rezept, `ui/recipe/RecipeMenuItems.kt`, Aktionen in `CollectionViewModel`); Schriftgröße klein/mittel/groß (`data/CookingTextSize.kt`, ersetzt „Große Schrift beim Kochen“, alter Wert wird als „groß“ übernommen).
-- Lehre: Eigenschaften in ViewModels vor dem `init`-Block deklarieren (sonst NullPointerException).
+## Zuletzt: Teigrechner auf einem Bildschirm (0.72.0, auf `main`)
+- Anlass: Inhaber musste auf seinem Handy für „Wasser (Hydration)“ und Öl scrollen. Fünf bedienbare Entwürfe auf der privaten Entwurfsseite https://claude.ai/artifact/RAw2psMZkncGoKijB3sHSq; gewählt am 04.11.2026: **Entwurf 5 „Aufklappen“**, dazu zwei Wünsche (Vorteig mit Gesamtgewicht, Zeile „Hauptteig“).
+- Umgesetzt: bei normaler Schrift Bereiche Hefe, Vorteig, Teig (`ui/dough/DoughSection.kt`; immer einer offen, Standard „Teig“; Zusammenfassung je Bereich, z. B. „Biga · Mehl 30 % · Wasser 50 % · 277 g“). Ergebniskarte `ResultTop`: Gesamtteig als erste, hervorgehobene Kachel, darunter „Biga: …“ und neu „Hauptteig: Biga, 429 g Mehl, 276 g Wasser, 17 g Salz“ (`data/dough/DoughSummary.kt`, Test `DoughSummaryTest`). Pasta: Größe + Zutaten; Kuchen: Größe, Hefe (nur Hefeteig), Zutaten; Standard offen „Zutaten“. Große Schrift unverändert (Karten zum Scrollen).
+- Bewusst so: Bei Biga/Poolish steckt die ganze Hefe im Vorteig (Rechnung unverändert); Hefe in der Zeile „Hauptteig“ gibt es nur beim Sauerteig. Zusätzliche Hefe im Hauptteig bei Biga wäre eine neue Einstellung (Inhaber fragen). „Neu in Version“ nicht geändert (wie 0.61–0.71).
+- Rundgang: `openDoughSection(...)` in `AppTourTest` klappt „Vorteig“ vor Biga und „Teig“ vor „Weitere Zutat“ auf; erste Prüfung wartet auf „4 × 250 g“ (`dough_summary_pieces`).
+- Build: Lauf 384 rot nur wegen Lint `NonObservableLocale` (`Locale.getDefault()` direkt in einer Composable; behoben mit `LocalConfiguration`), Lauf 385 grün (Lint, Unit-Tests, Release-APK, Rundgang). Bildschirmfotos (Artefakt „bildschirmfotos-0.72.0“) in der Cloud-Sitzung nicht ladbar: Host `productionresultssa4.blob.core.windows.net` von den Netzwerkregeln gesperrt.
+- **Nächster Schritt:** Build auf `main` prüfen (Release v0.72.0); Inhaber prüft auf dem Handy. Offene Frage an ihn: zusätzliche Hefe im Hauptteig bei Biga/Poolish als neue Einstellung?
 
 ## Offen / zurückgestellt
 - Schrift 200 % verbessern (Inhaber: „später“; Bildschirm und Gerät nannte er nicht).
 - YouTube-Link: Feld „Video“ unter „Quelle“ gibt es schon; Inhaber nennt bei Bedarf ein Rezept, bei dem er fehlt.
-- (erledigt in 0.60.1: Foto bei Handy quer flacher)
-- (erledigt in 0.60.2: „Handy“ → „Gerät“ in deutschen Texten und README; „Wie das Gerät“ in den Einstellungen)
 - Wiederherstellen mit Auswahl (ältere ersetzen, fehlende ergänzen, Doppelte einzeln bestätigen): eigenes Vorhaben, noch auszuarbeiten.
 - Windows-Version: erst nach 1.0 (Besprechung `docs/besprechungen/2026-10-23-tablet-und-windows.md`).
-- Echtes Handy/Tablet prüfen: Kochleiste oben (Handy quer), Menü beim langen Berühren, Schriftgrößen, Kopfhörer-Befehle.
+- Echtes Handy/Tablet prüfen: Kochleiste oben (Handy quer), Menü beim langen Berühren, Schriftgrößen, Kopfhörer-Befehle, Teigrechner „Aufklappen“.
 
 ## Weg zu Version 1.0 (Abnahmeliste)
 1. Prüfung auf echtem Handy durch den Projektinhaber: Blättern, Vorlesen mit TalkBack, Spracheingabe, Kopfhörertasten, „Aufnehmen“, „Aus Audio“, Texterkennung/Übersetzung messen (#52, #62).
@@ -39,8 +32,9 @@ Offene Issues: #16 (prüfen ob erledigt), #47, #52, #57 (schließbar nach Entsch
 
 ## Arbeitsweise (bewährt)
 - Ein Zweig je Aufgabe, bauen mit `gh workflow run build.yml --ref <zweig>`, auf grün warten, **Bildschirmfotos ansehen** (`gh run download <id> -n bildschirmfotos-<version> -D bildschirmfotos/<name>`), dann `git merge --squash` auf `main` mit `Fixes #<Nr>`. Ein Build dauert ca. 20 Minuten.
+- Cloud-Sitzung (ohne `gh`): Build per GitHub-Werkzeug „run_workflow“ auf dem Zweig starten; Stand ohne Anmeldung über `https://api.github.com/repos/boerni328-bene/Moltobene/actions/runs/<id>/jobs` abfragen. Android-SDK lässt sich dort nicht laden (dl.google.com gesperrt), also nur in GitHub bauen.
 - Fehlersuche: Artefakt `testbericht-<version>` herunterladen (in den Scratchpad-Ordner) und die HTML-Berichte unter `app/build/reports/androidTests/connected/debug/` lesen; `--log-failed` zeigt oft nur „exit code 1“. Zeilen mit `texterkennung[...]` und `umrechnenNachBackform[PSEUDO]` sind bewusst übersprungen.
 - Windows: Mehrzeiliges mit Umlauten per Write-Werkzeug schreiben; `gh` unter `C:\Program Files\GitHub CLI\gh.exe`; kein Python; `git push` scheitert gelegentlich kurz, wiederholen. Warten auf Builds mit `until`-Schleife im Hintergrund, nicht mit `sleep`.
 - Parallele Sitzungen im selben Ordner kommen vor: vor Commit, Push und Versionssprung `git fetch origin`, Zweig und `origin/main` prüfen. Ein alter Stash („Doppelte 0.14.1-Fassung“) liegt unberührt.
-- Stolpersteine: `remember { }` darf nicht `Unit` liefern (`SideEffect`); bei durchsichtiger Leiste Tests mit `performSemanticsAction(OnClick)`; Pseudosprache setzt Werte in »…«; GitHub-Actions-Speicher kann voll sein (Sicherung per `.github/scripts/artefakte-sichern.ps1`, bei über 350 MB nachfragen).
+- Stolpersteine: `remember { }` darf nicht `Unit` liefern (`SideEffect`); Eigenschaften in ViewModels vor dem `init`-Block deklarieren; in Compose Lambdas statt Funktionsverweisen (`{ select(it) }` statt `::select`, sonst nach „Zurücksetzen“ veraltet); bei durchsichtiger Leiste Tests mit `performSemanticsAction(OnClick)`; Pseudosprache setzt Werte in »…«; GitHub-Actions-Speicher kann voll sein (Sicherung per `.github/scripts/artefakte-sichern.ps1`, bei über 350 MB nachfragen).
 - Token sparen: Aufbau-Datei nur bei Bedarf lesen, erst suchen dann gezielt lesen, Spezialisten/Prüfrunden nur gezielt.

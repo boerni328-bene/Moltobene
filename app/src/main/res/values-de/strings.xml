@@ -565,6 +565,15 @@
     <string name="dough_preferment_water">Wasser (% davon)</string>
     <string name="dough_section_result">Ergebnis</string>
     <string name="dough_bar_preferment">%1$s: %2$s</string>
+    <string name="dough_bar_main">Hauptteig: %1$s</string>
+    <string name="dough_tile_total">Gesamtteig</string>
+    <string name="dough_summary_value">%1$s %2$s</string>
+    <string name="dough_summary_of_flour">%1$s vom Mehl</string>
+    <string name="dough_summary_pieces">%1$s × %2$s</string>
+    <string name="dough_summary_portions">%1$s × %2$s Mehl</string>
+    <string name="dough_summary_round">Ø %1$s %2$s</string>
+    <string name="dough_summary_rect">%1$s × %2$s %3$s</string>
+    <string name="dough_percent_line">Wasser, Salz und Öl in % vom Mehl</string>
     <string name="dough_total_line">Gesamtteig: %1$s · %2$s</string>
     <string name="dough_total_pieces">Gesamtteig: %1$s (%2$d × %3$s)</string>
     <string name="dough_percent_note">Wasser, Salz und Öl\nin % vom Mehl</string>
