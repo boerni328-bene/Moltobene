@@ -24,6 +24,7 @@ import com.moltobene.app.data.dough.DoughDraft
 import com.moltobene.app.data.dough.DoughNumbers
 import com.moltobene.app.data.dough.DoughPresets
 import com.moltobene.app.data.dough.DoughResult
+import com.moltobene.app.data.dough.DoughSummary
 import com.moltobene.app.data.dough.DoughTexts
 import com.moltobene.app.data.dough.PhaseKind
 import com.moltobene.app.data.PhasePlace
@@ -204,6 +205,15 @@ class DoughViewModel(
             TotalItem(DoughNumbers.weight(it.grams, it.role, language, weightUnit), texts.ingredient(it.role, input.yeastKind))
         }
     }
+
+    /**
+     * Was zum Kneten zum Vorteig in den Hauptteig kommt (Wunsch vom 04.11.2026): Hefe zuerst, falls sie nicht im Vorteig
+     * ist, dann Mehl, Wasser, Salz und der Rest; leer ohne Vorteig.
+     */
+    fun mainItems(result: DoughResult.Success, input: LeavenedInput): List<TotalItem> =
+        DoughSummary.mainLines(result).map {
+            TotalItem(DoughNumbers.weight(it.grams, it.role, language, weightUnit), texts.ingredient(it.role, input.yeastKind))
+        }
 
     private fun totalItems(result: DoughResult.Success, yeastKind: YeastKind): List<TotalItem> {
         val lines = result.sections.flatMap { it.lines }

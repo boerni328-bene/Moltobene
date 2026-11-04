@@ -567,6 +567,15 @@
     <string name="dough_preferment_water">Water (% of that)</string>
     <string name="dough_section_result">Result</string>
     <string name="dough_bar_preferment">%1$s: %2$s</string>
+    <string name="dough_bar_main">Final dough: %1$s</string>
+    <string name="dough_tile_total">Total dough</string>
+    <string name="dough_summary_value">%1$s %2$s</string>
+    <string name="dough_summary_of_flour">%1$s of flour</string>
+    <string name="dough_summary_pieces">%1$s × %2$s</string>
+    <string name="dough_summary_portions">%1$s × %2$s flour</string>
+    <string name="dough_summary_round">Ø %1$s %2$s</string>
+    <string name="dough_summary_rect">%1$s × %2$s %3$s</string>
+    <string name="dough_percent_line">Water, salt and oil in % of flour</string>
     <string name="dough_total_line">Total dough: %1$s · %2$s</string>
     <string name="dough_total_pieces">Total dough: %1$s (%2$d × %3$s)</string>
     <string name="dough_percent_note">Water, salt and oil\nin % of flour</string>

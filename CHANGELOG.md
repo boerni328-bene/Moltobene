@@ -3,6 +3,18 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.72.0] – 2026-11-04 (versionCode 123)
+
+### Neu
+- **Teigrechner: Gewicht des Vorteigs.** Die Zusammenfassung des Vorteigs endet mit seinem Gesamtgewicht, zum Beispiel „Biga · Mehl 30 % · Wasser 50 % · 277 g“.
+- **Teigrechner: Zeile „Hauptteig“.** Oben im Ergebnis steht unter „Biga: …“, was zum Kneten dazukommt, zum Beispiel „Hauptteig: Biga, 429 g Mehl, 276 g Wasser, 17 g Salz“. Beim Sauerteig steht dort auch die Hefe, weil sie erst in den Hauptteig kommt.
+
+### Geändert
+- **Teigrechner (Pizza und Brot) auf einem Bildschirm:** Hefe, Vorteig und Teig stehen als drei Bereiche untereinander. Jeder zeigt in einer Zeile, was eingestellt ist, zum Beispiel „Frischhefe · 0,2 % vom Mehl · 1,2 g“. Ein Tipp klappt einen Bereich auf, der vorher offene klappt zu. So passen bei normaler Schrift alle Werte ohne Scrollen auf den Bildschirm, auch „Wasser (Hydration)“ und Öl.
+- **Pasta und Kuchen ebenso:** Größe, Zutaten und beim Hefeteig die Hefe sind aufklappbare Bereiche mit Zusammenfassung.
+- **Ergebnis oben:** Der Gesamtteig steht als erste, hervorgehobene Kachel vor den übrigen Mengen.
+- Bei großer Schrift bleibt es bei den Karten zum Scrollen.
+
 ## [0.71.1] – 2026-11-03 (versionCode 122)
 
 ### Behoben

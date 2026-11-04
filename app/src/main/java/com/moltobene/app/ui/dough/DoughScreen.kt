@@ -1,5 +1,6 @@
 package com.moltobene.app.ui.dough
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -100,6 +101,7 @@ import com.moltobene.app.data.dough.DoughLimits
 import com.moltobene.app.data.dough.DoughNumbers
 import com.moltobene.app.data.dough.DoughPresets
 import com.moltobene.app.data.dough.DoughResult
+import com.moltobene.app.data.dough.DoughSummary
 import com.moltobene.app.data.dough.DoughStepper
 import com.moltobene.app.data.StepperSide
 import com.moltobene.app.data.WeightUnit
@@ -786,6 +788,11 @@ private fun DoughForm(
     var seedsText by rememberSaveable(type, resetCount) { mutableStateOf(show(start.seeds)) }
     // Weitere Zutaten erscheinen, sobald sie eine Menge haben oder über „Weitere Zutat“ hinzugefügt wurden.
     var addedExtras by rememberSaveable(type, resetCount) { mutableStateOf("") }
+    // Welcher Bereich offen ist (Entwurf 5 „Aufklappen“ vom 04.11.2026); bleibt beim Zurücksetzen und bei Voreinstellungen.
+    var openSection by rememberSaveable(type) { mutableStateOf(SECTION_DOUGH) }
+    fun toggleSection(key: String) {
+        openSection = if (openSection == key) "" else key
+    }
 
     val yeastKind = YeastKind.fromKey(yeastKindKey) ?: YeastKind.FRESH
     val preferment = Preferment.fromKey(prefermentKey) ?: Preferment.NONE
@@ -1033,18 +1040,51 @@ private fun DoughForm(
     val success = result as? DoughResult.Success
     val resultTotals = success?.let { viewModel.totals(it, input) }
     val prefermentItems = success?.let { viewModel.prefermentItems(it, input) }.orEmpty()
+    val prefermentName = stringResource(prefermentLabel(preferment))
     val prefermentBar = if (prefermentItems.isEmpty()) null else stringResource(
         R.string.dough_bar_preferment,
-        stringResource(prefermentLabel(preferment)),
+        prefermentName,
         prefermentItems.joinToString(", ") { "${it.amount} ${it.name}" },
     )
+    // Darunter, was zum Kneten in den Hauptteig kommt (Wunsch vom 04.11.2026): der Vorteig, Hefe falls nicht im Vorteig,
+    // Mehl, Wasser, Salz und der Rest.
+    val mainItems = success?.let { viewModel.mainItems(it, input) }.orEmpty()
+    val mainBar = if (prefermentItems.isEmpty() || mainItems.isEmpty()) null else stringResource(
+        R.string.dough_bar_main,
+        (listOf(prefermentName) + mainItems.map { "${it.amount} ${it.name}" }).joinToString(", "),
+    )
+    val language = LocalConfiguration.current.locales[0].language
+    // Zusammenfassungen der Bereiche (Entwurf 5): was eingestellt ist, auch wenn der Bereich zu ist.
+    val yeastSummary = listOfNotNull(
+        stringResource(AndroidDoughTexts.yeastName(yeastKind)),
+        stringResource(R.string.dough_summary_of_flour, "${yeast.trim()} %"),
+        success?.let { DoughNumbers.weight(DoughSummary.yeastGrams(it), LineRole.YEAST, language, unit) },
+    ).joinToString(SUMMARY_SEPARATOR)
+    // Beim Vorteig am Schluss sein Gesamtgewicht, wie die Hefemenge darüber (Wunsch vom 04.11.2026).
+    val prefermentSummary = if (preferment == Preferment.NONE) {
+        prefermentName
+    } else {
+        listOfNotNull(
+            prefermentName,
+            summaryValue(R.string.dough_ingredient_flour, prefermentFlour),
+            summaryValue(R.string.dough_ingredient_water, prefermentWater),
+            success?.let { DoughNumbers.weight(DoughSummary.prefermentGrams(it), 0, language, unit) },
+        ).joinToString(SUMMARY_SEPARATOR)
+    }
+    val doughSummary = buildList {
+        add(stringResource(R.string.dough_summary_pieces, count.trim(), "${piece.trim()} ${unit.label}"))
+        add(summaryValue(R.string.dough_ingredient_water, water))
+        add(summaryValue(R.string.dough_ingredient_salt, salt))
+        for (spec in shownExtras) add(summaryValue(spec.label, spec.text))
+        add(summaryValue(R.string.dough_ingredient_oil, oil))
+    }.joinToString(SUMMARY_SEPARATOR)
     Column(modifier = Modifier.fillMaxSize()) {
         if (pinned) {
             header()
             ResultTop(
-                summary = if (success != null) leavenedSummary(success, input, unit) else null,
+                total = success?.let { DoughNumbers.weight(it.totalGrams, 0, language, unit) },
                 totals = resultTotals,
-                preferment = prefermentBar,
+                lines = listOfNotNull(prefermentBar, mainBar),
             )
         }
         Column(
@@ -1077,65 +1117,85 @@ private fun DoughForm(
             )
 
             if (pinned) {
-                // Alles in einem Bild, ohne Scrollen (Entwurf vom 30.10.2026): Felder paarweise, Auswahlen im Format der Felder.
-                // Der Vorteig steht oben im Rezept und abgesetzt in einer Fläche mit Rahmen (Wunsch vom 31.10.2026).
-                // Die Hefe steht ganz oben, abgesetzt wie der Vorteig: Hefeart und Menge gehören zusammen.
-                Card("", highlighted = true) {
-                    SubtleChoice(
-                        label = stringResource(R.string.dough_section_yeast),
-                        options = YeastKind.entries,
-                        selected = yeastKind,
-                        optionLabel = { stringResource(AndroidDoughTexts.yeastName(it)) },
-                        onSelect = { selectYeastKind(it) },
-                        modifier = Modifier.fillMaxWidth(),
-                        maxLines = 2,
-                    )
-                    yeastField(Modifier.fillMaxWidth())
-                }
-                Card("", highlighted = true) {
-                    SubtleChoice(
-                        label = stringResource(R.string.dough_section_preferment),
-                        options = Preferment.entries,
-                        selected = preferment,
-                        optionLabel = { stringResource(prefermentLabel(it)) },
-                        onSelect = { selectPreferment(it) },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    // Untereinander, damit auch „100 %“ in den Feldern Platz hat.
-                    if (preferment != Preferment.NONE) {
-                        prefermentFlourField(Modifier.fillMaxWidth())
-                        prefermentWaterField(Modifier.fillMaxWidth())
+                // Entwurf 5 „Aufklappen“ (Wahl des Projektinhabers vom 04.11.2026): Hefe, Vorteig und Teig als Bereiche mit
+                // Zusammenfassung, immer einer offen. So stehen bei normaler Schrift alle Werte auf einem Bildschirm; Hefe
+                // und Vorteig bleiben oben (Wunsch vom 31.10. und 03.11.2026).
+                Column(
+                    modifier = Modifier.padding(horizontal = Spacing.m),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.s),
+                ) {
+                    DoughSection(
+                        title = stringResource(R.string.dough_section_yeast),
+                        summary = yeastSummary,
+                        expanded = openSection == SECTION_YEAST,
+                        onToggle = { toggleSection(SECTION_YEAST) },
+                    ) {
+                        SubtleChoice(
+                            label = "",
+                            options = YeastKind.entries,
+                            selected = yeastKind,
+                            optionLabel = { stringResource(AndroidDoughTexts.yeastName(it)) },
+                            onSelect = { selectYeastKind(it) },
+                            modifier = Modifier.fillMaxWidth(),
+                            maxLines = 2,
+                        )
+                        yeastField(Modifier.fillMaxWidth())
+                        if (success != null) YeastEquivalent(success, yeastKind)
                     }
-                }
-                Column(modifier = Modifier.padding(horizontal = Spacing.m)) {
-                    Fields(
-                        countField, pieceField, waterField, saltField,
-                        *shownExtras.map(extraField).toTypedArray(), oilField,
-                        // Der Hinweis steht neben dem Öl, statt eine eigene Zeile zu belegen.
-                        trailing = {
+                    DoughSection(
+                        title = stringResource(R.string.dough_section_preferment),
+                        summary = prefermentSummary,
+                        expanded = openSection == SECTION_PREFERMENT,
+                        onToggle = { toggleSection(SECTION_PREFERMENT) },
+                    ) {
+                        SubtleChoice(
+                            label = "",
+                            options = Preferment.entries,
+                            selected = preferment,
+                            optionLabel = { stringResource(prefermentLabel(it)) },
+                            onSelect = { selectPreferment(it) },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Text(
+                            stringResource(prefermentExplanation(preferment)),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        if (preferment != Preferment.NONE) Fields(prefermentFlourField, prefermentWaterField)
+                    }
+                    DoughSection(
+                        title = stringResource(R.string.dough_section_dough),
+                        summary = doughSummary,
+                        expanded = openSection == SECTION_DOUGH,
+                        onToggle = { toggleSection(SECTION_DOUGH) },
+                    ) {
+                        val doughFields = buildList<@Composable (Modifier) -> Unit> {
+                            add(countField)
+                            add(pieceField)
+                            add(waterField)
+                            add(saltField)
+                            addAll(shownExtras.map(extraField))
+                            add(oilField)
+                        }
+                        // „Weitere Zutat“ steht neben dem letzten Feld, wenn dort Platz ist, sonst darunter.
+                        val odd = doughFields.size % 2 == 1
+                        Fields(*doughFields.toTypedArray(), trailing = if (odd) addExtraButton else null)
+                        if (!odd) addExtraButton()
+                        if (extrasNote) {
                             Text(
-                                stringResource(R.string.dough_percent_note),
+                                stringResource(R.string.dough_extras_note),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                        },
-                    )
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(horizontal = Spacing.s),
-                ) {
-                    addExtraButton()
-                    if (extrasNote) {
+                        }
+                        flourHint()
                         Text(
-                            stringResource(R.string.dough_extras_note),
+                            stringResource(R.string.dough_percent_line),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.weight(1f),
                         )
                     }
                 }
-                Box(modifier = Modifier.padding(horizontal = Spacing.s)) { flourHint() }
                 Text(
                     stringResource(R.string.dough_hint),
                     style = MaterialTheme.typography.bodySmall,
@@ -1251,20 +1311,7 @@ private fun DoughForm(
             }
 
             if (result is DoughResult.Success) {
-                val yeastGrams = result.sections.flatMap { it.lines }.filter { it.role == LineRole.YEAST }.sumOf { it.grams }
-                if (yeastGrams > 0) {
-                    val language = LocalConfiguration.current.locales[0].language
-                    val resources = LocalResources.current
-                    val others = YeastKind.entries.filter { it != yeastKind }.joinToString(", ") { other ->
-                        val grams = DoughNumbers.grams(yeastKind.convert(yeastGrams, other), LineRole.YEAST, language)
-                        resources.getString(R.string.dough_yeast_item, grams, resources.getString(AndroidDoughTexts.yeastName(other)))
-                    }
-                    Text(
-                        stringResource(R.string.dough_yeast_equal, others),
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(horizontal = Spacing.m),
-                    )
-                }
+                YeastEquivalent(result, yeastKind, Modifier.padding(horizontal = Spacing.m))
             }
             if (isLargeText() && result is DoughResult.Success) {
                 TotalsCard(viewModel.totals(result, input))
@@ -1294,40 +1341,45 @@ private fun DoughForm(
 }
 
 /**
- * Oben fest (Entwurf vom 22.10.2026): die Summe und die Gesamtmengen als Kacheln. [summary] null = ungültig. Die
- * Kacheln teilen sich die Breite, bei mehr als vier lassen sie sich seitlich verschieben.
+ * Oben fest (Entwurf 5 vom 04.11.2026): als erste Kachel der Gesamtteig, dann die Gesamtmengen; darunter Zeilen wie
+ * „Biga: …“ (was am Abend vorher angesetzt wird) und „Hauptteig: …“ (was zum Kneten dazukommt). [total] null =
+ * ungültig. Passen die Kacheln nicht nebeneinander, lassen sie sich seitlich verschieben.
  */
 @Composable
-internal fun ResultTop(summary: String?, totals: List<TotalItem>?, preferment: String? = null) {
+internal fun ResultTop(total: String?, totals: List<TotalItem>?, lines: List<String> = emptyList()) {
     Surface(
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         shape = MaterialTheme.shapes.large,
         modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.m, vertical = Spacing.xs),
     ) {
-        Column(modifier = Modifier.padding(Spacing.s), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-            Column(modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }) {
-                if (summary != null) {
-                    Text(summary, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                } else {
-                    Text(
-                        stringResource(R.string.dough_invalid),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
-            }
-            if (summary != null && !totals.isNullOrEmpty()) {
+        Column(
+            modifier = Modifier.padding(horizontal = Spacing.s, vertical = Spacing.xs),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+        ) {
+            if (total == null) {
+                Text(
+                    stringResource(R.string.dough_invalid),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(vertical = Spacing.xs).semantics { liveRegion = LiveRegionMode.Polite },
+                )
+            } else {
                 Row(
                     modifier = Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                 ) {
-                    for (item in totals) TotalTile(item)
+                    TotalTile(
+                        TotalItem(total, stringResource(R.string.dough_tile_total)),
+                        emphasized = true,
+                        compact = true,
+                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                    )
+                    for (item in totals.orEmpty()) TotalTile(item, compact = true)
                 }
-            }
-            // Biga, Poolish, Sauerteig: was für den Vorteig am Abend vorher angesetzt wird.
-            if (summary != null && preferment != null) {
-                Text(preferment, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.semantics(mergeDescendants = true) {})
+                for (line in lines) {
+                    Text(line, style = MaterialTheme.typography.bodySmall, modifier = Modifier.semantics(mergeDescendants = true) {})
+                }
             }
         }
     }
@@ -1416,19 +1468,55 @@ internal fun ResultBar(summary: String?, totals: List<TotalItem>?, onSave: () ->
     }
 }
 
-/** Eine Gesamtmenge als Kachel: die Menge groß, darunter der Name. */
+/**
+ * Eine Gesamtmenge als Kachel: die Menge groß, darunter der Name. [emphasized]: der Gesamtteig, in der Hauptfarbe.
+ * [compact]: etwas kleinere Schrift, für die Ergebniskarte oben (Entwurf 5).
+ */
 @Composable
-private fun TotalTile(item: TotalItem) {
-    Surface(color = MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium) {
+private fun TotalTile(item: TotalItem, emphasized: Boolean = false, compact: Boolean = false, modifier: Modifier = Modifier) {
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        color = if (emphasized) colors.primary else colors.surface,
+        contentColor = if (emphasized) colors.onPrimary else colors.onSurface,
+        shape = MaterialTheme.shapes.medium,
+        modifier = modifier,
+    ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(horizontal = Spacing.s, vertical = Spacing.xs).semantics(mergeDescendants = true) {},
         ) {
-            Text(item.amount, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text(item.name, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                item.amount,
+                style = if (compact) MaterialTheme.typography.titleSmall else MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                item.name,
+                style = if (compact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelMedium,
+                color = if (emphasized) colors.onPrimary else colors.onSurfaceVariant,
+            )
         }
     }
 }
+
+/** „Gleichwertige Hefemenge: 0,4 g Instanthefe, 0,5 g Aktivhefe“; nichts, wenn der Teig keine Hefe hat. */
+@Composable
+private fun YeastEquivalent(result: DoughResult.Success, yeastKind: YeastKind, modifier: Modifier = Modifier) {
+    val yeastGrams = DoughSummary.yeastGrams(result)
+    if (yeastGrams <= 0) return
+    val language = LocalConfiguration.current.locales[0].language
+    val resources = LocalResources.current
+    val others = YeastKind.entries.filter { it != yeastKind }.joinToString(", ") { other ->
+        val grams = DoughNumbers.grams(yeastKind.convert(yeastGrams, other), LineRole.YEAST, language)
+        resources.getString(R.string.dough_yeast_item, grams, resources.getString(AndroidDoughTexts.yeastName(other)))
+    }
+    Text(stringResource(R.string.dough_yeast_equal, others), style = MaterialTheme.typography.bodySmall, modifier = modifier)
+}
+
+/** Ein Wert in der Zusammenfassung eines Bereichs, z. B. „Wasser 60 %“; [value] wie eingegeben. */
+@Composable
+internal fun summaryValue(@StringRes name: Int, value: String, unit: String = "%"): String =
+    stringResource(R.string.dough_summary_value, stringResource(name), "${value.trim()} $unit")
 
 /** Bei großer Schrift: die Gesamtmengen als Liste mit dem Namen links und der Menge rechts (#83). */
 @Composable
@@ -1472,9 +1560,12 @@ private class ExtraSpec(
     val set: (String) -> Unit,
 )
 
-/** Auswahl als Schaltflächen wie die Teigart oben, nur dezenter (kleinere Schrift, ruhige Farben): Hefeart und Vorteig. */
+/**
+ * Auswahl als Schaltflächen wie die Teigart oben, nur dezenter (kleinere Schrift, ruhige Farben): Hefeart und Vorteig.
+ * Ohne [label] (leer) steht nur die Reihe, z. B. in einem Bereich, dessen Name schon darüber steht.
+ */
 @Composable
-private fun <T> SubtleChoice(
+internal fun <T> SubtleChoice(
     label: String,
     options: List<T>,
     selected: T,
@@ -1484,7 +1575,9 @@ private fun <T> SubtleChoice(
     maxLines: Int = 1,
 ) {
     Column(modifier = modifier) {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        if (label.isNotEmpty()) {
+            Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
             options.forEachIndexed { i, option ->
                 SegmentedButton(
