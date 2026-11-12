@@ -49,6 +49,11 @@ class AppPreferences(context: Context) {
     /** „Gewichte“ im Teigrechner; null, bis [loadAppearance] sie gelesen hat (dann gilt „Gramm“). */
     val weightUnit: StateFlow<WeightUnit?> = weightUnitState.asStateFlow()
 
+    private val temperatureUnitState = MutableStateFlow<TemperatureUnit?>(null)
+
+    /** „Temperaturen“ im Teigrechner (°C oder °F); null, bis [loadAppearance] sie gelesen hat (dann gilt „Celsius“). */
+    val temperatureUnit: StateFlow<TemperatureUnit?> = temperatureUnitState.asStateFlow()
+
     private val speechSettingsState = MutableStateFlow(SpeechSettings())
 
     /** Stimme, Tempo und Tonhöhe beim Vorlesen (#85); bis [loadAppearance] sie gelesen hat, gelten die Standardwerte. */
@@ -75,6 +80,8 @@ class AppPreferences(context: Context) {
         stepperSideState.compareAndSet(null, side)
         val weight = runCatching { WeightUnit.fromKey(prefs.getString(KEY_WEIGHT_UNIT, null)) }.getOrDefault(WeightUnit.GRAMS)
         weightUnitState.compareAndSet(null, weight)
+        val temperature = runCatching { TemperatureUnit.fromKey(prefs.getString(KEY_TEMPERATURE_UNIT, null)) }.getOrDefault(TemperatureUnit.CELSIUS)
+        temperatureUnitState.compareAndSet(null, temperature)
         val speech = runCatching { SpeechSettings.decode(prefs.getString(KEY_SPEECH_SETTINGS, null)) }.getOrDefault(SpeechSettings())
         if (!speechSettingsTouched) speechSettingsState.value = speech
     }
@@ -112,6 +119,12 @@ class AppPreferences(context: Context) {
     suspend fun setWeightUnit(unit: WeightUnit) {
         weightUnitState.value = unit
         withContext(Dispatchers.IO) { prefs.edit { putString(KEY_WEIGHT_UNIT, unit.key) } }
+    }
+
+    /** Gilt sofort, gespeichert wird danach. */
+    suspend fun setTemperatureUnit(unit: TemperatureUnit) {
+        temperatureUnitState.value = unit
+        withContext(Dispatchers.IO) { prefs.edit { putString(KEY_TEMPERATURE_UNIT, unit.key) } }
     }
 
     /** Gilt sofort, gespeichert wird danach. */
@@ -252,6 +265,7 @@ class AppPreferences(context: Context) {
         const val KEY_SCREEN_ON = "screen_on"
         const val KEY_STEPPER_SIDE = "stepper_side"
         const val KEY_WEIGHT_UNIT = "weight_unit"
+        const val KEY_TEMPERATURE_UNIT = "temperature_unit"
         const val KEY_SPEECH_SETTINGS = "speech_settings"
         const val KEY_START_SCREEN = "start_screen"
         const val KEY_RECENT_RECIPES = "recent_recipes"

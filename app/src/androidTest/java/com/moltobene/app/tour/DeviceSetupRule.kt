@@ -15,6 +15,7 @@ import com.moltobene.app.data.CollectionSort
 import com.moltobene.app.data.CookingTextSize
 import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.StartScreen
+import com.moltobene.app.data.TemperatureUnit
 import kotlinx.coroutines.runBlocking
 import org.junit.rules.ExternalResource
 import kotlin.math.abs
@@ -94,5 +95,7 @@ class DeviceSetupRule(private val variant: DisplayVariant) : ExternalResource() 
         container.preferences.setStartScreen(StartScreen.COLLECTION)
         container.preferences.setCollectionSort(CollectionSort.DEFAULT)
         container.preferences.setCookingTextSize(CookingTextSize.MEDIUM)
+        // Temperaturen im Teigrechner in °C; der Rundgang wechselt selbst einmal zu °F.
+        container.preferences.setTemperatureUnit(TemperatureUnit.CELSIUS)
     }
 }

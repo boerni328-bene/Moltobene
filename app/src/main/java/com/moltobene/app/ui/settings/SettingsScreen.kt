@@ -73,6 +73,7 @@ import com.moltobene.app.R
 import com.moltobene.app.data.Appearance
 import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.StepperSide
+import com.moltobene.app.data.TemperatureUnit
 import com.moltobene.app.data.WeightUnit
 import com.moltobene.app.data.StartScreen
 import com.moltobene.app.data.backup.BackupManager
@@ -93,6 +94,9 @@ import java.text.DateFormat
 import java.time.LocalDate
 import java.util.Date
 
+/** Gruppe „Teigrechner“, die der Link „°C/°F“ im Teigrechner gleich öffnet. */
+const val SETTINGS_GROUP_DOUGH = "dough"
+
 private val BACKUP_MIME_TYPES = arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream")
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,6 +106,7 @@ fun SettingsScreen(
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onOpenLicenses: () -> Unit,
+    initialGroup: String? = null,
 ) {
     // Texte über LocalResources lesen: passt sich an, wenn sich z. B. die App-Sprache ändert.
     val resources = LocalResources.current
@@ -115,11 +120,17 @@ fun SettingsScreen(
     val screenOn by viewModel.screenOn.collectAsStateWithLifecycle()
     val stepperSide by viewModel.stepperSide.collectAsStateWithLifecycle()
     val weightUnit by viewModel.weightUnit.collectAsStateWithLifecycle()
+    val temperatureUnit by viewModel.temperatureUnit.collectAsStateWithLifecycle()
     val startScreen by viewModel.startScreen.collectAsStateWithLifecycle()
     val speechSettings by viewModel.speechSettings.collectAsStateWithLifecycle()
     // Liste mit Gruppen (Entwurf vom 22.10.2026): Eine Gruppe öffnet sich als eigene Ansicht, Zurück führt zur Liste.
-    var openGroup by rememberSaveable { mutableStateOf<String?>(null) }
-    BackHandler(enabled = openGroup != null) { openGroup = null }
+    // Vom Teigrechner aus („°C/°F“) ist gleich die Gruppe „Teigrechner“ offen, Zurück führt dann wieder dorthin.
+    val directGroup = if (initialGroup == SETTINGS_GROUP_DOUGH) stringResource(R.string.dough_title) else null
+    var openGroup by rememberSaveable { mutableStateOf(directGroup) }
+    fun back() {
+        if (openGroup != null && openGroup != directGroup) openGroup = null else onBack()
+    }
+    BackHandler(enabled = openGroup != null) { back() }
     val backupSummary = viewModel.lastBackup.let { last ->
         if (last == null) {
             stringResource(R.string.backup_never)
@@ -148,7 +159,7 @@ fun SettingsScreen(
             TopAppBar(
                 title = { AppTitle(style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
-                    IconButton(onClick = { if (openGroup != null) openGroup = null else onBack() }) {
+                    IconButton(onClick = { back() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
@@ -230,6 +241,8 @@ fun SettingsScreen(
                     onStepperSide = viewModel::setStepperSide,
                     weightUnit = weightUnit ?: WeightUnit.GRAMS,
                     onWeightUnit = viewModel::setWeightUnit,
+                    temperatureUnit = temperatureUnit ?: TemperatureUnit.CELSIUS,
+                    onTemperatureUnit = viewModel::setTemperatureUnit,
                 )
             }
             SettingsGroup(stringResource(R.string.settings_section_speech), R.drawable.ic_volume_up) {

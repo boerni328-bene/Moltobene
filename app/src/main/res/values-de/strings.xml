@@ -249,30 +249,10 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Neu: Im Menü ⋮ des Rezepts und beim langen Berühren eines Rezepts im Kochbuch gibt es dasselbe Menü mit Favorit, Teilen, Schriftgröße und Löschen. Die Schriftgröße gibt es jetzt in klein, mittel und groß.</item>
-        <item>Neu für Tablets: Im Rezept stehen Zutaten und Zubereitung nebeneinander, jede Spalte blättert für sich. Texte und Formulare bleiben auf breiten Bildschirmen gut lesbar. Mit einer Tastatur blättern die Pfeiltasten auf und ab, links und rechts wechseln zwischen Zubereitung, Notizen und Quelle.</item>
-        <item>Im Rezept lässt sich nach links und rechts wischen, um zwischen Zutaten, Zubereitung, Notizen und Quelle zu wechseln. Quelle, Video und Originalseiten stehen jetzt auf dem Reiter „Quelle“. Im Teigrechner braucht das Öl weniger Platz.</item>
-        <item>Neu (Beta): „Aufnehmen“ auf der Seite „Hinzufügen“: Rezept einsprechen, der Text erscheint beim Sprechen und wird zum Entwurf. Die Aufnahme wird nicht gespeichert.</item>
-        <item>Neu (Beta): „Aus Audio übernehmen“ erkennt eine Audiodatei auf dem Gerät, z. B. eine Sprachnachricht, und macht daraus einen Entwurf. Dafür wird das Erkennungspaket aus den Einstellungen gebraucht.</item>
-        <item>Neues Aussehen: Die Startseite zeigt das Gericht des Tages groß, das Kochbuch (früher „Sammlung“) ist eine Liste mit Reitern oben und einem Startsymbol, das Rezept hat Reiter für Zutaten, Zubereitung und Notizen, und Hinzufügen ist eine eigene Seite.</item>
-        <item>Teigrechner übersichtlicher: Das Ergebnis steht oben fest, Werte lassen sich mit Minus und Plus ändern, der Vorteig ist hervorgehoben, und ein Tipp auf Biga, Poolish, Sauerteig oder eine Hefeart erklärt den Begriff.</item>
-        <item>Einstellungen als Liste mit Symbolen: Oben stehen Schalter für das Wichtigste („Schnell“), jede Gruppe öffnet sich als eigene Ansicht.</item>
-        <item>Neuer Bereich „Speicher“ in den Einstellungen: Er zeigt, wie viel Platz die App belegt – getrennt nach Programm, Fotos, Vorschaubildern, Rezepten, Sprachpaket, Erkennungspaket, Übersetzungen und Zwischenspeicher, dazu die Summe. Pakete und Zwischenspeicher lassen sich dort löschen.</item>
-        <item>Zeitplan für Teige: Der Teigrechner legt bei Pizza und Brot einen Zeitplan an (z. B. Biga 1 bis 3 Tage im Kühlschrank). Im Rezept startet „Teig starten“ den Ablauf; die App zeigt, wo der Teig steht und wann es weitergeht, auch auf der Startseite.</item>
-        <item>Teigrechner kompakter: Werte stehen paarweise nebeneinander, die Voreinstellung braucht weniger Platz, und die Leiste unten zeigt bei Biga oder Poolish auch den Vorteig.</item>
-        <item>Einstellungen aufgeräumt: Die Gruppen lassen sich auf- und zuklappen, so passt alles auf einen Bildschirm.</item>
-        <item>Beim Kochen ist die Schrift für Zutaten und Schritte etwas größer.</item>
-        <item>Schlagwörter beim Übernehmen: Kategorie und Stichwörter einer Rezeptseite erscheinen im Entwurf als Vorschläge zum Antippen; aus einer Rezeptdatei kommen die Schlagwörter wieder mit.</item>
-        <item>Beim Kochen: „Große Schrift beim Kochen“ im Menü ⋮ der Rezeptansicht vergrößert Zutaten, Schritte und Notizen. Neue Notizen lassen sich direkt in der Rezeptansicht mit „Notiz hinzufügen“ festhalten.</item>
-        <item>Sammlung sortieren: Das neue Symbol neben der Suche wechselt zwischen „Titel A–Z“ und „Zuletzt hinzugefügt“. Umlaute stehen bei ihrem Buchstaben, die Wahl bleibt gemerkt.</item>
-        <item>Rezeptansicht: Das Foto reicht bis unter die Leiste oben.</item>
-        <item>Spracheingabe beim Kochen: Der neue Mikrofon-Knopf in der Kochleiste hört zu und versteht „Weiter“, „Zurück“, „Wiederholen“, „Vorlesen“ und „Stopp“; „Mikrofon aus“ beendet das Zuhören. Nötig ist einmalig das Erkennungspaket aus den Einstellungen.</item>
-        <item>Kopfhörertasten: In den Einstellungen unter „Vorlesen“ lässt sich festlegen, was die Tasten Wiedergabe/Pause, Weiter und Zurück beim Kochen auslösen. So lassen sich auch Kopfhörer anpassen, die Gesten selbst umwandeln.</item>
-        <item>Teigrechner: Jeder Wert hat einen Regler mit antippbarer Zahl; der Umschalter „Zahlen | Regler“ entfällt, Plus und Minus gibt es nur bei kleinen ganzen Zahlen.</item>
-        <item>„Standard 250 g“ mit „Auf Standard“ erscheint nur, wenn ein Wert vom Standard abweicht.</item>
-
-        <item>Die Kochleiste zeigt „Schritt 2 von 5“, „Weiter“ ist betont, der aktuelle Schritt hat einen Balken am Rand. Bei großer Schrift stehen die Knöpfe in zwei Reihen.</item>
-        <item>Das Foto in der Rezeptansicht ist niedriger, damit Zutaten und Schritte früher kommen.</item>
+        <item>Teigrechner: neuer Bereich „Gehzeiten und Temperaturen“ für Raum, Kühlschrank, Gehzeiten und Backofen. Gehzeiten bei Raumtemperatur richten sich nach dem Raum: wärmer ist kürzer.</item>
+        <item>Teigrechner: Die Wassertemperatur wird berechnet, damit der Teig nach dem Kneten die gewählte Temperatur hat, von Hand oder mit der Maschine.</item>
+        <item>Als Rezept gespeichert bekommt der Teig einen Zeitplan mit den gewählten Gehzeiten und eine Zubereitung mit Mengen und Temperaturen. Unter Einstellungen › Teigrechner lassen sich Temperaturen in °F zeigen.</item>
+        <item>Mengen vorn: Die Zusammenfassungen beginnen mit der Menge, z. B. „277 g Biga · Mehl 30 % (184 g)“.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Geräts) -->
@@ -568,7 +548,7 @@
     <string name="dough_preferment_water">Wasser (% davon)</string>
     <string name="dough_section_result">Ergebnis</string>
     <string name="dough_bar_preferment">%1$s: %2$s</string>
-    <string name="dough_bar_main">Hauptteig: %1$s</string>
+    <string name="dough_bar_main">%1$s Hauptteig: %2$s</string>
     <string name="dough_tile_total">Gesamtteig</string>
     <string name="dough_summary_value">%1$s %2$s</string>
     <string name="dough_summary_of_flour">%1$s vom Mehl</string>
@@ -676,8 +656,82 @@
     <string name="dough_recipe_title_pizza_with">Pizzateig mit %1$s</string>
     <string name="dough_recipe_title_bread">Brotteig</string>
     <string name="dough_recipe_title_bread_with">Brotteig mit %1$s</string>
-    <string name="dough_heading_preferment">Für den Vorteig (%1$s)</string>
-    <string name="dough_heading_main">Für den Hauptteig</string>
+    <string name="dough_heading_preferment">Für den Vorteig (%1$s %2$s)</string>
+    <string name="dough_heading_main">Für den Hauptteig (%1$s)</string>
+    <string name="dough_whole_preferment">%1$s %2$s (der ganze Vorteig)</string>
+    <string name="place_room_at">bei Raumtemperatur, %1$s</string>
+    <string name="place_fridge_at">im Kühlschrank, %1$s</string>
+    <string name="place_oven_at">im Backofen, %1$s</string>
+    <string name="list_pair">%1$s und %2$s</string>
+    <string name="list_last">%1$s und %2$s</string>
+    <string name="phase_proof_balls">Teigkugeln gehen lassen</string>
+    <string name="phase_proof_loaf">Laib gehen lassen</string>
+    <string name="step_mix_biga">%1$s kurz vermengen, bis kein trockenes Mehl mehr zu sehen ist. Nicht kneten: Die Biga bleibt krümelig.</string>
+    <string name="step_mix_poolish">%1$s glatt verrühren.</string>
+    <string name="step_mix_sourdough">%1$s mit etwas Anstellgut verrühren.</string>
+    <string name="step_ripen_biga">Abgedeckt kalt stellen. Fertig, wenn sie leicht säuerlich duftet und etwas aufgegangen ist.</string>
+    <string name="step_ripen_poolish">Abgedeckt stehen lassen. Fertig, wenn die Oberfläche voller Bläschen ist und gerade einzusinken beginnt.</string>
+    <string name="step_ripen_sourdough">Abgedeckt stehen lassen. Fertig, wenn er sich etwa verdoppelt hat und säuerlich riecht.</string>
+    <string name="step_knead_biga">%1$s in Stücke zupfen und mit %2$s kneten.</string>
+    <string name="step_knead_preferment">%1$s mit %2$s kneten.</string>
+    <string name="step_knead_plain">%1$s kneten.</string>
+    <string name="step_knead_salt">Nach etwa 5 Minuten %1$s dazugeben.</string>
+    <string name="step_knead_end">Kneten, bis der Teig glatt und elastisch ist. Ziel: etwa %1$s, mit einem Küchenthermometer prüfen.</string>
+    <string name="step_bulk">Abgedeckt ruhen lassen, bis der Teig sichtbar aufgegangen ist.</string>
+    <string name="step_shape_ball">Zu einer straffen Kugel formen.</string>
+    <string name="step_shape_loaf">Zu einem Laib formen und mit der Naht nach oben in ein bemehltes Gärkörbchen legen.</string>
+    <string name="step_proof_balls_room">In einer abgedeckten Box, bis sie deutlich größer und luftig sind. Etwa 1 Stunde vor dem Backen den Backofen mit Pizzastein auf %1$s vorheizen.</string>
+    <string name="step_proof_balls_fridge">In einer abgedeckten Box kalt gehen lassen.</string>
+    <string name="step_proof_loaf_room">Abgedeckt gehen lassen, bis der Teig auf leichten Fingerdruck langsam zurückfedert. Dabei den Backofen auf %1$s vorheizen.</string>
+    <string name="step_proof_loaf_fridge">Abgedeckt kalt gehen lassen und direkt aus dem Kühlschrank backen. Etwa 45 Minuten vorher den Backofen auf %1$s vorheizen.</string>
+    <string name="step_warm">Aus dem Kühlschrank nehmen und abgedeckt warm werden lassen. Etwa 1 Stunde vor dem Backen den Backofen mit Pizzastein auf %1$s vorheizen.</string>
+    <string name="step_bake_pizza">Teigkugeln ausziehen, belegen und backen, bis der Rand braun ist.</string>
+    <string name="step_bake_bread">Backen, bis die Kruste kräftig braun ist und der Laib beim Klopfen auf die Unterseite hohl klingt.</string>
+    <string name="dough_section_process">Gehzeiten und Temperaturen</string>
+    <string name="dough_process_kitchen">Raum und Kühlschrank</string>
+    <string name="dough_process_room">Raum</string>
+    <string name="dough_process_fridge">Kühlschrank</string>
+    <string name="dough_process_kitchen_note">Gilt für alle Schritte bei Raumtemperatur bzw. im Kühlschrank.</string>
+    <string name="dough_process_dough_temp">Teig nach dem Kneten</string>
+    <string name="dough_process_oven">Backofen</string>
+    <string name="dough_process_rising_time">Gehzeit</string>
+    <string name="dough_process_temperature">Temperatur</string>
+    <string name="dough_process_dough_temperature">Teigtemperatur</string>
+    <string name="dough_place_room_choice">Bei Raumtemperatur</string>
+    <string name="dough_place_fridge_choice">Im Kühlschrank</string>
+    <string name="dough_place_room_short">bei Raumtemperatur</string>
+    <string name="dough_place_fridge_short">im Kühlschrank</string>
+    <string name="dough_knead_hand">Von Hand</string>
+    <string name="dough_knead_machine">Mit Maschine</string>
+    <string name="dough_knead_hand_lower">von Hand</string>
+    <string name="dough_knead_machine_lower">mit Maschine</string>
+    <string name="dough_process_knead_suffix">%1$s · Wasser %2$s</string>
+    <string name="dough_process_water">Wasser für den Hauptteig: %1$s</string>
+    <string name="dough_process_water_plain">Wasser: %1$s</string>
+    <string name="dough_process_summary">Raum %1$s · Wasser %2$s · gesamt %3$s</string>
+    <string name="dough_process_summary_no_water">Raum %1$s · gesamt %2$s</string>
+    <string name="dough_process_adapts">Gehzeiten bei Raumtemperatur richten sich nach dem Raum: wärmer ist kürzer. Selbst geänderte Werte sind fett und bleiben.</string>
+    <string name="dough_process_units_description">°C oder °F in den Einstellungen wählen</string>
+    <string name="dough_summary_amount">%1$s (%2$s)</string>
+    <string name="dough_process_shorter">%1$s kürzer</string>
+    <string name="dough_process_longer">%1$s länger</string>
+    <string name="dough_process_row">%1$s: %2$s</string>
+    <string name="dough_water_too_cold">Dafür müsste das Wasser eiskalt sein: das Mehl vorher kühlen, von Hand kneten oder eine höhere Teigtemperatur wählen.</string>
+    <string name="dough_water_too_hot">Wasser über %1$s schadet der Hefe: eine niedrigere Teigtemperatur wählen.</string>
+    <string name="dough_hours_short">%1$s Std.</string>
+    <string name="dough_minutes_short">%1$s Min.</string>
+    <string name="dough_hours_minutes_short">%1$s Std. %2$s Min.</string>
+    <string name="temperature_unit_title">Temperaturen</string>
+    <string name="temperature_unit_celsius">Grad Celsius (°C)</string>
+    <string name="temperature_unit_fahrenheit">Grad Fahrenheit (°F)</string>
+    <plurals name="step_shape_balls">
+        <item quantity="one">In %1$d Stück zu %2$s teilen und straff zu einer Kugel formen.</item>
+        <item quantity="other">In %1$d Stücke zu je %2$s teilen und straff zu Kugeln formen.</item>
+    </plurals>
+    <plurals name="step_shape_loaves">
+        <item quantity="one">In %1$d Stück zu %2$s teilen und zu einem Laib formen.</item>
+        <item quantity="other">In %1$d Stücke zu je %2$s teilen und zu Laiben formen.</item>
+    </plurals>
     <string name="dough_ingredient_flour">Mehl</string>
     <string name="dough_ingredient_water">Wasser</string>
     <string name="dough_ingredient_salt">Salz</string>
@@ -852,8 +906,7 @@
     <string name="phase_knead">Teig kneten</string>
     <string name="phase_bulk">Teig gehen lassen</string>
     <string name="phase_shape">Teig formen</string>
-    <string name="phase_proof">Geformten Teig gehen lassen</string>
-    <string name="phase_warm_up">Teig auf Zimmertemperatur kommen lassen</string>
+    <string name="phase_warm_up">Teigkugeln aufwärmen</string>
     <string name="phase_bake">Backen</string>
     <plurals name="duration_minutes">
         <item quantity="one">%1$d Minute</item>
@@ -879,7 +932,7 @@
         <item quantity="one">%1$d bis %2$d Tag</item>
         <item quantity="other">%1$d bis %2$d Tage</item>
     </plurals>
-    <string name="place_room">bei Zimmertemperatur</string>
+    <string name="place_room">bei Raumtemperatur</string>
     <string name="place_fridge">im Kühlschrank</string>
     <string name="place_oven">im Backofen</string>
     <string name="schedule_title">Zeitplan</string>

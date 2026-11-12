@@ -11,8 +11,12 @@ internal object GermanTexts : DoughTexts {
 
     override fun cakeTitle(kind: CakeKind) = "Kuchenteig ${kind.key}"
 
-    override fun heading(kind: SectionKind, preferment: Preferment) =
-        if (kind == SectionKind.PREFERMENT) "Für den Vorteig (${preferment.key})" else "Für den Hauptteig"
+    override fun heading(kind: SectionKind, preferment: Preferment, amount: String) =
+        if (kind == SectionKind.PREFERMENT) "Für den Vorteig ($amount ${preferment.key})" else "Für den Hauptteig ($amount)"
+
+    override fun wholePreferment(preferment: Preferment, amount: String) = "$amount ${preferment.key} (der ganze Vorteig)"
+
+    override fun prefermentName(preferment: Preferment) = preferment.key
 
     override fun ingredient(role: LineRole, yeastKind: YeastKind) = when (role) {
         LineRole.FLOUR -> "Mehl"
@@ -47,9 +51,24 @@ internal object GermanTexts : DoughTexts {
         YieldKind.DOUGH -> "Teig"
     }
 
-    override fun phase(kind: PhaseKind, preferment: Preferment) = "${kind.name}:${preferment.key}"
+    override fun phase(kind: PhaseKind, type: DoughType, preferment: Preferment) = "${kind.name}:${preferment.key}"
 
     override fun duration(minMinutes: Int, maxMinutes: Int) = "$minMinutes-$maxMinutes min"
 
-    override fun place(place: PhasePlace) = if (place == PhasePlace.NONE) "" else place.key
+    override fun placeAt(place: PhasePlace, temperature: String) = if (place == PhasePlace.NONE) "" else "${place.key} $temperature"
+
+    override fun join(parts: List<String>) =
+        if (parts.size <= 1) parts.joinToString("") else parts.dropLast(1).joinToString(", ") + " und " + parts.last()
+
+    override fun stepDetail(detail: StepDetail) = when (detail) {
+        is StepDetail.Mix -> "mischen: ${detail.ingredients}"
+        is StepDetail.Ripen -> "reifen ${detail.preferment.key}"
+        is StepDetail.Knead -> listOfNotNull(detail.preferment, "mit ${detail.ingredients}", detail.salt?.let { "Salz $it" }, "Ziel ${detail.doughTemp}")
+            .joinToString(" | ")
+        StepDetail.Bulk -> "gehen"
+        is StepDetail.Shape -> "${detail.count} × ${detail.piece}"
+        is StepDetail.Proof -> "${detail.type.key} ${detail.place.key} ${detail.oven}"
+        is StepDetail.Warm -> "aufwärmen ${detail.oven}"
+        is StepDetail.Bake -> "backen ${detail.type.key}"
+    }
 }

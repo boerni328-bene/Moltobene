@@ -97,18 +97,24 @@ import com.moltobene.app.data.dough.DoughCalculator
 import com.moltobene.app.data.dough.DoughField
 import com.moltobene.app.data.dough.DoughFlours
 import com.moltobene.app.data.dough.DoughIssue
+import com.moltobene.app.data.dough.DoughKitchen
 import com.moltobene.app.data.dough.DoughLimits
 import com.moltobene.app.data.dough.DoughNumbers
 import com.moltobene.app.data.dough.DoughPresets
+import com.moltobene.app.data.dough.DoughProcess
+import com.moltobene.app.data.dough.DoughProcessMemory
+import com.moltobene.app.data.dough.DoughProcessRules
 import com.moltobene.app.data.dough.DoughResult
 import com.moltobene.app.data.dough.DoughSummary
 import com.moltobene.app.data.dough.DoughStepper
 import com.moltobene.app.data.StepperSide
 import com.moltobene.app.data.WeightUnit
 import com.moltobene.app.data.dough.DoughType
+import com.moltobene.app.data.dough.DoughWater
 import com.moltobene.app.data.dough.LeavenedInput
 import com.moltobene.app.data.dough.LineRole
 import com.moltobene.app.data.dough.Preferment
+import com.moltobene.app.data.dough.SectionKind
 import com.moltobene.app.data.dough.YeastKind
 import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.components.AppTitleWithScreen
@@ -148,6 +154,7 @@ fun DoughScreen(
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onOpenKnowHow: () -> Unit,
+    onOpenSettings: () -> Unit,
     onSaved: (String) -> Unit,
 ) {
     var typeKey by rememberSaveable { mutableStateOf(DoughType.PIZZA.key) }
@@ -218,7 +225,7 @@ fun DoughScreen(
                     Header(type) { typeKey = it.key }
                 }
                 when (type) {
-                    DoughType.PIZZA, DoughType.BREAD -> LeavenedContent(type, viewModel, onSaved, header)
+                    DoughType.PIZZA, DoughType.BREAD -> LeavenedContent(type, viewModel, onSaved, onOpenSettings, header)
                     DoughType.PASTA -> PastaContent(viewModel, onSaved, header)
                     DoughType.CAKE -> CakeContent(viewModel, onSaved, header)
                 }
@@ -232,9 +239,10 @@ private fun LeavenedContent(
     type: DoughType,
     viewModel: DoughViewModel,
     onSaved: (String) -> Unit,
+    onOpenSettings: () -> Unit,
     header: @Composable () -> Unit,
 ) {
-    val loaded by produceState<LeavenedInput?>(null, type) {
+    val loaded by produceState<DoughViewModel.Loaded?>(null, type) {
         value = null
         value = viewModel.load(type)
     }
@@ -243,7 +251,7 @@ private fun LeavenedContent(
         Column { header() }
         CircularProgressIndicator(Modifier.padding(Spacing.m))
     } else {
-        DoughForm(initial, viewModel, onSaved, header)
+        DoughForm(initial.input, initial.process, viewModel, onSaved, onOpenSettings, header)
     }
 }
 
@@ -756,8 +764,10 @@ internal fun issueText(issue: DoughIssue): String? = when (issue) {
 @Composable
 private fun DoughForm(
     initial: LeavenedInput,
+    initialProcess: DoughProcess,
     viewModel: DoughViewModel,
     onSaved: (String) -> Unit,
+    onOpenSettings: () -> Unit,
     header: @Composable () -> Unit,
 ) {
     val type = initial.type
@@ -790,6 +800,13 @@ private fun DoughForm(
     var seedsText by rememberSaveable(type, resetCount) { mutableStateOf(show(start.seeds)) }
     // Weitere Zutaten erscheinen, sobald sie eine Menge haben oder über „Weitere Zutat“ hinzugefügt wurden.
     var addedExtras by rememberSaveable(type, resetCount) { mutableStateOf("") }
+    // Gehzeiten und Temperaturen (Entwurf 10C, Wahl vom 12.11.2026): je Teigart gemerkt, nach „Zurücksetzen“ die
+    // Standardwerte; als Text gemerkt, damit sie auch nach dem Drehen des Handys bleiben.
+    var processText by rememberSaveable(type, resetCount) {
+        mutableStateOf(DoughProcessMemory.encode(if (resetCount == 0) initialProcess else DoughProcessRules.defaults(type, start.preferment)))
+    }
+    // Welche Zeile im Bereich „Gehzeiten und Temperaturen“ offen ist (immer höchstens eine).
+    var openRow by rememberSaveable(type) { mutableStateOf("") }
     // Welcher Bereich offen ist (Entwurf 5 „Aufklappen“ vom 04.11.2026); bleibt beim Zurücksetzen und bei Voreinstellungen.
     var openSection by rememberSaveable(type) { mutableStateOf(SECTION_DOUGH) }
     fun toggleSection(key: String) {
@@ -798,6 +815,18 @@ private fun DoughForm(
 
     val yeastKind = YeastKind.fromKey(yeastKindKey) ?: YeastKind.FRESH
     val preferment = Preferment.fromKey(prefermentKey) ?: Preferment.NONE
+    val process = DoughProcessMemory.decode(type, preferment, processText)
+    fun setProcess(value: DoughProcess) {
+        processText = DoughProcessMemory.encode(value)
+    }
+    // Raum, Kühlschrank und Knetart gelten für alle Teigarten (im ViewModel gemerkt); °C oder °F aus den Einstellungen.
+    val kitchen = viewModel.kitchen
+    val temperatureUnit = viewModel.temperatureUnit
+    // „Zurücksetzen“ stellt alle Werte des Formulars wieder her, auch Raum, Kühlschrank und Knetart.
+    fun reset() {
+        resetCount += 1
+        viewModel.updateKitchen(DoughKitchen())
+    }
     val defaults = DoughLimits.defaults(type)
     fun stepping(field: DoughField, default: Double?) =
         Stepping(DoughStepper.stepFor(field), default, DoughLimits.range(type, field, preferment), field)
@@ -856,6 +885,10 @@ private fun DoughForm(
             viewModel.remember(input)
         }
     }
+    LaunchedEffect(process) {
+        delay(MEMORY_DELAY_MILLIS)
+        viewModel.rememberProcess(type, process)
+    }
 
     // Voreinstellungen (#83, Etappe 3): mitgelieferte und eigene; die zuletzt gewählte eigene bleibt vorn, solange die Werte passen.
     val entries = presetEntries(type, viewModel.own(type))
@@ -871,6 +904,8 @@ private fun DoughForm(
         oil = show(preset.oil)
         yeastKindKey = preset.yeastKind.key
         yeast = show(preset.yeast)
+        // Ein anderer Vorteig bringt seine üblichen Gehzeiten mit; die Temperaturen bleiben.
+        if (preset.preferment != preferment) setProcess(DoughProcessRules.forPreferment(process, type, preset.preferment))
         prefermentKey = preset.preferment.key
         prefermentFlour = show(preset.prefermentFlour)
         prefermentWater = show(preset.prefermentWater)
@@ -897,7 +932,7 @@ private fun DoughForm(
         bar.showSave = true
         bar.canSave = result is DoughResult.Success
         bar.save = { savingPreset = true }
-        bar.reset = { resetCount += 1 }
+        bar.reset = { reset() }
     }
     DisposableEffect(Unit) { onDispose { bar.showSave = false } }
 
@@ -1043,6 +1078,7 @@ private fun DoughForm(
         yeastKindKey = kind.key
     }
     fun selectPreferment(option: Preferment) {
+        if (option != preferment) setProcess(DoughProcessRules.forPreferment(process, type, option))
         prefermentKey = option.key
         // Biga und Poolish haben feste Wasseranteile, die hier vorausgefüllt werden.
         if (option != Preferment.NONE) prefermentWater = show(DoughLimits.defaultPrefermentWater(option))
@@ -1051,45 +1087,104 @@ private fun DoughForm(
     // bei großer Schrift bleibt es bei der Leiste unten, damit zum Scrollen genug Platz bleibt.
     val pinned = !isLargeText()
     val success = result as? DoughResult.Success
+    val language = LocalConfiguration.current.locales[0].language
+    val resources = LocalResources.current
     val resultTotals = success?.let { viewModel.totals(it, input) }
     val prefermentItems = success?.let { viewModel.prefermentItems(it, input) }.orEmpty()
     val prefermentName = stringResource(prefermentLabel(preferment))
+    // Mengen vorn (Wunsch vom 05.11.2026): „277 g Biga“.
+    val prefermentAmount = success?.let {
+        stringResource(R.string.dough_summary_value, DoughNumbers.weight(DoughSummary.prefermentGrams(it), 0, language, unit), prefermentName)
+    } ?: prefermentName
+    // Gramm einer Zutat in einem Teil des Teigs, z. B. die Hefe im Vorteig; null ohne Ergebnis.
+    fun gramsIn(kind: SectionKind, role: LineRole): String? = success?.let { done ->
+        val grams = done.sections.filter { it.kind == kind }.flatMap { it.lines }.filter { it.role == role }.sumOf { it.grams }
+        DoughNumbers.weight(grams, role, language, unit)
+    }
+    fun withGrams(text: String, grams: String?): String = if (grams == null) text else resources.getString(R.string.dough_summary_amount, text, grams)
+
+    // Wassertemperatur für den Hauptteig (ohne Vorteig: für den Teig) nach Raum, Knetart und Teig nach dem Kneten
+    // (Wunsch vom 05.11.2026); unter 2 °C oder über 40 °C mit Warnung.
+    val waterTemperature = success?.let { DoughWater.temperature(it, preferment, kitchen, process.doughTemp) }
+    val waterText = waterTemperature?.let { temperatureUnit.format(it.coerceAtLeast(0.0)) }
+    val waterWarning = when {
+        waterTemperature == null -> null
+        waterTemperature < DoughWater.TOO_COLD -> stringResource(R.string.dough_water_too_cold)
+        waterTemperature > DoughWater.TOO_HOT -> stringResource(R.string.dough_water_too_hot, temperatureUnit.format(DoughWater.TOO_HOT))
+        else -> null
+    }
+    val effective = DoughProcessRules.effective(process, kitchen, type, preferment)
+    val totalText = totalShort(resources, DoughProcessRules.totalMinutes(effective, type, preferment, kitchen.kneading))
+
     val prefermentBar = if (prefermentItems.isEmpty()) null else stringResource(
         R.string.dough_bar_preferment,
-        prefermentName,
+        prefermentAmount,
         prefermentItems.joinToString(", ") { "${it.amount} ${it.name}" },
     )
-    // Darunter, was zum Kneten in den Hauptteig kommt (Wunsch vom 04.11.2026): der Vorteig, Hefe falls nicht im Vorteig,
-    // Mehl, Wasser, Salz und der Rest.
+    // Darunter, was zum Kneten in den Hauptteig kommt (Wunsch vom 04.11.2026), mit Gewicht und Wassertemperatur
+    // (Wunsch vom 05.11.2026): „1000 g Hauptteig: 277 g Biga, 429 g Mehl, 276 g Wasser (30 °C), 17 g Salz“.
     val mainItems = success?.let { viewModel.mainItems(it, input) }.orEmpty()
-    val mainBar = if (prefermentItems.isEmpty() || mainItems.isEmpty()) null else stringResource(
+    val mainBar = if (success == null || prefermentItems.isEmpty() || mainItems.isEmpty()) null else stringResource(
         R.string.dough_bar_main,
-        (listOf(prefermentName) + mainItems.map { "${it.amount} ${it.name}" }).joinToString(", "),
+        DoughNumbers.weight(success.totalGrams, 0, language, unit),
+        (
+            listOf(prefermentAmount) + mainItems.map { item ->
+                val text = "${item.amount} ${item.name}"
+                if (item.role == LineRole.WATER && waterText != null) withGrams(text, waterText) else text
+            }
+            ).joinToString(", "),
     )
-    val language = LocalConfiguration.current.locales[0].language
-    // Zusammenfassungen der Bereiche (Entwurf 5): was eingestellt ist, auch wenn der Bereich zu ist.
-    // Mit zusätzlicher Hefe im Hauptteig: „Frischhefe · Vorteig 0,2 % · Hauptteig 0,1 % · 1,8 g“ (Gramm insgesamt).
+    // Ohne Vorteig: „Wasser: 20 °C · Teig nach dem Kneten: 24 °C“.
+    val plainBar = if (preferment != Preferment.NONE || waterText == null) null else listOf(
+        stringResource(R.string.dough_process_water_plain, waterText),
+        stringResource(R.string.dough_process_row, stringResource(R.string.dough_process_dough_temp), temperatureUnit.format(process.doughTemp)),
+    ).joinToString(SUMMARY_SEPARATOR)
+    // Zusammenfassungen der Bereiche (Entwurf 5) mit der Menge vorn (Wunsch vom 05.11.2026): „1,2 g Frischhefe · 0,2 %
+    // vom Mehl“, mit zusätzlicher Hefe im Hauptteig „1,8 g Frischhefe · Vorteig 0,2 % (1,2 g) · Hauptteig 0,1 % (0,6 g)“.
     val withMainYeast = preferment.carriesYeast && parseNumber(mainYeast).let { !it.isFinite() || it > 0 }
-    val yeastSummary = buildList {
-        add(stringResource(AndroidDoughTexts.yeastName(yeastKind)))
-        if (withMainYeast) {
-            add(summaryValue(R.string.dough_section_preferment, yeast))
-            add(summaryValue(R.string.dough_main_dough, mainYeast))
-        } else {
-            add(stringResource(R.string.dough_summary_of_flour, "${yeast.trim()} %"))
-        }
-        if (success != null) add(DoughNumbers.weight(DoughSummary.yeastGrams(success), LineRole.YEAST, language, unit))
-    }.joinToString(SUMMARY_SEPARATOR)
-    // Beim Vorteig am Schluss sein Gesamtgewicht, wie die Hefemenge darüber (Wunsch vom 04.11.2026).
+    val yeastName = stringResource(AndroidDoughTexts.yeastName(yeastKind))
+    val yeastAmount = success?.let {
+        stringResource(R.string.dough_summary_value, DoughNumbers.weight(DoughSummary.yeastGrams(it), LineRole.YEAST, language, unit), yeastName)
+    } ?: yeastName
+    val yeastParts = if (withMainYeast) {
+        listOf(
+            yeastAmount,
+            withGrams(summaryValue(R.string.dough_section_preferment, yeast), gramsIn(SectionKind.PREFERMENT, LineRole.YEAST)),
+            withGrams(summaryValue(R.string.dough_main_dough, mainYeast), gramsIn(SectionKind.MAIN, LineRole.YEAST)),
+        )
+    } else {
+        listOf(yeastAmount, stringResource(R.string.dough_summary_of_flour, "${yeast.trim()} %"))
+    }
+    val yeastSummary = yeastParts.joinToString(SUMMARY_SEPARATOR)
+    // Vorteig: „277 g Biga · Mehl 30 % (184 g) · Wasser 50 % (92 g)“.
     val prefermentSummary = if (preferment == Preferment.NONE) {
         prefermentName
     } else {
-        listOfNotNull(
-            prefermentName,
-            summaryValue(R.string.dough_ingredient_flour, prefermentFlour),
-            summaryValue(R.string.dough_ingredient_water, prefermentWater),
-            success?.let { DoughNumbers.weight(DoughSummary.prefermentGrams(it), 0, language, unit) },
+        listOf(
+            prefermentAmount,
+            withGrams(summaryValue(R.string.dough_ingredient_flour, prefermentFlour), gramsIn(SectionKind.PREFERMENT, LineRole.FLOUR)),
+            withGrams(summaryValue(R.string.dough_ingredient_water, prefermentWater), gramsIn(SectionKind.PREFERMENT, LineRole.WATER)),
         ).joinToString(SUMMARY_SEPARATOR)
+    }
+    // Gehzeiten und Temperaturen: „Raum 22 °C · Wasser 30 °C · gesamt 29 Std. 55 Min.“.
+    val processSummary = if (waterText == null) {
+        stringResource(R.string.dough_process_summary_no_water, temperatureUnit.format(kitchen.room), totalText)
+    } else {
+        stringResource(R.string.dough_process_summary, temperatureUnit.format(kitchen.room), waterText, totalText)
+    }
+    val processRowList = processRows(
+        resources, language, type, preferment, prefermentName, process, kitchen, temperatureUnit, waterText,
+        onProcess = { setProcess(it) },
+        onKitchen = { viewModel.updateKitchen(it) },
+    )
+    val processContent: @Composable () -> Unit = {
+        ProcessList(
+            rows = processRowList,
+            openKey = openRow,
+            onToggle = { key -> openRow = if (openRow == key) "" else key },
+            warning = waterWarning,
+            onUnits = onOpenSettings,
+        )
     }
     val doughSummary = buildList {
         add(stringResource(R.string.dough_summary_pieces, count.trim(), "${piece.trim()} ${unit.label}"))
@@ -1104,7 +1199,7 @@ private fun DoughForm(
             ResultTop(
                 total = success?.let { DoughNumbers.weight(it.totalGrams, 0, language, unit) },
                 totals = resultTotals,
-                lines = listOfNotNull(prefermentBar, mainBar),
+                lines = listOfNotNull(prefermentBar, mainBar, plainBar),
             )
         }
         Column(
@@ -1216,6 +1311,15 @@ private fun DoughForm(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
+                    // Gehzeiten und Temperaturen (Entwurf 10C, Wahl vom 12.11.2026): eine ruhige Liste mit den Werten.
+                    DoughSection(
+                        title = stringResource(R.string.dough_section_process),
+                        summary = processSummary,
+                        expanded = openSection == SECTION_PROCESS,
+                        onToggle = { toggleSection(SECTION_PROCESS) },
+                    ) {
+                        processContent()
+                    }
                 }
                 Text(
                     stringResource(R.string.dough_hint),
@@ -1305,9 +1409,14 @@ private fun DoughForm(
                 }
             }
 
+            Card(stringResource(R.string.dough_section_process)) {
+                Text(processSummary, style = MaterialTheme.typography.bodyMedium)
+                processContent()
+            }
+
             // Mit Vorteig steht hier die Aufteilung; die Summen stehen immer unten.
             if (result is DoughResult.Success && preferment != Preferment.NONE) {
-                val draft = viewModel.draft(result, input)
+                val draft = viewModel.draft(result, input, process)
                 Surface(
                     color = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -1344,18 +1453,18 @@ private fun DoughForm(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = Spacing.m),
             )
-            TextButton(onClick = { resetCount += 1 }, modifier = Modifier.padding(horizontal = Spacing.s)) {
+            TextButton(onClick = { reset() }, modifier = Modifier.padding(horizontal = Spacing.s)) {
                 Text(stringResource(R.string.dough_reset))
             }
         }
 
         if (pinned) {
-            SaveBar(enabled = success != null, onSave = { viewModel.saveAsRecipe(input, onSaved) })
+            SaveBar(enabled = success != null, onSave = { viewModel.saveAsRecipe(input, process, onSaved) })
         } else {
             ResultBar(
                 summary = if (success != null) leavenedSummary(success, input, unit) else null,
                 totals = resultTotals,
-                onSave = { viewModel.saveAsRecipe(input, onSaved) },
+                onSave = { viewModel.saveAsRecipe(input, process, onSaved) },
                 preferment = prefermentBar,
             )
         }

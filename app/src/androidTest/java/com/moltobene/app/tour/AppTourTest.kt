@@ -823,15 +823,38 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.dough_extras_note))
         screenshot("14t-teigrechner-zutaten")
 
+        // Gehzeiten und Temperaturen (Entwurf 10C, 0.74.0): Zeilen mit den Werten; Antippen öffnet Minus und Plus, eine
+        // selbst geänderte Gehzeit steht fett. „Teig nach dem Kneten“ nennt die Wassertemperatur.
+        openDoughSection(R.string.dough_section_process)
+        val bulk = text(R.string.phase_bulk)
+        composeRule.onNode(hasClickAction() and hasContentDescription(bulk, substring = true)).performScrollTo().performClick()
+        composeRule.onNodeWithContentDescription(
+            text(R.string.dough_process_row, bulk, text(R.string.dough_process_longer, text(R.string.dough_process_rising_time))),
+        ).performScrollTo().performClick()
+        screenshot("14u-teigrechner-gehzeiten")
+        // „°C/°F“ öffnet in den Einstellungen gleich die Gruppe „Teigrechner“; nach der Wahl von °F führt Zurück wieder zum
+        // Teigrechner, der nun in °F rechnet.
+        composeRule.onNodeWithContentDescription(text(R.string.dough_process_units_description)).performScrollTo().performClick()
+        waitForText(text(R.string.temperature_unit_fahrenheit))
+        composeRule.onNodeWithText(text(R.string.temperature_unit_fahrenheit)).performScrollTo().performClick()
+        screenshot("14v-einstellungen-temperaturen")
+        pressBack()
+        waitForText(text(R.string.dough_save))
+        waitForText("°F", substring = true)
+        screenshot("14w-teigrechner-fahrenheit")
+
         composeRule.onNodeWithText(text(R.string.dough_save)).performClick()
         composeRule.waitUntil(10_000) {
             runBlocking { container().repository.getAll().any { it.isDraft && it.ingredients.any { line -> line.isHeading } } }
         }
         val draft = runBlocking { container().repository.getAll().first { it.isDraft } }
         assertEquals(com.moltobene.app.data.SourceType.OWN, draft.source?.type)
-        // Pizza und Brot bekommen einen Zeitplan (#71); die Biga reift 1 bis 3 Tage.
+        // Pizza und Brot bekommen einen Zeitplan (#71) mit den gewählten Gehzeiten; jeder Schritt der Zubereitung nennt
+        // Mengen und Temperaturen (0.74.0), hier in °F, wie zuvor in den Einstellungen gewählt.
         assertTrue(draft.timeline.isNotEmpty())
         assertEquals(draft.timeline.size, draft.steps.size)
+        assertTrue(draft.steps.toString(), draft.steps.any { "°F" in it })
+        assertTrue(draft.ingredients.toString(), draft.ingredients.any { "°F" in it.text })
         waitForText(text(R.string.dough_saved))
         screenshot("14c-teigrechner-entwurf")
     }

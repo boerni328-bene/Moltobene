@@ -15,6 +15,7 @@ import com.moltobene.app.R
 import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.StartScreen
 import com.moltobene.app.data.StepperSide
+import com.moltobene.app.data.TemperatureUnit
 import com.moltobene.app.data.WeightUnit
 
 /**
@@ -46,13 +47,18 @@ private fun label(choice: ScreenOn): String {
     }
 }
 
-/** „Teigrechner“ in den Einstellungen: auf welcher Seite des Werts Minus und Plus nebeneinander stehen. */
+/**
+ * „Teigrechner“ in den Einstellungen: auf welcher Seite des Werts Minus und Plus nebeneinander stehen, Gewichte in
+ * Gramm oder Unzen und Temperaturen in °C oder °F (Wunsch vom 05.11.2026).
+ */
 @Composable
 internal fun DoughSection(
     stepperSide: StepperSide,
     onStepperSide: (StepperSide) -> Unit,
     weightUnit: WeightUnit,
     onWeightUnit: (WeightUnit) -> Unit,
+    temperatureUnit: TemperatureUnit,
+    onTemperatureUnit: (TemperatureUnit) -> Unit,
 ) {
     GroupLabel(stringResource(R.string.stepper_side_title))
     Column(modifier = Modifier.selectableGroup()) {
@@ -77,6 +83,23 @@ internal fun DoughSection(
                 },
                 leadingContent = { RadioButton(selected = selected, onClick = null) },
                 modifier = Modifier.selectable(selected = selected, role = Role.RadioButton, onClick = { onWeightUnit(choice) }),
+            )
+        }
+    }
+    GroupLabel(stringResource(R.string.temperature_unit_title))
+    Column(modifier = Modifier.selectableGroup()) {
+        TemperatureUnit.entries.forEach { choice ->
+            val selected = temperatureUnit == choice
+            ListItem(
+                headlineContent = {
+                    Text(
+                        stringResource(
+                            if (choice == TemperatureUnit.CELSIUS) R.string.temperature_unit_celsius else R.string.temperature_unit_fahrenheit,
+                        ),
+                    )
+                },
+                leadingContent = { RadioButton(selected = selected, onClick = null) },
+                modifier = Modifier.selectable(selected = selected, role = Role.RadioButton, onClick = { onTemperatureUnit(choice) }),
             )
         }
     }

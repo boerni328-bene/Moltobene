@@ -1,42 +1,41 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 06.11.2026 · `main` = Version 0.73.0 (Release v0.73.0 erschienen, Build 41832772904 grün) · Arbeitszweig `claude/trusting-galileo-xg0tgz` = `main` plus diese Übergabe · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 12.11.2026 · `main` = Version 0.73.0 (Release v0.73.0 erschienen) · Arbeitszweig `claude/trusting-galileo-xg0tgz` = **0.74.0 (versionCode 125)**, Build auf dem Zweig gestartet, noch nicht auf `main` · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
 
-## Gerade in Arbeit: Teigrechner mit Temperaturen, Gehzeiten, Hefe-Automatik und Zeitplan mit Uhrzeiten (nur Entwürfe, noch kein Code)
-- Private Entwurfsseite https://claude.ai/artifact/RAw2psMZkncGoKijB3sHSq. Ein gemeinsamer Bereich **„Gehzeiten und Temperaturen“** statt zwei (Wunsch des Inhabers vom 06.11.2026: verschmelzen, logisch, einfach, sehr kompakt). Aus 9A–9C hat er **9A** (Schritt für Schritt) gewählt, aber kompakter und aufgeräumter, Minus/Plus nebeneinander wie überall (rechts bzw. nach Einstellung links). Dazu neu auf Seite „Gehzeiten und Temperaturen kompakt“: **10A** Liste (Beschriftung links, Feld mit Wert und −/+ rechts), **10B** zwei Spalten wie im übrigen Teigrechner, **10C** ruhige Liste mit −/+ beim Antippen. Gebaut aus Entwurf 8 mit `check/build_mix.py` (9A–9C) und `check/build_mix2.py` (10A–10C) im Scratchpad. Seite „Gewählte Lösung“: **Entwurf 8** (`Loesung.dc.html`, ein bedienbarer Ablauf Teigrechner → Rezept → Startseite). Quellen nur im Scratchpad der Cloud-Sitzung (`src/loesung.js` + Bauskript); ältere Seiten (Entwurf 6, Varianten 7A–7D) bleiben als Verlauf.
-- Entscheidungen des Inhabers: 05.11.2026 Entwurf 6 im Grundsatz „Ja“ (Mengen vorne, Bereich „Temperaturen“ mit Wassertemperatur, Backofentemperatur beim Backen, °C/°F unter Einstellungen › Teigrechner), dazu einstellbare Gehzeiten; 06.11.2026 **Liste aus 7A mit der Startseite aus 7D**, **Hefe richtet sich nach Gehzeit und Temperatur**, **Gehzeit der Teigkugeln richtet sich nach der Raumtemperatur**.
-- Mengen vorne: Hefe „1,2 g Frischhefe · 0,2 % vom Mehl · automatisch“; Vorteig „277 g Biga · Mehl 30 % (184 g) · Wasser 50 % (92 g)“; Ergebniskarte „277 g Biga: …“, „1000 g Hauptteig: 277 g Biga, 429 g Mehl, 276 g Wasser (30 °C), 17 g Salz“; im Rezept „Für den Vorteig (277 g Biga)“, „Für den Hauptteig (1000 g)“, erste Zeile „277 g Biga (der ganze Vorteig)“. Ort im Zeitplan „bei Raumtemperatur, 22 °C“ (heute „bei Zimmertemperatur“).
-- Rechenmodell im Entwurf (Richtwerte, Quellen als Notiz auf der Entwurfsseite: Plötzblog, Brooot, AVPN, pizzablab u. a.; sie weichen bis Faktor 3 ab): Gärfaktor 2^((T − 24)/8); Frischhefe % vom Mehl = 1,6 / (Gehzeit in Std. bei 24 °C) ohne Vorteig, Biga 3,08 × Vorteiganteil / (Reifezeit bei 24 °C), Poolish 6,73 × Vorteiganteil / (…); so geeicht, dass die bisherigen Standards (0,2 %) herauskommen. Gehzeiten bei Raumtemperatur skalieren mit 2^((22 − Raum)/8), auf Feldstufen gerundet, außer selbst geändert (fett). Plus/Minus an der Hefe schaltet die Automatik aus; Sauerteig: Hefe von Hand. Wassertemperatur: Wärmebilanz Mehl 1,7 / Wasser 4,18 kJ/(kg·K), Knetwärme Hand 3 °C, Maschine 8 °C.
-- Ablauf: Rezept-Zeitplan mit „Backen am … um …“ (Tag ±, 15 Min. ±), Schritte nach Tagen mit Uhrzeit, Gehzeit im Schritt änderbar (Hefe in den Zutaten rechnet mit), „nachts“ (22–7 Uhr) und „vorbei“ markiert; „Plan merken“ → Startseite „Laufende Teige: Geplant: Biga ansetzen …“ (nur Anzeige, kein Wecker); „Jetzt starten“: Backzeit bleibt, erste Gehzeit gleicht aus.
-- Beim Einbau beachten: Rezept muss die Teigrechner-Werte speichern (sonst keine Neuberechnung der Hefe aus dem Rezept) → Datenbank-Migration und Sicherungsformat; geplanter Teig braucht eine Backzeit in `DoughRun` (oder eigenen Zustand); `TimelinePhase` hat heute min/max, künftig zusätzlich die geplante Dauer; `DoughMemory` um Temperaturen, Gehzeiten, Automatik erweitern (alte Werte lesbar); Texte in beide `strings.xml`; Rundgang ergänzen. Mit offenem Bereich passt auf dem kleinen Testhandy nicht alles ohne Scrollen.
-- **Nächster Schritt:** Inhaber wählt 10A, 10B, 10C oder eine Mischung; der Rest von Entwurf 8 gilt. Danach Umsetzung in Schritten (siehe unten). Danach Umsetzung auf dem Arbeitszweig in Schritten, z. B. 0.74.0 Mengen vorne, Temperaturen, Wasser, °C/°F; 0.75.0 Gehzeiten mit Hefe-Automatik; 0.76.0 Uhrzeiten und geplanter Teig auf der Startseite.
+## Gerade in Arbeit: 0.74.0 „Gehzeiten und Temperaturen“ (Schritt 1 von 3)
+- Inhaber hat am 12.11.2026 **Entwurf 10C** gewählt (ruhige Liste: Zeilen zeigen Werte, Antippen öffnet −/+ nebeneinander, wo nötig die Auswahl). Entwurfsseite (privat): https://claude.ai/artifact/RAw2psMZkncGoKijB3sHSq, Quellen nur im Scratchpad der Cloud-Sitzung.
+- Umgesetzt auf dem Zweig (lokal 117 Unit-Tests der Rechenteile grün, App-Build nur auf GitHub):
+  - Vierter Bereich im Teigrechner (Pizza/Brot): Raum und Kühlschrank, Vorteig reifen lassen, Teig nach dem Kneten (von Hand/mit Maschine, Wasser mit Temperatur), Teig gehen lassen, Teigkugeln bzw. Laib gehen lassen (Raum/Kühlschrank), Teigkugeln aufwärmen (Pizza aus dem Kühlschrank), Backofen. Bei großer Schrift als Karte.
+  - Gehzeiten bei Raumtemperatur × 2^((22 − Raum)/8), auf Stufen gerundet; selbst geänderte fett und fest; Kühlschrank-Gehzeiten fest. Küche (Raum, Kühlschrank, Knetart) gilt für alle Teigarten, Gehzeiten je Teigart; gemerkt in `AppPreferences` (nicht in der Sicherung). „Zurücksetzen“ setzt alles zurück, auch die Küche.
+  - Wassertemperatur per Wärmebilanz (Hand 3 °C, Maschine 8 °C Knetwärme; Biga kalt aus dem Kühlschrank), Warnung unter 2 °C / über 40 °C.
+  - Mengen vorn: „1,2 g Frischhefe · 0,2 % vom Mehl“, „277 g Biga · Mehl 30 % (184 g) · Wasser 50 % (92 g)“, oben „277 g Biga: …“ und „1000 g Hauptteig: 277 g Biga, …, 276 g Wasser (30 °C), 17 g Salz“; ohne Vorteig „Wasser: 20 °C · Teig nach dem Kneten: 24 °C“.
+  - Gespeichertes Rezept: Überschriften mit Gewicht, „277 g Biga (der ganze Vorteig)“, Wasserzeile mit Temperatur; Zeitplan mit den gewählten Gehzeiten (je eine Dauer statt Spanne, Arbeitsschritte mit Spanne) und Zubereitung je Schritt mit Mengen, Ort und Temperatur.
+  - °C/°F unter Einstellungen › Teigrechner › Temperaturen; Link „°C/°F“ im Bereich öffnet `SettingsRoute(group = "dough")` direkt in der Gruppe, Zurück führt zum Teigrechner. In °F: Schritte 1 °F, Backofen 25 °F.
+  - „Neu in Version 0.74.0“ aktualisiert (zuletzt war es 0.60.0). Rundgang: Bildschirmfotos 14u (Gehzeiten), 14v (Einstellungen Temperaturen), 14w (Teigrechner in °F); der Rundgang setzt vor jedem Test wieder °C.
+- **Nächster Schritt:** Build auf dem Zweig bis grün (Lint, Unit-Tests, Release-APK, Testlauf auf dem Emulator), Bildschirmfotos 14a/14b/14u/14v/14w ansehen, dann Inhaber berichten. Auf `main` erst nach „Pushe die Version 0.74.0“.
+- Danach (nach Freigabe): **0.75.0 Hefe-Automatik** (Entwurf 8: Frischhefe % = 1,6 / Gehzeit bei 24 °C ohne Vorteig, Biga 3,08 × Vorteiganteil / …, Poolish 6,73 × …; −/+ an der Hefe schaltet die Automatik aus; Sauerteig von Hand) und **0.76.0 Uhrzeiten** (Liste aus 7A im Rezept, „Backen am … um …“, geplanter Teig auf der Startseite aus 7D). Dafür muss das Rezept die Teigrechner-Werte speichern (Datenbank-Migration und Sicherungsformat) und `DoughRun` eine Backzeit bekommen.
 
 ## Offen / zurückgestellt
 - Inhaber prüft Release 0.73.0 auf dem Handy (Aufklappen, Zeile „Hauptteig“, zusätzliche Hefe).
-- Schrift 200 % verbessern (Inhaber: „später“; Bildschirm und Gerät nannte er nicht).
-- YouTube-Link: Feld „Video“ unter „Quelle“ gibt es schon; Inhaber nennt bei Bedarf ein Rezept, bei dem er fehlt.
-- Wiederherstellen mit Auswahl (ältere ersetzen, fehlende ergänzen, Doppelte einzeln bestätigen): eigenes Vorhaben, noch auszuarbeiten.
-- Windows-Version: erst nach 1.0 (Besprechung `docs/besprechungen/2026-10-23-tablet-und-windows.md`).
-- Echtes Handy/Tablet prüfen: Kochleiste oben (Handy quer), Menü beim langen Berühren, Schriftgrößen, Kopfhörer-Befehle.
+- Schrift 200 % verbessern (Inhaber: „später“).
+- YouTube-Link: Feld „Video“ gibt es; Inhaber nennt bei Bedarf ein Rezept, bei dem er fehlt.
+- Wiederherstellen mit Auswahl (ersetzen, ergänzen, Doppelte bestätigen): eigenes Vorhaben.
+- Windows-Version: erst nach 1.0 (`docs/besprechungen/2026-10-23-tablet-und-windows.md`).
+- Echtes Handy/Tablet prüfen: Kochleiste oben (quer), Menü beim langen Berühren, Schriftgrößen, Kopfhörer-Befehle.
 
 ## Weg zu Version 1.0 (Abnahmeliste)
 1. Prüfung auf echtem Handy durch den Projektinhaber: Blättern, Vorlesen mit TalkBack, Spracheingabe, Kopfhörertasten, „Aufnehmen“, „Aus Audio“, Texterkennung/Übersetzung messen (#52, #62).
-2. Teigwissen-Artikel von einer Fachperson gegenlesen (oder „ohne Gewähr“ belassen); Erklärtexte im Teigrechner gegenlesen.
-3. Store-Auftritt (#73): eigene Gerichte-Fotos (ohne Aufnahmeort, keine erkennbaren Personen), Texte, Spendenlink nur im Store-Eintrag; Markenname „Molto Bene“ vorher im Markenregister prüfen.
+2. Teigwissen-Artikel und Erklärtexte im Teigrechner gegenlesen lassen (oder „ohne Gewähr“).
+3. Store-Auftritt (#73): eigene Gerichte-Fotos, Texte, Spendenlink nur im Store-Eintrag; Marke „Molto Bene“ vorher prüfen.
 4. `/pruefrunde` vor 1.0 (automatisch laut `CLAUDE.md`); Issues erst nach Freigabe.
-Nicht nötig für 1.0: PDF (#47), Umzug aus Apps (#76), Fassungen/Vergleichen (#77/#78), Gehzeiten (#71 Stufe 2), kleineres Lesemodell (#59), Baseline-Profil.
-
-Offene Fragen an den Inhaber: Zeitpunkt der Store-Fotos, wer prüft die Marke; Baseline-Profil vor oder nach 1.0; Reihenfolge der Abnahmeliste.
-Offene Issues: #16 (prüfen ob erledigt), #47, #52, #57 (schließbar nach Entscheidung), #59, #62, #71, #73–#78.
+Offene Issues: #16 (prüfen ob erledigt), #47, #52, #57, #59, #62, #71, #73–#78.
 
 ## Arbeitsweise (bewährt)
-- Ein Zweig je Aufgabe, bauen mit `gh workflow run build.yml --ref <zweig>`, auf grün warten, **Bildschirmfotos ansehen** (`gh run download <id> -n bildschirmfotos-<version> -D bildschirmfotos/<name>`), dann `git merge --squash` auf `main` mit `Fixes #<Nr>`. Ein Build dauert ca. 20 Minuten.
-- Cloud-Sitzung (ohne `gh`): Build per GitHub-Werkzeug „run_workflow“ auf dem Zweig starten; Stand ohne Anmeldung über `https://api.github.com/repos/boerni328-bene/Moltobene/actions/runs/<id>/jobs` abfragen. Android-SDK und Artefakte lassen sich dort nicht laden (dl.google.com und der Artefakt-Speicher sind gesperrt), also nur in GitHub bauen. Push auf `main` nur nach ausdrücklicher Freigabe je Version; kein Force-Push.
-- Fehlersuche: Artefakt `testbericht-<version>` herunterladen (in den Scratchpad-Ordner) und die HTML-Berichte unter `app/build/reports/androidTests/connected/debug/` lesen; `--log-failed` zeigt oft nur „exit code 1“. Zeilen mit `texterkennung[...]` und `umrechnenNachBackform[PSEUDO]` sind bewusst übersprungen. Lint-Fehler (z. B. `NonObservableLocale`: in Composables `LocalConfiguration` statt `Locale.getDefault()`) lassen den Build scheitern.
-- Windows: Mehrzeiliges mit Umlauten per Write-Werkzeug schreiben; `gh` unter `C:\Program Files\GitHub CLI\gh.exe`; kein Python; `git push` scheitert gelegentlich kurz, wiederholen. Warten auf Builds mit `until`-Schleife im Hintergrund, nicht mit `sleep`.
-- Parallele Sitzungen im selben Ordner kommen vor: vor Commit, Push und Versionssprung `git fetch origin`, Zweig und `origin/main` prüfen. Ein alter Stash („Doppelte 0.14.1-Fassung“) liegt unberührt.
-- Stolpersteine: `remember { }` darf nicht `Unit` liefern (`SideEffect`); Eigenschaften in ViewModels vor dem `init`-Block deklarieren; in Compose Lambdas statt Funktionsverweisen (`{ select(it) }` statt `::select`, sonst nach „Zurücksetzen“ veraltet); bei durchsichtiger Leiste Tests mit `performSemanticsAction(OnClick)`; Pseudosprache setzt Werte in »…«; GitHub-Actions-Speicher kann voll sein (Sicherung per `.github/scripts/artefakte-sichern.ps1`, bei über 350 MB nachfragen).
-- Token sparen: Aufbau-Datei nur bei Bedarf lesen, erst suchen dann gezielt lesen, Spezialisten/Prüfrunden nur gezielt.
+- Ein Zweig je Aufgabe, bauen mit „Run workflow“ auf dem Zweig, auf grün warten, **Bildschirmfotos ansehen**, dann auf `main`. Ein Build dauert ca. 20 Minuten.
+- Cloud-Sitzung (ohne `gh`): Build per GitHub-Werkzeug „run_workflow“ (`build.yml`, ref = Zweig); Stand über `https://api.github.com/repos/boerni328-bene/Moltobene/actions/runs/<id>/jobs`. Android-SDK und Artefakte lassen sich dort nicht laden; Rechenteile lokal mit dem Gradle-Gerüst im Scratchpad (`jvmcheck`, nur `data/dough` u. a.) prüfen. Push auf `main` nur nach ausdrücklicher Freigabe je Version; kein Force-Push.
+- Fehlersuche: Artefakt `testbericht-<version>` (HTML unter `app/build/reports/androidTests/connected/debug/`); Lint-Fehler (z. B. `NonObservableLocale`) lassen den Build scheitern.
+- Stolpersteine: `remember { }` darf nicht `Unit` liefern; Eigenschaften in ViewModels vor `init`; in Compose Lambdas statt Funktionsverweisen; bei durchsichtiger Leiste Tests mit `performSemanticsAction(OnClick)`; Pseudosprache setzt Werte in »…«; Actions-Speicher kann voll sein.
+- Parallele Sitzungen kommen vor: vor Commit, Push und Versionssprung `git fetch origin`, Zweig und `origin/main` prüfen.
