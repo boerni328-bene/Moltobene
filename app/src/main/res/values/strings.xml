@@ -249,30 +249,10 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>New: the ⋮ menu of a recipe and a long press on a recipe in the cookbook now offer the same menu with favorite, share, text size and delete. Text size now comes in small, medium and large.</item>
-        <item>New for tablets: in a recipe, ingredients and instructions sit side by side, and each column scrolls on its own. Text and forms stay easy to read on wide screens. With a keyboard, the up and down arrow keys scroll and the left and right arrow keys switch between instructions, notes and source.</item>
-        <item>In a recipe, swipe left or right to switch between ingredients, instructions, notes and source. Source, video and original pages now sit on the “Source” tab. In the dough calculator the oil field takes less room.</item>
-        <item>New (beta): “Record” on the Add page: speak a recipe, the text appears while you talk and becomes a draft. The recording is not saved.</item>
-        <item>New (beta): “Import from audio” recognizes an audio file on the device, such as a voice message, and turns it into a draft. It needs the recognition pack from Settings.</item>
-        <item>New look: Home shows the dish of the day large, the cookbook (formerly “Collection”) is a list with tabs at the top and a home icon, a recipe has tabs for ingredients, instructions and notes, and Add is its own page.</item>
-        <item>Clearer dough calculator: the result stays at the top, values change with minus and plus, the preferment is highlighted, and tapping biga, poolish, sourdough starter or a yeast type explains the term.</item>
-        <item>Settings as a list with icons: switches for the most important options (“Quick”) sit at the top, and each group opens as its own view.</item>
-        <item>New “Storage” section in Settings: it shows how much space the app uses – split into app, photos, thumbnails, recipes, language pack, recognition pack, translations and cache, plus the total. Packs and the cache can be deleted there.</item>
-        <item>Dough schedule: for pizza and bread the dough calculator creates a schedule (for example biga 1 to 3 days in the refrigerator). In the recipe, “Start dough” begins the process; the app shows where the dough stands and when to continue, also on Home.</item>
-        <item>Compact dough calculator: values sit side by side, the preset takes less room, and the bar at the bottom also shows the preferment for biga or poolish.</item>
-        <item>Tidier settings: groups can be expanded and collapsed, so everything fits on one screen.</item>
-        <item>While cooking, the text for ingredients and steps is a little larger.</item>
-        <item>Tags when importing: the category and keywords of a recipe page appear in the draft as suggestions to tap; tags come back with a recipe file.</item>
-        <item>Cooking: “Large text for cooking” in the ⋮ menu of the recipe view enlarges ingredients, steps and notes. Notes can now be added right in the recipe view with “Add note”.</item>
-        <item>Sorting the collection: The new icon next to search switches between “Title A–Z” and “Recently added”. Umlauts and accents sort with their letter, and the choice is remembered.</item>
-        <item>Recipe view: The photo now extends up behind the top bar.</item>
-        <item>Voice input while cooking: The new microphone button in the cooking bar listens for “Next”, “Previous”, “Repeat”, “Read aloud” and “Stop”; “Microphone off” ends listening. This needs the recognition pack from Settings once.</item>
-        <item>Headset buttons: In Settings under “Read aloud”, choose what the play/pause, next and previous buttons do while cooking. This also covers headsets that convert gestures themselves.</item>
-        <item>Dough calculator: every value has a slider with a number you can tap and type; the “Numbers | Sliders” switch is gone, plus and minus remain only for small whole numbers.</item>
-        <item>“Default 250 g” with “To default” appears only when a value differs from its default.</item>
-
-        <item>The cooking bar shows “Step 2 of 5”, “Next” is emphasized, and the current step has a bar at its edge. With large text the buttons stand in two rows.</item>
-        <item>The photo in the recipe view is lower so ingredients and steps start earlier.</item>
+        <item>Dough calculator: new section “Rising times and temperatures” for room, refrigerator, rising times, and oven. Rising times at room temperature follow the room: warmer is shorter.</item>
+        <item>Dough calculator: the water temperature is calculated so the dough reaches the chosen temperature after kneading, by hand or with a machine.</item>
+        <item>Saved as a recipe, the dough gets a schedule with the chosen rising times and instructions with amounts and temperatures. Under Settings › Dough calculator, temperatures can be shown in °F.</item>
+        <item>Amounts first: summaries start with the amount, e.g. “277 g Biga · flour 30 % (184 g)”.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->
@@ -570,7 +550,7 @@
     <string name="dough_preferment_water">Water (% of that)</string>
     <string name="dough_section_result">Result</string>
     <string name="dough_bar_preferment">%1$s: %2$s</string>
-    <string name="dough_bar_main">Final dough: %1$s</string>
+    <string name="dough_bar_main">%1$s final dough: %2$s</string>
     <string name="dough_tile_total">Total dough</string>
     <string name="dough_summary_value">%1$s %2$s</string>
     <string name="dough_summary_of_flour">%1$s of flour</string>
@@ -671,6 +651,7 @@
     <string name="dough_preset_replace_confirm">Replace</string>
     <string name="dough_cake_kind_label">Type of cake</string>
     <string name="dough_saved">Saved as a draft. Add the instructions.</string>
+    <string name="dough_saved_with_steps">Saved as a draft with schedule and instructions.</string>
     <string name="dough_error_number">Enter a number.</string>
     <string name="dough_error_range">Between %1$s and %2$s.</string>
     <string name="dough_error_preferment">The preferment needs water worth %1$s %% of the flour weight, but the dough only has %2$s %%. Lower the flour or water in the preferment, or raise the hydration.</string>
@@ -678,8 +659,83 @@
     <string name="dough_recipe_title_pizza_with">Pizza dough with %1$s</string>
     <string name="dough_recipe_title_bread">Bread dough</string>
     <string name="dough_recipe_title_bread_with">Bread dough with %1$s</string>
-    <string name="dough_heading_preferment">For the preferment (%1$s)</string>
-    <string name="dough_heading_main">For the final dough</string>
+    <string name="dough_heading_preferment">For the preferment (%1$s %2$s)</string>
+    <string name="dough_heading_main">For the final dough (%1$s)</string>
+    <string name="dough_whole_preferment">%1$s %2$s (all of the preferment)</string>
+    <string name="place_room_at">at room temperature, %1$s</string>
+    <string name="place_fridge_at">in the refrigerator, %1$s</string>
+    <string name="place_oven_at">in the oven, %1$s</string>
+    <string name="list_pair">%1$s and %2$s</string>
+    <string name="list_last">%1$s, and %2$s</string>
+    <string name="phase_proof_balls">Let the dough balls rise</string>
+    <string name="phase_proof_loaf">Let the loaf rise</string>
+    <string name="step_mix_biga">Briefly mix %1$s until no dry flour is left. Do not knead: the biga stays crumbly.</string>
+    <string name="step_mix_poolish">Stir %1$s until smooth.</string>
+    <string name="step_mix_sourdough">Stir %1$s together with a little starter.</string>
+    <string name="step_ripen_biga">Cover and refrigerate. Ready when it smells slightly sour and has risen a little.</string>
+    <string name="step_ripen_poolish">Cover and leave to stand. Ready when the surface is full of bubbles and just starting to sink.</string>
+    <string name="step_ripen_sourdough">Cover and leave to stand. Ready when it has about doubled and smells sour.</string>
+    <string name="step_knead_biga">Tear %1$s into pieces and knead with %2$s.</string>
+    <string name="step_knead_preferment">Knead %1$s with %2$s.</string>
+    <string name="step_knead_plain">Knead %1$s.</string>
+    <string name="step_knead_salt">After about 5 minutes, add %1$s.</string>
+    <string name="step_knead_end">Knead until the dough is smooth and elastic. Aim for about %1$s; check with a kitchen thermometer.</string>
+    <string name="step_bulk">Cover and rest until the dough has visibly risen.</string>
+    <string name="step_shape_ball">Shape into a tight ball.</string>
+    <string name="step_shape_loaf">Shape into a loaf and place seam side up in a floured proofing basket.</string>
+    <string name="step_proof_balls_room">In a covered box until clearly larger and airy. About 1 hour before baking, preheat the oven with a pizza stone to %1$s.</string>
+    <string name="step_proof_balls_fridge">Let rise in a covered box in the refrigerator.</string>
+    <string name="step_proof_loaf_room">Cover and let rise until the dough springs back slowly when pressed lightly. Meanwhile, preheat the oven to %1$s.</string>
+    <string name="step_proof_loaf_fridge">Cover and let rise in the refrigerator, then bake straight from the refrigerator. About 45 minutes before, preheat the oven to %1$s.</string>
+    <string name="step_warm">Take out of the refrigerator and let warm up, covered. About 1 hour before baking, preheat the oven with a pizza stone to %1$s.</string>
+    <string name="step_bake_pizza">Stretch the dough balls, add toppings and bake until the rim is brown.</string>
+    <string name="step_bake_bread">Bake until the crust is deep brown and the loaf sounds hollow when tapped underneath.</string>
+    <string name="dough_section_process">Rising times and temperatures</string>
+    <string name="dough_process_kitchen">Room and refrigerator</string>
+    <string name="dough_process_room">Room</string>
+    <string name="dough_process_fridge">Refrigerator</string>
+    <string name="dough_process_kitchen_note">Applies to all steps at room temperature or in the refrigerator.</string>
+    <string name="dough_process_dough_temp">Dough after kneading</string>
+    <string name="dough_process_oven">Oven</string>
+    <string name="dough_process_rising_time">Rising time</string>
+    <string name="dough_process_temperature">Temperature</string>
+    <string name="dough_process_dough_temperature">Dough temperature</string>
+    <string name="dough_place_room_choice">At room temperature</string>
+    <string name="dough_place_fridge_choice">In the refrigerator</string>
+    <string name="dough_place_room_short">at room temperature</string>
+    <string name="dough_place_fridge_short">in the refrigerator</string>
+    <string name="dough_knead_hand">By hand</string>
+    <string name="dough_knead_machine">With a machine</string>
+    <string name="dough_knead_hand_lower">by hand</string>
+    <string name="dough_knead_machine_lower">with a machine</string>
+    <string name="dough_process_knead_suffix">%1$s · water %2$s</string>
+    <string name="dough_process_water">Water for the final dough: %1$s</string>
+    <string name="dough_process_water_plain">Water: %1$s</string>
+    <string name="dough_process_summary">Room %1$s · water %2$s · total %3$s</string>
+    <string name="dough_process_summary_no_water">Room %1$s · total %2$s</string>
+    <string name="dough_process_adapts">Times at room temperature follow the room: warmer is shorter. Values changed by hand are bold and stay.</string>
+    <string name="dough_process_units" translatable="false">°C/°F</string>
+    <string name="dough_process_units_description">Choose °C or °F in Settings</string>
+    <string name="dough_summary_amount">%1$s (%2$s)</string>
+    <string name="dough_process_shorter">%1$s shorter</string>
+    <string name="dough_process_longer">%1$s longer</string>
+    <string name="dough_process_row">%1$s: %2$s</string>
+    <string name="dough_water_too_cold">The water would have to be ice-cold: chill the flour beforehand, knead by hand or choose a higher dough temperature.</string>
+    <string name="dough_water_too_hot">Water above %1$s harms the yeast: choose a lower dough temperature.</string>
+    <string name="dough_hours_short">%1$s h</string>
+    <string name="dough_minutes_short">%1$s min</string>
+    <string name="dough_hours_minutes_short">%1$s h %2$s min</string>
+    <string name="temperature_unit_title">Temperatures</string>
+    <string name="temperature_unit_celsius">Degrees Celsius (°C)</string>
+    <string name="temperature_unit_fahrenheit">Degrees Fahrenheit (°F)</string>
+    <plurals name="step_shape_balls">
+        <item quantity="one">Divide into %1$d piece of %2$s and shape into a tight ball.</item>
+        <item quantity="other">Divide into %1$d pieces of %2$s each and shape into tight balls.</item>
+    </plurals>
+    <plurals name="step_shape_loaves">
+        <item quantity="one">Divide into %1$d piece of %2$s and shape into a loaf.</item>
+        <item quantity="other">Divide into %1$d pieces of %2$s each and shape into loaves.</item>
+    </plurals>
     <string name="dough_ingredient_flour">flour</string>
     <string name="dough_ingredient_water">water</string>
     <string name="dough_ingredient_salt">salt</string>
@@ -854,8 +910,7 @@
     <string name="phase_knead">Knead the dough</string>
     <string name="phase_bulk">Let the dough rise</string>
     <string name="phase_shape">Shape the dough</string>
-    <string name="phase_proof">Let the shaped dough rise</string>
-    <string name="phase_warm_up">Bring the dough to room temperature</string>
+    <string name="phase_warm_up">Warm up the dough balls</string>
     <string name="phase_bake">Bake</string>
     <plurals name="duration_minutes">
         <item quantity="one">%1$d minute</item>

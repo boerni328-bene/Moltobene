@@ -32,8 +32,9 @@ data class EditRoute(
     val fromShare: Boolean = false,
 )
 
+/** Einstellungen; mit [group] (z. B. „dough“ für den Teigrechner) gleich mit dieser Gruppe offen. */
 @Serializable
-object SettingsRoute
+data class SettingsRoute(val group: String? = null)
 
 @Serializable
 object LicensesRoute

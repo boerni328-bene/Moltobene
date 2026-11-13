@@ -41,6 +41,7 @@ import com.moltobene.app.ui.licenses.LicensesScreen
 import com.moltobene.app.ui.licenses.LicensesViewModel
 import com.moltobene.app.ui.recipe.RecipeScreen
 import com.moltobene.app.ui.recipe.RecipeViewModel
+import com.moltobene.app.ui.settings.SETTINGS_GROUP_DOUGH
 import com.moltobene.app.ui.settings.SettingsScreen
 import com.moltobene.app.ui.settings.SettingsViewModel
 import com.moltobene.app.ui.whatsnew.WhatsNewDialog
@@ -94,7 +95,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                     onAddFromFile = { navController.navigate(EditRoute(fromFile = true)) },
                     onAddFromAudio = { navController.navigate(EditRoute(fromAudio = true)) },
                     onAddFromSpeech = { navController.navigate(EditRoute(fromSpeech = true)) },
-                    onOpenSettings = { navController.navigate(SettingsRoute) },
+                    onOpenSettings = { navController.navigate(SettingsRoute()) },
                 )
             }
         }
@@ -120,7 +121,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                 onAddFromAudio = { navController.navigate(EditRoute(fromAudio = true)) },
                 onAddFromSpeech = { navController.navigate(EditRoute(fromSpeech = true)) },
                 onOpenDough = { navController.navigate(DoughRoute) },
-                onOpenSettings = { navController.navigate(SettingsRoute) },
+                onOpenSettings = { navController.navigate(SettingsRoute()) },
                 // Zurück zur Startseite; ist sie nicht im Stapel (Start im Kochbuch), wird sie geöffnet.
                 onOpenHome = {
                     if (!navController.popBackStack<HomeRoute>(inclusive = false)) {
@@ -166,7 +167,7 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                     navController.popBackStack()
                     showMessage(message)
                 },
-                onOpenSettings = { navController.navigate(SettingsRoute) },
+                onOpenSettings = { navController.navigate(SettingsRoute()) },
             )
         }
         composable<EditRoute> {
@@ -224,18 +225,21 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                 snackbarHostState = snackbarHostState,
                 onBack = { navController.popBackStack() },
                 onOpenKnowHow = { navController.navigate(KnowHowRoute) },
-                onSaved = { id ->
+                onOpenSettings = { navController.navigate(SettingsRoute(SETTINGS_GROUP_DOUGH)) },
+                onSaved = { id, withSteps ->
                     navController.navigate(EditRoute(id)) { popUpTo<DoughRoute> { inclusive = true } }
-                    showMessage(resources.getString(R.string.dough_saved))
+                    // Pizza und Brot bringen Zeitplan und Zubereitung mit; bei Pasta und Kuchen fehlt die Zubereitung noch.
+                    showMessage(resources.getString(if (withSteps) R.string.dough_saved_with_steps else R.string.dough_saved))
                 },
             )
         }
-        composable<SettingsRoute> {
+        composable<SettingsRoute> { entry ->
             SettingsScreen(
                 viewModel = viewModel { SettingsViewModel(container.backupManager, container.preferences, container.languagePack, container.voicePack, container.storageUsage) { container.speech } },
                 snackbarHostState = snackbarHostState,
                 onBack = { navController.popBackStack() },
                 onOpenLicenses = { navController.navigate(LicensesRoute) },
+                initialGroup = entry.toRoute<SettingsRoute>().group,
             )
         }
         composable<LicensesRoute> {

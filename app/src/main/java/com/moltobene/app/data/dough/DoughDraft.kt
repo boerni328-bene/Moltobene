@@ -5,6 +5,7 @@ import com.moltobene.app.data.PhasePlace
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeSource
 import com.moltobene.app.data.SourceType
+import com.moltobene.app.data.TemperatureUnit
 import com.moltobene.app.data.TimelinePhase
 import com.moltobene.app.data.WeightUnit
 import java.util.Locale
@@ -60,8 +61,17 @@ object DoughNumbers {
 interface DoughTexts {
     fun title(type: DoughType, preferment: Preferment): String
 
-    /** Zwischenüberschrift ohne Doppelpunkt, z. B. „Für den Vorteig (Biga)“. */
-    fun heading(kind: SectionKind, preferment: Preferment): String
+    /**
+     * Zwischenüberschrift ohne Doppelpunkt mit dem Gewicht vorn (Wunsch vom 05.11.2026), z. B. „Für den Vorteig (277 g
+     * Biga)“ oder „Für den Hauptteig (1000 g)“.
+     */
+    fun heading(kind: SectionKind, preferment: Preferment, amount: String): String
+
+    /** Erste Zeile des Hauptteigs: der ganze Vorteig, z. B. „277 g Biga (der ganze Vorteig)“. */
+    fun wholePreferment(preferment: Preferment, amount: String): String
+
+    /** Name des Vorteigs, z. B. „Biga“. */
+    fun prefermentName(preferment: Preferment): String
 
     fun ingredient(role: LineRole, yeastKind: YeastKind): String
 
@@ -72,20 +82,29 @@ interface DoughTexts {
     /** Einheit der Portionen ohne Anzahl, z. B. „Teigkugeln (je 250 g)“; [detail] ist das Gewicht, bei einer Form ihr Maß. */
     fun servingsUnit(kind: YieldKind, detail: String): String
 
-    /** Text einer Phase im Zeitplan (#71), z. B. „Vorteig (Biga) reifen lassen“. */
-    fun phase(kind: PhaseKind, preferment: Preferment): String
+    /** Text einer Phase im Zeitplan (#71), z. B. „Biga reifen lassen“ oder bei Pizza „Teigkugeln gehen lassen“. */
+    fun phase(kind: PhaseKind, type: DoughType, preferment: Preferment): String
 
     /** Dauer als Text, z. B. „12 bis 72 Stunden“ oder „1 Stunde“ (bei gleicher [minMinutes] und [maxMinutes]). */
     fun duration(minMinutes: Int, maxMinutes: Int): String
 
-    /** Ort der Phase als Zusatz zur Dauer, z. B. „im Kühlschrank“; leer ohne Ort. */
-    fun place(place: PhasePlace): String
+    /** Ort mit Temperatur, z. B. „im Kühlschrank, 5 °C“; leer ohne Ort. */
+    fun placeAt(place: PhasePlace, temperature: String): String
+
+    /** Aufzählung, z. B. „184 g Mehl, 92 g Wasser und 1,2 g Frischhefe“. */
+    fun join(parts: List<String>): String
+
+    /** Anleitung zu einem Schritt der Zubereitung (Wunsch vom 05.11.2026), z. B. „Abgedeckt kalt stellen. Fertig, wenn …“. */
+    fun stepDetail(detail: StepDetail): String
 }
 
 /**
  * Das Ergebnis des Teigrechners als normales Rezept (#69, „Als Rezept speichern“): Zutaten als Textzeilen mit der Menge
- * vorn und dem Anteil vom Mehl in Klammern, Zwischenüberschriften für Vorteig und Hauptteig, Portionsangabe wie
- * „6 Teigkugeln (je 250 g)“, damit „Umrechnen …“ und das Teilen sie verstehen. Bei Pizza und Brot kommt der Zeitplan (#71) dazu, auch als Zubereitung; bei Pasta und Kuchen bleibt die Zubereitung leer.
+ * vorn und dem Anteil vom Mehl in Klammern, Zwischenüberschriften für Vorteig und Hauptteig mit dem Gewicht, im
+ * Hauptteig zuerst der ganze Vorteig und beim Wasser die Temperatur (Wunsch vom 05.11.2026), Portionsangabe wie
+ * „6 Teigkugeln (je 250 g)“, damit „Umrechnen …“ und das Teilen sie verstehen. Bei Pizza und Brot kommt der Zeitplan
+ * (#71) mit den gewählten Gehzeiten dazu und als Zubereitung je Schritt eine Anleitung mit Mengen und Temperaturen;
+ * bei Pasta und Kuchen bleibt die Zubereitung leer.
  */
 data class DoughDraft(
     val title: String,
@@ -114,27 +133,32 @@ data class DoughDraft(
     )
 
     companion object {
-        /** @param language Sprache der Oberfläche; in ihr werden Zahlen und Zeilen geschrieben und als Rezeptsprache gesetzt */
+        /**
+         * @param language Sprache der Oberfläche; in ihr werden Zahlen und Zeilen geschrieben und als Rezeptsprache gesetzt
+         * @param process Gehzeiten und Temperaturen wie eingestellt; wirksam werden sie über [DoughProcessRules.effective]
+         */
+        @Suppress("LongParameterList")
         fun from(
             result: DoughResult.Success,
             input: LeavenedInput,
             texts: DoughTexts,
             language: String,
             unit: WeightUnit = WeightUnit.GRAMS,
+            process: DoughProcess = DoughProcessRules.defaults(input.type, input.preferment),
+            kitchen: DoughKitchen = DoughKitchen(),
+            temperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS,
         ): DoughDraft {
+            val water = DoughWater.temperature(result, input.preferment, kitchen, process.doughTemp)
+            val waterText = water?.let { temperatureUnit.format(it.coerceAtLeast(0.0)) }
             val draft = build(
                 result, texts, language, input.yeastKind, texts.title(input.type, input.preferment),
-                DoughNumbers.weight(result.yield.pieceGrams, 1, language, unit), unit,
+                DoughNumbers.weight(result.yield.pieceGrams, 1, language, unit), unit, waterText,
             )
-            val timeline = DoughTimeline.build(input, texts)
-            return draft.copy(timeline = timeline, steps = timeline.map { stepText(it, texts) })
-        }
-
-        /** Eine Phase als Schritt der Zubereitung, z. B. „Biga reifen lassen (1 bis 3 Tage, im Kühlschrank)“. */
-        fun stepText(phase: TimelinePhase, texts: DoughTexts): String {
-            val place = texts.place(phase.place)
-            val detail = texts.duration(phase.minMinutes, phase.maxMinutes) + if (place.isEmpty()) "" else ", $place"
-            return "${phase.text} ($detail)"
+            val effective = DoughProcessRules.effective(process, kitchen, input.type, input.preferment)
+            val plan = DoughTimeline.plan(input.type, input.preferment, effective, kitchen.kneading)
+            val timeline = plan.map { TimelinePhase(texts.phase(it.kind, input.type, input.preferment), it.min, it.max, it.place) }
+            val steps = DoughSteps.build(plan, timeline, result, input, effective, kitchen, waterText, texts, language, unit, temperatureUnit)
+            return draft.copy(timeline = timeline, steps = steps)
         }
 
         fun fromPasta(
@@ -160,6 +184,8 @@ data class DoughDraft(
             return build(result, texts, language, input.yeastKind, texts.cakeTitle(input.kind), detail, unit)
         }
 
+        /** [waterText]: Temperatur des Wassers, das zum Kneten dazukommt (nicht das des Vorteigs); null ohne. */
+        @Suppress("LongParameterList")
         private fun build(
             result: DoughResult.Success,
             texts: DoughTexts,
@@ -168,15 +194,25 @@ data class DoughDraft(
             title: String,
             detail: String,
             unit: WeightUnit,
+            waterText: String? = null,
         ): DoughDraft {
             val lines = mutableListOf<Ingredient>()
             val sections = result.sections
+            val prefermentGrams = DoughSummary.prefermentGrams(result)
             for (section in sections) {
-                if (sections.size > 1) lines += Ingredient(text = texts.heading(section.kind, section.preferment), isHeading = true)
+                if (sections.size > 1) {
+                    val grams = if (section.kind == SectionKind.PREFERMENT) prefermentGrams else result.totalGrams
+                    val amount = DoughNumbers.weight(grams, 0, language, unit)
+                    lines += Ingredient(text = texts.heading(section.kind, section.preferment, amount), isHeading = true)
+                    if (section.kind == SectionKind.MAIN && section.preferment != Preferment.NONE && prefermentGrams > 0) {
+                        lines += Ingredient(texts.wholePreferment(section.preferment, DoughNumbers.weight(prefermentGrams, 0, language, unit)))
+                    }
+                }
                 for (line in section.lines) {
                     val amount = DoughNumbers.weight(line.grams, line.role, language, unit)
                     val percent = DoughNumbers.percent(line.grams / result.flourGrams * 100, language)
-                    lines += Ingredient("$amount ${texts.ingredient(line.role, yeastKind)} ($percent %)")
+                    val warm = if (line.role == LineRole.WATER && section.kind != SectionKind.PREFERMENT && waterText != null) ", $waterText" else ""
+                    lines += Ingredient("$amount ${texts.ingredient(line.role, yeastKind)} ($percent %)$warm")
                 }
             }
             return DoughDraft(

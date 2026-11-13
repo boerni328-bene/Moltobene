@@ -35,6 +35,7 @@ internal const val SECTION_PREFERMENT = "preferment"
 internal const val SECTION_DOUGH = "dough"
 internal const val SECTION_SIZE = "size"
 internal const val SECTION_INGREDIENTS = "ingredients"
+internal const val SECTION_PROCESS = "process"
 
 /** Trennt die Werte in der Zusammenfassung eines Bereichs, z. B. „Frischhefe · 0,2 % vom Mehl · 1,2 g“. */
 internal const val SUMMARY_SEPARATOR = " · "

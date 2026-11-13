@@ -2,61 +2,58 @@ package com.moltobene.app.data.dough
 
 import com.moltobene.app.data.PhasePlace
 import com.moltobene.app.data.TimelinePhase
+import kotlin.math.roundToInt
 
 /** Die Arten von Phasen im Zeitplan eines Teigs (#71); der Text kommt aus strings.xml ([DoughTexts.phase]). */
 enum class PhaseKind { PREFERMENT_MIX, PREFERMENT_RIPEN, KNEAD, BULK, SHAPE, PROOF, WARM_UP, BAKE }
 
 /**
- * Zeitplan für Pizza und Brot (#71, Richtwerte nach `docs/recherche/2026-10-17-zeitplan.md`): welche Phasen es gibt,
- * wie lange sie frühestens und spätestens dauern und wo sie stattfinden. Die Dauern sind Spannen, weil Temperatur und
- * Mehl mitreden; der Nutzer schließt jede Phase selbst ab, wenn der Teig so weit ist.
+ * Zeitplan für Pizza und Brot (#71). Die Gehzeiten kommen seit 0.74.0 aus dem Teigrechner ([DoughProcess], Wunsch vom
+ * 05.11.2026) und stehen als eine Dauer im Zeitplan; die Arbeitsschritte (Ansetzen, Kneten, Formen, Backen) behalten
+ * ihre Spannen (Richtwerte nach `docs/recherche/2026-10-17-zeitplan.md`). Der Nutzer schließt jede Phase selbst ab,
+ * wenn der Teig so weit ist.
  */
 object DoughTimeline {
 
-    private const val H = 60
-    private const val D = 24 * 60
+    /** Eine Phase mit Dauer in Minuten (frühestens, spätestens) und Ort. */
+    data class Planned(val kind: PhaseKind, val min: Int, val max: Int, val place: PhasePlace)
 
-    private data class Step(val kind: PhaseKind, val min: Int, val max: Int, val place: PhasePlace)
+    /**
+     * Zeitplan zur Eingabe; [process] sind die wirksamen Gehzeiten ([DoughProcessRules.effective]). Ohne Angabe gelten
+     * die Standardwerte zu Teigart und Vorteig.
+     */
+    fun build(
+        input: LeavenedInput,
+        texts: DoughTexts,
+        process: DoughProcess = DoughProcessRules.defaults(input.type, input.preferment),
+        kneading: Kneading = Kneading.HAND,
+    ): List<TimelinePhase> = plan(input.type, input.preferment, process, kneading).map {
+        TimelinePhase(texts.phase(it.kind, input.type, input.preferment), it.min, it.max, it.place)
+    }
 
-    /** Zeitplan zur Eingabe; leer für Teige ohne Zeitplan (Pasta, Kuchen). */
-    fun build(input: LeavenedInput, texts: DoughTexts): List<TimelinePhase> =
-        steps(input.type, input.preferment).map {
-            TimelinePhase(texts.phase(it.kind, input.preferment), it.min, it.max, it.place)
-        }
-
-    private fun steps(type: DoughType, preferment: Preferment): List<Step> {
-        val out = mutableListOf<Step>()
-        if (preferment != Preferment.NONE) {
-            out += Step(PhaseKind.PREFERMENT_MIX, 5, 15, PhasePlace.NONE)
-            out += when (preferment) {
-                // Biga: fester Vorteig, 1 bis 3 Tage kühl.
-                Preferment.BIGA -> Step(PhaseKind.PREFERMENT_RIPEN, 24 * H, 3 * D, PhasePlace.FRIDGE)
-                Preferment.POOLISH -> Step(PhaseKind.PREFERMENT_RIPEN, 8 * H, 16 * H, PhasePlace.ROOM)
-                else -> Step(PhaseKind.PREFERMENT_RIPEN, 8 * H, 12 * H, PhasePlace.ROOM)
-            }
-        }
-        out += Step(PhaseKind.KNEAD, 10, 30, PhasePlace.NONE)
+    /** Die Phasen in ihrer Reihenfolge; Pizza aus dem Kühlschrank wärmt vor dem Backen auf, Brot backt direkt. */
+    fun plan(type: DoughType, preferment: Preferment, process: DoughProcess, kneading: Kneading): List<Planned> {
+        fun minutes(hours: Double): Int = (hours * 60).roundToInt().coerceAtLeast(1)
         val pizza = type == DoughType.PIZZA
-        val long = preferment == Preferment.NONE
-        when {
-            pizza && long -> {
-                out += Step(PhaseKind.BULK, 1 * H, 2 * H, PhasePlace.ROOM)
-                out += Step(PhaseKind.SHAPE, 10, 20, PhasePlace.NONE)
-                out += Step(PhaseKind.PROOF, 8 * H, 24 * H, PhasePlace.FRIDGE)
-                out += Step(PhaseKind.WARM_UP, 1 * H, 2 * H, PhasePlace.ROOM)
-            }
-            pizza -> {
-                out += Step(PhaseKind.BULK, 1 * H, 2 * H, PhasePlace.ROOM)
-                out += Step(PhaseKind.SHAPE, 10, 20, PhasePlace.NONE)
-                out += Step(PhaseKind.PROOF, 2 * H, 6 * H, PhasePlace.ROOM)
-            }
-            else -> {
-                out += Step(PhaseKind.BULK, 1 * H, 3 * H, PhasePlace.ROOM)
-                out += Step(PhaseKind.SHAPE, 10, 20, PhasePlace.NONE)
-                out += Step(PhaseKind.PROOF, 45, 90, PhasePlace.ROOM)
-            }
+        val out = mutableListOf<Planned>()
+        if (preferment != Preferment.NONE) {
+            out += Planned(PhaseKind.PREFERMENT_MIX, 5, 15, PhasePlace.NONE)
+            val ripen = minutes(process.ripen)
+            out += Planned(PhaseKind.PREFERMENT_RIPEN, ripen, ripen, if (preferment == Preferment.BIGA) PhasePlace.FRIDGE else PhasePlace.ROOM)
         }
-        out += if (pizza) Step(PhaseKind.BAKE, 8, 15, PhasePlace.OVEN) else Step(PhaseKind.BAKE, 30, 50, PhasePlace.OVEN)
+        val (kneadMin, kneadMax) = DoughProcessRules.kneadMinutes(kneading)
+        out += Planned(PhaseKind.KNEAD, kneadMin, kneadMax, PhasePlace.NONE)
+        val bulk = minutes(process.bulk)
+        out += Planned(PhaseKind.BULK, bulk, bulk, PhasePlace.ROOM)
+        out += Planned(PhaseKind.SHAPE, 10, 20, PhasePlace.NONE)
+        val cold = process.proofPlace == RestPlace.FRIDGE
+        val proof = minutes(process.proof)
+        out += Planned(PhaseKind.PROOF, proof, proof, if (cold) PhasePlace.FRIDGE else PhasePlace.ROOM)
+        if (pizza && cold) {
+            val warm = minutes(process.warm)
+            out += Planned(PhaseKind.WARM_UP, warm, warm, PhasePlace.ROOM)
+        }
+        out += if (pizza) Planned(PhaseKind.BAKE, 8, 15, PhasePlace.OVEN) else Planned(PhaseKind.BAKE, 30, 50, PhasePlace.OVEN)
         return out
     }
 }

@@ -25,14 +25,17 @@ class DoughDraftTest {
         val draft = draft(biga, "de")
         assertEquals("Pizzateig mit biga", draft.title)
         assertEquals(
+            // Gewicht vorn in den Überschriften, im Hauptteig zuerst der ganze Vorteig und beim Wasser die Temperatur
+            // (Wunsch vom 05.11.2026): Raum 22 °C, Biga aus dem Kühlschrank, von Hand geknetet, Teig danach 24 °C.
             listOf(
-                "Für den Vorteig (biga)",
+                "Für den Vorteig (536 g biga)",
                 "369 g Mehl (40 %)",
                 "166 g Wasser (18 %)",
                 "0,9 g Frischhefe (0,1 %)",
-                "Für den Hauptteig",
+                "Für den Hauptteig (1500 g)",
+                "536 g biga (der ganze Vorteig)",
                 "554 g Mehl (60 %)",
-                "387 g Wasser (42 %)",
+                "387 g Wasser (42 %), 33 °C",
                 "23 g Salz (2,5 %)",
             ),
             draft.ingredients.map { it.text },
@@ -62,8 +65,9 @@ class DoughDraftTest {
         assertEquals(SourceType.OWN, recipe.source?.type)
         // Der Zeitplan steht auch als Zubereitung im Rezept, damit Teilen und Vorlesen ihn kennen (#71).
         assertEquals(recipe.timeline.size, recipe.steps.size)
-        assertTrue(recipe.steps.first().startsWith("PREFERMENT_MIX:biga (5-15 min)"))
-        assertTrue(recipe.steps.any { it.contains("1440-4320 min, fridge") })
+        assertTrue(recipe.steps.first().startsWith("PREFERMENT_MIX:biga (5-15 min): mischen: 369 g Mehl, 166 g Wasser und 0,9 g Frischhefe"))
+        // Die Biga reift standardmäßig 24 Stunden im Kühlschrank bei 5 °C.
+        assertTrue(recipe.steps.toString(), recipe.steps.any { it.startsWith("PREFERMENT_RIPEN:biga (1440-1440 min, fridge 5 °C)") })
         assertEquals("de", recipe.language)
     }
 
@@ -76,7 +80,7 @@ class DoughDraftTest {
         assertTrue(RecipeYield.hasSize(draft.servingsUnit))
     }
 
-    /** „Umrechnen …“ rechnet jede Zeile des Entwurfs um und lässt Prozente in Klammern in Ruhe. */
+    /** „Umrechnen …“ rechnet jede Zeile des Entwurfs um und lässt Prozente in Klammern und Temperaturen in Ruhe. */
     @Test
     fun umrechnenKommtMitDemEntwurfZurecht() {
         for (language in listOf("de", "en")) {
@@ -88,7 +92,7 @@ class DoughDraftTest {
                     val after = AmountScaling.leadingAmount(scaled.removePrefix("≈ "), language)!!
                     // Gerundet wird auf übliche Küchenwerte; die Abweichung bleibt klein.
                     assertEquals("$line × $factor → $scaled", original.value * factor, after.value, original.value * factor * 0.1 + 0.6)
-                    assertTrue(scaled.endsWith("%)"))
+                    assertEquals(line.substringAfter(" ("), scaled.substringAfter(" ("))
                 }
             }
         }

@@ -12,6 +12,7 @@ import com.moltobene.app.data.Appearance
 import com.moltobene.app.data.Palette
 import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.StepperSide
+import com.moltobene.app.data.TemperatureUnit
 import com.moltobene.app.data.WeightUnit
 import com.moltobene.app.data.StartScreen
 import com.moltobene.app.data.StorageFull
@@ -152,6 +153,13 @@ class SettingsViewModel(
 
     fun setWeightUnit(unit: WeightUnit) {
         viewModelScope.launch { runCatching { preferences.setWeightUnit(unit) } }
+    }
+
+    /** „Temperaturen“ im Teigrechner: °C oder °F (Wunsch vom 05.11.2026). */
+    val temperatureUnit: StateFlow<TemperatureUnit?> = preferences.temperatureUnit
+
+    fun setTemperatureUnit(unit: TemperatureUnit) {
+        viewModelScope.launch { runCatching { preferences.setTemperatureUnit(unit) } }
     }
 
     /** Stimme, Tempo und Tonhöhe beim Vorlesen (#85); gilt sofort beim nächsten Vorlesen. */

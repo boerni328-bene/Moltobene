@@ -3,6 +3,22 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.74.0] – 2026-11-12 (versionCode 125)
+
+### Neu
+- **Teigrechner: Bereich „Gehzeiten und Temperaturen“** (Pizza und Brot). Eine ruhige Liste zeigt Raum und Kühlschrank, die Reifezeit des Vorteigs, den Teig nach dem Kneten, die Gehzeit des Teigs, die der Teigkugeln bzw. des Laibs und den Backofen. Ein Tipp auf eine Zeile öffnet dort Minus und Plus, ein zweiter schließt sie wieder. Teigkugeln und Laib gehen wahlweise bei Raumtemperatur oder im Kühlschrank; Pizza aus dem Kühlschrank bekommt den Schritt „Teigkugeln aufwärmen“ dazu.
+- **Gehzeiten richten sich nach dem Raum:** Ist es wärmer, werden die Gehzeiten bei Raumtemperatur kürzer, ist es kühler, länger (etwa doppelt so schnell je 8 °C mehr). Selbst geänderte Gehzeiten stehen fett und bleiben, wie sie sind.
+- **Wassertemperatur:** Der Teigrechner berechnet, wie warm das Wasser sein soll, damit der Teig nach dem Kneten die gewählte Temperatur hat, von Hand oder mit der Maschine geknetet. Sie steht in der Zeile „Hauptteig“, zum Beispiel „276 g Wasser (30 °C)“, und im gespeicherten Rezept. Wäre das Wasser eiskalt oder zu heiß, erscheint ein Hinweis.
+- **Rezept mit Zeitplan und Zubereitung:** „Als Rezept speichern“ übernimmt die gewählten Gehzeiten in den Zeitplan und beschreibt jeden Schritt mit Mengen, Ort und Temperatur, zum Beispiel „Biga reifen lassen (1 Tag, im Kühlschrank, 5 °C): Abgedeckt kalt stellen. Fertig, wenn sie leicht säuerlich duftet und etwas aufgegangen ist.“
+- **°C oder °F:** Unter Einstellungen › Teigrechner › Temperaturen. Der Link „°C/°F“ im Teigrechner führt direkt dorthin.
+
+### Geändert
+- **Mengen vorn:** Die Zusammenfassungen beginnen mit der Menge, zum Beispiel „1,2 g Frischhefe · 0,2 % vom Mehl“ und „277 g Biga · Mehl 30 % (184 g) · Wasser 50 % (92 g)“. Oben im Ergebnis steht „277 g Biga: …“ und „1000 g Hauptteig: 277 g Biga, 429 g Mehl, 276 g Wasser (30 °C), 17 g Salz“.
+- **Gespeichertes Rezept:** Die Zwischenüberschriften nennen das Gewicht („Für den Vorteig (277 g Biga)“, „Für den Hauptteig (1000 g)“), und der Hauptteig beginnt mit „277 g Biga (der ganze Vorteig)“.
+- Im Zeitplan heißt es „bei Raumtemperatur“ statt „bei Zimmertemperatur“ und „Teigkugeln gehen lassen“ bzw. „Laib gehen lassen“ statt „Geformten Teig gehen lassen“.
+- „Zurücksetzen“ stellt auch Raum, Kühlschrank, Knetart, Gehzeiten und Temperaturen auf die Standardwerte.
+- Nach dem Speichern von Pizza- und Brotteig heißt es jetzt „Als Entwurf mit Zeitplan und Zubereitung gespeichert.“
+
 ## [0.73.0] – 2026-11-04 (versionCode 124)
 
 ### Neu
