@@ -3,6 +3,10 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.74.2] – 2026-11-13 (versionCode 127)
+
+Keine sichtbaren Änderungen an der App. Intern sind die beiden größten Bildschirme (Rezeptansicht und „Rezept bearbeiten“) in kleinere Dateien aufgeteilt, damit künftige Änderungen sicherer werden.
+
 ## [0.74.1] – 2026-11-13 (versionCode 126)
 
 ### Geändert
