@@ -1,6 +1,6 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 12.11.2026 · `main` = Version 0.73.0 (Release v0.73.0 erschienen) · Arbeitszweig `claude/trusting-galileo-xg0tgz` = **0.74.0 (versionCode 125)**, Build auf dem Zweig gestartet, noch nicht auf `main` · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 13.11.2026 · `main` = Version 0.73.0 (Release v0.73.0 erschienen) · Arbeitszweig `claude/trusting-galileo-xg0tgz` = **0.74.0 (versionCode 125)**, Build 43311329897 auf dem Zweig **grün** (Lint, Unit-Tests, Release-APK, Testlauf), noch nicht auf `main` · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
@@ -15,7 +15,8 @@ Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die
   - Gespeichertes Rezept: Überschriften mit Gewicht, „277 g Biga (der ganze Vorteig)“, Wasserzeile mit Temperatur; Zeitplan mit den gewählten Gehzeiten (je eine Dauer statt Spanne, Arbeitsschritte mit Spanne) und Zubereitung je Schritt mit Mengen, Ort und Temperatur.
   - °C/°F unter Einstellungen › Teigrechner › Temperaturen; Link „°C/°F“ im Bereich öffnet `SettingsRoute(group = "dough")` direkt in der Gruppe, Zurück führt zum Teigrechner. In °F: Schritte 1 °F, Backofen 25 °F.
   - „Neu in Version 0.74.0“ aktualisiert (zuletzt war es 0.60.0). Rundgang: Bildschirmfotos 14u (Gehzeiten), 14v (Einstellungen Temperaturen), 14w (Teigrechner in °F); der Rundgang setzt vor jedem Test wieder °C.
-- **Nächster Schritt:** Build auf dem Zweig bis grün (Lint, Unit-Tests, Release-APK, Testlauf auf dem Emulator), Bildschirmfotos 14a/14b/14u/14v/14w ansehen, dann Inhaber berichten. Auf `main` erst nach „Pushe die Version 0.74.0“.
+- Bildschirmfotos (14a/14b/14u/14v/14w) noch nicht angesehen: Die Cloud-Sitzung erreicht den Artefakt-Speicher von GitHub nicht (`productionresultssa30.blob.core.windows.net`, vom Netzwerkfilter gesperrt). Vorschlag an den Inhaber: eigene persönliche Umgebung „Moltobene“ = Default plus genau diese Adresse (die Karte dazu wurde durch einen Neustart abgebrochen, nichts angelegt). Inhaber fragte nach dem Zweck; Antwort steht aus.
+- **Nächster Schritt:** Je nach Antwort Umgebung anlegen und Fotos ansehen, sonst sieht der Inhaber sie selbst an (Build 43311329897, Artefakt „bildschirmfotos-0.74.0“). Auf `main` erst nach „Pushe die Version 0.74.0“.
 - Danach (nach Freigabe): **0.75.0 Hefe-Automatik** (Entwurf 8: Frischhefe % = 1,6 / Gehzeit bei 24 °C ohne Vorteig, Biga 3,08 × Vorteiganteil / …, Poolish 6,73 × …; −/+ an der Hefe schaltet die Automatik aus; Sauerteig von Hand) und **0.76.0 Uhrzeiten** (Liste aus 7A im Rezept, „Backen am … um …“, geplanter Teig auf der Startseite aus 7D). Dafür muss das Rezept die Teigrechner-Werte speichern (Datenbank-Migration und Sicherungsformat) und `DoughRun` eine Backzeit bekommen.
 
 ## Offen / zurückgestellt
