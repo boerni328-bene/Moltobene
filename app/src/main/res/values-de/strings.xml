@@ -649,6 +649,7 @@
     <string name="dough_preset_replace_confirm">Ersetzen</string>
     <string name="dough_cake_kind_label">Kuchenart</string>
     <string name="dough_saved">Als Entwurf gespeichert. Zubereitung ergänzen.</string>
+    <string name="dough_saved_with_steps">Als Entwurf mit Zeitplan und Zubereitung gespeichert.</string>
     <string name="dough_error_number">Zahl eingeben.</string>
     <string name="dough_error_range">Zwischen %1$s und %2$s.</string>
     <string name="dough_error_preferment">Der Vorteig braucht Wasser im Wert von %1$s %% des Mehlgewichts, der Teig hat aber nur %2$s %%. Mehl oder Wasser im Vorteig verringern oder die Hydration erhöhen.</string>

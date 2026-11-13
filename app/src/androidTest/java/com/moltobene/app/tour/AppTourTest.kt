@@ -855,7 +855,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         assertEquals(draft.timeline.size, draft.steps.size)
         assertTrue(draft.steps.toString(), draft.steps.any { "°F" in it })
         assertTrue(draft.ingredients.toString(), draft.ingredients.any { "°F" in it.text })
-        waitForText(text(R.string.dough_saved))
+        waitForText(text(R.string.dough_saved_with_steps))
         screenshot("14c-teigrechner-entwurf")
     }
 

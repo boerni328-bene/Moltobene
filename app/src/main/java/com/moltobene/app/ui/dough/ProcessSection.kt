@@ -4,11 +4,14 @@ import android.content.res.Resources
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -31,6 +34,7 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.moltobene.app.R
 import com.moltobene.app.data.StepperSide
@@ -104,15 +108,29 @@ internal fun ProcessList(
         for (row in rows) ProcessRowView(row, open = row.key == openKey, onToggle = { onToggle(row.key) })
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         val unitsDescription = stringResource(R.string.dough_process_units_description)
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = Spacing.xs)) {
+        val hint: @Composable (Modifier) -> Unit = { modifier ->
             Text(
                 stringResource(R.string.dough_process_adapts),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f),
+                modifier = modifier,
             )
+        }
+        val units: @Composable () -> Unit = {
             TextButton(onClick = onUnits, modifier = Modifier.semantics { contentDescription = unitsDescription }) {
                 Text(stringResource(R.string.dough_process_units))
+            }
+        }
+        if (isLargeText()) {
+            // Bei großer Schrift bekommt der Hinweis die ganze Breite, der Link steht darunter.
+            Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(top = Spacing.xs)) {
+                hint(Modifier.fillMaxWidth())
+                units()
+            }
+        } else {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = Spacing.xs)) {
+                hint(Modifier.weight(1f))
+                units()
             }
         }
         if (warning != null) {
@@ -136,14 +154,16 @@ private fun ProcessRowView(row: ProcessRow, open: Boolean, onToggle: () -> Unit)
         HorizontalDivider(color = colors.outlineVariant)
         val value: @Composable () -> Unit = {
             if (!open) {
+                val align = if (large) TextAlign.Start else TextAlign.End
                 Column(horizontalAlignment = if (large) Alignment.Start else Alignment.End) {
                     Text(
                         row.value,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = if (row.changed) FontWeight.Bold else null,
+                        textAlign = align,
                     )
                     if (row.suffix != null) {
-                        Text(row.suffix, style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
+                        Text(row.suffix, style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant, textAlign = align)
                     }
                 }
             }
@@ -168,8 +188,15 @@ private fun ProcessRowView(row: ProcessRow, open: Boolean, onToggle: () -> Unit)
                     value()
                 }
             } else {
-                Text(row.label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                value()
+                // Der Wert nimmt höchstens gut die Hälfte der Breite: Lange Texte (z. B. auf Italienisch) brechen dann
+                // um, statt den Namen auf wenige Buchstaben je Zeile zusammenzudrücken.
+                BoxWithConstraints(modifier = Modifier.weight(1f)) {
+                    val valueMax = maxWidth * VALUE_SHARE
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                        Text(row.label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                        Box(modifier = Modifier.widthIn(max = valueMax)) { value() }
+                    }
+                }
             }
             Icon(
                 if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
@@ -281,6 +308,9 @@ internal fun totalShort(res: Resources, minutes: Int): String = when {
     minutes % 60 == 0 -> res.getString(R.string.dough_hours_short, (minutes / 60).toString())
     else -> res.getString(R.string.dough_hours_minutes_short, (minutes / 60).toString(), (minutes % 60).toString())
 }
+
+/** Höchstens so viel der Zeilenbreite bekommt der Wert rechts neben dem Namen. */
+private const val VALUE_SHARE = 0.55f
 
 /** Selbst geänderte Temperatur: weicht vom Standardwert ab (mit Spielraum für umgerechnete °F-Werte). */
 private const val CHANGED_TOLERANCE = 0.01

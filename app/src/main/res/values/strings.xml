@@ -651,6 +651,7 @@
     <string name="dough_preset_replace_confirm">Replace</string>
     <string name="dough_cake_kind_label">Type of cake</string>
     <string name="dough_saved">Saved as a draft. Add the instructions.</string>
+    <string name="dough_saved_with_steps">Saved as a draft with schedule and instructions.</string>
     <string name="dough_error_number">Enter a number.</string>
     <string name="dough_error_range">Between %1$s and %2$s.</string>
     <string name="dough_error_preferment">The preferment needs water worth %1$s %% of the flour weight, but the dough only has %2$s %%. Lower the flour or water in the preferment, or raise the hydration.</string>

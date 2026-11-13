@@ -17,6 +17,7 @@ Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 - **Gespeichertes Rezept:** Die Zwischenüberschriften nennen das Gewicht („Für den Vorteig (277 g Biga)“, „Für den Hauptteig (1000 g)“), und der Hauptteig beginnt mit „277 g Biga (der ganze Vorteig)“.
 - Im Zeitplan heißt es „bei Raumtemperatur“ statt „bei Zimmertemperatur“ und „Teigkugeln gehen lassen“ bzw. „Laib gehen lassen“ statt „Geformten Teig gehen lassen“.
 - „Zurücksetzen“ stellt auch Raum, Kühlschrank, Knetart, Gehzeiten und Temperaturen auf die Standardwerte.
+- Nach dem Speichern von Pizza- und Brotteig heißt es jetzt „Als Entwurf mit Zeitplan und Zubereitung gespeichert.“
 
 ## [0.73.0] – 2026-11-04 (versionCode 124)
 

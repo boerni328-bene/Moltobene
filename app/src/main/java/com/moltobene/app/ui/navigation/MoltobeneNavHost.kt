@@ -226,9 +226,10 @@ fun MoltobeneNavHost(shared: SharedContent? = null) {
                 onBack = { navController.popBackStack() },
                 onOpenKnowHow = { navController.navigate(KnowHowRoute) },
                 onOpenSettings = { navController.navigate(SettingsRoute(SETTINGS_GROUP_DOUGH)) },
-                onSaved = { id ->
+                onSaved = { id, withSteps ->
                     navController.navigate(EditRoute(id)) { popUpTo<DoughRoute> { inclusive = true } }
-                    showMessage(resources.getString(R.string.dough_saved))
+                    // Pizza und Brot bringen Zeitplan und Zubereitung mit; bei Pasta und Kuchen fehlt die Zubereitung noch.
+                    showMessage(resources.getString(if (withSteps) R.string.dough_saved_with_steps else R.string.dough_saved))
                 },
             )
         }

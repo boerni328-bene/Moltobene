@@ -155,7 +155,8 @@ fun DoughScreen(
     onBack: () -> Unit,
     onOpenKnowHow: () -> Unit,
     onOpenSettings: () -> Unit,
-    onSaved: (String) -> Unit,
+    /** Nummer des gespeicherten Rezepts; [withSteps]: mit Zeitplan und Zubereitung (Pizza und Brot). */
+    onSaved: (id: String, withSteps: Boolean) -> Unit,
 ) {
     var typeKey by rememberSaveable { mutableStateOf(DoughType.PIZZA.key) }
     val type = DoughType.fromKey(typeKey) ?: DoughType.PIZZA
@@ -225,9 +226,9 @@ fun DoughScreen(
                     Header(type) { typeKey = it.key }
                 }
                 when (type) {
-                    DoughType.PIZZA, DoughType.BREAD -> LeavenedContent(type, viewModel, onSaved, onOpenSettings, header)
-                    DoughType.PASTA -> PastaContent(viewModel, onSaved, header)
-                    DoughType.CAKE -> CakeContent(viewModel, onSaved, header)
+                    DoughType.PIZZA, DoughType.BREAD -> LeavenedContent(type, viewModel, { onSaved(it, true) }, onOpenSettings, header)
+                    DoughType.PASTA -> PastaContent(viewModel, { onSaved(it, false) }, header)
+                    DoughType.CAKE -> CakeContent(viewModel, { onSaved(it, false) }, header)
                 }
             }
         }
