@@ -1,9 +1,18 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 13.11.2026 · `main` = **Version 0.74.0** (Release v0.74.0 erschienen, Build 43428360006 grün) · Arbeitszweig `claude/trusting-galileo-xg0tgz` = `main` plus diese Übergabe · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 13.11.2026 · `main` = **Version 0.74.0** (Release v0.74.0 erschienen) · Zweig `verbesserungen-0741` = 0.74.2 (grün, wartet auf Freigabe) · Cloud-Zweig `claude/trusting-galileo-xg0tgz` = `main` plus Übergabe · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
+
+## Wartet auf Freigabe: Zweig `verbesserungen-0741` (0.74.1 und 0.74.2, beide Builds grün, 13.11.2026)
+- Anlass: Einschätzung des Standes durch die PC-Sitzung, Inhaber: „Setze deine Vorschläge um.“
+- **0.74.1** (Build 43441690165): Reihen, die seitlich weitergehen (Kacheln oben im Teigrechner, Vorteig-Kacheln, Voreinstellungen), laufen am Rand weich aus (`ui/components/ScrollFade.kt`, `Modifier.scrollFade(state)` vor `horizontalScroll`); bei großer Schrift zeigt die Leiste unten nur Gesamtteig und „Als Rezept speichern“ (Vorteig-Zeile entfällt dort, steht als Karte im Formular); Hinweis unter der Liste beginnt mit „Zeiten und Temperaturen sind Richtwerte.“
+- **0.74.2** (Build 43442080357, keine sichtbare Änderung): `RecipeScreen.kt` (1820 → 1116 Zeilen) aufgeteilt in `CookingBar.kt`, `RecipeParts.kt`, `RecipeTranslation.kt`; `EditScreen.kt` (1247 → 560) in `EditImportParts.kt`, `EditSections.kt`. Nur verschoben, `private` auf Dateiebene wurde `internal`. Fotos (hell, dunkel, 200 %) angesehen: unverändert bzw. wie beabsichtigt.
+- **Noch nicht auf `main`** (Push nur nach Freigabe). Die Cloud-Sitzung sollte vor 0.75.0 diesen Zweig übernehmen, sonst gibt es Konflikte in `DoughScreen.kt`, `PresetCard.kt`, `strings.xml`, `CHANGELOG.md`.
+- Bewusst nicht angefasst: `DoughScreen.kt` (1738 Zeilen, dort arbeitet die Cloud-Sitzung) und `EditViewModel.kt` (1663 Zeilen, Aufteilen ändert Logik, eigener Schritt). Die langen Funktionen `RecipeContent` und `EditScreen` sind noch groß.
+- Offene Entscheidungen des Inhabers aus der Einschätzung: Reihenfolge (erst 1.0, dann 0.75/0.76?); Teigrechner in zwei Stufen („einfach“ und „Feinheiten“, erst als Entwurf); Zwischenstände als Vorabversion statt als „neueste Version“; frühe Prüfung auf einem echten Gerät.
+- Dependabot-Meldung #10 („hoch“): Guava in den Build-Werkzeugen (`settings.gradle.kts`), nicht in der App; behoben ab Guava 33.7.2, noch nicht umgestellt.
 
 ## Zuletzt erschienen: 0.74.0 „Gehzeiten und Temperaturen“ (Schritt 1 von 3)
 - Inhaber hat am 12.11.2026 **Entwurf 10C** gewählt (ruhige Liste: Zeilen zeigen Werte, Antippen öffnet −/+ nebeneinander, wo nötig die Auswahl). Entwurfsseite (privat): https://claude.ai/artifact/RAw2psMZkncGoKijB3sHSq, Quellen nur im Scratchpad der Cloud-Sitzung.
