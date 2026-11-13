@@ -44,6 +44,7 @@ import com.moltobene.app.R
 import com.moltobene.app.data.dough.DoughPresets
 import com.moltobene.app.data.dough.DoughType
 import com.moltobene.app.data.dough.LeavenedInput
+import com.moltobene.app.ui.components.scrollFade
 import com.moltobene.app.ui.theme.Spacing
 
 /** Ein Eintrag der Liste: Name, Werte und – bei eigenen – der Name zum Löschen. */
@@ -119,7 +120,7 @@ internal fun PresetCard(
     val picker: @Composable (Modifier) -> Unit = { modifier ->
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = modifier.horizontalScroll(rememberScrollState()).selectableGroup(),
+            modifier = rememberScrollState().let { modifier.scrollFade(it).horizontalScroll(it) }.selectableGroup(),
         ) {
             entries.forEachIndexed { i, entry ->
                 if (i > 0) VerticalDivider(modifier = Modifier.height(24.dp))
@@ -276,7 +277,7 @@ internal fun <T> KindRow(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.horizontalScroll(rememberScrollState()).selectableGroup(),
+        modifier = rememberScrollState().let { modifier.scrollFade(it).horizontalScroll(it) }.selectableGroup(),
     ) {
         options.forEachIndexed { i, option ->
             if (i > 0) VerticalDivider(modifier = Modifier.height(24.dp))

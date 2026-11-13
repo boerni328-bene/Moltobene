@@ -3,6 +3,13 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.74.1] – 2026-11-13 (versionCode 126)
+
+### Geändert
+- **Teigrechner: Reihen, die seitlich weitergehen, sind erkennbar.** Passen die Kacheln mit den Mengen oder die Voreinstellungen nicht nebeneinander, läuft die Reihe am Rand weich aus. So ist zu sehen, dass sie sich seitlich verschieben lässt.
+- **Teigrechner bei großer Schrift:** Die Leiste unten zeigt nur noch den Gesamtteig und „Als Rezept speichern“. Die Aufteilung des Vorteigs steht weiterhin als Karte im Formular. So bleibt mehr Platz für die Eingaben.
+- **Gehzeiten und Temperaturen:** Der Hinweis unter der Liste beginnt mit „Zeiten und Temperaturen sind Richtwerte.“
+
 ## [0.74.0] – 2026-11-12 (versionCode 125)
 
 ### Neu

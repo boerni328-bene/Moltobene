@@ -713,7 +713,7 @@
     <string name="dough_process_water_plain">Water: %1$s</string>
     <string name="dough_process_summary">Room %1$s · water %2$s · total %3$s</string>
     <string name="dough_process_summary_no_water">Room %1$s · total %2$s</string>
-    <string name="dough_process_adapts">Times at room temperature follow the room: warmer is shorter. Values changed by hand are bold and stay.</string>
+    <string name="dough_process_adapts">Times and temperatures are guide values. Times at room temperature follow the room: warmer is shorter. Values changed by hand are bold and stay.</string>
     <string name="dough_process_units" translatable="false">°C/°F</string>
     <string name="dough_process_units_description">Choose °C or °F in Settings</string>
     <string name="dough_summary_amount">%1$s (%2$s)</string>
