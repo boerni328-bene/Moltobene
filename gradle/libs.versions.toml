@@ -17,8 +17,11 @@ onnxruntime = "1.30.0"
 jsoup = "1.23.2"
 vosk = "0.3.47"
 jna = "5.13.0"
+# Nur Bauwerkzeug (kommt über das Android-Bauwerkzeug mit), nicht in der App. Mindestens 33.7.2 wegen Sicherheitslücke (Dependabot #10).
+guava = "33.7.2-jre"
 
 [libraries]
+guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 # Legt die Kotlin-Version fest: Seit AGP 9 bringt das Android-Bauwerkzeug Kotlin selbst mit (siehe build.gradle.kts).
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
