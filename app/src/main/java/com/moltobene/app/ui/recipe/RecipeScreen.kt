@@ -9,27 +9,15 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
-import android.icu.text.MeasureFormat
-import android.icu.util.Measure
-import android.icu.util.MeasureUnit
-import android.net.Uri
 import android.os.SystemClock
-import android.text.format.Formatter
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,43 +28,21 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.relocation.BringIntoViewRequester
-import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -88,13 +54,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -104,13 +68,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
@@ -123,27 +83,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.text
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.LocaleList
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -155,13 +103,11 @@ import com.moltobene.app.R
 import com.moltobene.app.data.Adjustment
 import com.moltobene.app.data.DoughRun
 import com.moltobene.app.data.AmountScaling
-import com.moltobene.app.data.Pan
 import com.moltobene.app.data.PanScaling
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeText
 import com.moltobene.app.data.ScreenOn
 import com.moltobene.app.data.ScreenOnTimer
-import com.moltobene.app.data.Tag
 import com.moltobene.app.data.ocr.TextLanguage
 import com.moltobene.app.data.share.PreparedShare
 import com.moltobene.app.data.share.RecipeShareText
@@ -189,7 +135,6 @@ import com.moltobene.app.ui.components.RecipePhotoLarge
 import com.moltobene.app.ui.components.TagLabels
 import com.moltobene.app.ui.components.isLargeText
 import com.moltobene.app.ui.components.DashedDivider
-import com.moltobene.app.ui.components.IngredientLine
 import com.moltobene.app.ui.components.isShortHeight
 import com.moltobene.app.ui.components.rememberAmountWidth
 import com.moltobene.app.ui.components.isWideLayout
@@ -207,7 +152,6 @@ import com.moltobene.app.ui.schedule.ScheduleCard
 import com.moltobene.app.ui.schedule.rememberNow
 import com.moltobene.app.ui.theme.Spacing
 import java.io.File
-import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlinx.coroutines.awaitCancellation
@@ -542,7 +486,7 @@ internal fun openShareMenu(context: Context, share: PreparedShare, chooserTitle:
 }
 
 /** Beobachtet jede Berührung, auch beim Blättern, ohne sie abzufangen. */
-private fun Modifier.observeTouches(onTouch: () -> Unit): Modifier = pointerInput(onTouch) {
+internal fun Modifier.observeTouches(onTouch: () -> Unit): Modifier = pointerInput(onTouch) {
     awaitPointerEventScope {
         while (true) {
             awaitPointerEvent(PointerEventPass.Initial)
@@ -557,7 +501,7 @@ private fun Modifier.observeTouches(onTouch: () -> Unit): Modifier = pointerInpu
  * aufgerufen wird: Sie startet die Frist neu und schaltet nach dem Ausgehen wieder an.
  */
 @Composable
-private fun keepScreenOn(setting: ScreenOn): () -> Unit {
+internal fun keepScreenOn(setting: ScreenOn): () -> Unit {
     val view = LocalView.current
     val timer = remember(setting) { ScreenOnTimer(setting) { SystemClock.uptimeMillis() } }
     val touches = remember { Channel<Unit>(Channel.CONFLATED) }
@@ -585,7 +529,7 @@ private fun keepScreenOn(setting: ScreenOn): () -> Unit {
 }
 
 /** Was beim Kochen dazukommt (#56): Häkchen, aktueller Schritt und Umrechnen (#66). */
-private class CookingState(
+internal class CookingState(
     val checked: Set<String>,
     val currentStep: String?,
     val adjustment: Adjustment?,
@@ -596,16 +540,8 @@ private class CookingState(
     val onNextStep: () -> StepMove,
 )
 
-/** „Rezept übersetzen“ (#60): Zustand und Aktionen für den Umschalter „DE | EN“. */
-private class TranslationActions(
-    val state: TranslationState,
-    val onShowLanguage: (language: String?, original: String?) -> Unit,
-    val onRetry: () -> Unit,
-    val onOpenSettings: () -> Unit,
-)
-
 @Composable
-private fun RecipeContent(
+internal fun RecipeContent(
     recipe: Recipe,
     photo: File?,
     cooking: CookingState,
@@ -1171,650 +1107,10 @@ private fun RecipeContent(
     }
 }
 
-/** Alles, was die Kochleiste zeigt und tut; unten als [CookingBar], im niedrigen Querformat oben als [CookingBarTop]. */
-private class CookingBarData(
-    val hasSteps: Boolean,
-    val speaking: Boolean,
-    val stepNumber: Int?,
-    val stepCount: Int,
-    val message: String?,
-    val voiceHint: String?,
-    val microphoneOn: Boolean,
-    val onMicrophone: () -> Unit,
-    val onPrevious: () -> Unit,
-    val onRead: () -> Unit,
-    val onNext: () -> Unit,
-)
-
-/**
- * Übergabe der Kochleiste an die obere Leiste: Nur diese liest [data]. Eine Änderung baut deshalb nur die Leiste neu
- * auf, nicht das Rezept.
- */
-private class CookingBarHolder {
-    var data by mutableStateOf<CookingBarData?>(null)
-}
-
-/** Status der Kochleiste als Text: eine Kurzmeldung, sonst „Schritt 2 von 5“. */
-@Composable
-private fun CookingBarData.statusText(): String? =
-    message ?: stepNumber?.let { stringResource(R.string.cook_step_of, it, stepCount) }
-
-/** Kochleiste in der oberen Leiste (Handy quer): „Zurück“, „Weiter“, Mikrofon und Vorlesen als Symbole. */
-@Composable
-private fun CookingBarTop(bar: CookingBarData) {
-    val microphoneIcon = if (bar.microphoneOn) R.drawable.ic_mic_off else R.drawable.ic_mic
-    val microphoneDescription = stringResource(
-        if (bar.microphoneOn) R.string.cook_bar_mic_off_description else R.string.cook_bar_mic_on_description,
-    )
-    val readIcon = if (bar.speaking) R.drawable.ic_stop else R.drawable.ic_volume_up
-    val readDescription = stringResource(if (bar.speaking) R.string.cook_bar_stop_description else R.string.cook_bar_read_description)
-    FilledTonalIconButton(onClick = bar.onPrevious, enabled = bar.hasSteps) {
-        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.cook_bar_previous_description))
-    }
-    FilledIconButton(onClick = bar.onNext, enabled = bar.hasSteps) {
-        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.cook_bar_next_description))
-    }
-    val micModifier = Modifier.semantics { contentDescription = microphoneDescription }
-    if (bar.microphoneOn) {
-        FilledIconButton(onClick = bar.onMicrophone, modifier = micModifier) {
-            Icon(painterResource(microphoneIcon), contentDescription = null)
-        }
-    } else {
-        FilledTonalIconButton(onClick = bar.onMicrophone, modifier = micModifier) {
-            Icon(painterResource(microphoneIcon), contentDescription = null)
-        }
-    }
-    FilledTonalIconButton(onClick = bar.onRead, enabled = bar.hasSteps) {
-        Icon(painterResource(readIcon), contentDescription = readDescription)
-    }
-}
-
-/**
- * Portionen mit − und +; umgerechnet wird nur in der Anzeige (#56). Nach einer Zutat umgerechnet (#66) können es
- * krumme Portionen sein: Dann steht „etwa“ davor, und − und + gehen von der gerundeten Zahl aus.
- */
-@Composable
-private fun ServingsControl(shown: Int, approximate: Boolean, unit: String?, onChange: (Int) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = { onChange(shown - 1) }, enabled = shown > 1) {
-            Icon(painterResource(R.drawable.ic_remove), contentDescription = stringResource(R.string.servings_fewer))
-        }
-        val text = servingsControlText(shown, unit)
-        Text(
-            text = if (approximate) stringResource(R.string.amount_about, text) else text,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            // Der Screenreader sagt die neue Zahl an.
-            modifier = Modifier.weight(1f, fill = false).semantics { liveRegion = LiveRegionMode.Polite },
-        )
-        IconButton(onClick = { onChange(shown + 1) }, enabled = shown < Adjustment.MAX_SERVINGS) {
-            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.servings_more))
-        }
-    }
-}
-
-/**
- * „Umrechnen …“ (#66) und, wenn umgerechnet ist, der Hinweis mit „Zurücksetzen“. Bei großer Schrift dürfen die beiden
- * Schaltflächen untereinander stehen.
- */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun AdjustActions(adjusted: Boolean, hint: String?, bakingNote: Boolean, onAdjust: () -> Unit, onReset: () -> Unit) {
-    if (adjusted && hint != null) {
-        Text(
-            text = hint + " " + stringResource(if (bakingNote) R.string.adjust_pan_baking else R.string.adjust_hint_rules),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-        if (adjusted) TextButton(onClick = onReset) { Text(stringResource(R.string.servings_reset)) }
-    }
-}
-
-/** Zwischen − und +: „4 Portionen“ oder mit eigener Einheit „Springform (Ø 26 cm): 2“ statt „2 Springform“ (#63). */
-@Composable
-private fun servingsControlText(servings: Int, unit: String?): String =
-    if (unit == null) {
-        pluralStringResource(R.plurals.servings_count, servings, servings)
-    } else {
-        stringResource(R.string.servings_unit_count, unit, servings)
-    }
-
-/** Als Satzteil, z. B. im Hinweis „Im Rezept: 1 Springform (Ø 26 cm)“. */
-@Composable
-private fun servingsText(servings: Int, unit: String?): String =
-    if (unit == null) {
-        pluralStringResource(R.plurals.servings_count, servings, servings)
-    } else {
-        stringResource(R.string.servings_with_unit, servings, unit)
-    }
-
-/**
- * Eine Zutat zum Abhaken: Die ganze Zeile ist antippbar, abgehakt heißt Häkchen und durchgestrichen.
- * Umgerechnete Mengen sind fett, damit sie nicht nur an der Farbe zu erkennen sind.
- */
-@Composable
-private fun IngredientRow(
-    parts: List<AmountScaling.Part>,
-    locale: LocaleList?,
-    amountWidth: Dp?,
-    checked: Boolean,
-    onToggle: () -> Unit,
-) {
-    val state = stringResource(if (checked) R.string.ingredient_checked else R.string.ingredient_unchecked)
-    val resources = LocalResources.current
-    // Der Screenreader liest „etwa 335 g Mehl, umgerechnet“ (#65); die Zutat behält dabei die Sprache des Rezepts.
-    val spoken = remember(parts, locale, resources) {
-        if (parts.none { it.scaled }) return@remember null
-        val line = AmountScaling.spoken(parts) { resources.getString(R.string.amount_about, it) }
-        val full = resources.getString(R.string.ingredient_adjusted, line)
-        buildAnnotatedString {
-            append(full)
-            val start = full.indexOf(line)
-            if (start >= 0) addStyle(SpanStyle(localeList = locale), start, start + line.length)
-        }
-    }
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.s),
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 48.dp)
-            .toggleable(value = checked, role = Role.Checkbox, onValueChange = { onToggle() })
-            .semantics { stateDescription = state },
-    ) {
-        Checkbox(checked = checked, onCheckedChange = null)
-        Box(modifier = if (spoken != null) Modifier.clearAndSetSemantics { text = spoken } else Modifier) {
-            IngredientLine(
-                parts = parts,
-                amountWidth = amountWidth,
-                locale = locale,
-                style = cookingTextStyle().copy(
-                    textDecoration = if (checked) TextDecoration.LineThrough else TextDecoration.None,
-                ),
-                color = if (checked) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
-            )
-        }
-    }
-}
-
-/** Ein Schritt; antippen markiert ihn als aktuellen Schritt – mit Symbol und Hintergrund, nicht nur über die Farbe. */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun StepRow(number: Int, text: AnnotatedString, current: Boolean, barInset: Dp, onClick: () -> Unit) {
-    // „Weiter“ und „Zurück“ (#79) scrollen den aktuellen Schritt in den sichtbaren Bereich.
-    val requester = remember { BringIntoViewRequester() }
-    // Liegt die Leiste über dem Inhalt, bleibt Platz in Höhe der Leiste frei, damit der Schritt nicht darunter landet.
-    var rowSize by remember { mutableStateOf(IntSize.Zero) }
-    val insetPx = with(LocalDensity.current) { barInset.toPx() }
-    LaunchedEffect(current) {
-        if (current) requester.bringIntoView(Rect(0f, -insetPx, rowSize.width.toFloat(), rowSize.height.toFloat()))
-    }
-    val currentLabel = stringResource(R.string.step_current)
-    // Ein kräftiger Balken links zeigt den aktuellen Schritt auch ohne Farbe: zusätzlich zu Symbol, Hintergrund und Text.
-    val barColor = MaterialTheme.colorScheme.primary
-    val accent = if (current) Modifier.drawBehind { drawRect(barColor, size = Size(4.dp.toPx(), size.height)) } else Modifier
-    val markLabel = stringResource(R.string.step_mark_current)
-    val highlight = if (current) {
-        Modifier.background(MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.shapes.medium)
-    } else {
-        Modifier
-    }
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(Spacing.s),
-        modifier = Modifier
-            .fillMaxWidth()
-            .bringIntoViewRequester(requester)
-            .onSizeChanged { rowSize = it }
-            .heightIn(min = 48.dp)
-            .clip(MaterialTheme.shapes.medium)
-            .then(highlight)
-            .then(accent)
-            .clickable(onClickLabel = markLabel, onClick = onClick)
-            .padding(Spacing.s)
-            .semantics(mergeDescendants = true) { if (current) stateDescription = currentLabel },
-    ) {
-        val color = if (current) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface
-        if (current) {
-            Icon(Icons.Filled.PlayArrow, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-        }
-        Text(
-            text = "$number.",
-            style = cookingTextStyle(current),
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.widthIn(min = 24.dp),
-        )
-        Text(text, style = cookingTextStyle(current), color = color)
-    }
-}
-
-/**
- * Kochleiste (#79, #89): „Zurück“ und „Weiter“ nebeneinander – „Weiter“ ist der häufigste Knopf, deshalb betont –, davon
- * getrennt ganz rechts das Mikrofon (Spracheingabe, #80) und „Vorlesen“ als Lautsprecher-Symbol (beim Vorlesen als „Anhalten“-Symbol, Wunsch vom 14.10.2026). Darüber steht, welcher Schritt gerade dran ist
- * („Schritt 2 von 5“, als Text, nicht nur Farbe). Mindestens 64 dp hoch. Bei großer Schrift stehen „Zurück“ und „Weiter“
- * oben, „Vorlesen“ darunter rechts, damit kein Wort mitten im Wort umbricht. Das Vorlesen startet nur auf Antippen.
- */
-@Composable
-private fun CookingBar(bar: CookingBarData) {
-    val hasSteps = bar.hasSteps
-    val speaking = bar.speaking
-    val stepNumber = bar.stepNumber
-    val stepCount = bar.stepCount
-    val message = bar.message
-    val voiceHint = bar.voiceHint
-    val microphoneOn = bar.microphoneOn
-    val onMicrophone = bar.onMicrophone
-    val onPrevious = bar.onPrevious
-    val onRead = bar.onRead
-    val onNext = bar.onNext
-    val previous = stringResource(R.string.cook_bar_previous)
-    val previousDescription = stringResource(R.string.cook_bar_previous_description)
-    val readIcon = if (speaking) R.drawable.ic_stop else R.drawable.ic_volume_up
-    val readDescription = stringResource(if (speaking) R.string.cook_bar_stop_description else R.string.cook_bar_read_description)
-    val next = stringResource(R.string.cook_bar_next)
-    val nextDescription = stringResource(R.string.cook_bar_next_description)
-    val microphoneIcon = if (microphoneOn) R.drawable.ic_mic_off else R.drawable.ic_mic
-    val microphoneDescription = stringResource(if (microphoneOn) R.string.cook_bar_mic_off_description else R.string.cook_bar_mic_on_description)
-    val compact = isLargeText()
-    Surface(color = MaterialTheme.colorScheme.surfaceContainer, tonalElevation = 3.dp, modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(horizontal = Spacing.s, vertical = Spacing.s),
-            verticalArrangement = Arrangement.spacedBy(Spacing.xs),
-        ) {
-            val status = message ?: stepNumber?.let { stringResource(R.string.cook_step_of, it, stepCount) }
-            if (status != null) {
-                Text(
-                    text = status,
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
-                    textAlign = TextAlign.Center,
-                )
-            }
-            if (voiceHint != null) {
-                Text(
-                    text = voiceHint,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
-                    textAlign = TextAlign.Center,
-                )
-            }
-            if (compact) {
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-                    BarButton(previous, previousDescription, hasSteps, onPrevious)
-                    BarButton(next, nextDescription, hasSteps, onNext, primary = true)
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-                    Spacer(Modifier.weight(1f))
-                    BarIconButton(microphoneIcon, microphoneDescription, true, onMicrophone, active = microphoneOn)
-                    BarIconButton(readIcon, readDescription, hasSteps, onRead)
-                }
-            } else {
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
-                    BarButton(previous, previousDescription, hasSteps, onPrevious)
-                    BarButton(next, nextDescription, hasSteps, onNext, primary = true)
-                    // Lücke, damit „Vorlesen“ getrennt von den beiden Schritt-Knöpfen ganz rechts steht.
-                    Spacer(Modifier.width(Spacing.m))
-                    BarIconButton(microphoneIcon, microphoneDescription, true, onMicrophone, active = microphoneOn)
-                    BarIconButton(readIcon, readDescription, hasSteps, onRead)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun RowScope.BarButton(text: String, description: String, enabled: Boolean, onClick: () -> Unit, primary: Boolean = false) {
-    val modifier = Modifier
-        .weight(1f)
-        .heightIn(min = 64.dp)
-        .semantics { contentDescription = description }
-    val padding = PaddingValues(horizontal = Spacing.xs, vertical = Spacing.xs)
-    if (primary) {
-        Button(onClick = onClick, enabled = enabled, modifier = modifier, contentPadding = padding) {
-            Text(text, textAlign = TextAlign.Center)
-        }
-    } else {
-        FilledTonalButton(onClick = onClick, enabled = enabled, modifier = modifier, contentPadding = padding) {
-            Text(text, textAlign = TextAlign.Center)
-        }
-    }
-}
-
-/** Knopf nur mit Symbol (z. B. „Vorlesen“ als Lautsprecher); die Beschreibung für den Screenreader steht in strings.xml. */
-@Composable
-private fun BarIconButton(icon: Int, description: String, enabled: Boolean, onClick: () -> Unit, active: Boolean = false) {
-    val modifier = Modifier.width(64.dp).heightIn(min = 64.dp).semantics { contentDescription = description }
-    val content: @Composable () -> Unit = { Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(28.dp)) }
-    if (active) {
-        // Eingeschaltet (z. B. das Mikrofon hört zu): betont und mit anderem Symbol, nicht nur durch die Farbe.
-        Button(onClick = onClick, enabled = enabled, modifier = modifier, contentPadding = PaddingValues(Spacing.xs)) { content() }
-    } else {
-        FilledTonalButton(onClick = onClick, enabled = enabled, modifier = modifier, contentPadding = PaddingValues(Spacing.xs)) { content() }
-    }
-}
-
-/** So lange steht eine Kurzmeldung („Letzter Schritt“) in der Kochleiste. */
-private const val BAR_MESSAGE_MILLIS = 3_000L
-
-/** Ab dieser Abweichung von einer ganzen Zahl steht „etwa“ vor den Portionen. */
-private const val SERVINGS_TOLERANCE = 0.01
-
-/** Text in der Sprache des Rezepts: Der Screenreader liest ihn mit der passenden Aussprache vor (#60). */
-private fun localized(text: String, locale: LocaleList?): AnnotatedString =
-    if (locale == null) AnnotatedString(text) else buildAnnotatedString { withStyle(SpanStyle(localeList = locale)) { append(text) } }
-
-/** Name einer Sprache in der Sprache der Oberfläche, z. B. „Englisch“. */
-@Composable
-private fun languageName(code: String): String {
-    val ui = LocalConfiguration.current.locales[0]
-    return Locale.forLanguageTag(code).getDisplayLanguage(ui).replaceFirstChar { it.titlecase(ui) }
-}
-
-/** Die gezeigte bzw. gewünschte Sprache: das Original, eine Übersetzung oder eine, die gerade entsteht. */
-private fun TranslationState.selectedLanguage(original: String): String = when (this) {
-    TranslationState.Original -> original
-    is TranslationState.Working -> language
-    is TranslationState.Shown -> translation.language
-    is TranslationState.NeedsPack -> language
-    is TranslationState.Failed -> language
-}
-
-/**
- * Umschalter „DE | EN“ oben in der Leiste (#60): Abkürzungen statt Flaggen, die Originalsprache mit Sternchen markiert,
- * z. B. „DE*“ (Wunsch vom 08.10.2026). Die gewählte Sprache ist ausgefüllt und fett, nicht nur farbig; der Screenreader liest
- * den Namen der Sprache. Schmal gehalten, damit daneben „MOLTOBENE“, Bearbeiten und ⋮ Platz haben.
- */
-@Composable
-private fun LanguageSwitch(original: String, selected: String, onSelect: (String) -> Unit) {
-    val languages = (listOf(original) + LanguagePack.targets(original)).sorted()
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.selectableGroup(),
-    ) {
-        languages.forEach { code ->
-            val isSelected = code == selected
-            val name = languageName(code)
-            val description = if (code == original) stringResource(R.string.translation_language_original, name) else name
-            val shape = MaterialTheme.shapes.small
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .minimumInteractiveComponentSize()
-                    .clip(shape)
-                    .selectable(selected = isSelected, role = Role.RadioButton, onClick = { onSelect(code) })
-                    .semantics { contentDescription = description }
-                    .widthIn(min = 40.dp)
-                    .then(
-                        if (isSelected) {
-                            Modifier.background(MaterialTheme.colorScheme.secondaryContainer, shape)
-                        } else {
-                            Modifier.border(1.dp, MaterialTheme.colorScheme.outline, shape)
-                        },
-                    )
-                    .padding(horizontal = Spacing.s, vertical = Spacing.xs),
-            ) {
-                Text(
-                    text = if (code == original) {
-                        stringResource(R.string.translation_code_original, code.uppercase(Locale.ROOT))
-                    } else {
-                        code.uppercase(Locale.ROOT)
-                    },
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                )
-            }
-        }
-    }
-}
-
-/** Fest unter der Leiste: Fortschritt, Hinweis auf die maschinelle Übersetzung oder was zu tun ist (#60). */
-@Composable
-private fun TranslationStatus(original: String, actions: TranslationActions) {
-    val state = actions.state
-    when (state) {
-        TranslationState.Original -> Unit
-        is TranslationState.Working -> Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
-                Text(
-                    text = stringResource(R.string.translation_running, state.done, state.total),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f),
-                )
-                TextButton(onClick = { actions.onShowLanguage(null, original) }) { Text(stringResource(R.string.cancel)) }
-            }
-            LinearProgressIndicator(
-                progress = { if (state.total > 0) state.done.toFloat() / state.total else 0f },
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        is TranslationState.Shown -> Text(
-            text = stringResource(R.string.translation_hint),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-        )
-        is TranslationState.NeedsPack -> Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-            val context = LocalContext.current
-            Text(
-                text = stringResource(R.string.translation_needs_pack, Formatter.formatShortFileSize(context, LanguagePack.DOWNLOAD_BYTES)),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-            )
-            OutlinedButton(onClick = actions.onOpenSettings) { Text(stringResource(R.string.translation_open_settings)) }
-        }
-        is TranslationState.Failed -> Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-            Text(
-                text = stringResource(if (state.lowMemory) R.string.translation_low_memory else R.string.translation_error),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-            )
-            OutlinedButton(onClick = actions.onRetry) { Text(stringResource(R.string.translation_retry)) }
-        }
-    }
-}
-
-@Composable
-private fun SectionTitle(text: String) {
-    Text(
-        text = text,
-        style = when (LocalCookingSize.current) {
-            CookingTextSize.SMALL -> MaterialTheme.typography.headlineSmall
-            CookingTextSize.MEDIUM -> MaterialTheme.typography.headlineMedium
-            CookingTextSize.LARGE -> MaterialTheme.typography.headlineLarge
-        },
-        modifier = Modifier
-            .padding(top = Spacing.m)
-            .semantics { heading() },
-    )
-}
-
-/** Öffnet nur Links mit http/https im Browser. */
-@Composable
-private fun SourceLink(url: String, snackbarHostState: SnackbarHostState) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val errorText = stringResource(R.string.source_link_error)
-    TextButton(
-        onClick = {
-            try {
-                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-            } catch (e: ActivityNotFoundException) {
-                scope.launch { snackbarHostState.showSnackbar(errorText) }
-            }
-        },
-    ) {
-        Text(
-            text = buildAnnotatedString {
-                withStyle(SpanStyle(textDecoration = TextDecoration.Underline)) { append(url) }
-            },
-            style = MaterialTheme.typography.bodyLarge,
-        )
-    }
-}
-
-/** Zeiten aus einer Übernahme (#55), im Format des Handys, z. B. „Gesamtzeit: 1 Std., 30 Min.“. */
-@Composable
-private fun RecipeTimes(prepMinutes: Int?, totalMinutes: Int?) {
-    val locale = LocalConfiguration.current.locales[0]
-    listOfNotNull(
-        prepMinutes?.takeIf { it > 0 }?.let { R.string.recipe_time_prep to it },
-        totalMinutes?.takeIf { it > 0 }?.let { R.string.recipe_time_total to it },
-    ).forEach { (label, minutes) ->
-        Text(
-            text = stringResource(label, formatDuration(minutes, locale)),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
-/** Dauer in Stunden und Minuten mit den Abkürzungen der Sprache, z. B. „1 Std., 30 Min.“ oder “1 hr, 30 min”. */
-internal fun formatDuration(minutes: Int, locale: Locale): String {
-    val hours = minutes / 60
-    val rest = minutes % 60
-    val parts = buildList {
-        if (hours > 0) add(Measure(hours, MeasureUnit.HOUR))
-        if (rest > 0 || hours == 0) add(Measure(rest, MeasureUnit.MINUTE))
-    }
-    return MeasureFormat.getInstance(locale, MeasureFormat.FormatWidth.SHORT).formatMeasures(*parts.toTypedArray())
-}
-
-/** Eine Backform als Text, z. B. „Ø 28 cm“ oder „30 × 40 cm“, bei Eingabe in Zoll mit „(9 Zoll)“ (#67). */
-@Composable
-private fun panLabel(pan: Pan, inch: Boolean): String {
-    fun cm(value: Double) = if (abs(value - value.roundToInt()) < 0.05) value.roundToInt().toString() else "%.1f".format(java.util.Locale.ROOT, value)
-    fun inches(value: Double) = (value / PanScaling.CM_PER_INCH).let { if (abs(it - it.roundToInt()) < 0.05) it.roundToInt().toString() else "%.1f".format(java.util.Locale.ROOT, it) }
-    val base = if (pan.round) {
-        stringResource(R.string.pan_round, cm(pan.a))
-    } else {
-        stringResource(R.string.pan_rectangle, cm(pan.a), cm(pan.b))
-    }
-    if (!inch) return base
-    val size = if (pan.round) inches(pan.a) else stringResource(R.string.pan_size_pair, inches(pan.a), inches(pan.b))
-    return stringResource(R.string.pan_with_inch, base, stringResource(R.string.pan_inch, size))
-}
-
-/** „Umrechnen …“ neben den Portionen in derselben Zeile; bei großer Schrift darunter. */
-@Composable
-private fun AdjustRow(onAdjust: () -> Unit, content: @Composable () -> Unit) {
-    val button = @Composable { TextButton(onClick = onAdjust) { Text(stringResource(R.string.adjust_action)) } }
-    if (isLargeText()) {
-        Column {
-            content()
-            button()
-        }
-    } else {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.weight(1f)) { content() }
-            button()
-        }
-    }
-}
-
-/** Die Schlagwörter des Rezepts (#57) als ruhige Marken unter den Zeiten; mit Text, nicht nur mit Farbe. */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun RecipeTags(tags: List<Tag>) {
-    val resources = LocalResources.current
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(Spacing.s),
-        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
-    ) {
-        for (tag in tags) {
-            Surface(color = MaterialTheme.colorScheme.secondaryContainer, shape = MaterialTheme.shapes.small) {
-                Text(
-                    text = TagLabels.text(resources, tag),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.padding(horizontal = Spacing.s, vertical = Spacing.xs),
-                )
-            }
-        }
-    }
-}
-
 /** Kleinstes Seitenverhältnis (Breite zu Höhe) des Fotos in der Rezeptansicht: nie höher als 5:3. */
-private const val COOKING_PHOTO_MIN_RATIO = 2f
-private const val COOKING_PHOTO_SHORT_MIN_RATIO = 3.2f
-private const val TAB_INGREDIENTS = 0
-private const val TAB_STEPS = 1
-private const val TAB_NOTES = 2
-private const val TAB_SOURCE = 3
-
-/** Ob unter der Leiste der Übersetzungsbalken steht (Rezept mit möglicher Übersetzung, die gerade nicht das Original zeigt). */
-private fun translationBarShown(recipe: Recipe, state: TranslationState): Boolean {
-    val original = RecipeTranslations.languageOf(recipe)
-    return original != null && LanguagePack.targets(original).isNotEmpty() && state != TranslationState.Original
-}
-
-/** Deckkraft des Verlaufs oben auf dem Foto, damit Titel und Symbole der durchsichtigen Leiste lesbar bleiben. */
-private const val BAR_GRADIENT_ALPHA = 0.9f
-private val BAR_HEIGHT = 64.dp
-
-/** Schriftgröße in der Rezeptansicht (#61): klein, mittel oder groß, unabhängig von der Schriftgröße des Geräts. */
-private val LocalCookingSize = compositionLocalOf { CookingTextSize.MEDIUM }
-
-/**
- * Schrift für Zutaten, Schritte und Notizen nach der gewählten Größe. Nur der aktuelle Schritt (Einzelschritt beim
- * Kochen) ist eine Stufe größer.
- */
-@Composable
-private fun cookingTextStyle(current: Boolean = false): TextStyle = with(MaterialTheme.typography) {
-    when (LocalCookingSize.current) {
-        CookingTextSize.SMALL -> if (current) titleMedium else bodyMedium
-        CookingTextSize.MEDIUM -> if (current) titleLarge else bodyLarge
-        CookingTextSize.LARGE -> if (current) headlineMedium else titleLarge
-    }
-}
-
-/**
- * Notizen zum Rezept (#61) mit „Notiz hinzufügen“ bzw. „Notiz bearbeiten“ direkt in der Rezeptansicht. Die angefangene
- * Notiz übersteht das Drehen des Handys und das Beenden der App durch Android (`rememberSaveable`).
- */
-@Composable
-private fun NotesSection(notes: String, onSave: (String) -> Unit) {
-    var editing by rememberSaveable { mutableStateOf(false) }
-    var draft by rememberSaveable { mutableStateOf("") }
-    if (notes.isNotBlank()) {
-        SectionTitle(stringResource(R.string.notes))
-        Text(notes, style = cookingTextStyle())
-    }
-    OutlinedButton(
-        onClick = {
-            draft = notes
-            editing = true
-        },
-        modifier = Modifier.padding(top = if (notes.isBlank()) Spacing.m else 0.dp),
-    ) {
-        Text(stringResource(if (notes.isBlank()) R.string.note_add else R.string.note_edit))
-    }
-    if (editing) {
-        AlertDialog(
-            onDismissRequest = { editing = false },
-            title = { Text(stringResource(R.string.notes)) },
-            text = {
-                OutlinedTextField(
-                    value = draft,
-                    onValueChange = { draft = it },
-                    label = { Text(stringResource(R.string.notes)) },
-                    minLines = 3,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    onSave(draft.trim())
-                    editing = false
-                }) { Text(stringResource(R.string.save)) }
-            },
-            dismissButton = { TextButton(onClick = { editing = false }) { Text(stringResource(R.string.cancel)) } },
-        )
-    }
-}
+internal const val COOKING_PHOTO_MIN_RATIO = 2f
+internal const val COOKING_PHOTO_SHORT_MIN_RATIO = 3.2f
+internal const val TAB_INGREDIENTS = 0
+internal const val TAB_STEPS = 1
+internal const val TAB_NOTES = 2
+internal const val TAB_SOURCE = 3

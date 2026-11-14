@@ -119,6 +119,7 @@ import com.moltobene.app.data.dough.YeastKind
 import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.components.AppTitleWithScreen
 import com.moltobene.app.ui.components.isLargeText
+import com.moltobene.app.ui.components.scrollFade
 import com.moltobene.app.ui.theme.Spacing
 import com.moltobene.app.ui.components.RepeatIconButton
 import com.moltobene.app.ui.components.readingWidth
@@ -1400,7 +1401,7 @@ private fun DoughForm(
                     val tiles = (result as? DoughResult.Success)?.let { viewModel.prefermentItems(it, input) }.orEmpty()
                     if (tiles.isNotEmpty()) {
                         Row(
-                            modifier = Modifier.horizontalScroll(rememberScrollState()),
+                            modifier = rememberScrollState().let { Modifier.scrollFade(it).horizontalScroll(it) },
                             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                         ) {
                             for (item in tiles) TotalTile(item)
@@ -1462,11 +1463,12 @@ private fun DoughForm(
         if (pinned) {
             SaveBar(enabled = success != null, onSave = { viewModel.saveAsRecipe(input, process, onSaved) })
         } else {
+            // Große Schrift: Die Aufteilung des Vorteigs steht schon als Karte im Formular; in der Leiste nähme sie
+            // dem Formular den Platz (bei Schrift 200 % blieben nur wenige Zeilen).
             ResultBar(
                 summary = if (success != null) leavenedSummary(success, input, unit) else null,
                 totals = resultTotals,
                 onSave = { viewModel.saveAsRecipe(input, process, onSaved) },
-                preferment = prefermentBar,
             )
         }
     }
@@ -1498,7 +1500,7 @@ internal fun ResultTop(total: String?, totals: List<TotalItem>?, lines: List<Str
                 )
             } else {
                 Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    modifier = rememberScrollState().let { Modifier.scrollFade(it).horizontalScroll(it) },
                     horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                 ) {
                     TotalTile(
@@ -1583,7 +1585,7 @@ internal fun ResultBar(summary: String?, totals: List<TotalItem>?, onSave: () ->
             }
             if (summary != null && !totals.isNullOrEmpty() && !isLargeText()) {
                 Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    modifier = rememberScrollState().let { Modifier.scrollFade(it).horizontalScroll(it) },
                     horizontalArrangement = Arrangement.spacedBy(Spacing.s),
                 ) {
                     for (item in totals) TotalTile(item)

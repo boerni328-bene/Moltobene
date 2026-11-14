@@ -711,7 +711,7 @@
     <string name="dough_process_water_plain">Wasser: %1$s</string>
     <string name="dough_process_summary">Raum %1$s · Wasser %2$s · gesamt %3$s</string>
     <string name="dough_process_summary_no_water">Raum %1$s · gesamt %2$s</string>
-    <string name="dough_process_adapts">Gehzeiten bei Raumtemperatur richten sich nach dem Raum: wärmer ist kürzer. Selbst geänderte Werte sind fett und bleiben.</string>
+    <string name="dough_process_adapts">Zeiten und Temperaturen sind Richtwerte. Gehzeiten bei Raumtemperatur richten sich nach dem Raum: wärmer ist kürzer. Selbst geänderte Werte sind fett und bleiben.</string>
     <string name="dough_process_units_description">°C oder °F in den Einstellungen wählen</string>
     <string name="dough_summary_amount">%1$s (%2$s)</string>
     <string name="dough_process_shorter">%1$s kürzer</string>

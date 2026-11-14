@@ -1,11 +1,20 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 13.11.2026 · `main` = Version 0.73.0 (Release v0.73.0 erschienen) · Arbeitszweig `claude/trusting-galileo-xg0tgz` = **0.74.0 (versionCode 125)**, erster Build grün, Korrekturen danach im neuen Build, noch nicht auf `main` · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 13.11.2026 · `main` = **Version 0.74.0** (Release v0.74.0 erschienen) · Zweig `verbesserungen-0741` = 0.74.2 (grün, wartet auf Freigabe) · Cloud-Zweig `claude/trusting-galileo-xg0tgz` = `main` plus Übergabe · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
 
-## Gerade in Arbeit: 0.74.0 „Gehzeiten und Temperaturen“ (Schritt 1 von 3)
+## Wartet auf Freigabe: Zweig `verbesserungen-0741` (0.74.1 und 0.74.2, beide Builds grün, 13.11.2026)
+- Anlass: Einschätzung des Standes durch die PC-Sitzung, Inhaber: „Setze deine Vorschläge um.“
+- **0.74.1** (Build 43441690165): Reihen, die seitlich weitergehen (Kacheln oben im Teigrechner, Vorteig-Kacheln, Voreinstellungen), laufen am Rand weich aus (`ui/components/ScrollFade.kt`, `Modifier.scrollFade(state)` vor `horizontalScroll`); bei großer Schrift zeigt die Leiste unten nur Gesamtteig und „Als Rezept speichern“ (Vorteig-Zeile entfällt dort, steht als Karte im Formular); Hinweis unter der Liste beginnt mit „Zeiten und Temperaturen sind Richtwerte.“
+- **0.74.2** (Build 43442080357, keine sichtbare Änderung): `RecipeScreen.kt` (1820 → 1116 Zeilen) aufgeteilt in `CookingBar.kt`, `RecipeParts.kt`, `RecipeTranslation.kt`; `EditScreen.kt` (1247 → 560) in `EditImportParts.kt`, `EditSections.kt`. Nur verschoben, `private` auf Dateiebene wurde `internal`. Fotos (hell, dunkel, 200 %) angesehen: unverändert bzw. wie beabsichtigt.
+- **Noch nicht auf `main`** (Push nur nach Freigabe). Die Cloud-Sitzung sollte vor 0.75.0 diesen Zweig übernehmen, sonst gibt es Konflikte in `DoughScreen.kt`, `PresetCard.kt`, `strings.xml`, `CHANGELOG.md`.
+- Bewusst nicht angefasst: `DoughScreen.kt` (1738 Zeilen, dort arbeitet die Cloud-Sitzung) und `EditViewModel.kt` (1663 Zeilen, Aufteilen ändert Logik, eigener Schritt). Die langen Funktionen `RecipeContent` und `EditScreen` sind noch groß.
+- Offene Entscheidungen des Inhabers aus der Einschätzung: Reihenfolge (erst 1.0, dann 0.75/0.76?); Teigrechner in zwei Stufen („einfach“ und „Feinheiten“, erst als Entwurf); Zwischenstände als Vorabversion statt als „neueste Version“; frühe Prüfung auf einem echten Gerät.
+- Dependabot-Meldung #10 („hoch“): Guava in den Build-Werkzeugen (`settings.gradle.kts`), nicht in der App; behoben ab Guava 33.7.2, noch nicht umgestellt.
+
+## Zuletzt erschienen: 0.74.0 „Gehzeiten und Temperaturen“ (Schritt 1 von 3)
 - Inhaber hat am 12.11.2026 **Entwurf 10C** gewählt (ruhige Liste: Zeilen zeigen Werte, Antippen öffnet −/+ nebeneinander, wo nötig die Auswahl). Entwurfsseite (privat): https://claude.ai/artifact/RAw2psMZkncGoKijB3sHSq, Quellen nur im Scratchpad der Cloud-Sitzung.
 - Umgesetzt auf dem Zweig (lokal 117 Unit-Tests der Rechenteile grün, App-Build nur auf GitHub):
   - Vierter Bereich im Teigrechner (Pizza/Brot): Raum und Kühlschrank, Vorteig reifen lassen, Teig nach dem Kneten (von Hand/mit Maschine, Wasser mit Temperatur), Teig gehen lassen, Teigkugeln bzw. Laib gehen lassen (Raum/Kühlschrank), Teigkugeln aufwärmen (Pizza aus dem Kühlschrank), Backofen. Bei großer Schrift als Karte.
@@ -17,7 +26,7 @@ Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die
   - „Neu in Version 0.74.0“ aktualisiert (zuletzt war es 0.60.0). Rundgang: Bildschirmfotos 14u (Gehzeiten), 14v (Einstellungen Temperaturen), 14w (Teigrechner in °F); der Rundgang setzt vor jedem Test wieder °C.
 - Neue persönliche Umgebung „Moltobene“ (Default plus `productionresultssa30.blob.core.windows.net`, am 13.11.2026 vom Inhaber bestätigt): Bildschirmfotos lassen sich jetzt in der Cloud-Sitzung laden (Artefakt-ID über das GitHub-Werkzeug, dann `curl -L …/actions/artifacts/<id>/zip`).
 - Fotos des ersten grünen Builds (43311329897) angesehen: Deutsch, Englisch, dunkel, 200 % in Ordnung. Behoben danach: in der Pseudosprache drückte ein langer Zusatz (z. B. „von Hand · Wasser …“) den Namen der Zeile auf wenige Buchstaben zusammen → Wert höchstens 55 % der Breite; bei 200 % steht der Link „°C/°F“ unter dem Hinweis; Meldung nach dem Speichern bei Pizza/Brot „Als Entwurf mit Zeitplan und Zubereitung gespeichert.“ (Pasta/Kuchen weiter „… Zubereitung ergänzen.“).
-- **Nächster Schritt:** neuer Build auf dem Zweig, Fotos 14u/14w (pseudo, hell, schrift-200) prüfen, dann Inhaber berichten. Auf `main` erst nach „Pushe die Version 0.74.0“.
+- **Nächster Schritt:** Inhaber prüft 0.74.0 auf dem Handy; danach nach Freigabe 0.75.0 (Hefe-Automatik). Hinweis: GitHub legt Artefakte teils auf anderen Speicherhosts ab (z. B. `productionresultssa17.blob.core.windows.net`); dann ist die Umgebung „Moltobene“ um diesen Host zu ergänzen (nur nach Rückfrage). Dependabot meldet eine Lücke „hoch“ (#10 unter Security), noch nicht angesehen.
 - Danach (nach Freigabe): **0.75.0 Hefe-Automatik** (Entwurf 8: Frischhefe % = 1,6 / Gehzeit bei 24 °C ohne Vorteig, Biga 3,08 × Vorteiganteil / …, Poolish 6,73 × …; −/+ an der Hefe schaltet die Automatik aus; Sauerteig von Hand) und **0.76.0 Uhrzeiten** (Liste aus 7A im Rezept, „Backen am … um …“, geplanter Teig auf der Startseite aus 7D). Dafür muss das Rezept die Teigrechner-Werte speichern (Datenbank-Migration und Sicherungsformat) und `DoughRun` eine Backzeit bekommen.
 
 ## Offen / zurückgestellt
