@@ -250,7 +250,7 @@
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
         <item>Teigrechner: Die Hefe rechnet sich jetzt automatisch aus Gehzeiten und Temperaturen. Längere oder kühlere Gehzeiten brauchen weniger Hefe, kürzere oder wärmere mehr.</item>
-        <item>Der Schalter „Automatisch“ steht im Bereich „Hefe“. Wird die Menge von Hand geändert, gilt sie und die Automatik geht aus. Beim Sauerteig bleibt die Hefe von Hand.</item>
+        <item>Der Schalter „Automatisch“ steht im Bereich „Hefe und Vorteig“. Wird die Menge von Hand geändert, gilt sie und die Automatik geht aus. Beim Sauerteig bleibt die Hefe von Hand.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Geräts) -->
@@ -541,6 +541,9 @@
     <string name="dough_yeast_main">Zusätzlich im Hauptteig (% vom Mehl)</string>
     <string name="dough_main_dough">Hauptteig</string>
     <string name="dough_section_preferment">Vorteig</string>
+    <string name="dough_section_yeast_preferment">Hefe und Vorteig</string>
+    <string name="dough_summary_no_preferment">ohne Vorteig</string>
+    <string name="dough_help_preferment_open">Was ist ein Vorteig?</string>
     <string name="dough_explain_preferment">Vorteig: Ein Teil von Mehl, Wasser und Hefe wird vorher angesetzt. Das gibt mehr Geschmack und einen lockereren Teig.</string>
     <string name="dough_pre_none">Ohne</string>
     <string name="dough_pre_sourdough">Sauerteig</string>

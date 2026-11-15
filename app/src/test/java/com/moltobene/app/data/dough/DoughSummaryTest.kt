@@ -57,7 +57,7 @@ class DoughSummaryTest {
     fun hefeGesamtGleichObImVorteigOderImHauptteig() {
         listOf(Preferment.NONE, Preferment.BIGA, Preferment.POOLISH, Preferment.SOURDOUGH).forEach { preferment ->
             val result = pizza(preferment, prefermentWater = 100.0)
-            assertEquals(preferment.key, result.flourGrams * 0.002, DoughSummary.yeastGrams(result), 1e-9)
+            assertEquals(preferment.key, result.flourGrams * 0.002, DoughSummary.yeastGrams(result), 0.05)
         }
     }
 
@@ -70,6 +70,26 @@ class DoughSummaryTest {
         val lines = DoughSummary.mainLines(result)
         assertEquals(listOf(LineRole.YEAST, LineRole.FLOUR, LineRole.WATER, LineRole.SALT), lines.map { it.role })
         assertEquals(result.flourGrams * 0.001, lines.first().grams, 1e-9)
-        assertEquals(result.flourGrams * 0.003, DoughSummary.yeastGrams(result), 1e-9)
+        assertEquals(result.flourGrams * 0.003, DoughSummary.yeastGrams(result), 0.1)
+    }
+
+    @Test
+    fun hefeGesamtIstDieSummeDerGerundetenZeilen() {
+        // Rückmeldung vom 15.11.2026: 1,24 g im Vorteig und 0,64 g im Hauptteig stehen als 1,2 g und 0,6 g im Rezept;
+        // gesamt muss dann 1,8 g heißen, nicht 1,9 g (gerundet aus 1,88 g).
+        val result = DoughResult.Success(
+            listOf(
+                DoughSection(SectionKind.PREFERMENT, Preferment.BIGA, listOf(DoughLine(LineRole.FLOUR, 180.0), DoughLine(LineRole.YEAST, 1.24))),
+                DoughSection(SectionKind.MAIN, Preferment.BIGA, listOf(DoughLine(LineRole.YEAST, 0.64), DoughLine(LineRole.FLOUR, 420.0))),
+            ),
+            DoughYield(4, YieldKind.BALL, 250.0),
+            1000.0,
+            600.0,
+        )
+        assertEquals(1.8, DoughSummary.yeastGrams(result), 1e-9)
+        assertEquals("1,8", DoughNumbers.grams(DoughSummary.yeastGrams(result), LineRole.YEAST, "de"))
+        // Sehr kleine Mengen bleiben, wie sie sind.
+        assertEquals(0.03, DoughNumbers.rounded(0.03, LineRole.YEAST), 1e-9)
+        assertEquals("0,03", DoughNumbers.grams(0.03, LineRole.YEAST, "de"))
     }
 }

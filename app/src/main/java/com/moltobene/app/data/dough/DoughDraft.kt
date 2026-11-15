@@ -16,21 +16,33 @@ object DoughNumbers {
 
     /** Menge in Gramm: Mehl und Wasser auf 1 g, Salz und Öl auf 0,5 g, Hefe auf 0,1 g; nie „0“, dann zwei Stellen. */
     fun grams(value: Double, role: LineRole, language: String?): String {
-        val step = when (role) {
+        val step = step(role)
+        val rounded = rounded(value, role)
+        val text = when {
+            value > 0 && (value / step).roundToLong() <= 0 -> plain(value, 2)
+            step >= 1.0 -> rounded.roundToLong().toString()
+            else -> plain(rounded, 1)
+        }
+        return separator(text, language)
+    }
+
+    /**
+     * Die Menge so gerundet, wie sie in der Zutatenzeile steht (sehr kleine Mengen bleiben, wie sie sind). Summen über
+     * mehrere Zeilen (z. B. Hefe im Vorteig und im Hauptteig) zählen diese Werte zusammen, damit sie zu den Zeilen passen.
+     */
+    fun rounded(value: Double, role: LineRole): Double {
+        val rounded = (value / step(role)).roundToLong() * step(role)
+        return if (value > 0 && rounded <= 0) value else rounded
+    }
+
+    private fun step(role: LineRole): Double =
+        when (role) {
             LineRole.FLOUR, LineRole.WATER, LineRole.SEMOLINA, LineRole.EGG, LineRole.YOLK, LineRole.MILK, LineRole.LIQUID,
             LineRole.SUGAR, LineRole.BUTTER, LineRole.QUARK, LineRole.YOGURT, LineRole.WHEAT, LineRole.RYE, LineRole.WHOLE,
             LineRole.SPELT, LineRole.SEEDS -> 1.0
             LineRole.SALT, LineRole.OIL, LineRole.BAKING_POWDER, LineRole.MALT, LineRole.HONEY -> 0.5
             LineRole.YEAST -> 0.1
         }
-        val rounded = (value / step).roundToLong() * step
-        val text = when {
-            value > 0 && rounded <= 0 -> plain(value, 2)
-            step >= 1.0 -> rounded.roundToLong().toString()
-            else -> plain(rounded, 1)
-        }
-        return separator(text, language)
-    }
 
     /** Menge einer Zutat mit Einheit, z. B. „595 g“ oder „21 oz“. */
     fun weight(value: Double, role: LineRole, language: String?, unit: WeightUnit): String =

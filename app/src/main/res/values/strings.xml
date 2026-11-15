@@ -250,7 +250,7 @@
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
         <item>Dough calculator: the yeast is now calculated automatically from rising times and temperatures. Longer or cooler rising times need less yeast, shorter or warmer ones more.</item>
-        <item>The “Automatic” switch is in the “Yeast” section. Changing the amount by hand applies it and turns the automatic calculation off. With sourdough, the yeast stays manual.</item>
+        <item>The “Automatic” switch is in the “Yeast and preferment” section. Changing the amount by hand applies it and turns the automatic calculation off. With sourdough, the yeast stays manual.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->
@@ -541,6 +541,9 @@
     <string name="dough_yeast_main">Extra in final dough (% of flour)</string>
     <string name="dough_main_dough">Final dough</string>
     <string name="dough_section_preferment">Preferment</string>
+    <string name="dough_section_yeast_preferment">Yeast and preferment</string>
+    <string name="dough_summary_no_preferment">no preferment</string>
+    <string name="dough_help_preferment_open">What is a preferment?</string>
     <string name="dough_explain_preferment">Preferment: Part of the flour, water and yeast is mixed ahead of time. This gives more flavor and a lighter dough.</string>
     <string name="dough_pre_none">None</string>
     <string name="dough_pre_biga" translatable="false">Biga</string>

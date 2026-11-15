@@ -31,7 +31,6 @@ import com.moltobene.app.ui.theme.Spacing
 
 /** Die aufklappbaren Bereiche des Teigrechners; gemerkt wird, welcher offen ist. */
 internal const val SECTION_YEAST = "yeast"
-internal const val SECTION_PREFERMENT = "preferment"
 internal const val SECTION_DOUGH = "dough"
 internal const val SECTION_SIZE = "size"
 internal const val SECTION_INGREDIENTS = "ingredients"
