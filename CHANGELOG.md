@@ -3,6 +3,14 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.75.1] – 2026-11-15 (versionCode 131)
+
+### Geändert
+- **Teigrechner: Hefe und Vorteig in einem Bereich.** Die Bereiche „Hefe“ und „Vorteig“ sind zu „Hefe und Vorteig“ zusammengefasst, oben die Hefe, darunter der Vorteig. So stehen die Hefe im Vorteig, die zusätzliche Hefe im Hauptteig und der Vorteig beieinander. Die Zusammenfassung lautet z. B. „1,8 g Frischhefe · 277 g Biga · automatisch“.
+
+### Behoben
+- Die gesamte Hefemenge passt jetzt genau zu den Zeilen im Rezept: Hefe im Vorteig und zusätzlich im Hauptteig ergeben zusammen die angezeigte Summe (vorher konnte sie durch Runden um 0,1 g abweichen).
+
 ## [0.75.0] – 2026-11-15 (versionCode 130)
 
 ### Neu

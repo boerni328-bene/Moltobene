@@ -805,8 +805,8 @@ class AppTourTest(private val variant: DisplayVariant) {
                 },
             ).performScrollTo().performClick()
         }
-        // Bei normaler Schrift liegt die Auswahl im Bereich „Vorteig“, der dafür aufgeklappt wird.
-        openDoughSection(R.string.dough_section_preferment)
+        // Bei normaler Schrift liegt die Auswahl im Bereich „Hefe und Vorteig“, der dafür aufgeklappt wird.
+        openDoughSection(R.string.dough_section_yeast_preferment)
         composeRule.onAllNodesWithText(text(R.string.dough_pre_biga))[0].performScrollTo().performClick()
         // Mit Vorteig erscheinen seine Felder; bei großer Schrift steht die Erklärung dabei.
         // (Der Feldname enthält „%“; deshalb ohne Formatierung lesen.)
@@ -815,7 +815,7 @@ class AppTourTest(private val variant: DisplayVariant) {
 
         // Hefe-Automatik (Entwurf 8, 0.75.0): Der Schalter ist an, die Zusammenfassung nennt „automatisch“; Ausschalten
         // lässt die Menge stehen, Einschalten rechnet wieder.
-        openDoughSection(R.string.dough_section_yeast)
+        openDoughSection(R.string.dough_section_yeast_preferment)
         val autoSwitch = composeRule.onNode(hasText(text(R.string.dough_yeast_auto)) and hasClickAction())
         autoSwitch.performScrollTo().assertIsOn()
         waitForText(text(R.string.dough_yeast_auto_on))

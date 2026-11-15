@@ -1181,21 +1181,16 @@ private fun DoughForm(
     } else {
         listOf(yeastAmount, stringResource(R.string.dough_summary_of_flour, "${yeastText.trim()} %"))
     }
-    // „· automatisch“, solange die Hefe-Automatik rechnet (Entwurf 8).
-    val yeastSummary = (yeastParts + listOfNotNull(autoYeast?.let { stringResource(R.string.dough_yeast_auto_short) }))
-        .joinToString(SUMMARY_SEPARATOR)
+    // Hefe und Vorteig in einem Bereich (Wunsch vom 15.11.2026, „Hefe zuerst“): „1,8 g Frischhefe · 277 g Biga ·
+    // automatisch“; ohne Vorteig „1,2 g Frischhefe · ohne Vorteig · 0,2 % vom Mehl“. „· automatisch“, solange die
+    // Hefe-Automatik rechnet (Entwurf 8).
+    val prefermentPart = if (preferment == Preferment.NONE) stringResource(R.string.dough_summary_no_preferment) else prefermentAmount
+    val yeastSummary = (
+        listOf(yeastParts.first(), prefermentPart) + yeastParts.drop(1).takeIf { withMainYeast || preferment == Preferment.NONE }.orEmpty() +
+            listOfNotNull(autoYeast?.let { stringResource(R.string.dough_yeast_auto_short) })
+        ).joinToString(SUMMARY_SEPARATOR)
     val yeastAutoSwitch: @Composable () -> Unit = {
         if (DoughYeast.applies(preferment)) YeastAutoSwitch(checked = process.yeastAuto, onChange = { setYeastAuto(it) })
-    }
-    // Vorteig: „277 g Biga · Mehl 30 % (184 g) · Wasser 50 % (92 g)“.
-    val prefermentSummary = if (preferment == Preferment.NONE) {
-        prefermentName
-    } else {
-        listOf(
-            prefermentAmount,
-            withGrams(summaryValue(R.string.dough_ingredient_flour, prefermentFlour), gramsIn(SectionKind.PREFERMENT, LineRole.FLOUR)),
-            withGrams(summaryValue(R.string.dough_ingredient_water, prefermentWater), gramsIn(SectionKind.PREFERMENT, LineRole.WATER)),
-        ).joinToString(SUMMARY_SEPARATOR)
     }
     // Gehzeiten und Temperaturen: „Raum 22 °C · Wasser 30 °C · gesamt 29 Std. 55 Min.“.
     val processSummary = if (waterText == null) {
@@ -1270,8 +1265,10 @@ private fun DoughForm(
                     modifier = Modifier.padding(horizontal = Spacing.m),
                     verticalArrangement = Arrangement.spacedBy(Spacing.s),
                 ) {
+                    // Hefe und Vorteig in einem Bereich, die Hefe zuerst (Wunsch vom 15.11.2026): Der Vorteig ist auch eine
+                    // Art Hefe, und die Mengen im Vorteig und im Hauptteig stehen so beieinander.
                     DoughSection(
-                        title = stringResource(R.string.dough_section_yeast),
+                        title = stringResource(R.string.dough_section_yeast_preferment),
                         summary = yeastSummary,
                         expanded = openSection == SECTION_YEAST,
                         onToggle = { toggleSection(SECTION_YEAST) },
@@ -1289,13 +1286,7 @@ private fun DoughForm(
                         yeastField(Modifier.fillMaxWidth())
                         if (preferment.carriesYeast) mainYeastField(Modifier.fillMaxWidth())
                         if (success != null) YeastEquivalent(success, yeastKind)
-                    }
-                    DoughSection(
-                        title = stringResource(R.string.dough_section_preferment),
-                        summary = prefermentSummary,
-                        expanded = openSection == SECTION_PREFERMENT,
-                        onToggle = { toggleSection(SECTION_PREFERMENT) },
-                    ) {
+                        PrefermentHeading()
                         SubtleChoice(
                             label = "",
                             options = Preferment.entries,
@@ -1362,7 +1353,9 @@ private fun DoughForm(
                 return@Column
             }
 
-            Card(stringResource(R.string.dough_section_yeast), onHelp = { help = "yeast" }) {
+            // Hefe und Vorteig in einer Karte, die Hefe zuerst (Wunsch vom 15.11.2026). Der Vorteig: Auswahl, Anteile und die
+            // Mengen des Vorteigs als Kacheln, dazu ein Fenster, das Biga, Poolish und Sauerteig erklärt (Entwurf vom 22.10.2026).
+            Card(stringResource(R.string.dough_section_yeast_preferment), onHelp = { help = "yeast" }, highlighted = true) {
                 ChoiceField(
                     label = stringResource(R.string.dough_section_yeast),
                     options = YeastKind.entries,
@@ -1376,6 +1369,39 @@ private fun DoughForm(
                 yeastAutoSwitch()
                 yeastField(Modifier.fillMaxWidth())
                 if (preferment.carriesYeast) mainYeastField(Modifier.fillMaxWidth())
+                ChoiceField(
+                    label = stringResource(R.string.dough_section_preferment),
+                    options = Preferment.entries,
+                    selected = preferment,
+                    optionLabel = { stringResource(prefermentLabel(it)) },
+                    onSelect = { selectPreferment(it) },
+                )
+                TextButton(onClick = { help = if (preferment == Preferment.NONE) "preferment" else preferment.key }) {
+                    Text(
+                        if (preferment == Preferment.NONE) {
+                            stringResource(R.string.dough_help_preferment_open)
+                        } else {
+                            stringResource(R.string.dough_help_term_open, stringResource(prefermentLabel(preferment)))
+                        },
+                    )
+                }
+                Text(
+                    stringResource(prefermentExplanation(preferment)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (preferment != Preferment.NONE) {
+                    val tiles = (result as? DoughResult.Success)?.let { viewModel.prefermentItems(it, input) }.orEmpty()
+                    if (tiles.isNotEmpty()) {
+                        Row(
+                            modifier = rememberScrollState().let { Modifier.scrollFade(it).horizontalScroll(it) },
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                        ) {
+                            for (item in tiles) TotalTile(item)
+                        }
+                    }
+                    Fields(prefermentFlourField, prefermentWaterField)
+                }
             }
 
             Card(stringResource(R.string.dough_section_dough), onHelp = { help = "dough" }) {
@@ -1406,40 +1432,6 @@ private fun DoughForm(
                 }
                 flourHint()
                 addExtraButton()
-            }
-
-            // Der Vorteig ist hervorgehoben (Rahmen in der Hauptfarbe): Auswahl, Anteile und die Mengen des Vorteigs als Kacheln,
-            // dazu ein Fenster, das Biga, Poolish und Sauerteig erklärt (Entwurf vom 22.10.2026).
-            Card(stringResource(R.string.dough_section_preferment), onHelp = { help = "preferment" }, highlighted = true) {
-                ChoiceField(
-                    label = stringResource(R.string.dough_section_preferment),
-                    options = Preferment.entries,
-                    selected = preferment,
-                    optionLabel = { stringResource(prefermentLabel(it)) },
-                    onSelect = { selectPreferment(it) },
-                )
-                if (preferment != Preferment.NONE) {
-                    TextButton(onClick = { help = preferment.key }) {
-                        Text(stringResource(R.string.dough_help_term_open, stringResource(prefermentLabel(preferment))))
-                    }
-                }
-                Text(
-                    stringResource(prefermentExplanation(preferment)),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                if (preferment != Preferment.NONE) {
-                    val tiles = (result as? DoughResult.Success)?.let { viewModel.prefermentItems(it, input) }.orEmpty()
-                    if (tiles.isNotEmpty()) {
-                        Row(
-                            modifier = rememberScrollState().let { Modifier.scrollFade(it).horizontalScroll(it) },
-                            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-                        ) {
-                            for (item in tiles) TotalTile(item)
-                        }
-                    }
-                    Fields(prefermentFlourField, prefermentWaterField)
-                }
             }
 
             Card(stringResource(R.string.dough_section_process)) {
@@ -1562,6 +1554,16 @@ internal fun SaveBar(enabled: Boolean, onSave: () -> Unit) {
             Text(stringResource(R.string.dough_save))
         }
     }
+}
+
+/** Zwischenüberschrift „Vorteig“ im Bereich „Hefe und Vorteig“ (Wunsch vom 15.11.2026), für den Screenreader eine Überschrift. */
+@Composable
+private fun PrefermentHeading() {
+    Text(
+        stringResource(R.string.dough_section_preferment),
+        style = MaterialTheme.typography.titleSmall,
+        modifier = Modifier.padding(top = Spacing.s).semantics { heading() },
+    )
 }
 
 private fun prefermentLabel(preferment: Preferment): Int = when (preferment) {

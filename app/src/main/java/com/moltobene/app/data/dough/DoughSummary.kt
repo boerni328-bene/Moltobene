@@ -20,7 +20,10 @@ object DoughSummary {
         return lines.filter { it.role == LineRole.YEAST } + lines.filter { it.role != LineRole.YEAST }
     }
 
-    /** Hefe im ganzen Teig in Gramm, gleich ob sie im Vorteig oder im Hauptteig steht. */
+    /**
+     * Hefe im ganzen Teig in Gramm, gleich ob sie im Vorteig oder im Hauptteig steht. Gezählt werden die Mengen, wie sie
+     * gerundet in den Zutatenzeilen stehen, damit Vorteig und Hauptteig zusammen genau die Summe ergeben.
+     */
     fun yeastGrams(result: DoughResult.Success): Double =
-        result.sections.flatMap { it.lines }.filter { it.role == LineRole.YEAST }.sumOf { it.grams }
+        result.sections.flatMap { it.lines }.filter { it.role == LineRole.YEAST }.sumOf { DoughNumbers.rounded(it.grams, it.role) }
 }
