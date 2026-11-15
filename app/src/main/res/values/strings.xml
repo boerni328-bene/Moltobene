@@ -249,10 +249,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Dough calculator: new section “Rising times and temperatures” for room, refrigerator, rising times, and oven. Rising times at room temperature follow the room: warmer is shorter.</item>
-        <item>Dough calculator: the water temperature is calculated so the dough reaches the chosen temperature after kneading, by hand or with a machine.</item>
-        <item>Saved as a recipe, the dough gets a schedule with the chosen rising times and instructions with amounts and temperatures. Under Settings › Dough calculator, temperatures can be shown in °F.</item>
-        <item>Amounts first: summaries start with the amount, e.g. “277 g Biga · flour 30 % (184 g)”.</item>
+        <item>Dough calculator: the yeast is now calculated automatically from rising times and temperatures. Longer or cooler rising times need less yeast, shorter or warmer ones more.</item>
+        <item>The “Automatic” switch is in the “Yeast” section. Changing the amount by hand applies it and turns the automatic calculation off. With sourdough, the yeast stays manual.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->
@@ -534,6 +532,11 @@
     <string name="dough_yeast_instant">Instant yeast</string>
     <string name="dough_yeast_active">Active dry yeast</string>
     <string name="dough_yeast_amount">Amount (% of flour)</string>
+    <!-- Hefe-Automatik (Entwurf 8, 0.75.0) -->
+    <string name="dough_yeast_auto">Automatic</string>
+    <string name="dough_yeast_auto_on">Follows rising times and temperatures. Changing the amount turns this off.</string>
+    <string name="dough_yeast_auto_off">Off: the amount entered applies.</string>
+    <string name="dough_yeast_auto_short">automatic</string>
     <string name="dough_yeast_in_preferment">In preferment (% of flour)</string>
     <string name="dough_yeast_main">Extra in final dough (% of flour)</string>
     <string name="dough_main_dough">Final dough</string>

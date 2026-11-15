@@ -118,6 +118,8 @@ data class DoughProcess(
     val warm: Double,
     val proofPlace: RestPlace,
     val manual: Set<RestTime> = emptySet(),
+    /** Hefe-Automatik (0.75.0, [DoughYeast]): Die Hefe richtet sich nach Gehzeiten und Temperaturen, bis sie von Hand geändert wird. */
+    val yeastAuto: Boolean = true,
 ) {
     fun hours(time: RestTime): Double = when (time) {
         RestTime.RIPEN -> ripen
@@ -263,9 +265,9 @@ object DoughProcessRules {
         )
     }
 
-    /** Anderer Vorteig: Gehzeiten und Ort wie beim neuen Vorteig üblich; die Temperaturen bleiben. */
+    /** Anderer Vorteig: Gehzeiten und Ort wie beim neuen Vorteig üblich; die Temperaturen bleiben und die Hefe-Automatik bleiben. */
     fun forPreferment(process: DoughProcess, type: DoughType, preferment: Preferment): DoughProcess =
-        defaults(type, preferment).copy(doughTemp = process.doughTemp, ovenTemp = process.ovenTemp)
+        defaults(type, preferment).copy(doughTemp = process.doughTemp, ovenTemp = process.ovenTemp, yeastAuto = process.yeastAuto)
 
     /** Knetzeit in Minuten (frühestens, spätestens): von Hand länger als mit der Maschine. */
     fun kneadMinutes(kneading: Kneading): Pair<Int, Int> = if (kneading == Kneading.MACHINE) 8 to 12 else 15 to 20

@@ -116,6 +116,7 @@ import com.moltobene.app.data.dough.LineRole
 import com.moltobene.app.data.dough.Preferment
 import com.moltobene.app.data.dough.SectionKind
 import com.moltobene.app.data.dough.YeastKind
+import com.moltobene.app.data.dough.DoughYeast
 import com.moltobene.app.ui.components.AppTitle
 import com.moltobene.app.ui.components.AppTitleWithScreen
 import com.moltobene.app.ui.components.isLargeText
@@ -824,6 +825,21 @@ private fun DoughForm(
     // Raum, Kühlschrank und Knetart gelten für alle Teigarten (im ViewModel gemerkt); °C oder °F aus den Einstellungen.
     val kitchen = viewModel.kitchen
     val temperatureUnit = viewModel.temperatureUnit
+    // Hefe-Automatik (Entwurf 8, 0.75.0): Solange sie an ist, rechnet sich die Hefe aus Gehzeiten und Temperaturen;
+    // von Hand geändert, gilt wieder der eingegebene Wert. Beim Sauerteig gibt es sie nicht.
+    val autoYeast = if (process.yeastAuto) {
+        DoughYeast.auto(
+            type, preferment, parseNumber(prefermentFlour), yeastKind,
+            DoughProcessRules.effective(process, kitchen, type, preferment), kitchen,
+        )
+    } else {
+        null
+    }
+    val yeastText = autoYeast?.let { show(it) } ?: yeast
+    fun setYeastAuto(on: Boolean) {
+        if (!on) yeast = yeastText
+        setProcess(process.copy(yeastAuto = on))
+    }
     // „Zurücksetzen“ stellt alle Werte des Formulars wieder her, auch Raum, Kühlschrank und Knetart.
     fun reset() {
         resetCount += 1
@@ -840,7 +856,7 @@ private fun DoughForm(
         salt = parseNumber(salt),
         oil = parseNumber(oil),
         yeastKind = yeastKind,
-        yeast = parseNumber(yeast),
+        yeast = parseNumber(yeastText),
         preferment = preferment,
         prefermentFlour = parseNumber(prefermentFlour),
         prefermentWater = parseNumber(prefermentWater),
@@ -896,8 +912,11 @@ private fun DoughForm(
     val entries = presetEntries(type, viewModel.own(type))
     val entryInputs = entries.map { it.input }
     var chosen by rememberSaveable(type) { mutableStateOf(-1) }
-    val presetIndex = chosen.takeIf { it in entryInputs.indices && DoughPresets.matches(input, entryInputs[it]) }
-        ?: DoughPresets.indexOf(input, entryInputs)
+    // Mit der Hefe-Automatik zählt die Hefe beim Vergleich nicht: Sie folgt den Gehzeiten, nicht der Voreinstellung.
+    fun matchesPreset(preset: LeavenedInput) =
+        DoughPresets.matches(if (autoYeast != null) input.copy(yeast = preset.yeast) else input, preset)
+    val presetIndex = chosen.takeIf { it in entryInputs.indices && matchesPreset(entryInputs[it]) }
+        ?: entryInputs.indexOfFirst { matchesPreset(it) }
     fun applyPreset(i: Int) {
         val preset = entries.getOrNull(i)?.input ?: return
         chosen = i
@@ -976,7 +995,12 @@ private fun DoughForm(
         NumberField(
             // Mit Biga oder Poolish gibt es zwei Hefefelder; das erste nennt dann den Vorteig.
             stringResource(if (preferment.carriesYeast) R.string.dough_yeast_in_preferment else R.string.dough_yeast_amount),
-            yeast, { yeast = it },
+            yeastText,
+            {
+                // Von Hand geändert (Tippen oder −/+): Die Automatik geht aus, der neue Wert gilt.
+                yeast = it
+                if (process.yeastAuto && DoughYeast.applies(preferment)) setProcess(process.copy(yeastAuto = false))
+            },
             issueFor(DoughField.YEAST), m, suffix = "%",
             stepping = stepping(DoughField.YEAST, YeastKind.FRESH.convert(defaults.yeast, yeastKind)),
         )
@@ -1151,13 +1175,18 @@ private fun DoughForm(
     val yeastParts = if (withMainYeast) {
         listOf(
             yeastAmount,
-            withGrams(summaryValue(R.string.dough_section_preferment, yeast), gramsIn(SectionKind.PREFERMENT, LineRole.YEAST)),
+            withGrams(summaryValue(R.string.dough_section_preferment, yeastText), gramsIn(SectionKind.PREFERMENT, LineRole.YEAST)),
             withGrams(summaryValue(R.string.dough_main_dough, mainYeast), gramsIn(SectionKind.MAIN, LineRole.YEAST)),
         )
     } else {
-        listOf(yeastAmount, stringResource(R.string.dough_summary_of_flour, "${yeast.trim()} %"))
+        listOf(yeastAmount, stringResource(R.string.dough_summary_of_flour, "${yeastText.trim()} %"))
     }
-    val yeastSummary = yeastParts.joinToString(SUMMARY_SEPARATOR)
+    // „· automatisch“, solange die Hefe-Automatik rechnet (Entwurf 8).
+    val yeastSummary = (yeastParts + listOfNotNull(autoYeast?.let { stringResource(R.string.dough_yeast_auto_short) }))
+        .joinToString(SUMMARY_SEPARATOR)
+    val yeastAutoSwitch: @Composable () -> Unit = {
+        if (DoughYeast.applies(preferment)) YeastAutoSwitch(checked = process.yeastAuto, onChange = { setYeastAuto(it) })
+    }
     // Vorteig: „277 g Biga · Mehl 30 % (184 g) · Wasser 50 % (92 g)“.
     val prefermentSummary = if (preferment == Preferment.NONE) {
         prefermentName
@@ -1216,7 +1245,7 @@ private fun DoughForm(
                 saving = savingPreset,
                 onSavingChange = { savingPreset = it },
                 canSave = result is DoughResult.Success,
-                hasOwnChanges = !DoughPresets.matches(input, defaults),
+                hasOwnChanges = !matchesPreset(defaults),
                 onSelect = { applyPreset(it) },
                 onSave = { name ->
                     val saved = viewModel.saveOwnPreset(type, name, input)
@@ -1256,6 +1285,7 @@ private fun DoughForm(
                             modifier = Modifier.fillMaxWidth(),
                             maxLines = 2,
                         )
+                        yeastAutoSwitch()
                         yeastField(Modifier.fillMaxWidth())
                         if (preferment.carriesYeast) mainYeastField(Modifier.fillMaxWidth())
                         if (success != null) YeastEquivalent(success, yeastKind)
@@ -1343,6 +1373,7 @@ private fun DoughForm(
                 TextButton(onClick = { help = yeastKind.key }) {
                     Text(stringResource(R.string.dough_help_term_open, stringResource(AndroidDoughTexts.yeastName(yeastKind))))
                 }
+                yeastAutoSwitch()
                 yeastField(Modifier.fillMaxWidth())
                 if (preferment.carriesYeast) mainYeastField(Modifier.fillMaxWidth())
             }

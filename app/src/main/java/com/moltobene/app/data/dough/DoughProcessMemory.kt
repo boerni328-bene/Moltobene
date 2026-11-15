@@ -21,6 +21,7 @@ object DoughProcessMemory {
         "warm=${process.warm}",
         "proofPlace=${process.proofPlace.key}",
         "manual=${process.manual.joinToString(",") { it.key }}",
+        "yeastAuto=${process.yeastAuto}",
     ).joinToString(";")
 
     /** Die gemerkten Werte für [type] mit [preferment]; ohne oder mit kaputtem [text] die Standardwerte. */
@@ -49,6 +50,8 @@ object DoughProcessMemory {
             warm = hours(RestTime.WARM),
             proofPlace = place,
             manual = manual,
+            // Neu in 0.75.0; ältere gemerkte Werte haben sie nicht und beginnen mit der Automatik.
+            yeastAuto = values["yeastAuto"] != "false",
         )
     }
 
