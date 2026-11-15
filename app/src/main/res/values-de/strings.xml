@@ -249,10 +249,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Teigrechner: neuer Bereich „Gehzeiten und Temperaturen“ für Raum, Kühlschrank, Gehzeiten und Backofen. Gehzeiten bei Raumtemperatur richten sich nach dem Raum: wärmer ist kürzer.</item>
-        <item>Teigrechner: Die Wassertemperatur wird berechnet, damit der Teig nach dem Kneten die gewählte Temperatur hat, von Hand oder mit der Maschine.</item>
-        <item>Als Rezept gespeichert bekommt der Teig einen Zeitplan mit den gewählten Gehzeiten und eine Zubereitung mit Mengen und Temperaturen. Unter Einstellungen › Teigrechner lassen sich Temperaturen in °F zeigen.</item>
-        <item>Mengen vorn: Die Zusammenfassungen beginnen mit der Menge, z. B. „277 g Biga · Mehl 30 % (184 g)“.</item>
+        <item>Teigrechner: Die Hefe rechnet sich jetzt automatisch aus Gehzeiten und Temperaturen. Längere oder kühlere Gehzeiten brauchen weniger Hefe, kürzere oder wärmere mehr.</item>
+        <item>Der Schalter „Automatisch“ steht im Bereich „Hefe“. Wird die Menge von Hand geändert, gilt sie und die Automatik geht aus. Beim Sauerteig bleibt die Hefe von Hand.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Geräts) -->
@@ -534,6 +532,11 @@
     <string name="dough_yeast_instant">Instanthefe</string>
     <string name="dough_yeast_active">Aktivhefe</string>
     <string name="dough_yeast_amount">Menge (% vom Mehl)</string>
+    <!-- Hefe-Automatik (Entwurf 8, 0.75.0) -->
+    <string name="dough_yeast_auto">Automatisch</string>
+    <string name="dough_yeast_auto_on">Richtet sich nach Gehzeiten und Temperaturen. Eine geänderte Menge schaltet das aus.</string>
+    <string name="dough_yeast_auto_off">Aus: Es gilt die eingegebene Menge.</string>
+    <string name="dough_yeast_auto_short">automatisch</string>
     <string name="dough_yeast_in_preferment">Im Vorteig (% vom Mehl)</string>
     <string name="dough_yeast_main">Zusätzlich im Hauptteig (% vom Mehl)</string>
     <string name="dough_main_dough">Hauptteig</string>

@@ -3,6 +3,16 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.75.0] – 2026-11-15 (versionCode 130)
+
+### Neu
+- **Teigrechner: Hefe automatisch** (Pizza und Brot). Die Hefe rechnet sich aus den Gehzeiten und Temperaturen im Bereich „Gehzeiten und Temperaturen“: Längere oder kühlere Gehzeiten brauchen weniger Hefe, kürzere oder wärmere mehr. Mit den Standardwerten kommen wie bisher 0,2 % Frischhefe heraus. Mit Biga oder Poolish zählt die Reifezeit des Vorteigs und wie viel Mehl im Vorteig ist.
+- Der Schalter **„Automatisch“** steht im Bereich „Hefe“, die Zusammenfassung endet dann mit „automatisch“. Wird die Menge von Hand geändert (Tippen oder Minus und Plus), gilt diese Menge und die Automatik geht aus; ein Tipp auf den Schalter schaltet sie wieder ein. Beim Sauerteig bleibt die Hefe von Hand.
+- Die Werte sind Richtwerte: Je nach Mehl, Hefe und Küche kann es schneller oder langsamer gehen.
+
+### Geändert
+- Solange die Automatik an ist, bestimmen die Gehzeiten die Hefe, nicht die Voreinstellung. Eine Voreinstellung gilt deshalb auch dann als gewählt, wenn ihre Hefe abweicht.
+
 ## [0.74.4] – 2026-11-14 (versionCode 129)
 
 Keine sichtbaren Änderungen an der App. Derselbe Baustein wie in 0.74.3 kam auch über weitere Werkzeuge (zum Prüfen und Testen der App) in älteren Versionen mit; auch dort wird jetzt die Version ohne Sicherheitslücke verwendet. In der App selbst steckt dieser Baustein nicht.

@@ -813,6 +813,19 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(activity.resources.getText(R.string.dough_preferment_flour).toString())
         screenshot("14b-teigrechner-biga")
 
+        // Hefe-Automatik (Entwurf 8, 0.75.0): Der Schalter ist an, die Zusammenfassung nennt „automatisch“; Ausschalten
+        // lässt die Menge stehen, Einschalten rechnet wieder.
+        openDoughSection(R.string.dough_section_yeast)
+        val autoSwitch = composeRule.onNode(hasText(text(R.string.dough_yeast_auto)) and hasClickAction())
+        autoSwitch.performScrollTo().assertIsOn()
+        waitForText(text(R.string.dough_yeast_auto_on))
+        screenshot("14x-teigrechner-hefe-automatik")
+        autoSwitch.performClick()
+        autoSwitch.assertIsOff()
+        waitForText(text(R.string.dough_yeast_auto_off))
+        autoSwitch.performClick()
+        autoSwitch.assertIsOn()
+
         // Weitere Zutaten: „Weitere Zutat“ öffnet die Auswahl; das Feld erscheint mit seiner Menge, Hinweis zum Wasser im Joghurt.
         // Bei normaler Schrift steht der Knopf im Bereich „Teig“.
         openDoughSection(R.string.dough_section_dough)
