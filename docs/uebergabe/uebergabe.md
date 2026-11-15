@@ -1,21 +1,22 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 15.11.2026 · `main` = **Version 0.74.4** (Release v0.74.4 erschienen, Build 43687203670 grün) · Zweig `hefe-automatik` = **0.75.0 Hefe-Automatik** (Build 43698726260 grün, Fotos 14x angesehen, wartet auf Freigabe für `main`) · `verbesserungen-0741`, `guava-sicherheit`, `guava-sicherheit-2` sind vollständig auf `main` und können gelöscht werden · Cloud-Zweig `claude/trusting-galileo-xg0tgz` = alter Stand 0.74.0 plus Übergabe · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 15.11.2026 · `main` = **Version 0.75.0 Hefe-Automatik** (Release v0.75.0 erschienen, Build 43702734555 grün) · Kein Arbeitszweig offen; `verbesserungen-0741`, `guava-sicherheit`, `guava-sicherheit-2`, `hefe-automatik` sind vollständig auf `main` und können gelöscht werden · Cloud-Zweig `claude/trusting-galileo-xg0tgz` = alter Stand 0.74.0 plus Übergabe · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
 
-## In Arbeit: 0.75.0 Hefe-Automatik (Zweig `hefe-automatik`)
+## Zuletzt erschienen: 0.75.0 Hefe-Automatik (15.11.2026)
 - `data/dough/DoughYeast` (Entwurf 8): Gärfaktor 2^((T − 24)/8); ohne Vorteig 1,6 / (Gehzeit Teig + Teigkugeln + Aufwärmen bei 24 °C), Biga 3,08 bzw. Poolish 6,73 × Vorteiganteil / Reifezeit bei 24 °C; in Hefeart umgerechnet, auf 0,01 gerundet, in Grenzen. Standardwerte ergeben 0,2 % (Pizza), Brot ohne Vorteig 0,63 % (bisher 0,5).
 - `DoughProcess.yeastAuto` (Standard an, gemerkt als `yeastAuto=`; alte Werte starten mit an); Schalter `ui/dough/YeastAutoSwitch` im Bereich Hefe; Tippen oder −/+ am Hefefeld schaltet aus; Zusammenfassung endet mit „automatisch“. Sauerteig ohne Automatik.
 - Eigene Entscheidung (dem Inhaber gemeldet): Mit Automatik zählt die Hefe beim Vergleich mit Voreinstellungen nicht; die Hefe der Voreinstellung wird erst wirksam, wenn die Automatik aus ist.
 - Unit-Tests `DoughYeastTest`; Rundgang 14x (Schalter an/aus).
 - Bewusst noch groß: `DoughScreen.kt` (~1770 Zeilen), `EditViewModel.kt` (~1660).
+
 ## Offene Entscheidungen des Inhabers
 - Nach 0.75.0: erst 0.76.0 (Uhrzeiten) oder erst der Weg zu 1.0?
 - Teigrechner in zwei Stufen („einfach“ und „Feinheiten“), erst als Entwurf?
 - Zwischenstände als Vorabversion statt als „neueste Version“?
-- Frühe Prüfung auf einem echten Gerät (0.73.0/0.74.x auf dem Handy).
+- Frühe Prüfung auf einem echten Gerät (0.75.0 auf dem Handy, besonders die Hefemengen).
 
 ## Technische Notizen
 - Dependabot #10 (Guava) **behoben** mit 0.74.3/0.74.4: Root-`build.gradle.kts` hebt Guava im Klassenpfad der Bauwerkzeuge (`constraints`) und in allen Konfigurationen des App-Moduls (`eachDependency`, Room-Compiler, Lint, Robolectric) auf mindestens `guava` aus `libs.versions.toml`. Prüfen geht vor dem Push mit `gh api repos/…/dependency-graph/compare/main...<zweig>`.
