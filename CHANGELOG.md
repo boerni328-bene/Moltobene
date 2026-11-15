@@ -3,6 +3,10 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.74.4] – 2026-11-14 (versionCode 129)
+
+Keine sichtbaren Änderungen an der App. Derselbe Baustein wie in 0.74.3 kam auch über weitere Werkzeuge (zum Prüfen und Testen der App) in älteren Versionen mit; auch dort wird jetzt die Version ohne Sicherheitslücke verwendet. In der App selbst steckt dieser Baustein nicht.
+
 ## [0.74.3] – 2026-11-14 (versionCode 128)
 
 Keine sichtbaren Änderungen an der App. Ein Baustein, den nur die Werkzeuge zum Bauen der App verwenden, ist auf eine neuere Version gehoben, die eine gemeldete Sicherheitslücke schließt. In der App selbst steckt dieser Baustein nicht.
