@@ -1,6 +1,6 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 14.11.2026 · `main` = **Version 0.74.3** (Release v0.74.3 erschienen, Build 43586961688 grün) · Zweig `guava-sicherheit-2` = 0.74.4 (Build 43589172087 grün, wartet auf Freigabe für `main`) · Zweige `verbesserungen-0741` und `guava-sicherheit` sind vollständig auf `main`, können gelöscht werden · Cloud-Zweig `claude/trusting-galileo-xg0tgz` = alter Stand 0.74.0 plus Übergabe · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 15.11.2026 · `main` = **Version 0.74.4** (Release v0.74.4 erschienen, Build 43687203670 grün) · Kein Arbeitszweig offen; `verbesserungen-0741`, `guava-sicherheit`, `guava-sicherheit-2` sind vollständig auf `main` und können gelöscht werden · Cloud-Zweig `claude/trusting-galileo-xg0tgz` = alter Stand 0.74.0 plus Übergabe · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
@@ -17,7 +17,9 @@ Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die
 - Teigrechner in zwei Stufen („einfach“ und „Feinheiten“), erst als Entwurf?
 - Zwischenstände als Vorabversion statt als „neueste Version“?
 - Frühe Prüfung auf einem echten Gerät (0.73.0/0.74.x auf dem Handy).
-- Dependabot-Meldung #10 („hoch“, Guava nur in Werkzeugen, nicht in der App): 0.74.3 hebt den Klassenpfad der Bauwerkzeuge (`constraints { classpath(libs.guava) }`), reicht aber nicht: ältere Guava kam auch über Room-Compiler (33.2.1), Lint (33.4.0) und Robolectric (33.6.0). 0.74.4 (Zweig `guava-sicherheit-2`) hebt per `subprojects { configurations.configureEach { resolutionStrategy.eachDependency … } }` alles unter 33.7.2 an; der Vergleich des Abhängigkeitsgraphen `main...guava-sicherheit-2` zeigt alle alten Versionen entfernt. Meldung schließt sich nach dem Push auf `main`.
+
+## Technische Notizen
+- Dependabot #10 (Guava) **behoben** mit 0.74.3/0.74.4: Root-`build.gradle.kts` hebt Guava im Klassenpfad der Bauwerkzeuge (`constraints`) und in allen Konfigurationen des App-Moduls (`eachDependency`, Room-Compiler, Lint, Robolectric) auf mindestens `guava` aus `libs.versions.toml`. Prüfen geht vor dem Push mit `gh api repos/…/dependency-graph/compare/main...<zweig>`.
 - Tablet-Test `kochbuchUndRezept` (Pfeiltaste, `TabletTourTest.kt:62`) schlug einmal auf drei Darstellungen fehl und lief beim Wiederholen grün: wackelig, ggf. längere Wartezeit.
 
 ## Geplant (nach Freigabe)
