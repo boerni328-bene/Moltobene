@@ -1,13 +1,19 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 15.11.2026 · `main` = **Version 0.75.1** (Hefe und Vorteig in einem Bereich, Hefesumme passt; Release v0.75.1 erschienen, Build 43746706543 grün) · Kein Arbeitszweig offen; `verbesserungen-0741`, `guava-sicherheit`, `guava-sicherheit-2`, `hefe-automatik`, `hefe-summe` sind vollständig auf `main` und können gelöscht werden · Cloud-Zweig `claude/trusting-galileo-xg0tgz` = alter Stand 0.74.0 plus Übergabe · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 18.11.2026 · `main` = **Version 0.75.1** (erschienen) · Wartet auf Freigabe für `main`: Zweig `hefe-hauptteig` = **0.75.2** (Build 44354301387 grün) und darauf aufbauend `mengen-antippen` = **0.76.0** (Build 44355377308 grün, enthält 0.75.2) · Zwischenstand Uhrzeiten auf Zweig `uhrzeiten` (Commit 0ac3f47, wird **0.77.0**) · Alte Zweige `verbesserungen-0741`, `guava-sicherheit`, `guava-sicherheit-2`, `hefe-automatik`, `hefe-summe` sind auf `main` und können gelöscht werden · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
 
-## Zuletzt erschienen: 0.75.1 (Rückmeldung des Inhabers vom 15.11.2026)
-- Hefe gesamt (Zusammenfassung, gleichwertige Hefemenge) zählt jetzt die gerundeten Zeilen zusammen (`DoughNumbers.rounded`, `DoughSummary.yeastGrams`), damit Vorteig + Hauptteig genau die Summe ergeben.
-- Bereiche „Hefe“ und „Vorteig“ zu „Hefe und Vorteig“ zusammengelegt, Hefe zuerst (Wahl des Inhabers), Zwischenüberschrift „Vorteig“; bei großer Schrift eine Karte. `SECTION_PREFERMENT` entfällt.
+## Wartet auf Freigabe (18.11.2026)
+- **0.75.2** (`hefe-hauptteig`): Mit Hefe-Automatik steht die Hefe im Hauptteig auf 0 (ganze Hefe im Vorteig; vorher kam sie ungerechnet obendrauf, Rückmeldung des Inhabers mit Bildschirmfoto). Eingabe im Hauptteig schaltet die Automatik aus (`mainYeastText` in `DoughScreen`), Rundgang prüft das.
+- **0.76.0** (`mengen-antippen`, Wunsch vom 18.11.2026): Kacheln oben (Gesamtteig, Mehl, Wasser, Salz, Hefe) bzw. Zeilen „Gesamtmengen“ bei großer Schrift antippen → `ui/dough/ScaleDialog` (Menge, −/+, Eingabe, „Umrechnen“); `data/dough/DoughScale` ändert nur das Gewicht je Stück (Prozente bleiben, 0,1 g, Grenzen). Nur Pizza und Brot. Tests `DoughScaleTest`, Rundgang 14y.
+
+## In Arbeit: 0.77.0 Uhrzeiten (Zweig `uhrzeiten`, Zwischenstand)
+- Entscheidung des Inhabers 18.11.2026: **„Backzeit bleibt“** (7D): Wer früher/später startet, behält den Backtermin, die längste Ruhezeit (Biga/Poolish, sonst Kühlschrank-Gare) wird länger/kürzer, ½× bis 3×; reicht das nicht, sagt die App es.
+- Rezept speichert den Zeitplan schon → keine Änderung an Rezept und Sicherung. Datenbank 5 (AutoMigration 4→5): `dough_runs` + `bakeAt`, `planned`, `stretchMinutes`. Fertig: `data/dough/DoughBakePlan` (rückwärts, Nacht 22–7, `startNow`, `adjusted`), `DoughRunPlanner.state` nutzt `adjusted`. Offen: ViewModel (`bakeAt` im SavedStateHandle, Planen, Jetzt starten), `ScheduleCard` (Backen am … um … mit Datum/Uhrzeit-Auswahl des Systems, Liste mit Uhrzeiten, Planen), Startseite „Geplant“, Texte, Tests, Migrationstest 4→5, `5.json` aus dem Build-Artefakt übernehmen. Vorschlag: frühester Backtermin auf halbe Stunde aufgerundet. Zweig vor dem Weiterbauen auf `main` (mit 0.76.0) bringen.
+
+## Zuletzt erschienen: 0.75.1 (Hefe und Vorteig in einem Bereich, Hefesumme passt)
 
 ## Davor: 0.75.0 Hefe-Automatik (15.11.2026)
 - `data/dough/DoughYeast` (Entwurf 8): Gärfaktor 2^((T − 24)/8); ohne Vorteig 1,6 / (Gehzeit Teig + Teigkugeln + Aufwärmen bei 24 °C), Biga 3,08 bzw. Poolish 6,73 × Vorteiganteil / Reifezeit bei 24 °C; in Hefeart umgerechnet, auf 0,01 gerundet, in Grenzen. Standardwerte ergeben 0,2 % (Pizza), Brot ohne Vorteig 0,63 % (bisher 0,5).
@@ -17,7 +23,7 @@ Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die
 - Bewusst noch groß: `DoughScreen.kt` (~1770 Zeilen), `EditViewModel.kt` (~1660).
 
 ## Offene Entscheidungen des Inhabers
-- Nach 0.75.1: erst 0.76.0 (Uhrzeiten) oder erst der Weg zu 1.0?
+- Nach 0.77.0: Weg zu 1.0?
 - Teigrechner in zwei Stufen („einfach“ und „Feinheiten“), erst als Entwurf?
 - Zwischenstände als Vorabversion statt als „neueste Version“?
 - Frühe Prüfung auf einem echten Gerät (0.75.1 auf dem Handy, besonders die Hefemengen).
@@ -27,7 +33,6 @@ Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die
 - Tablet-Test `kochbuchUndRezept` (Pfeiltaste, `TabletTourTest.kt:62`) schlug einmal auf drei Darstellungen fehl und lief beim Wiederholen grün: wackelig, ggf. längere Wartezeit.
 
 ## Geplant (nach Freigabe)
-- **0.76.0 Uhrzeiten** (Liste aus 7A im Rezept, „Backen am … um …“, geplanter Teig auf der Startseite aus 7D). Dafür muss das Rezept die Teigrechner-Werte speichern (Datenbank-Migration und Sicherungsformat) und `DoughRun` eine Backzeit bekommen.
 - Entwürfe 10C (Gehzeiten): https://claude.ai/artifact/RAw2psMZkncGoKijB3sHSq (privat).
 
 ## Offen / zurückgestellt
