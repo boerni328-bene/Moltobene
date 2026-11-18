@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.75.2] – 2026-11-18 (versionCode 132)
+
+### Behoben
+- **Teigrechner: Hefe im Hauptteig und Automatik.** Mit Biga oder Poolish kam die Hefe „Zusätzlich im Hauptteig“ bisher ungerechnet zur automatischen Hefe dazu; so konnte viel zu viel Hefe im Teig landen, obwohl „Automatisch“ an war. Jetzt steckt bei eingeschalteter Automatik die ganze Hefe im Vorteig, im Hauptteig steht 0 %. Wird die Hefe im Hauptteig von Hand geändert, geht die Automatik aus, wie beim Feld „Im Vorteig“.
+
 ## [0.75.1] – 2026-11-15 (versionCode 131)
 
 ### Geändert

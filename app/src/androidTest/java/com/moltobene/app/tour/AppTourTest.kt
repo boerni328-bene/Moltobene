@@ -825,6 +825,15 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.dough_yeast_auto_off))
         autoSwitch.performClick()
         autoSwitch.assertIsOn()
+        // Auch Hefe im Hauptteig von Hand schaltet die Automatik aus (Rückmeldung vom 18.11.2026); mit Automatik steht
+        // dort 0, weil die ganze Hefe im Vorteig steckt. (Der Feldname enthält „%“; deshalb ohne Formatierung lesen.)
+        val mainYeastLabel = activity.resources.getText(R.string.dough_yeast_main).toString()
+        val mainYeastField = composeRule.onNode(hasSetTextAction() and (hasText(mainYeastLabel) or hasContentDescription(mainYeastLabel)))
+        mainYeastField.performScrollTo().performTextClearance()
+        mainYeastField.performTextInput("1")
+        autoSwitch.assertIsOff()
+        autoSwitch.performClick()
+        autoSwitch.assertIsOn()
 
         // Weitere Zutaten: „Weitere Zutat“ öffnet die Auswahl; das Feld erscheint mit seiner Menge, Hinweis zum Wasser im Joghurt.
         // Bei normaler Schrift steht der Knopf im Bereich „Teig“.

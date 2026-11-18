@@ -836,8 +836,14 @@ private fun DoughForm(
         null
     }
     val yeastText = autoYeast?.let { show(it) } ?: yeast
+    // Mit Automatik steckt bei Biga und Poolish die ganze Hefe im Vorteig; der Hauptteig bekommt keine zusätzliche
+    // (Rückmeldung vom 18.11.2026: sonst kam die Hefe im Hauptteig ungerechnet obendrauf).
+    val mainYeastText = if (autoYeast != null) show(0.0) else mainYeast
     fun setYeastAuto(on: Boolean) {
-        if (!on) yeast = yeastText
+        if (!on) {
+            yeast = yeastText
+            mainYeast = mainYeastText
+        }
         setProcess(process.copy(yeastAuto = on))
     }
     // „Zurücksetzen“ stellt alle Werte des Formulars wieder her, auch Raum, Kühlschrank und Knetart.
@@ -870,7 +876,7 @@ private fun DoughForm(
         honey = parseNumber(honeyText),
         egg = parseNumber(eggText),
         seeds = parseNumber(seedsText),
-        mainYeast = parseNumber(mainYeast),
+        mainYeast = parseNumber(mainYeastText),
     )
     val result = DoughCalculator.calculate(input)
     val issues = (result as? DoughResult.Invalid)?.issues.orEmpty()
@@ -914,7 +920,7 @@ private fun DoughForm(
     var chosen by rememberSaveable(type) { mutableStateOf(-1) }
     // Mit der Hefe-Automatik zählt die Hefe beim Vergleich nicht: Sie folgt den Gehzeiten, nicht der Voreinstellung.
     fun matchesPreset(preset: LeavenedInput) =
-        DoughPresets.matches(if (autoYeast != null) input.copy(yeast = preset.yeast) else input, preset)
+        DoughPresets.matches(if (autoYeast != null) input.copy(yeast = preset.yeast, mainYeast = preset.mainYeast) else input, preset)
     val presetIndex = chosen.takeIf { it in entryInputs.indices && matchesPreset(entryInputs[it]) }
         ?: entryInputs.indexOfFirst { matchesPreset(it) }
     fun applyPreset(i: Int) {
@@ -998,8 +1004,8 @@ private fun DoughForm(
             yeastText,
             {
                 // Von Hand geändert (Tippen oder −/+): Die Automatik geht aus, der neue Wert gilt.
+                if (process.yeastAuto && DoughYeast.applies(preferment)) setYeastAuto(false)
                 yeast = it
-                if (process.yeastAuto && DoughYeast.applies(preferment)) setProcess(process.copy(yeastAuto = false))
             },
             issueFor(DoughField.YEAST), m, suffix = "%",
             stepping = stepping(DoughField.YEAST, YeastKind.FRESH.convert(defaults.yeast, yeastKind)),
@@ -1007,7 +1013,12 @@ private fun DoughForm(
     }
     val mainYeastField: @Composable (Modifier) -> Unit = { m ->
         NumberField(
-            stringResource(R.string.dough_yeast_main), mainYeast, { mainYeast = it },
+            stringResource(R.string.dough_yeast_main), mainYeastText,
+            {
+                // Auch die Hefe im Hauptteig von Hand geändert: Die Automatik geht aus.
+                if (process.yeastAuto && DoughYeast.applies(preferment)) setYeastAuto(false)
+                mainYeast = it
+            },
             issueFor(DoughField.MAIN_YEAST), m, suffix = "%",
             stepping = stepping(DoughField.MAIN_YEAST, 0.0),
         )
@@ -1167,7 +1178,7 @@ private fun DoughForm(
     ).joinToString(SUMMARY_SEPARATOR)
     // Zusammenfassungen der Bereiche (Entwurf 5) mit der Menge vorn (Wunsch vom 05.11.2026): „1,2 g Frischhefe · 0,2 %
     // vom Mehl“, mit zusätzlicher Hefe im Hauptteig „1,8 g Frischhefe · Vorteig 0,2 % (1,2 g) · Hauptteig 0,1 % (0,6 g)“.
-    val withMainYeast = preferment.carriesYeast && parseNumber(mainYeast).let { !it.isFinite() || it > 0 }
+    val withMainYeast = preferment.carriesYeast && parseNumber(mainYeastText).let { !it.isFinite() || it > 0 }
     val yeastName = stringResource(AndroidDoughTexts.yeastName(yeastKind))
     val yeastAmount = success?.let {
         stringResource(R.string.dough_summary_value, DoughNumbers.weight(DoughSummary.yeastGrams(it), LineRole.YEAST, language, unit), yeastName)
@@ -1176,7 +1187,7 @@ private fun DoughForm(
         listOf(
             yeastAmount,
             withGrams(summaryValue(R.string.dough_section_preferment, yeastText), gramsIn(SectionKind.PREFERMENT, LineRole.YEAST)),
-            withGrams(summaryValue(R.string.dough_main_dough, mainYeast), gramsIn(SectionKind.MAIN, LineRole.YEAST)),
+            withGrams(summaryValue(R.string.dough_main_dough, mainYeastText), gramsIn(SectionKind.MAIN, LineRole.YEAST)),
         )
     } else {
         listOf(yeastAmount, stringResource(R.string.dough_summary_of_flour, "${yeastText.trim()} %"))
