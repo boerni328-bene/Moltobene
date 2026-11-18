@@ -99,6 +99,7 @@ import com.moltobene.app.data.dough.DoughFlours
 import com.moltobene.app.data.dough.DoughIssue
 import com.moltobene.app.data.dough.DoughKitchen
 import com.moltobene.app.data.dough.DoughLimits
+import com.moltobene.app.data.dough.DoughScale
 import com.moltobene.app.data.dough.DoughNumbers
 import com.moltobene.app.data.dough.DoughPresets
 import com.moltobene.app.data.dough.DoughProcess
@@ -125,6 +126,7 @@ import com.moltobene.app.ui.theme.Spacing
 import com.moltobene.app.ui.components.RepeatIconButton
 import com.moltobene.app.ui.components.readingWidth
 import java.util.Locale
+import kotlin.math.roundToLong
 import kotlinx.coroutines.delay
 
 /** Zahl aus einem Eingabefeld: Komma oder Punkt; leer oder Text ergibt NaN (wird als „keine Zahl“ gemeldet). */
@@ -1127,6 +1129,7 @@ private fun DoughForm(
     val language = LocalConfiguration.current.locales[0].language
     val resources = LocalResources.current
     val resultTotals = success?.let { viewModel.totals(it, input) }
+    var scaling by remember { mutableStateOf<TotalItem?>(null) }
     val prefermentItems = success?.let { viewModel.prefermentItems(it, input) }.orEmpty()
     val prefermentName = stringResource(prefermentLabel(preferment))
     // Mengen vorn (Wunsch vom 05.11.2026): „277 g Biga“.
@@ -1237,6 +1240,23 @@ private fun DoughForm(
                 total = success?.let { DoughNumbers.weight(it.totalGrams, 0, language, unit) },
                 totals = resultTotals,
                 lines = listOfNotNull(prefermentBar, mainBar, plainBar),
+                totalGrams = success?.totalGrams ?: Double.NaN,
+                onScale = { scaling = it },
+            )
+        }
+        // Menge antippen und ändern (Wunsch vom 18.11.2026): Der ganze Teig wird im gleichen Verhältnis umgerechnet,
+        // nur das Gewicht je Stück ändert sich.
+        scaling?.let { item ->
+            ScaleDialog(
+                name = item.name,
+                grams = item.grams,
+                unit = unit,
+                onScale = { target ->
+                    DoughScale.pieceGrams(input.pieceGrams, item.grams, target, DoughLimits.range(type, DoughField.PIECE_GRAMS, preferment))
+                        ?.let { piece = show((unit.fromGrams(it) * 10).roundToLong() / 10.0) }
+                    scaling = null
+                },
+                onDismiss = { scaling = null },
             )
         }
         Column(
@@ -1481,7 +1501,11 @@ private fun DoughForm(
                 YeastEquivalent(result, yeastKind, Modifier.padding(horizontal = Spacing.m))
             }
             if (isLargeText() && result is DoughResult.Success) {
-                TotalsCard(viewModel.totals(result, input))
+                TotalsCard(
+                    listOf(TotalItem(DoughNumbers.weight(result.totalGrams, 0, language, unit), stringResource(R.string.dough_tile_total), grams = result.totalGrams)) +
+                        viewModel.totals(result, input),
+                    onScale = { scaling = it },
+                )
             }
             Text(
                 stringResource(R.string.dough_hint),
@@ -1514,7 +1538,13 @@ private fun DoughForm(
  * ungültig. Passen die Kacheln nicht nebeneinander, lassen sie sich seitlich verschieben.
  */
 @Composable
-internal fun ResultTop(total: String?, totals: List<TotalItem>?, lines: List<String> = emptyList()) {
+internal fun ResultTop(
+    total: String?,
+    totals: List<TotalItem>?,
+    lines: List<String> = emptyList(),
+    totalGrams: Double = Double.NaN,
+    onScale: ((TotalItem) -> Unit)? = null,
+) {
     Surface(
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -1538,12 +1568,13 @@ internal fun ResultTop(total: String?, totals: List<TotalItem>?, lines: List<Str
                     horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                 ) {
                     TotalTile(
-                        TotalItem(total, stringResource(R.string.dough_tile_total)),
+                        TotalItem(total, stringResource(R.string.dough_tile_total), grams = totalGrams),
                         emphasized = true,
                         compact = true,
                         modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                        onScale = onScale,
                     )
-                    for (item in totals.orEmpty()) TotalTile(item, compact = true)
+                    for (item in totals.orEmpty()) TotalTile(item, compact = true, onScale = onScale)
                 }
                 for (line in lines) {
                     Text(line, style = MaterialTheme.typography.bodySmall, modifier = Modifier.semantics(mergeDescendants = true) {})
@@ -1651,8 +1682,21 @@ internal fun ResultBar(summary: String?, totals: List<TotalItem>?, onSave: () ->
  * [compact]: etwas kleinere Schrift, für die Ergebniskarte oben (Entwurf 5).
  */
 @Composable
-private fun TotalTile(item: TotalItem, emphasized: Boolean = false, compact: Boolean = false, modifier: Modifier = Modifier) {
+private fun TotalTile(
+    item: TotalItem,
+    emphasized: Boolean = false,
+    compact: Boolean = false,
+    modifier: Modifier = Modifier,
+    onScale: ((TotalItem) -> Unit)? = null,
+) {
     val colors = MaterialTheme.colorScheme
+    // Antippen öffnet das Fenster zum Ändern der Menge (Wunsch vom 18.11.2026); mindestens 48 dp hoch.
+    val scaleLabel = stringResource(R.string.dough_scale_action)
+    val tap = if (onScale != null && item.grams.isFinite() && item.grams > 0) {
+        Modifier.heightIn(min = 48.dp).clickable(onClickLabel = scaleLabel, role = Role.Button) { onScale(item) }
+    } else {
+        Modifier
+    }
     Surface(
         color = if (emphasized) colors.primary else colors.surface,
         contentColor = if (emphasized) colors.onPrimary else colors.onSurface,
@@ -1661,7 +1705,8 @@ private fun TotalTile(item: TotalItem, emphasized: Boolean = false, compact: Boo
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(horizontal = Spacing.s, vertical = Spacing.xs).semantics(mergeDescendants = true) {},
+            modifier = tap.padding(horizontal = Spacing.s, vertical = Spacing.xs).semantics(mergeDescendants = true) {},
+            verticalArrangement = Arrangement.Center,
         ) {
             Text(
                 item.amount,
@@ -1698,13 +1743,21 @@ internal fun summaryValue(@StringRes name: Int, value: String, unit: String = "%
 
 /** Bei großer Schrift: die Gesamtmengen als Liste mit dem Namen links und der Menge rechts (#83). */
 @Composable
-internal fun TotalsCard(items: List<TotalItem>) {
+internal fun TotalsCard(items: List<TotalItem>, onScale: ((TotalItem) -> Unit)? = null) {
     if (items.isEmpty()) return
+    val scaleLabel = stringResource(R.string.dough_scale_action)
     Card(stringResource(R.string.dough_totals_title)) {
         for (item in items) {
+            // Antippen ändert die Menge (Wunsch vom 18.11.2026), wie die Kacheln bei normaler Schrift.
+            val tap = if (onScale != null && item.grams.isFinite() && item.grams > 0) {
+                Modifier.heightIn(min = 48.dp).clickable(onClickLabel = scaleLabel, role = Role.Button) { onScale(item) }
+            } else {
+                Modifier
+            }
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) {},
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().then(tap).semantics(mergeDescendants = true) {},
             ) {
                 Text(item.name, style = MaterialTheme.typography.bodyLarge)
                 Text(item.amount, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)

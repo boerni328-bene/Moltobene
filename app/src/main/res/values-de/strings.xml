@@ -249,8 +249,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Teigrechner: Die Hefe rechnet sich jetzt automatisch aus Gehzeiten und Temperaturen. Längere oder kühlere Gehzeiten brauchen weniger Hefe, kürzere oder wärmere mehr.</item>
-        <item>Der Schalter „Automatisch“ steht im Bereich „Hefe und Vorteig“. Wird die Menge von Hand geändert, gilt sie und die Automatik geht aus. Beim Sauerteig bleibt die Hefe von Hand.</item>
+        <item>Teigrechner: Die Mengen oben lassen sich antippen und ändern, z. B. der Gesamtteig oder das Mehl. Der ganze Teig wird im gleichen Verhältnis umgerechnet.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Geräts) -->
@@ -556,6 +555,10 @@
     <string name="dough_bar_preferment">%1$s: %2$s</string>
     <string name="dough_bar_main">%1$s Hauptteig: %2$s</string>
     <string name="dough_tile_total">Gesamtteig</string>
+    <string name="dough_scale_action">Menge ändern</string>
+    <string name="dough_scale_amount">Menge</string>
+    <string name="dough_scale_hint">Alle Mengen werden im gleichen Verhältnis umgerechnet. Die Prozente bleiben, das Gewicht je Stück ändert sich.</string>
+    <string name="dough_scale_confirm">Umrechnen</string>
     <string name="dough_summary_value">%1$s %2$s</string>
     <string name="dough_summary_of_flour">%1$s vom Mehl</string>
     <string name="dough_summary_pieces">%1$s × %2$s</string>

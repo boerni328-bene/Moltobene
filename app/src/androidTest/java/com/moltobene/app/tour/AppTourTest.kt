@@ -726,6 +726,17 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.dough_summary_pieces, "4", "250 g"), substring = true)
         screenshot("14a-teigrechner")
 
+        // Menge antippen und ändern (Wunsch vom 18.11.2026): Gesamtteig 1500 g ergibt 4 × 375 g; „Zurücksetzen“ unten
+        // stellt die Standardwerte wieder her.
+        composeRule.onNode(hasText(text(R.string.dough_tile_total)) and hasClickAction()).performScrollTo().performClick()
+        waitForText(text(R.string.dough_scale_hint))
+        val scaleField = composeRule.onNode(hasSetTextAction() and hasText(text(R.string.dough_scale_amount)))
+        scaleField.performTextClearance()
+        scaleField.performTextInput("1500")
+        screenshot("14y-teigrechner-menge-aendern")
+        composeRule.onNodeWithText(text(R.string.dough_scale_confirm)).performClick()
+        waitForText(text(R.string.dough_summary_pieces, "4", "375 g"), substring = true)
+
         // Voreinstellungen (#83, Etappe 3): nebeneinander wählen, eigene speichern, löschen, zurück zu den Standardwerten.
         // Die gemerkten Werte des vorigen Durchgangs bleiben stehen; „Zurücksetzen“ führt zu den Standardwerten.
         doughPresetAction(R.string.dough_reset)

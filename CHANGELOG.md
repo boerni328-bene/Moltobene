@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.76.0] – 2026-11-18 (versionCode 133)
+
+### Neu
+- **Teigrechner: Mengen antippen und ändern.** Die Kacheln oben (Gesamtteig, Mehl, Wasser, Salz, Hefe) lassen sich antippen. Im Fenster steht die Menge, sie lässt sich mit Minus und Plus oder per Eingabe ändern. „Umrechnen“ rechnet den ganzen Teig im gleichen Verhältnis um: Die Prozente bleiben, das Gewicht je Teigkugel bzw. Laib ändert sich. Beispiel: Gesamtteig 1500 g statt 1000 g ergibt 4 × 375 g; wer nur 500 g Mehl hat, tippt auf „Mehl“ und gibt 500 ein. Bei großer Schrift lassen sich die Zeilen unter „Gesamtmengen“ ebenso antippen.
+
 ## [0.75.2] – 2026-11-18 (versionCode 132)
 
 ### Behoben

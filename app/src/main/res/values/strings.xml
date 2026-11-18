@@ -249,8 +249,7 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Dough calculator: the yeast is now calculated automatically from rising times and temperatures. Longer or cooler rising times need less yeast, shorter or warmer ones more.</item>
-        <item>The “Automatic” switch is in the “Yeast and preferment” section. Changing the amount by hand applies it and turns the automatic calculation off. With sourdough, the yeast stays manual.</item>
+        <item>Dough calculator: tap an amount at the top, such as the total dough or the flour, to change it. The whole dough is adjusted in the same ratio.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->
@@ -558,6 +557,10 @@
     <string name="dough_bar_preferment">%1$s: %2$s</string>
     <string name="dough_bar_main">%1$s final dough: %2$s</string>
     <string name="dough_tile_total">Total dough</string>
+    <string name="dough_scale_action">Change amount</string>
+    <string name="dough_scale_amount">Amount</string>
+    <string name="dough_scale_hint">All amounts are adjusted in the same ratio. Percentages stay the same; the weight per piece changes.</string>
+    <string name="dough_scale_confirm">Adjust</string>
     <string name="dough_summary_value">%1$s %2$s</string>
     <string name="dough_summary_of_flour">%1$s of flour</string>
     <string name="dough_summary_pieces">%1$s × %2$s</string>

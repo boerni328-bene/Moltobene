@@ -47,7 +47,8 @@ import java.util.Locale
 import java.util.UUID
 
 /** Eine Gesamtmenge mit Namen, z. B. „594 g“ und „Mehl“ (#83); [role] kennzeichnet z. B. das Wasser für seine Temperatur. */
-data class TotalItem(val amount: String, val name: String, val role: LineRole? = null)
+/** [grams]: die Menge in Gramm, wenn sie sich antippen und ändern lässt (Wunsch vom 18.11.2026). */
+data class TotalItem(val amount: String, val name: String, val role: LineRole? = null, val grams: Double = Double.NaN)
 
 /** Texte des Entwurfs aus den Ressourcen der Oberfläche (#69). */
 class AndroidDoughTexts(private val context: Context) : DoughTexts {
@@ -336,7 +337,7 @@ class DoughViewModel(
         val lines = result.sections.flatMap { it.lines }
         return TOTALS_ORDER.mapNotNull { role ->
             val grams = lines.filter { it.role == role }.sumOf { it.grams }
-            if (grams <= 0) null else TotalItem(DoughNumbers.weight(grams, role, language, weightUnit), texts.ingredient(role, yeastKind))
+            if (grams <= 0) null else TotalItem(DoughNumbers.weight(grams, role, language, weightUnit), texts.ingredient(role, yeastKind), role, grams)
         }
     }
 
