@@ -203,6 +203,17 @@ private fun DoughRunEntity.toRun() = DoughRun(
     recipeId = recipeId,
     startedAt = startedAt,
     doneAt = doneAt.split(',').mapNotNull { it.trim().toLongOrNull() }.take(TimelinePhase.MAX_PHASES),
+    bakeAt = bakeAt,
+    planned = planned,
+    stretchMinutes = stretchMinutes,
 )
 
-private fun DoughRun.toRow() = DoughRunEntity(id = id, recipeId = recipeId, startedAt = startedAt, doneAt = doneAt.joinToString(","))
+private fun DoughRun.toRow() = DoughRunEntity(
+    id = id,
+    recipeId = recipeId,
+    startedAt = startedAt,
+    doneAt = doneAt.joinToString(","),
+    bakeAt = bakeAt,
+    planned = planned,
+    stretchMinutes = stretchMinutes,
+)

@@ -26,7 +26,8 @@ object DoughRunPlanner {
     fun state(timeline: List<TimelinePhase>, run: DoughRun): State {
         var earliest = run.startedAt
         var latest = run.startedAt
-        val times = timeline.mapIndexed { index, phase ->
+        // Seit 0.76.0 kann die längste Ruhezeit beim Start angepasst sein, damit der Backtermin bleibt.
+        val times = DoughBakePlan.adjusted(timeline, run.stretchMinutes).mapIndexed { index, phase ->
             val doneAt = run.doneAt.getOrNull(index)
             val time = if (doneAt != null) {
                 PhaseTime(earliest, latest, doneAt, doneAt, done = true)
