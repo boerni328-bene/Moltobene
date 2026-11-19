@@ -30,6 +30,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FilterChip
@@ -1240,6 +1241,8 @@ private fun DoughForm(
                 total = success?.let { DoughNumbers.weight(it.totalGrams, 0, language, unit) },
                 totals = resultTotals,
                 lines = listOfNotNull(prefermentBar, mainBar, plainBar),
+                // Mit Vorteig trennt eine Linie die Vorteig-Zeile vom Hauptteig (Wunsch vom 19.11.2026).
+                dividerAfterFirst = prefermentBar != null && mainBar != null,
                 totalGrams = success?.totalGrams ?: Double.NaN,
                 onScale = { scaling = it },
             )
@@ -1542,6 +1545,7 @@ internal fun ResultTop(
     total: String?,
     totals: List<TotalItem>?,
     lines: List<String> = emptyList(),
+    dividerAfterFirst: Boolean = false,
     totalGrams: Double = Double.NaN,
     onScale: ((TotalItem) -> Unit)? = null,
 ) {
@@ -1576,8 +1580,11 @@ internal fun ResultTop(
                     )
                     for (item in totals.orEmpty()) TotalTile(item, compact = true, onScale = onScale)
                 }
-                for (line in lines) {
+                lines.forEachIndexed { index, line ->
                     Text(line, style = MaterialTheme.typography.bodySmall, modifier = Modifier.semantics(mergeDescendants = true) {})
+                    if (index == 0 && dividerAfterFirst && lines.size > 1) {
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+                    }
                 }
             }
         }

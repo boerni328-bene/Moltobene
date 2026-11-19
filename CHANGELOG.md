@@ -11,6 +11,9 @@ Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 - **Der Backtermin bleibt.** Wer früher oder später startet als geplant, behält den Backtermin. Die längste Ruhezeit wird dafür länger oder kürzer (Biga oder Poolish, sonst meist die Teigkugeln im Kühlschrank), höchstens auf die Hälfte bzw. das Dreifache. Reicht das nicht, nennt die App den neuen Backtermin.
 - Laufende Teige zeigen ihren Backtermin.
 
+### Geändert
+- **Teigrechner:** Mit Vorteig trennt oben eine Linie die Zeile des Vorteigs (z. B. Biga) vom Hauptteig.
+
 ## [0.76.0] – 2026-11-18 (versionCode 133)
 
 ### Neu
