@@ -109,6 +109,8 @@ internal fun PresetCard(
 ) {
     var deleting by rememberSaveable { mutableStateOf(false) }
     var pending by rememberSaveable { mutableStateOf(-1) }
+    // „Speichern“ in der Nachfrage: nach dem Speichern zu dieser Voreinstellung wechseln (Wunsch vom 19.11.2026).
+    var afterSave by rememberSaveable { mutableStateOf(-1) }
     fun choose(i: Int) {
         when {
             i < 0 || i == index -> Unit
@@ -160,11 +162,20 @@ internal fun PresetCard(
             title = { Text(stringResource(R.string.dough_preset_replace_title)) },
             text = { Text(stringResource(R.string.dough_preset_replace_text)) },
             confirmButton = {
-                TextButton(onClick = {
-                    val chosen = pending
-                    pending = -1
-                    onSelect(chosen)
-                }) { Text(stringResource(R.string.dough_preset_replace_confirm)) }
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                    if (canSave) {
+                        TextButton(onClick = {
+                            afterSave = pending
+                            pending = -1
+                            onSavingChange(true)
+                        }) { Text(stringResource(R.string.save)) }
+                    }
+                    TextButton(onClick = {
+                        val chosen = pending
+                        pending = -1
+                        onSelect(chosen)
+                    }) { Text(stringResource(R.string.discard)) }
+                }
             },
             dismissButton = { TextButton(onClick = { pending = -1 }) { Text(stringResource(R.string.cancel)) } },
         )
@@ -175,10 +186,14 @@ internal fun PresetCard(
             existing = entries.mapNotNull { it.ownName },
             onSave = { typed ->
                 val result = onSave(typed)
-                if (result == DoughPresets.SaveResult.SAVED) onSavingChange(false)
+                if (result == DoughPresets.SaveResult.SAVED) {
+                    onSavingChange(false)
+                    if (afterSave >= 0) onSelect(afterSave)
+                    afterSave = -1
+                }
                 result
             },
-            onDismiss = { onSavingChange(false) },
+            onDismiss = { onSavingChange(false); afterSave = -1 },
         )
     }
     val ownName = entries.getOrNull(index)?.ownName

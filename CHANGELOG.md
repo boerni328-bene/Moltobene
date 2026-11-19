@@ -14,6 +14,8 @@ Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 ### Geändert
 - **Teigrechner:** Mit Vorteig trennt oben eine Linie die Zeile des Vorteigs (z. B. Biga) vom Hauptteig.
 - **Teigrechner:** Zutaten mit 0 % (z. B. Öl) stehen nicht mehr in der Zusammenfassung des Teigs.
+- **Teigrechner: Voreinstellung wechseln.** Weichen die eigenen Werte von allen Voreinstellungen ab, fragt die App jetzt „Eigene Werte verwerfen?“ mit drei Möglichkeiten: „Speichern“ merkt die Werte als eigene Voreinstellung und wechselt danach, „Verwerfen“ wechselt ohne sie, „Abbrechen“ bleibt. Bisher hieß es „Ersetzen“.
+- „New York“ heißt jetzt „New York Style“.
 
 ## [0.76.0] – 2026-11-18 (versionCode 133)
 

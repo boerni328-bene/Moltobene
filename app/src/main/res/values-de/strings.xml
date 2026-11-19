@@ -632,7 +632,7 @@
     <string name="dough_preset_neapolitan">Neapolitanisch</string>
     <string name="dough_preset_sheet_pan">Pizza vom Blech</string>
     <string name="dough_preset_white_bread">Weißbrot</string>
-    <string name="dough_preset_new_york">New York</string>
+    <string name="dough_preset_new_york">New York Style</string>
     <string name="dough_preset_detroit">Detroit</string>
     <string name="dough_preset_focaccia">Focaccia</string>
     <string name="dough_preset_pinsa">Pinsa romana</string>
@@ -654,9 +654,8 @@
     <string name="dough_preset_too_many">Höchstens %1$d eigene Voreinstellungen. Eine löschen, um Platz zu schaffen.</string>
     <string name="dough_preset_delete">Voreinstellung löschen</string>
     <string name="dough_preset_delete_title">Voreinstellung „%1$s“ wirklich löschen?</string>
-    <string name="dough_preset_replace_title">Eigene Werte ersetzen?</string>
-    <string name="dough_preset_replace_text">Die aktuellen Werte weichen von allen Voreinstellungen ab und gehen verloren. Mit „Als Voreinstellung speichern“ lassen sie sich vorher merken.</string>
-    <string name="dough_preset_replace_confirm">Ersetzen</string>
+    <string name="dough_preset_replace_title">Eigene Werte verwerfen?</string>
+    <string name="dough_preset_replace_text">Die aktuellen Werte weichen von allen Voreinstellungen ab. „Speichern“ merkt sie als eigene Voreinstellung, „Verwerfen“ wechselt ohne sie.</string>
     <string name="dough_cake_kind_label">Kuchenart</string>
     <string name="dough_saved">Als Entwurf gespeichert. Zubereitung ergänzen.</string>
     <string name="dough_saved_with_steps">Als Entwurf mit Zeitplan und Zubereitung gespeichert.</string>

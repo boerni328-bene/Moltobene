@@ -634,7 +634,7 @@
     <string name="dough_preset_neapolitan">Neapolitan</string>
     <string name="dough_preset_sheet_pan">Sheet-pan pizza</string>
     <string name="dough_preset_white_bread">White bread</string>
-    <string name="dough_preset_new_york">New York</string>
+    <string name="dough_preset_new_york">New York style</string>
     <string name="dough_preset_detroit">Detroit</string>
     <string name="dough_preset_focaccia">Focaccia</string>
     <string name="dough_preset_pinsa">Pinsa romana</string>
@@ -656,9 +656,8 @@
     <string name="dough_preset_too_many">Up to %1$d own presets. Delete one to make room.</string>
     <string name="dough_preset_delete">Delete preset</string>
     <string name="dough_preset_delete_title">Really delete preset “%1$s”?</string>
-    <string name="dough_preset_replace_title">Replace custom values?</string>
-    <string name="dough_preset_replace_text">The current values differ from every preset and will be lost. “Save as preset” keeps them first.</string>
-    <string name="dough_preset_replace_confirm">Replace</string>
+    <string name="dough_preset_replace_title">Discard custom values?</string>
+    <string name="dough_preset_replace_text">The current values differ from every preset. “Save” keeps them as a custom preset, “Discard” switches without them.</string>
     <string name="dough_cake_kind_label">Type of cake</string>
     <string name="dough_saved">Saved as a draft. Add the instructions.</string>
     <string name="dough_saved_with_steps">Saved as a draft with schedule and instructions.</string>

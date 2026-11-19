@@ -752,7 +752,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitUntilGone(text(R.string.dough_preset_replace_title))
         choosePreset(R.string.dough_preset_neapolitan)
         waitForText(text(R.string.dough_preset_replace_title))
-        composeRule.onNode(hasText(text(R.string.dough_preset_replace_confirm)) and hasClickAction()).performClick()
+        composeRule.onNode(hasText(text(R.string.discard)) and hasClickAction()).performClick()
         // Danach passen die Werte zur Voreinstellung und es kommt keine Nachfrage mehr.
         waitUntilGone(text(R.string.dough_preset_replace_title))
         screenshot("14l-teigrechner-voreinstellung")
