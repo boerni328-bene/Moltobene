@@ -924,7 +924,8 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("14p-zeitplan")
 
         // Backtermin wählen: Tag und Uhrzeit übernehmen, wie sie stehen (frühester Termin); dann gibt es „Planen“.
-        val change = text(R.string.schedule_bake_change, "").trim()
+        // Nur der Teil vor dem Termin (in der Pseudosprache steht danach noch Fülltext).
+        val change = text(R.string.schedule_bake_change, "0000").substringBefore("0000")
         composeRule.onNode(hasContentDescription(change, substring = true)).performScrollTo().performClick()
         waitForText(text(R.string.schedule_date_next))
         screenshot("14p1-backtermin-tag")
