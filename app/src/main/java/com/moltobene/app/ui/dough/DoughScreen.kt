@@ -1231,8 +1231,10 @@ private fun DoughForm(
         add(stringResource(R.string.dough_summary_pieces, count.trim(), "${piece.trim()} ${unit.label}"))
         add(summaryValue(R.string.dough_ingredient_water, water))
         add(summaryValue(R.string.dough_ingredient_salt, salt))
-        for (spec in shownExtras) add(summaryValue(spec.label, spec.text))
-        add(summaryValue(R.string.dough_ingredient_oil, oil))
+        // Zutaten mit 0 % stehen nicht in der Zusammenfassung (Wunsch vom 19.11.2026).
+        fun used(text: String) = parseNumber(text).let { !it.isFinite() || it > 0 }
+        for (spec in shownExtras) if (used(spec.text)) add(summaryValue(spec.label, spec.text))
+        if (used(oil)) add(summaryValue(R.string.dough_ingredient_oil, oil))
     }.joinToString(SUMMARY_SEPARATOR)
     Column(modifier = Modifier.fillMaxSize()) {
         if (pinned) {

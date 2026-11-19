@@ -13,6 +13,7 @@ Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
 ### Geändert
 - **Teigrechner:** Mit Vorteig trennt oben eine Linie die Zeile des Vorteigs (z. B. Biga) vom Hauptteig.
+- **Teigrechner:** Zutaten mit 0 % (z. B. Öl) stehen nicht mehr in der Zusammenfassung des Teigs.
 
 ## [0.76.0] – 2026-11-18 (versionCode 133)
 
