@@ -55,6 +55,9 @@ class HomeViewModel(
         .mapLatest { runs ->
             runs.mapNotNull { run ->
                 val recipe = repository.getRecipe(run.recipeId)?.takeIf { it.timeline.isNotEmpty() } ?: return@mapNotNull null
+                if (run.planned) {
+                    return@mapNotNull RunningDough(recipe.id, recipe.title, null, run.startedAt, run.startedAt, planned = true, bakeAt = run.bakeAt)
+                }
                 val state = DoughRunPlanner.state(recipe.timeline, run)
                 val time = state.phases.getOrNull(state.current)
                 RunningDough(
@@ -63,6 +66,7 @@ class HomeViewModel(
                     phase = recipe.timeline.getOrNull(state.current)?.text,
                     earliest = time?.endEarliest ?: 0L,
                     latest = time?.endLatest ?: 0L,
+                    bakeAt = run.bakeAt,
                 )
             }
         }
@@ -97,4 +101,13 @@ class HomeViewModel(
 }
 
 /** Ein laufender Teig auf der Startseite; [phase] ist null, wenn alle Phasen abgeschlossen sind. */
-data class RunningDough(val recipeId: String, val title: String, val phase: String?, val earliest: Long, val latest: Long)
+/** Ein laufender oder geplanter Teig auf der Startseite; bei [planned] ist [earliest] der geplante Start und [bakeAt] der Backtermin. */
+data class RunningDough(
+    val recipeId: String,
+    val title: String,
+    val phase: String?,
+    val earliest: Long,
+    val latest: Long,
+    val planned: Boolean = false,
+    val bakeAt: Long? = null,
+)

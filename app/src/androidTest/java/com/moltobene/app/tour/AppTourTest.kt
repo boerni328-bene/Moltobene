@@ -752,7 +752,7 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitUntilGone(text(R.string.dough_preset_replace_title))
         choosePreset(R.string.dough_preset_neapolitan)
         waitForText(text(R.string.dough_preset_replace_title))
-        composeRule.onNode(hasText(text(R.string.dough_preset_replace_confirm)) and hasClickAction()).performClick()
+        composeRule.onNode(hasText(text(R.string.discard)) and hasClickAction()).performClick()
         // Danach passen die Werte zur Voreinstellung und es kommt keine Nachfrage mehr.
         waitUntilGone(text(R.string.dough_preset_replace_title))
         screenshot("14l-teigrechner-voreinstellung")
@@ -892,7 +892,10 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("14c-teigrechner-entwurf")
     }
 
-    /** Zeitplan eines Teigs (#71): Teig starten, Phase abschließen, laufender Teig auf der Startseite. */
+    /**
+     * Zeitplan eines Teigs (#71): Uhrzeiten mit Backtermin (0.77.0), Planen, Jetzt starten, Phase abschließen,
+     * laufender und geplanter Teig auf der Startseite.
+     */
     @Test
     fun teigZeitplan() {
         addSampleRecipes()
@@ -906,7 +909,7 @@ class AppTourTest(private val variant: DisplayVariant) {
                     ingredients = listOf(com.moltobene.app.data.Ingredient("500 g Mehl")),
                     steps = listOf("Biga reifen lassen (1 bis 3 Tage, im Kühlschrank)", "Backen (8 bis 15 Minuten, im Backofen)"),
                     timeline = listOf(
-                        com.moltobene.app.data.TimelinePhase("Biga reifen lassen", 24 * 60, 72 * 60, com.moltobene.app.data.PhasePlace.FRIDGE),
+                        com.moltobene.app.data.TimelinePhase("Biga reifen lassen", 24 * 60, 24 * 60, com.moltobene.app.data.PhasePlace.FRIDGE),
                         com.moltobene.app.data.TimelinePhase("Teig kneten", 10, 30, com.moltobene.app.data.PhasePlace.NONE),
                         com.moltobene.app.data.TimelinePhase("Backen", 8, 15, com.moltobene.app.data.PhasePlace.OVEN),
                     ),
@@ -919,7 +922,30 @@ class AppTourTest(private val variant: DisplayVariant) {
         waitForText(text(R.string.schedule_start))
         composeRule.onNodeWithText(text(R.string.schedule_start)).performScrollTo().assertIsDisplayed()
         screenshot("14p-zeitplan")
-        composeRule.onNodeWithText(text(R.string.schedule_start)).performScrollTo().performClick()
+
+        // Backtermin wählen: Tag und Uhrzeit übernehmen, wie sie stehen (frühester Termin); dann gibt es „Planen“.
+        // Nur der Teil vor dem Termin (in der Pseudosprache steht danach noch Fülltext).
+        val change = text(R.string.schedule_bake_change, "0000").substringBefore("0000")
+        composeRule.onNode(hasContentDescription(change, substring = true)).performScrollTo().performClick()
+        waitForText(text(R.string.schedule_date_next))
+        screenshot("14p1-backtermin-tag")
+        composeRule.onNodeWithText(text(R.string.schedule_date_next)).performClick()
+        waitForText(text(R.string.schedule_time_set))
+        screenshot("14p2-backtermin-uhrzeit")
+        composeRule.onNodeWithText(text(R.string.schedule_time_set)).performClick()
+        waitForText(text(R.string.schedule_plan))
+        composeRule.onNodeWithText(text(R.string.schedule_plan)).performScrollTo().assertIsDisplayed()
+        screenshot("14p3-zeitplan-uhrzeiten")
+        composeRule.onNodeWithText(text(R.string.schedule_plan)).performScrollTo().performClick()
+        waitForText(text(R.string.schedule_start_now))
+        composeRule.onNodeWithText(text(R.string.schedule_start_now)).performScrollTo().assertIsDisplayed()
+        screenshot("14p4-geplanter-teig")
+        val planned = runBlocking { container().repository.observeRuns().first().single() }
+        assertTrue(planned.planned)
+        assertNotNull(planned.bakeAt)
+
+        // Jetzt starten: Der Backtermin bleibt.
+        composeRule.onNodeWithText(text(R.string.schedule_start_now)).performScrollTo().performClick()
         waitForText(text(R.string.schedule_complete))
         composeRule.onNodeWithText(text(R.string.schedule_complete)).performScrollTo().assertIsDisplayed()
         screenshot("14q-zeitplan-lauf")
@@ -928,11 +954,22 @@ class AppTourTest(private val variant: DisplayVariant) {
         screenshot("14r-zeitplan-phase-erledigt")
         val run = runBlocking { container().repository.observeRuns().first().single() }
         assertEquals(1, run.doneAt.size)
+        assertFalse(run.planned)
+        assertEquals(planned.bakeAt, run.bakeAt)
+
+        // Ein zweiter, geplanter Teig steht auf der Startseite in einer eigenen Kachel.
+        runBlocking {
+            val start = System.currentTimeMillis() + 3 * 60 * 60_000L
+            container().repository.saveRun(
+                run.copy(id = "geplant", startedAt = start, doneAt = emptyList(), planned = true, bakeAt = start + (24 * 60 + 30) * 60_000L, stretchMinutes = 0),
+            )
+        }
 
         // Zurück zur Startseite: Der laufende Teig steht ganz oben.
         pressBack()
         pressBack()
         waitForText(text(R.string.home_running_title))
+        composeRule.onNodeWithText(text(R.string.home_planned_title)).performScrollTo().assertIsDisplayed()
         composeRule.onAllNodesWithText(title).onFirst().performScrollTo().assertIsDisplayed()
         screenshot("14s-startseite-laufender-teig")
     }

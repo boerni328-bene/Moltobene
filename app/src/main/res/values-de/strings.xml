@@ -249,7 +249,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Teigrechner: Die Mengen oben lassen sich antippen und ändern, z. B. der Gesamtteig oder das Mehl. Der ganze Teig wird im gleichen Verhältnis umgerechnet.</item>
+        <item>Zeitplan mit Uhrzeiten: Im Rezept den Backtermin wählen, z. B. Samstag 18 Uhr. Die App rechnet rückwärts, wann jeder Schritt beginnt, und zeigt Nachtschritte an.</item>
+        <item>„Planen“ legt den Teig als geplanten Teig auf die Startseite. Wer früher oder später startet, behält den Backtermin: Die längste Ruhezeit wird länger oder kürzer.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Geräts) -->
@@ -631,7 +632,7 @@
     <string name="dough_preset_neapolitan">Neapolitanisch</string>
     <string name="dough_preset_sheet_pan">Pizza vom Blech</string>
     <string name="dough_preset_white_bread">Weißbrot</string>
-    <string name="dough_preset_new_york">New York</string>
+    <string name="dough_preset_new_york">New York Style</string>
     <string name="dough_preset_detroit">Detroit</string>
     <string name="dough_preset_focaccia">Focaccia</string>
     <string name="dough_preset_pinsa">Pinsa romana</string>
@@ -653,9 +654,8 @@
     <string name="dough_preset_too_many">Höchstens %1$d eigene Voreinstellungen. Eine löschen, um Platz zu schaffen.</string>
     <string name="dough_preset_delete">Voreinstellung löschen</string>
     <string name="dough_preset_delete_title">Voreinstellung „%1$s“ wirklich löschen?</string>
-    <string name="dough_preset_replace_title">Eigene Werte ersetzen?</string>
-    <string name="dough_preset_replace_text">Die aktuellen Werte weichen von allen Voreinstellungen ab und gehen verloren. Mit „Als Voreinstellung speichern“ lassen sie sich vorher merken.</string>
-    <string name="dough_preset_replace_confirm">Ersetzen</string>
+    <string name="dough_preset_replace_title">Eigene Werte verwerfen?</string>
+    <string name="dough_preset_replace_text">Die aktuellen Werte weichen von allen Voreinstellungen ab. „Speichern“ merkt sie als eigene Voreinstellung, „Verwerfen“ wechselt ohne sie.</string>
     <string name="dough_cake_kind_label">Kuchenart</string>
     <string name="dough_saved">Als Entwurf gespeichert. Zubereitung ergänzen.</string>
     <string name="dough_saved_with_steps">Als Entwurf mit Zeitplan und Zubereitung gespeichert.</string>
@@ -966,5 +966,25 @@
     <string name="schedule_started">Gestartet %1$s</string>
     <string name="schedule_remove_confirm">Teig aus den laufenden Teigen entfernen? Das Rezept bleibt erhalten.</string>
     <string name="schedule_phase_semantics">%1$s. %2$s. %3$s</string>
+    <string name="schedule_bake_label">Backtermin</string>
+    <string name="schedule_bake_change">Backtermin ändern, jetzt %1$s</string>
+    <string name="schedule_slot_start">Beginn %1$s</string>
+    <string name="schedule_slot_night">nachts</string>
+    <string name="schedule_slot_past">schon vorbei</string>
+    <string name="schedule_plan_start">Start %1$s</string>
+    <string name="schedule_plan_total">Gesamtdauer %1$s</string>
+    <string name="duration_list">%1$s, %2$s</string>
+    <string name="schedule_flex">Bei früherem oder späterem Start wird „%1$s“ länger oder kürzer. Der Backtermin bleibt.</string>
+    <string name="schedule_late_kept">Der Start wäre %1$s gewesen. Bei Start jetzt wird „%2$s“ kürzer, der Backtermin bleibt.</string>
+    <string name="schedule_late_moved">Der Start wäre %1$s gewesen. Bei Start jetzt wird erst %2$s gebacken.</string>
+    <string name="schedule_plan">Planen</string>
+    <string name="schedule_start_now">Jetzt starten</string>
+    <string name="schedule_planned_title">Geplant: Start %1$s</string>
+    <string name="schedule_planned_missed">Der geplante Start (%1$s) ist vorbei.</string>
+    <string name="schedule_bake_planned">Backen %1$s</string>
+    <string name="schedule_date_next">Uhrzeit wählen</string>
+    <string name="schedule_time_set">Festlegen</string>
+    <string name="schedule_time_title">Uhrzeit zum Backen</string>
+    <string name="home_planned_title">Geplanter Teig</string>
     <string name="home_running_title">Laufende Teige</string>
 </resources>

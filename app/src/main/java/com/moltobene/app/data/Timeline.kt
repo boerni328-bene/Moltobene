@@ -52,4 +52,10 @@ data class DoughRun(
     val recipeId: String,
     val startedAt: Long,
     val doneAt: List<Long> = emptyList(),
+    /** Geplanter Backtermin (Beginn der letzten Phase, 0.77.0); null bei Teigen ohne Backtermin. */
+    val bakeAt: Long? = null,
+    /** Noch nicht gestartet: [startedAt] ist der geplante Start. */
+    val planned: Boolean = false,
+    /** Um so viele Minuten ist die längste Ruhezeit länger (negativ: kürzer), damit der Backtermin bleibt. */
+    val stretchMinutes: Int = 0,
 )

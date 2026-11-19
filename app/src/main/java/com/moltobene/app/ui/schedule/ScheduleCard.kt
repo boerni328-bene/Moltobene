@@ -42,9 +42,13 @@ import com.moltobene.app.data.dough.DoughRunPlanner
 import com.moltobene.app.ui.dough.AndroidDurationText
 import com.moltobene.app.ui.theme.Spacing
 
-/** Aktionen der Karte „Zeitplan“ (#71). */
+/** Aktionen der Karte „Zeitplan“ (#71); [bakeAt] ist der gewählte Backtermin (0.77.0), null heißt: so früh wie möglich. */
 class ScheduleActions(
+    val bakeAt: Long?,
+    val onBakeAt: (Long) -> Unit,
     val onStart: () -> Unit,
+    val onPlan: () -> Unit,
+    val onStartPlanned: (DoughRun) -> Unit,
     val onComplete: (DoughRun) -> Unit,
     val onUndo: (DoughRun) -> Unit,
     val onRemove: (DoughRun) -> Unit,
@@ -91,7 +95,6 @@ fun ScheduleCard(
     actions: ScheduleActions,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     var removing by remember { mutableStateOf<DoughRun?>(null) }
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
         Text(
@@ -99,27 +102,22 @@ fun ScheduleCard(
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(top = Spacing.m).semantics { heading() },
         )
-        if (runs.isEmpty()) {
-            Surface(color = MaterialTheme.colorScheme.surfaceContainer, shape = MaterialTheme.shapes.medium) {
-                Column(modifier = Modifier.fillMaxWidth().padding(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
-                    timeline.forEach { phase -> PhaseText(phase, context) }
-                    Text(stringResource(R.string.schedule_hint), style = MaterialTheme.typography.bodyMedium)
-                }
+        if (runs.isEmpty()) BakePlanPanel(timeline, now, actions)
+        runs.forEach { run ->
+            if (run.planned) {
+                PlannedRunView(timeline, run, now, onStartNow = { actions.onStartPlanned(run) }, onRemove = { removing = run })
+            } else {
+                RunView(
+                    timeline = timeline,
+                    run = run,
+                    now = now,
+                    showStart = runs.size > 1,
+                    actions = actions,
+                    onRemove = { removing = run },
+                )
             }
         }
-        runs.forEach { run ->
-            RunView(
-                timeline = timeline,
-                run = run,
-                now = now,
-                showStart = runs.size > 1,
-                actions = actions,
-                onRemove = { removing = run },
-            )
-        }
-        if (runs.isEmpty()) {
-            Button(onClick = actions.onStart) { Text(stringResource(R.string.schedule_start)) }
-        } else {
+        if (runs.isNotEmpty()) {
             OutlinedButton(onClick = actions.onStart) { Text(stringResource(R.string.schedule_start)) }
         }
     }
@@ -134,21 +132,6 @@ fun ScheduleCard(
                 }) { Text(stringResource(R.string.remove)) }
             },
             dismissButton = { TextButton(onClick = { removing = null }) { Text(stringResource(R.string.cancel)) } },
-        )
-    }
-}
-
-/** Phase mit Dauer und Ort, z. B. „Biga reifen lassen (1 bis 3 Tage, im Kühlschrank)“. */
-@Composable
-private fun PhaseText(phase: TimelinePhase, context: Context) {
-    val place = AndroidDurationText.place(context, phase.place)
-    val duration = AndroidDurationText.format(context, phase.minMinutes, phase.maxMinutes)
-    Column {
-        Text(phase.text, style = MaterialTheme.typography.bodyLarge)
-        Text(
-            if (place.isEmpty()) duration else "$duration, $place",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -174,6 +157,9 @@ private fun RunView(
                 )
             }
             RunStatus(timeline, state, now)
+            run.bakeAt?.let { bake ->
+                Text(stringResource(R.string.schedule_bake_planned, formatMoment(context, bake)), style = MaterialTheme.typography.bodyLarge)
+            }
             timeline.forEachIndexed { index, phase ->
                 val time = state.phases[index]
                 val current = index == state.current

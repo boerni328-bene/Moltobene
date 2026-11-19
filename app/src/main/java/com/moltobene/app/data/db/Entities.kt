@@ -194,7 +194,11 @@ data class PhaseEntity(
     val place: String,
 )
 
-/** Laufender Teig (#71), seit Datenbank-Version 4. [doneAt] sind die Abschlusszeiten der Phasen, durch Komma getrennt. */
+/**
+ * Laufender Teig (#71), seit Datenbank-Version 4. [doneAt] sind die Abschlusszeiten der Phasen, durch Komma getrennt.
+ * Seit Version 5 (Uhrzeiten, 0.77.0): [bakeAt] geplanter Backtermin, [planned] noch nicht gestartet (dann ist
+ * [startedAt] der geplante Start), [stretchMinutes] Verlängerung (oder Kürzung) der längsten Ruhezeit beim Start.
+ */
 @Entity(
     tableName = "dough_runs",
     foreignKeys = [
@@ -212,4 +216,7 @@ data class DoughRunEntity(
     val recipeId: String,
     val startedAt: Long,
     val doneAt: String,
+    val bakeAt: Long? = null,
+    @ColumnInfo(defaultValue = "0") val planned: Boolean = false,
+    @ColumnInfo(defaultValue = "0") val stretchMinutes: Int = 0,
 )

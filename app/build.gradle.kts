@@ -17,8 +17,8 @@ android {
         applicationId = "com.moltobene.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 133
-        versionName = "0.76.0"
+        versionCode = 134
+        versionName = "0.77.0"
 
         // Rundgang durch die App auf dem Emulator (app/src/androidTest).
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -131,6 +131,12 @@ configurations.configureEach {
 // Baupläne der Datenbank (für spätere Umbauten/Migrationen) werden in app/schemas abgelegt.
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
+}
+
+// Debug und Release schreiben denselben Bauplan. Liefen beide gleichzeitig, las einer eine halb geschriebene Datei
+// (Build 44573259419 bei Datenbank 5). Deshalb nacheinander.
+tasks.matching { it.name == "kspDebugKotlin" }.configureEach {
+    mustRunAfter(tasks.matching { it.name == "kspReleaseKotlin" })
 }
 
 dependencies {
