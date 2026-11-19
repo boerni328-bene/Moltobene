@@ -133,6 +133,12 @@ ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
 
+// Debug und Release schreiben denselben Bauplan. Liefen beide gleichzeitig, las einer eine halb geschriebene Datei
+// (Build 44573259419 bei Datenbank 5). Deshalb nacheinander.
+tasks.matching { it.name == "kspDebugKotlin" }.configureEach {
+    mustRunAfter(tasks.matching { it.name == "kspReleaseKotlin" })
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
