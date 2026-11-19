@@ -33,6 +33,20 @@ object AndroidDurationText {
         }
     }
 
+    /** Gesamtdauer in Tagen, Stunden und Minuten, z. B. „1 Tag, 45 Minuten“ (Uhrzeiten, 0.77.0). */
+    fun total(context: Context, minutes: Int): String {
+        val res = context.resources
+        val days = minutes / (24 * 60)
+        val hours = minutes % (24 * 60) / 60
+        val rest = minutes % 60
+        val parts = buildList {
+            if (days > 0) add(res.getQuantityString(R.plurals.duration_days, days, days))
+            if (hours > 0) add(res.getQuantityString(R.plurals.duration_hours, hours, hours))
+            if (rest > 0 || isEmpty()) add(res.getQuantityString(R.plurals.duration_minutes, rest, rest))
+        }
+        return parts.reduce { a, b -> res.getString(R.string.duration_list, a, b) }
+    }
+
     fun place(context: Context, place: PhasePlace): String = when (place) {
         PhasePlace.NONE -> ""
         PhasePlace.ROOM -> context.getString(R.string.place_room)

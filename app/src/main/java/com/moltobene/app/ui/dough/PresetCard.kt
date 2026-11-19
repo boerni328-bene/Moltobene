@@ -162,7 +162,13 @@ internal fun PresetCard(
             title = { Text(stringResource(R.string.dough_preset_replace_title)) },
             text = { Text(stringResource(R.string.dough_preset_replace_text)) },
             confirmButton = {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                // Drei Möglichkeiten passen nicht nebeneinander: untereinander, rechtsbündig.
+                Column(horizontalAlignment = Alignment.End, modifier = Modifier.fillMaxWidth()) {
+                    TextButton(onClick = {
+                        val chosen = pending
+                        pending = -1
+                        onSelect(chosen)
+                    }) { Text(stringResource(R.string.discard)) }
                     if (canSave) {
                         TextButton(onClick = {
                             afterSave = pending
@@ -170,14 +176,9 @@ internal fun PresetCard(
                             onSavingChange(true)
                         }) { Text(stringResource(R.string.save)) }
                     }
-                    TextButton(onClick = {
-                        val chosen = pending
-                        pending = -1
-                        onSelect(chosen)
-                    }) { Text(stringResource(R.string.discard)) }
+                    TextButton(onClick = { pending = -1 }) { Text(stringResource(R.string.cancel)) }
                 }
             },
-            dismissButton = { TextButton(onClick = { pending = -1 }) { Text(stringResource(R.string.cancel)) } },
         )
     }
 

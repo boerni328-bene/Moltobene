@@ -84,7 +84,7 @@ internal fun BakePlanPanel(timeline: List<TimelinePhase>, now: Long, actions: Sc
                 Text(stringResource(R.string.schedule_plan_start, formatMoment(context, start)), style = MaterialTheme.typography.titleMedium)
                 val total = timeline.sumOf { it.maxMinutes }
                 Text(
-                    stringResource(R.string.schedule_plan_total, AndroidDurationText.format(context, total, total)),
+                    stringResource(R.string.schedule_plan_total, AndroidDurationText.total(context, total)),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }

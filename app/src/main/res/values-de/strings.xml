@@ -973,6 +973,7 @@
     <string name="schedule_slot_past">schon vorbei</string>
     <string name="schedule_plan_start">Start %1$s</string>
     <string name="schedule_plan_total">Gesamtdauer %1$s</string>
+    <string name="duration_list">%1$s, %2$s</string>
     <string name="schedule_flex">Bei früherem oder späterem Start wird „%1$s“ länger oder kürzer. Der Backtermin bleibt.</string>
     <string name="schedule_late_kept">Der Start wäre %1$s gewesen. Bei Start jetzt wird „%2$s“ kürzer, der Backtermin bleibt.</string>
     <string name="schedule_late_moved">Der Start wäre %1$s gewesen. Bei Start jetzt wird erst %2$s gebacken.</string>

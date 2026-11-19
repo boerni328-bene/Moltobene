@@ -976,6 +976,7 @@
     <string name="schedule_slot_past">already past</string>
     <string name="schedule_plan_start">Start %1$s</string>
     <string name="schedule_plan_total">Total time %1$s</string>
+    <string name="duration_list">%1$s, %2$s</string>
     <string name="schedule_flex">Starting earlier or later makes “%1$s” longer or shorter. The bake time stays.</string>
     <string name="schedule_late_kept">The start would have been %1$s. Starting now makes “%2$s” shorter, and the bake time stays.</string>
     <string name="schedule_late_moved">The start would have been %1$s. Starting now, baking is at %2$s.</string>
