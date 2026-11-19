@@ -196,7 +196,7 @@ data class PhaseEntity(
 
 /**
  * Laufender Teig (#71), seit Datenbank-Version 4. [doneAt] sind die Abschlusszeiten der Phasen, durch Komma getrennt.
- * Seit Version 5 (Uhrzeiten, 0.76.0): [bakeAt] geplanter Backtermin, [planned] noch nicht gestartet (dann ist
+ * Seit Version 5 (Uhrzeiten, 0.77.0): [bakeAt] geplanter Backtermin, [planned] noch nicht gestartet (dann ist
  * [startedAt] der geplante Start), [stretchMinutes] Verlängerung (oder Kürzung) der längsten Ruhezeit beim Start.
  */
 @Entity(

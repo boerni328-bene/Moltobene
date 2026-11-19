@@ -290,7 +290,16 @@ private fun TileGrid(
 ) {
     val recipesText = count?.let { pluralStringResource(R.plurals.home_recipes_count, it, it) }
     val context = LocalContext.current
-    val runningText = running.firstOrNull()?.let { first ->
+    // Laufende Teige zuerst; ein geplanter Teig (0.77.0) bekommt eine eigene Kachel, der nächste Start zuerst.
+    val active = running.filterNot { it.planned }
+    val nextPlanned = running.filter { it.planned }.minByOrNull { it.earliest }
+    val plannedText = nextPlanned?.let { planned ->
+        val name = planned.title.ifBlank { stringResource(R.string.untitled_recipe) }
+        val start = stringResource(R.string.schedule_plan_start, formatMoment(context, planned.earliest))
+        val bake = planned.bakeAt?.let { "\n" + stringResource(R.string.schedule_bake_planned, formatMoment(context, it)) }.orEmpty()
+        "$name\n$start$bake"
+    }
+    val runningText = active.firstOrNull()?.let { first ->
         val name = first.title.ifBlank { stringResource(R.string.untitled_recipe) }
         val phase = if (first.phase == null) stringResource(R.string.schedule_finished) else stringResource(R.string.schedule_now, first.phase)
         val next = if (first.phase == null) "" else "\n" + if (first.earliest == first.latest) {
@@ -310,7 +319,19 @@ private fun TileGrid(
                     R.drawable.ic_restaurant,
                     stringResource(R.string.home_running_title),
                     runningText,
-                    { onOpenRecipe(running.first().recipeId) },
+                    { onOpenRecipe(active.first().recipeId) },
+                    m,
+                    tertiary = true,
+                )
+            }
+        }
+        if (plannedText != null && nextPlanned != null) {
+            add { m ->
+                CompactTile(
+                    R.drawable.ic_restaurant,
+                    stringResource(R.string.home_planned_title),
+                    plannedText,
+                    { onOpenRecipe(nextPlanned.recipeId) },
                     m,
                     tertiary = true,
                 )

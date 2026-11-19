@@ -249,7 +249,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">New in version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Dough calculator: tap an amount at the top, such as the total dough or the flour, to change it. The whole dough is adjusted in the same ratio.</item>
+        <item>Schedule with clock times: choose the bake time in the recipe, for example Saturday 6 PM. The app works backward to when each step starts and marks steps at night.</item>
+        <item>“Plan” puts the dough on Home as a planned dough. Starting earlier or later keeps the bake time: the longest rest gets longer or shorter.</item>
     </string-array>
 
     <!-- Recipe view: times (duration in the device format) -->
@@ -969,5 +970,24 @@
     <string name="schedule_started">Started %1$s</string>
     <string name="schedule_remove_confirm">Remove this dough from the running doughs? The recipe stays.</string>
     <string name="schedule_phase_semantics">%1$s. %2$s. %3$s</string>
+    <string name="schedule_bake_label">Bake time</string>
+    <string name="schedule_bake_change">Change bake time, currently %1$s</string>
+    <string name="schedule_slot_start">Starts %1$s</string>
+    <string name="schedule_slot_night">at night</string>
+    <string name="schedule_slot_past">already past</string>
+    <string name="schedule_plan_start">Start %1$s</string>
+    <string name="schedule_plan_total">Total time %1$s</string>
+    <string name="schedule_flex">Starting earlier or later makes “%1$s” longer or shorter. The bake time stays.</string>
+    <string name="schedule_late_kept">The start would have been %1$s. Starting now makes “%2$s” shorter, and the bake time stays.</string>
+    <string name="schedule_late_moved">The start would have been %1$s. Starting now, baking is at %2$s.</string>
+    <string name="schedule_plan">Plan</string>
+    <string name="schedule_start_now">Start now</string>
+    <string name="schedule_planned_title">Planned: start %1$s</string>
+    <string name="schedule_planned_missed">The planned start (%1$s) has passed.</string>
+    <string name="schedule_bake_planned">Bake %1$s</string>
+    <string name="schedule_date_next">Choose time</string>
+    <string name="schedule_time_set">Set</string>
+    <string name="schedule_time_title">Time to bake</string>
+    <string name="home_planned_title">Planned dough</string>
     <string name="home_running_title">Running doughs</string>
 </resources>

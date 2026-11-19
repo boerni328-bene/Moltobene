@@ -143,6 +143,29 @@ class DatabaseMigrationTest {
     }
 
     @Test
+    fun version4LaufenderTeigBleibtUndKannGeplantWerden() = runBlocking {
+        createDatabase(version = 4) { db ->
+            db.execSQL(
+                "INSERT INTO recipes (id, title, notes, favorite, isDraft, createdAt, updatedAt) VALUES " +
+                    "('$KUCHEN', 'Pizzateig', '', 0, 0, 1000, 2000)",
+            )
+            db.execSQL("INSERT INTO recipe_search (recipeId, title, ingredients, notes) VALUES ('$KUCHEN', 'Pizzateig', '', '')")
+            db.execSQL("INSERT INTO dough_runs (id, recipeId, startedAt, doneAt) VALUES ('run-1', '$KUCHEN', 5000, '6000')")
+        }
+
+        withRepository { repository ->
+            // Ein Teig von vor 0.77.0 läuft weiter, ohne Backtermin, nicht geplant, ohne angepasste Ruhezeit.
+            val run = repository.observeRuns().first().single()
+            assertEquals(DoughRun(id = "run-1", recipeId = KUCHEN, startedAt = 5000, doneAt = listOf(6000L)), run)
+
+            // Ein geplanter Teig mit Backtermin wird gespeichert und wieder gelesen.
+            val planned = DoughRun(id = "run-2", recipeId = KUCHEN, startedAt = 9000, bakeAt = 99_000, planned = true, stretchMinutes = -30)
+            repository.saveRun(planned)
+            assertEquals(planned, repository.observeRuns().first().first { it.id == "run-2" })
+        }
+    }
+
+    @Test
     fun originalseitenBleibenGetrenntVomFotoDesGerichts() = runBlocking {
         withRepository { repository ->
             repository.save(Recipe(id = KUCHEN, title = "Apfelkuchen", photoIds = listOf(FOTO_1), pageIds = listOf(SEITE_1, SEITE_2), createdAt = 1, updatedAt = 1))

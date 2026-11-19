@@ -183,6 +183,7 @@ fun RecipeScreen(
     val currentStep by viewModel.currentStep.collectAsStateWithLifecycle()
     val adjustment by viewModel.adjustment.collectAsStateWithLifecycle()
     val runs by viewModel.runs.collectAsStateWithLifecycle()
+    val bakeAt by viewModel.bakeAt.collectAsStateWithLifecycle()
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
@@ -376,7 +377,11 @@ fun RecipeScreen(
                     onNextStep = viewModel::nextStep,
                 ),
                 schedule = ScheduleActions(
-                    onStart = viewModel::startRun,
+                    bakeAt = bakeAt,
+                    onBakeAt = { viewModel.setBakeAt(it) },
+                    onStart = { viewModel.startRun() },
+                    onPlan = { viewModel.planRun() },
+                    onStartPlanned = { viewModel.startPlanned(it) },
                     onComplete = viewModel::completePhase,
                     onUndo = viewModel::undoPhase,
                     onRemove = viewModel::removeRun,

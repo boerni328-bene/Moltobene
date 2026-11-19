@@ -52,7 +52,7 @@ data class DoughRun(
     val recipeId: String,
     val startedAt: Long,
     val doneAt: List<Long> = emptyList(),
-    /** Geplanter Backtermin (Beginn der letzten Phase, 0.76.0); null bei Teigen ohne Backtermin. */
+    /** Geplanter Backtermin (Beginn der letzten Phase, 0.77.0); null bei Teigen ohne Backtermin. */
     val bakeAt: Long? = null,
     /** Noch nicht gestartet: [startedAt] ist der geplante Start. */
     val planned: Boolean = false,

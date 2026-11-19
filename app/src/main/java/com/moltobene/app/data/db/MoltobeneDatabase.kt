@@ -15,7 +15,7 @@ import androidx.room.RoomDatabase
  *  - 2: Fotos haben eine Art – Foto des Gerichts oder Originalseite (#38). Vorhandene Fotos bleiben Fotos des Gerichts.
  *  - 3: Rezepte haben einen Link zu einem Video (0.25.0), getrennt von der Quelle. Vorhandene Rezepte haben keinen.
  *  - 4: Zeitplan der Teige (#71): Phasen je Rezept und laufende Teige als neue Tabellen. Vorhandene Rezepte haben keinen Zeitplan.
- *  - 5: Uhrzeiten (0.76.0): laufende Teige haben einen Backtermin, können geplant sein und die längste Ruhezeit anpassen.
+ *  - 5: Uhrzeiten (0.77.0): laufende Teige haben einen Backtermin, können geplant sein und die längste Ruhezeit anpassen.
  *    Vorhandene laufende Teige haben keinen Backtermin.
  */
 @Database(

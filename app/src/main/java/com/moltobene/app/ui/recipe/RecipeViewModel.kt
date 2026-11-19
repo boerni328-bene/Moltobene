@@ -12,6 +12,7 @@ import com.moltobene.app.data.Adjustment
 import com.moltobene.app.data.DoughRun
 import com.moltobene.app.data.Recipe
 import com.moltobene.app.data.RecipeRepository
+import com.moltobene.app.data.dough.DoughBakePlan
 import com.moltobene.app.data.dough.DoughRunPlanner
 import com.moltobene.app.data.ocr.CropArea
 import com.moltobene.app.data.photos.PhotoStore
@@ -126,11 +127,59 @@ class RecipeViewModel(
         .catch { emit(emptyList()) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    /** „Teig starten“: Der Zeitplan des Rezepts beginnt jetzt. */
+    /**
+     * Gewählter Backtermin (Uhrzeiten, 0.77.0); null heißt: so früh wie möglich, nichts gewählt. Liegt im
+     * [SavedStateHandle], damit Drehen und Zurückkehren ihn nicht verlieren.
+     */
+    val bakeAt: StateFlow<Long?> = savedStateHandle.getStateFlow<Long?>(KEY_BAKE_AT, null)
+
+    fun setBakeAt(millis: Long) {
+        savedStateHandle[KEY_BAKE_AT] = millis
+    }
+
+    private fun timeline() = (state.value as? RecipeUiState.Content)?.recipe?.timeline.orEmpty()
+
+    /**
+     * „Teig starten“: Der Zeitplan des Rezepts beginnt jetzt. Mit gewähltem Backtermin bleibt der Termin, soweit die
+     * längste Ruhezeit es erlaubt ([DoughBakePlan.startNow]).
+     */
     fun startRun() {
+        val now = System.currentTimeMillis()
+        val run = DoughRun(id = UUID.randomUUID().toString(), recipeId = recipeId, startedAt = now)
+        val bake = bakeAt.value
+        val timeline = timeline()
+        savedStateHandle[KEY_BAKE_AT] = null
         viewModelScope.launch {
-            repository.saveRun(DoughRun(id = UUID.randomUUID().toString(), recipeId = recipeId, startedAt = System.currentTimeMillis()))
+            repository.saveRun(if (bake == null || timeline.isEmpty()) run else DoughBakePlan.startNow(timeline, run, bake, now))
         }
+    }
+
+    /** „Planen“: Der Teig wartet bis zum Start, der sich rückwärts aus dem Backtermin ergibt. */
+    fun planRun() {
+        val bake = bakeAt.value ?: return
+        val timeline = timeline().takeIf { it.isNotEmpty() } ?: return
+        savedStateHandle[KEY_BAKE_AT] = null
+        val run = DoughRun(
+            id = UUID.randomUUID().toString(),
+            recipeId = recipeId,
+            startedAt = DoughBakePlan.startFor(timeline, bake),
+            bakeAt = bake,
+            planned = true,
+        )
+        viewModelScope.launch { repository.saveRun(run) }
+    }
+
+    /** „Jetzt starten“ bei einem geplanten Teig: Der Backtermin bleibt, soweit es geht. */
+    fun startPlanned(run: DoughRun) {
+        val now = System.currentTimeMillis()
+        val timeline = timeline()
+        val bake = run.bakeAt
+        val started = if (bake == null || timeline.isEmpty()) {
+            run.copy(startedAt = now, planned = false, doneAt = emptyList())
+        } else {
+            DoughBakePlan.startNow(timeline, run, bake, now)
+        }
+        viewModelScope.launch { repository.saveRun(started) }
     }
 
     /** „Phase abschließen“: Die laufende Phase endet jetzt, die Folgezeiten rechnen ab hier neu. */
@@ -325,6 +374,7 @@ class RecipeViewModel(
         private const val KEY_STEP = "cooking_step"
         private const val KEY_ADJUSTMENT = "cooking_adjustment"
         private const val KEY_LANGUAGE = "translation_language"
+        private const val KEY_BAKE_AT = "schedule_bake_at"
 
         /** Kennung einer Zeile beim Kochen: Stelle und Text. */
         fun progressKey(index: Int, text: String): String = "$index:${text.hashCode()}"

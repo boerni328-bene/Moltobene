@@ -3,6 +3,14 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.77.0] – 2026-11-19 (versionCode 134)
+
+### Neu
+- **Zeitplan mit Uhrzeiten.** Im Rezept steht unter „Zeitplan“ jetzt ein Backtermin. Ohne Auswahl ist es der früheste mögliche, auf die halbe Stunde aufgerundet. Antippen öffnet die Auswahl von Tag und Uhrzeit. Die App rechnet rückwärts, wann der Teig starten muss und wann jeder Schritt beginnt. Schritte in der Nacht (22 bis 7 Uhr) und schon vergangene Zeiten sind mit „nachts“ bzw. „schon vorbei“ gekennzeichnet. Dazu stehen Start und Gesamtdauer.
+- **Teig planen.** Mit gewähltem Backtermin legt „Planen“ den Teig als geplanten Teig an. Er steht im Rezept und auf der Startseite in der Kachel „Geplanter Teig“, mit Start und Backtermin. „Jetzt starten“ beginnt ihn.
+- **Der Backtermin bleibt.** Wer früher oder später startet als geplant, behält den Backtermin. Die längste Ruhezeit wird dafür länger oder kürzer (Biga oder Poolish, sonst meist die Teigkugeln im Kühlschrank), höchstens auf die Hälfte bzw. das Dreifache. Reicht das nicht, nennt die App den neuen Backtermin.
+- Laufende Teige zeigen ihren Backtermin.
+
 ## [0.76.0] – 2026-11-18 (versionCode 133)
 
 ### Neu

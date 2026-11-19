@@ -7,7 +7,7 @@ import java.time.Instant
 import java.time.ZoneId
 
 /**
- * Uhrzeiten rückwärts vom Backtermin (0.76.0, Entwürfe 7A und 7D, Wahl des Projektinhabers vom 18.11.2026 „Backzeit
+ * Uhrzeiten rückwärts vom Backtermin (0.77.0, Entwürfe 7A und 7D, Wahl des Projektinhabers vom 18.11.2026 „Backzeit
  * bleibt“). Der Backtermin ist der Beginn der letzten Phase („Backen“). Geplant wird mit der längsten Dauer jeder Phase,
  * damit der Teig rechtzeitig fertig ist. Wer früher oder später startet, behält den Backtermin: Die längste Ruhezeit
  * (Biga oder Poolish reifen, sonst meist die Teigkugeln im Kühlschrank) wird entsprechend länger oder kürzer, höchstens
@@ -74,12 +74,15 @@ object DoughBakePlan {
     /** Ein Teig, der jetzt beginnt und den Backtermin [bakeAt] so gut wie möglich hält. */
     fun startNow(timeline: List<TimelinePhase>, run: DoughRun, bakeAt: Long, now: Long): DoughRun {
         val stretch = stretchFor(timeline, bakeAt, now)
+        val bake = bakeWhenStarted(timeline, now, stretch)
+        // Reicht die Ruhezeit, bleibt der Backtermin genau (die Rechnung in Minuten verliert sonst Sekunden).
+        val kept = flexIndex(timeline) != null && kotlin.math.abs(bake - bakeAt) < MINUTE_MS
         return run.copy(
             startedAt = now,
             planned = false,
             doneAt = emptyList(),
             stretchMinutes = stretch,
-            bakeAt = bakeWhenStarted(timeline, now, stretch),
+            bakeAt = if (kept) bakeAt else bake,
         )
     }
 
