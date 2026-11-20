@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -195,7 +194,12 @@ private fun RunView(
                         StepMark.UPCOMING -> R.string.schedule_state_upcoming
                     },
                 )
-                val duration = AndroidDurationText.format(context, phase.minMinutes, phase.maxMinutes)
+                // Feste Dauern als „1 Tag, 6 Minuten“ statt „1446 Minuten“ (nach Anpassung beim Start oder eigener Dauer).
+                val duration = if (phase.minMinutes == phase.maxMinutes) {
+                    AndroidDurationText.total(context, phase.maxMinutes)
+                } else {
+                    AndroidDurationText.format(context, phase.minMinutes, phase.maxMinutes)
+                }
                 val trailing = if (time.done) stringResource(R.string.schedule_done_short, timeText(context, time.endEarliest)) else duration
                 val spoken = stringResource(
                     R.string.schedule_phase_semantics,
@@ -269,7 +273,7 @@ private fun CurrentDetails(phase: TimelinePhase, time: DoughRunPlanner.PhaseTime
 }
 
 /**
- * „Fertig“, „Zurück“, „Abbrechen“ (Wunsch vom 20.11.2026) in einer Reihe, gleich breit; „Fertig“ farbig. Bei großer
+ * „Fertig“, „Zurück“, „Abbrechen“ (Wunsch vom 20.11.2026) in einer Reihe, gleich breit; „Fertig“ gefüllt, die anderen mit Rahmen (heben sich so vom hervorgehobenen Schritt ab). Bei großer
  * Schrift brechen sie um, damit kein Text abgeschnitten wird.
  */
 @OptIn(ExperimentalLayoutApi::class)
@@ -302,11 +306,11 @@ private fun RunButtonSet(
         }
     }
     if (run.doneAt.isNotEmpty()) {
-        FilledTonalButton(onClick = { actions.onUndo(run) }, contentPadding = padding, modifier = modifier) {
+        OutlinedButton(onClick = { actions.onUndo(run) }, contentPadding = padding, modifier = modifier) {
             Text(stringResource(R.string.schedule_undo))
         }
     }
-    FilledTonalButton(onClick = onRemove, contentPadding = padding, modifier = modifier) {
+    OutlinedButton(onClick = onRemove, contentPadding = padding, modifier = modifier) {
         Text(stringResource(R.string.schedule_remove))
     }
 }
