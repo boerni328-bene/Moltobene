@@ -188,6 +188,16 @@ class RecipeViewModel(
         viewModelScope.launch { repository.saveRun(DoughRunPlanner.complete(run, count, System.currentTimeMillis())) }
     }
 
+    /** Dauer einer Phase nur für diesen Teig ändern (0.78.0). */
+    fun setPhaseDuration(run: DoughRun, index: Int, minutes: Int) {
+        viewModelScope.launch { repository.saveRun(DoughRunPlanner.setDuration(run, index, minutes)) }
+    }
+
+    /** Korrigieren, wann eine erledigte Phase fertig war (0.78.0). */
+    fun setPhaseDoneAt(run: DoughRun, index: Int, time: Long) {
+        viewModelScope.launch { repository.saveRun(DoughRunPlanner.setDoneAt(run, index, time, System.currentTimeMillis())) }
+    }
+
     fun undoPhase(run: DoughRun) {
         viewModelScope.launch { repository.saveRun(DoughRunPlanner.undo(run)) }
     }

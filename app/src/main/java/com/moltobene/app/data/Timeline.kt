@@ -58,4 +58,6 @@ data class DoughRun(
     val planned: Boolean = false,
     /** Um so viele Minuten ist die längste Ruhezeit länger (negativ: kürzer), damit der Backtermin bleibt. */
     val stretchMinutes: Int = 0,
+    /** Selbst geänderte Dauer einzelner Phasen in Minuten (0.78.0), nach Nummer der Phase; gilt nur für diesen Teig. */
+    val durations: Map<Int, Int> = emptyMap(),
 )

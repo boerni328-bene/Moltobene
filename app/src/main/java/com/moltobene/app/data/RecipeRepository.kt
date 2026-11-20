@@ -206,6 +206,12 @@ private fun DoughRunEntity.toRun() = DoughRun(
     bakeAt = bakeAt,
     planned = planned,
     stretchMinutes = stretchMinutes,
+    durations = durations.split(',').mapNotNull { part ->
+        val (index, minutes) = part.split(':').takeIf { it.size == 2 } ?: return@mapNotNull null
+        val i = index.trim().toIntOrNull()?.takeIf { it in 0 until TimelinePhase.MAX_PHASES } ?: return@mapNotNull null
+        val m = minutes.trim().toIntOrNull()?.takeIf { it > 0 } ?: return@mapNotNull null
+        i to m.coerceAtMost(TimelinePhase.MAX_MINUTES)
+    }.toMap(),
 )
 
 private fun DoughRun.toRow() = DoughRunEntity(
@@ -216,4 +222,5 @@ private fun DoughRun.toRow() = DoughRunEntity(
     bakeAt = bakeAt,
     planned = planned,
     stretchMinutes = stretchMinutes,
+    durations = durations.entries.sortedBy { it.key }.joinToString(",") { "${it.key}:${it.value}" },
 )

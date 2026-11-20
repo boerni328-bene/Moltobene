@@ -957,11 +957,27 @@ class AppTourTest(private val variant: DisplayVariant) {
         assertFalse(run.planned)
         assertEquals(planned.bakeAt, run.bakeAt)
 
+        // Dauer des aktuellen Schritts ändern (0.78.0): Kneten 30 → 35 Minuten, nur für diesen Teig.
+        val more = text(R.string.dough_step_more, text(R.string.schedule_duration_of, "Teig kneten"), text(R.string.schedule_step_minutes))
+        composeRule.onNodeWithContentDescription(more).performScrollTo().performClick()
+        composeRule.waitUntil(TIMEOUT_MILLIS) {
+            runBlocking { container().repository.observeRuns().first().single().durations[1] == 35 }
+        }
+        screenshot("14r1-zeitplan-dauer")
+
+        // Uhrzeit korrigieren, wann die Biga fertig war (Antippen des erledigten Schritts).
+        composeRule.onNode(hasContentDescription("Biga reifen lassen", substring = true) and hasClickAction())
+            .performScrollTo().performClick()
+        waitForText(text(R.string.schedule_done_time_title))
+        screenshot("14r2-zeitplan-uhrzeit-korrigieren")
+        composeRule.onNodeWithText(text(R.string.schedule_time_set)).performClick()
+        waitUntilGone(text(R.string.schedule_done_time_title))
+
         // Ein zweiter, geplanter Teig steht auf der Startseite in einer eigenen Kachel.
         runBlocking {
             val start = System.currentTimeMillis() + 3 * 60 * 60_000L
             container().repository.saveRun(
-                run.copy(id = "geplant", startedAt = start, doneAt = emptyList(), planned = true, bakeAt = start + (24 * 60 + 30) * 60_000L, stretchMinutes = 0),
+                run.copy(id = "geplant", startedAt = start, doneAt = emptyList(), planned = true, bakeAt = start + (24 * 60 + 30) * 60_000L, stretchMinutes = 0, durations = emptyMap()),
             )
         }
 

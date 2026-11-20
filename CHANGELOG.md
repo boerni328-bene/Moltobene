@@ -3,6 +3,14 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.78.0] – 2026-11-20 (versionCode 135)
+
+### Neu
+- **Zeitplan als Zeitleiste.** Der Zeitplan im Rezept ist kompakter: Jeder Tag steht als Überschrift mit einer Linie über die ganze Breite, darunter jeder Schritt in einer Zeile mit Uhrzeit, Name und Dauer. Ein Punkt links zeigt, ob ein Schritt erledigt, aktuell oder noch offen ist. Das gilt für die Planung, den geplanten und den laufenden Teig.
+- **Aktueller Schritt aufgeklappt.** Er zeigt den Ort, wann es weitergeht, und darunter in einer Reihe „Fertig“, „Zurück“ und „Abbrechen“ (bisher „Phase abschließen“, „Zurücknehmen“ und „Aus laufenden Teigen entfernen“).
+- **Dauer anpassen.** Im laufenden Teig lässt sich die Dauer des aktuellen und jedes folgenden Schritts ändern: Zahl eintippen oder mit Minus und Plus (lange Schritte in Stunden, kurze in Minuten). Die folgenden Uhrzeiten rechnen sich sofort neu. Das Rezept selbst bleibt unverändert.
+- **Uhrzeit korrigieren.** Ein Tipp auf einen erledigten Schritt ändert, wann er fertig war, etwa wenn „Fertig“ erst später angetippt wurde.
+
 ## [0.77.0] – 2026-11-19 (versionCode 134)
 
 ### Neu

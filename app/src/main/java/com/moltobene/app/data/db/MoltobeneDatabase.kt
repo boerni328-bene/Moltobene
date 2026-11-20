@@ -16,6 +16,7 @@ import androidx.room.RoomDatabase
  *  - 3: Rezepte haben einen Link zu einem Video (0.25.0), getrennt von der Quelle. Vorhandene Rezepte haben keinen.
  *  - 4: Zeitplan der Teige (#71): Phasen je Rezept und laufende Teige als neue Tabellen. Vorhandene Rezepte haben keinen Zeitplan.
  *  - 5: Uhrzeiten (0.77.0): laufende Teige haben einen Backtermin, können geplant sein und die längste Ruhezeit anpassen.
+ *  - 6: Zeitplan anpassen (0.78.0): laufende Teige merken selbst geänderte Dauern einzelner Phasen.
  *    Vorhandene laufende Teige haben keinen Backtermin.
  */
 @Database(
@@ -29,9 +30,9 @@ import androidx.room.RoomDatabase
         RecipeTagEntity::class,
         RecipeSearchEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(from = 3, to = 4), AutoMigration(from = 4, to = 5)],
+    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(from = 3, to = 4), AutoMigration(from = 4, to = 5), AutoMigration(from = 5, to = 6)],
 )
 abstract class MoltobeneDatabase : RoomDatabase() {
 

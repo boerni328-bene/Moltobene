@@ -86,16 +86,25 @@ object DoughBakePlan {
         )
     }
 
-    /** Die Phasen eines Teigs mit angepasster Ruhezeit ([DoughRun.stretchMinutes]). */
-    fun adjusted(timeline: List<TimelinePhase>, stretch: Int): List<TimelinePhase> {
-        if (stretch == 0) return timeline
-        val index = flexIndex(timeline) ?: return timeline
+    /**
+     * Die Phasen eines Teigs mit angepasster Ruhezeit ([DoughRun.stretchMinutes]) und selbst geänderten Dauern
+     * ([DoughRun.durations], 0.78.0); eine selbst geänderte Dauer gilt vor der Anpassung beim Start.
+     */
+    fun adjusted(timeline: List<TimelinePhase>, stretch: Int, durations: Map<Int, Int> = emptyMap()): List<TimelinePhase> {
+        if (stretch == 0 && durations.isEmpty()) return timeline
+        val index = if (stretch == 0) null else flexIndex(timeline)
         return timeline.mapIndexed { i, phase ->
-            if (i != index) {
-                phase
-            } else {
-                val minutes = (phase.maxMinutes + stretch).coerceIn(0, TimelinePhase.MAX_MINUTES)
-                phase.copy(minMinutes = minutes, maxMinutes = minutes)
+            val own = durations[i]
+            when {
+                own != null -> {
+                    val minutes = own.coerceIn(1, TimelinePhase.MAX_MINUTES)
+                    phase.copy(minMinutes = minutes, maxMinutes = minutes)
+                }
+                i == index -> {
+                    val minutes = (phase.maxMinutes + stretch).coerceIn(0, TimelinePhase.MAX_MINUTES)
+                    phase.copy(minMinutes = minutes, maxMinutes = minutes)
+                }
+                else -> phase
             }
         }
     }
