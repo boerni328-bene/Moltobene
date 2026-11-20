@@ -166,6 +166,32 @@ class DatabaseMigrationTest {
     }
 
     @Test
+    fun version5LaufenderTeigBleibtUndKannEigeneDauernMerken() = runBlocking {
+        createDatabase(version = 5) { db ->
+            db.execSQL(
+                "INSERT INTO recipes (id, title, notes, favorite, isDraft, createdAt, updatedAt) VALUES " +
+                    "('$KUCHEN', 'Pizzateig', '', 0, 0, 1000, 2000)",
+            )
+            db.execSQL("INSERT INTO recipe_search (recipeId, title, ingredients, notes) VALUES ('$KUCHEN', 'Pizzateig', '', '')")
+            db.execSQL(
+                "INSERT INTO dough_runs (id, recipeId, startedAt, doneAt, bakeAt, planned, stretchMinutes) VALUES " +
+                    "('run-1', '$KUCHEN', 5000, '6000', 99000, 0, -30)",
+            )
+        }
+
+        withRepository { repository ->
+            // Ein Teig von 0.77.0 läuft weiter, ohne eigene Dauern.
+            val run = repository.observeRuns().first().single()
+            assertEquals(DoughRun("run-1", KUCHEN, 5000, listOf(6000L), bakeAt = 99_000, stretchMinutes = -30), run)
+
+            // Eigene Dauern (0.78.0) werden gespeichert und wieder gelesen.
+            val changed = run.copy(durations = mapOf(0 to 2880, 3 to 35))
+            repository.saveRun(changed)
+            assertEquals(changed, repository.observeRuns().first().single())
+        }
+    }
+
+    @Test
     fun originalseitenBleibenGetrenntVomFotoDesGerichts() = runBlocking {
         withRepository { repository ->
             repository.save(Recipe(id = KUCHEN, title = "Apfelkuchen", photoIds = listOf(FOTO_1), pageIds = listOf(SEITE_1, SEITE_2), createdAt = 1, updatedAt = 1))

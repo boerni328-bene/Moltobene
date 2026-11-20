@@ -249,8 +249,8 @@
     <!-- Neu in Version … (Texte zu WhatsNew.VERSION_NAME) -->
     <string name="whats_new_title">Neu in Version %1$s</string>
     <string-array name="whats_new_items">
-        <item>Zeitplan mit Uhrzeiten: Im Rezept den Backtermin wählen, z. B. Samstag 18 Uhr. Die App rechnet rückwärts, wann jeder Schritt beginnt, und zeigt Nachtschritte an.</item>
-        <item>„Planen“ legt den Teig als geplanten Teig auf die Startseite. Wer früher oder später startet, behält den Backtermin: Die längste Ruhezeit wird länger oder kürzer.</item>
+        <item>Zeitplan als Zeitleiste: jeder Tag als Überschrift, jeder Schritt eine Zeile mit Uhrzeit und Dauer. Der aktuelle Schritt zeigt, wann es weitergeht, mit „Fertig“, „Zurück“ und „Abbrechen“.</item>
+        <item>Dauer eines Schritts im laufenden Teig ändern, mit Eingabe oder − und +. Ein Tipp auf einen erledigten Schritt korrigiert, wann er fertig war. Das Rezept bleibt unverändert.</item>
     </string-array>
 
     <!-- Rezeptansicht: Zeiten (Dauer im Format des Geräts) -->
@@ -954,21 +954,18 @@
     <string name="schedule_ready">Bereit für den nächsten Schritt. Spätestens %1$s</string>
     <string name="schedule_overdue">Spätester Zeitpunkt (%1$s) überschritten. Teig prüfen.</string>
     <string name="schedule_finished">Fertig. Der Teig ist durch.</string>
-    <string name="schedule_complete">Phase abschließen</string>
-    <string name="schedule_undo">Zurücknehmen</string>
-    <string name="schedule_remove">Aus laufenden Teigen entfernen</string>
+    <string name="schedule_complete">Fertig</string>
+    <string name="schedule_undo">Zurück</string>
+    <string name="schedule_remove">Abbrechen</string>
     <string name="schedule_state_done">Erledigt</string>
     <string name="schedule_state_current">Aktuell</string>
     <string name="schedule_state_upcoming">Folgt</string>
-    <string name="schedule_done_at">Erledigt %1$s</string>
-    <string name="schedule_phase_range">%1$s bis %2$s</string>
     <string name="schedule_phase_line">%1$s · %2$s</string>
     <string name="schedule_started">Gestartet %1$s</string>
-    <string name="schedule_remove_confirm">Teig aus den laufenden Teigen entfernen? Das Rezept bleibt erhalten.</string>
+    <string name="schedule_remove_confirm">Teig abbrechen? Er verschwindet aus den laufenden Teigen, das Rezept bleibt erhalten.</string>
     <string name="schedule_phase_semantics">%1$s. %2$s. %3$s</string>
     <string name="schedule_bake_label">Backtermin</string>
     <string name="schedule_bake_change">Backtermin ändern, jetzt %1$s</string>
-    <string name="schedule_slot_start">Beginn %1$s</string>
     <string name="schedule_slot_night">nachts</string>
     <string name="schedule_slot_past">schon vorbei</string>
     <string name="schedule_plan_start">Start %1$s</string>
@@ -985,6 +982,18 @@
     <string name="schedule_date_next">Uhrzeit wählen</string>
     <string name="schedule_time_set">Festlegen</string>
     <string name="schedule_time_title">Uhrzeit zum Backen</string>
+    <string name="schedule_remove_action">Teig abbrechen</string>
+    <string name="schedule_keep">Behalten</string>
+    <string name="schedule_unit_hours">Std.</string>
+    <string name="schedule_unit_minutes">Min.</string>
+    <string name="schedule_duration">Dauer</string>
+    <string name="schedule_duration_of">Dauer von „%1$s“</string>
+    <string name="schedule_step_hour">1 Stunde</string>
+    <string name="schedule_step_minutes">5 Minuten</string>
+    <string name="schedule_done_time_title">Fertig um</string>
+    <string name="schedule_done_short">Fertig %1$s</string>
+    <string name="schedule_change_time">Uhrzeit ändern</string>
+    <string name="schedule_step_open">Dauer ändern</string>
     <string name="home_planned_title">Geplanter Teig</string>
     <string name="home_running_title">Laufende Teige</string>
 </resources>

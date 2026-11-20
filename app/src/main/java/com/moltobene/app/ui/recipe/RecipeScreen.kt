@@ -385,6 +385,8 @@ fun RecipeScreen(
                     onComplete = viewModel::completePhase,
                     onUndo = viewModel::undoPhase,
                     onRemove = viewModel::removeRun,
+                    onDuration = { run, index, minutes -> viewModel.setPhaseDuration(run, index, minutes) },
+                    onDoneAt = { run, index, time -> viewModel.setPhaseDoneAt(run, index, time) },
                 ),
                 runs = runs,
                 translation = TranslationActions(

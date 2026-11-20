@@ -33,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
@@ -88,7 +87,7 @@ internal fun BakePlanPanel(timeline: List<TimelinePhase>, now: Long, actions: Sc
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
-            timeline.forEachIndexed { index, phase -> SlotRow(context, phase, slots[index]) }
+            StepTimeline(starts = slots.map { it.start }) { index, last -> SlotRow(context, timeline[index], slots[index], last) }
             if (late) {
                 val started = DoughBakePlan.startNow(timeline, DoughRun(id = "", recipeId = "", startedAt = now), bake, now)
                 val text = if (started.bakeAt == bake && flex != null) {
@@ -149,34 +148,46 @@ internal fun PlannedRunView(timeline: List<TimelinePhase>, run: DoughRun, now: L
                     kind = NoticeKind.INFO,
                 )
             }
-            timeline.forEachIndexed { index, phase -> SlotRow(context, phase, slots[index]) }
+            StepTimeline(starts = slots.map { it.start }) { index, last -> SlotRow(context, timeline[index], slots[index], last) }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
                 Button(onClick = onStartNow) { Text(stringResource(R.string.schedule_start_now)) }
-                TextButton(onClick = onRemove) { Text(stringResource(R.string.schedule_remove)) }
+                OutlinedButton(onClick = onRemove) { Text(stringResource(R.string.schedule_remove)) }
             }
         }
     }
 }
 
-/** Phase mit Dauer, Ort und Beginn, z. B. „Beginn Fr., 20. Nov., 23:00 · nachts“. */
+/**
+ * Ein geplanter Schritt als Zeile der Zeitleiste (Entwurf G4): Beginn, Name, Dauer; „nachts“ und „schon vorbei“ stehen
+ * als Text darunter, nie nur als Farbe. Der Ort steht in der Ansage für den Screenreader.
+ */
 @Composable
-private fun SlotRow(context: Context, phase: TimelinePhase, slot: DoughBakePlan.Slot) {
+private fun SlotRow(context: Context, phase: TimelinePhase, slot: DoughBakePlan.Slot, last: Boolean) {
     val place = AndroidDurationText.place(context, phase.place)
     val duration = AndroidDurationText.format(context, phase.minMinutes, phase.maxMinutes)
     val detail = if (place.isEmpty()) duration else "$duration, $place"
-    var line = stringResource(R.string.schedule_slot_start, formatMoment(context, slot.start))
-    if (slot.past) line = stringResource(R.string.schedule_phase_line, line, stringResource(R.string.schedule_slot_past))
-    if (slot.night) line = stringResource(R.string.schedule_phase_line, line, stringResource(R.string.schedule_slot_night))
-    val spoken = stringResource(R.string.schedule_phase_semantics, phase.text, detail, line)
-    Column(modifier = Modifier.clearAndSetSemantics { contentDescription = spoken }) {
-        Text(phase.text, style = MaterialTheme.typography.bodyLarge)
-        Text(detail, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(
-            line,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = if (slot.night || slot.past) FontWeight.Bold else FontWeight.Normal,
-        )
-    }
+    val marks = listOfNotNull(
+        if (slot.past) stringResource(R.string.schedule_slot_past) else null,
+        if (slot.night) stringResource(R.string.schedule_slot_night) else null,
+    )
+    val markText = marks.joinToString(" · ")
+    val moment = formatMoment(context, slot.start)
+    val spoken = stringResource(
+        R.string.schedule_phase_semantics,
+        if (marks.isEmpty()) moment else stringResource(R.string.schedule_phase_line, moment, markText),
+        phase.text,
+        detail,
+    )
+    val markLine: @Composable () -> Unit = { Text(markText, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold) }
+    StepLine(
+        time = timeText(context, slot.start),
+        title = phase.text,
+        trailing = duration,
+        mark = StepMark.UPCOMING,
+        last = last,
+        spoken = spoken,
+        below = if (marks.isEmpty()) null else markLine,
+    )
 }
 
 /**

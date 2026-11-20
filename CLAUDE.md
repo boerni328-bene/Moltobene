@@ -104,7 +104,9 @@ Immer dieses Wort verwenden, nie die Alternativen in Klammern.
 | Zeitplan (Phasen eines Teigs mit Dauer, #71) | schedule | Zeitleiste, Timer |
 | Teig starten (Zeitplan beginnt) | start dough | Timer starten |
 | laufender Teig (gestarteter Zeitplan) | running dough | aktiver Teig |
-| Phase abschließen | phase done | Schritt beenden |
+| Fertig (Schritt im laufenden Teig abschließen; bis 20.11.2026 „Phase abschließen“, Entscheidung des Projektinhabers) | Done | Phase abschließen, Schritt beenden |
+| Zurück (letztes „Fertig“ zurücknehmen, im laufenden Teig) | Undo | Zurücknehmen |
+| Abbrechen (laufenden Teig beenden, das Rezept bleibt) | Cancel | Entfernen, Teig beenden |
 | Teigwissen (Hinweise und Artikel zum Teig, #84) | dough know-how | Wiki, Lexikon, Ratgeber |
 | Type (Mehl; Mineralstoffgehalt, z. B. Type 405) | flour type | Typ, Sorte |
 | Backkraft (W-Wert auf italienischem Mehl) | baking strength (W value) | Stärke, Triebkraft |

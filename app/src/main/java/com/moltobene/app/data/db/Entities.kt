@@ -198,6 +198,7 @@ data class PhaseEntity(
  * Laufender Teig (#71), seit Datenbank-Version 4. [doneAt] sind die Abschlusszeiten der Phasen, durch Komma getrennt.
  * Seit Version 5 (Uhrzeiten, 0.77.0): [bakeAt] geplanter Backtermin, [planned] noch nicht gestartet (dann ist
  * [startedAt] der geplante Start), [stretchMinutes] Verlängerung (oder Kürzung) der längsten Ruhezeit beim Start.
+ * Seit Version 6 (0.78.0): [durations] selbst geänderte Dauern einzelner Phasen, „Phase:Minuten“ durch Komma getrennt.
  */
 @Entity(
     tableName = "dough_runs",
@@ -219,4 +220,5 @@ data class DoughRunEntity(
     val bakeAt: Long? = null,
     @ColumnInfo(defaultValue = "0") val planned: Boolean = false,
     @ColumnInfo(defaultValue = "0") val stretchMinutes: Int = 0,
+    @ColumnInfo(defaultValue = "") val durations: String = "",
 )
