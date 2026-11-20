@@ -1,11 +1,15 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 19.11.2026 · `main` = **Version 0.77.0** (erschienen, Build 44592484871 grün) · Kein Arbeitszweig offen; `uhrzeiten`, `hefe-hauptteig`, `mengen-antippen` sind vollständig auf `main` und können gelöscht werden · Alte Zweige `verbesserungen-0741`, `guava-sicherheit`, `guava-sicherheit-2`, `hefe-automatik`, `hefe-summe` sind auf `main` und können gelöscht werden · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 20.11.2026 · `main` = **Version 0.78.0** (erschienen, Build 44736579403 grün) · Kein Arbeitszweig offen; `zeitplan-kompakt` (ein alter Versuch liegt im Stash „Zeitplan kompakt, erster Versuch“, kann weg), `uhrzeiten`, `hefe-hauptteig`, `mengen-antippen` sind vollständig auf `main` und können gelöscht werden · Alte Zweige `verbesserungen-0741`, `guava-sicherheit`, `guava-sicherheit-2`, `hefe-automatik`, `hefe-summe` sind auf `main` und können gelöscht werden · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
 
-## Zuletzt erschienen: 0.77.0 (19.11.2026)
+## Zuletzt erschienen: 0.78.0 (20.11.2026)
+- Zeitplan als Zeitleiste (Entwurf G4 nach vier Runden, Entwürfe: https://claude.ai/artifact/4ZJDbC3goetgwjr61vhj4w): `ui/schedule/StepList` (Tag als Trenner, eine Zeile je Schritt, Punkt = Zustand, aktueller Schritt aufgeklappt mit Ort, „Weiter um …“, Dauer-Eingabe und „Fertig“/„Zurück“/„Abbrechen“ in einer Reihe). Künftige Schritte: Antippen → Dauer ändern; erledigte: Antippen → Uhrzeit korrigieren (`DoughRunPlanner.setDuration`/`setDoneAt`). Datenbank 6: `dough_runs.durations` („Phase:Minuten“). Feste Begriffe Fertig/Zurück/Abbrechen in `CLAUDE.md`.
+- Offen klein: Im Dunkelmodus ist der Rahmen von „Zurück“/„Abbrechen“ blass.
+
+## Davor: 0.77.0 (19.11.2026)
 - Uhrzeiten (Entscheidung „Backzeit bleibt“): `data/dough/DoughBakePlan` (rückwärts, Nacht 22–7, frühester Termin auf halbe Stunde, `startNow` hält den Termin über die längste feste Ruhezeit ½×–3×), Datenbank 5 (AutoMigration 4→5, `dough_runs` + `bakeAt`, `planned`, `stretchMinutes`, Test in `DatabaseMigrationTest`), `ui/schedule/BakePlan` (Backtermin mit Tages-/Uhrzeitauswahl von Material 3, bei großer Schrift Eingabe statt Zifferblatt; Liste mit Uhrzeiten; „Planen“, geplanter Teig mit „Jetzt starten“), Startseite „Geplanter Teig“. Gesamtdauer als „1 Tag, 45 Minuten“ (`AndroidDurationText.total`).
 - Wünsche vom 19.11.: Trennlinie oben zwischen Vorteig- und Hauptteig-Zeile; Zutaten mit 0 % nicht in der Zusammenfassung; Wechsel der Voreinstellung fragt „Eigene Werte verwerfen?“ mit Verwerfen/Speichern/Abbrechen (untereinander; Speichern wechselt danach); „New York Style“.
 - Build: `kspDebugKotlin` läuft nach `kspReleaseKotlin` (sonst lasen sie gleichzeitig den neuen Bauplan, `app/build.gradle.kts`).
@@ -20,7 +24,7 @@ Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die
 - Bewusst noch groß: `DoughScreen.kt` (~1770 Zeilen), `EditViewModel.kt` (~1660).
 
 ## Offene Entscheidungen des Inhabers
-- Nach 0.77.0: Weg zu 1.0?
+- Nach 0.78.0: Weg zu 1.0?
 - Teigrechner in zwei Stufen („einfach“ und „Feinheiten“), erst als Entwurf?
 - Zwischenstände als Vorabversion statt als „neueste Version“?
 - Frühe Prüfung auf einem echten Gerät (0.75.1 auf dem Handy, besonders die Hefemengen).
