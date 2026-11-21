@@ -671,6 +671,7 @@
     <string name="dough_heading_preferment">For the preferment (%1$s %2$s)</string>
     <string name="dough_heading_main">For the final dough (%1$s)</string>
     <string name="dough_whole_preferment">%1$s %2$s (all of the preferment)</string>
+    <string name="dough_recipe_summary">%1$s · %2$s (of the flour)</string>
     <string name="place_room_at">at room temperature, %1$s</string>
     <string name="place_fridge_at">in the refrigerator, %1$s</string>
     <string name="place_oven_at">in the oven, %1$s</string>

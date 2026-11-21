@@ -2,6 +2,7 @@ package com.moltobene.app.ui.schedule
 
 import android.content.Context
 import android.text.format.DateUtils
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -30,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
@@ -291,6 +293,13 @@ private fun RunButtons(run: DoughRun, actions: ScheduleActions, onRemove: () -> 
     }
 }
 
+/**
+ * Kräftiger Rahmen für „Zurück“ und „Abbrechen“ (Wunsch vom 21.11.2026): Der Standardrahmen war im Dunkelmodus auf dem
+ * hervorgehobenen Schritt kaum zu sehen.
+ */
+@Composable
+internal fun strongBorder(): BorderStroke = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+
 @Composable
 private fun RunButtonSet(
     run: DoughRun,
@@ -306,11 +315,11 @@ private fun RunButtonSet(
         }
     }
     if (run.doneAt.isNotEmpty()) {
-        OutlinedButton(onClick = { actions.onUndo(run) }, contentPadding = padding, modifier = modifier) {
+        OutlinedButton(onClick = { actions.onUndo(run) }, contentPadding = padding, border = strongBorder(), modifier = modifier) {
             Text(stringResource(R.string.schedule_undo))
         }
     }
-    OutlinedButton(onClick = onRemove, contentPadding = padding, modifier = modifier) {
+    OutlinedButton(onClick = onRemove, contentPadding = padding, border = strongBorder(), modifier = modifier) {
         Text(stringResource(R.string.schedule_remove))
     }
 }

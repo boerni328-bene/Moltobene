@@ -3,6 +3,14 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.78.1] – 2026-11-21 (versionCode 136)
+
+### Geändert
+- **Teigrechner: Prozente im gespeicherten Rezept.** Bei Pizza und Brot stehen die Anteile jetzt einmal oben in den Zutaten, für das ganze Rezept zusammengezählt, z. B. „609 g Mehl · Wasser 60 % · Salz 3,1 % · Frischhefe 1,2 % (vom Mehl)“. Die Zeilen darunter zeigen nur noch die Mengen. Bisher stand bei jeder Zeile ein Anteil vom gesamten Mehl, das war im Vorteig schwer nachzuvollziehen. Gilt für neu gespeicherte Teige.
+
+### Behoben
+- **Zeitplan im Dunkelmodus:** „Zurück“ und „Abbrechen“ haben einen kräftigeren Rahmen und sind auf dem hervorgehobenen Schritt jetzt gut als Knöpfe zu erkennen.
+
 ## [0.78.0] – 2026-11-20 (versionCode 135)
 
 ### Neu

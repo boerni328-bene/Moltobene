@@ -151,7 +151,7 @@ internal fun PlannedRunView(timeline: List<TimelinePhase>, run: DoughRun, now: L
             StepTimeline(starts = slots.map { it.start }) { index, last -> SlotRow(context, timeline[index], slots[index], last) }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
                 Button(onClick = onStartNow) { Text(stringResource(R.string.schedule_start_now)) }
-                OutlinedButton(onClick = onRemove) { Text(stringResource(R.string.schedule_remove)) }
+                OutlinedButton(onClick = onRemove, border = strongBorder()) { Text(stringResource(R.string.schedule_remove)) }
             }
         }
     }
