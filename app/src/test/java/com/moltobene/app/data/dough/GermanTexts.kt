@@ -57,6 +57,8 @@ internal object GermanTexts : DoughTexts {
 
     override fun placeAt(place: PhasePlace, temperature: String) = if (place == PhasePlace.NONE) "" else "${place.key} $temperature"
 
+    override fun recipeSummary(flour: String, shares: List<String>) = "$flour · ${shares.joinToString(" · ")} (vom Mehl)"
+
     override fun join(parts: List<String>) =
         if (parts.size <= 1) parts.joinToString("") else parts.dropLast(1).joinToString(", ") + " und " + parts.last()
 

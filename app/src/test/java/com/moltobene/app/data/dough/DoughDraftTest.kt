@@ -21,27 +21,31 @@ class DoughDraftTest {
         DoughDraft.from(DoughCalculator.calculate(input) as DoughResult.Success, input, German, language)
 
     @Test
-    fun zeilenMitMengeVornUndAnteilInKlammern() {
+    fun zeilenMitMengeVornUndAnteilenObenFuersGanzeRezept() {
         val draft = draft(biga, "de")
         assertEquals("Pizzateig mit biga", draft.title)
+        // Die Prozente vom Mehl stehen einmal oben (Wunsch vom 21.11.2026), über Vorteig und Hauptteig zusammengezählt.
+        val summary = draft.ingredients.first()
+        assertTrue(summary.isHeading)
+        assertTrue(summary.text, summary.text.endsWith(" g Mehl · Wasser 60 % · Frischhefe 0,1 % · Salz 2,5 % (vom Mehl)"))
         assertEquals(
             // Gewicht vorn in den Überschriften, im Hauptteig zuerst der ganze Vorteig und beim Wasser die Temperatur
             // (Wunsch vom 05.11.2026): Raum 22 °C, Biga aus dem Kühlschrank, von Hand geknetet, Teig danach 24 °C.
             listOf(
                 "Für den Vorteig (536 g biga)",
-                "369 g Mehl (40 %)",
-                "166 g Wasser (18 %)",
-                "0,9 g Frischhefe (0,1 %)",
+                "369 g Mehl",
+                "166 g Wasser",
+                "0,9 g Frischhefe",
                 "Für den Hauptteig (1500 g)",
                 "536 g biga (der ganze Vorteig)",
-                "554 g Mehl (60 %)",
-                "387 g Wasser (42 %), 33 °C",
-                "23 g Salz (2,5 %)",
+                "554 g Mehl",
+                "387 g Wasser, 33 °C",
+                "23 g Salz",
             ),
-            draft.ingredients.map { it.text },
+            draft.ingredients.drop(1).map { it.text },
         )
-        assertTrue(draft.ingredients[0].isHeading)
-        assertFalse(draft.ingredients[1].isHeading)
+        assertTrue(draft.ingredients[1].isHeading)
+        assertFalse(draft.ingredients[2].isHeading)
         assertEquals(6, draft.servings)
         assertEquals("Teigkugeln (je 250 g)", draft.servingsUnit)
     }
@@ -52,7 +56,7 @@ class DoughDraftTest {
         val english = draft(input, "en").ingredients.map { it.text }
         // 12 × 250 g sind 3 kg Teig: Mehl über 1.000 g, trotzdem „1845“ und nicht „1.779“.
         assertTrue(english.toString(), english.first().startsWith("1845 g Mehl"))
-        assertTrue(english.toString(), english.any { it.contains(".") && it.contains("%)") })
+        assertTrue(english.toString(), english.first().let { it.contains(".") && it.contains("%") })
         val german = draft(input, "de").ingredients.map { it.text }
         assertTrue(german.toString(), german.first().startsWith("1845 g Mehl"))
     }
@@ -92,7 +96,7 @@ class DoughDraftTest {
                     val after = AmountScaling.leadingAmount(scaled.removePrefix("≈ "), language)!!
                     // Gerundet wird auf übliche Küchenwerte; die Abweichung bleibt klein.
                     assertEquals("$line × $factor → $scaled", original.value * factor, after.value, original.value * factor * 0.1 + 0.6)
-                    assertEquals(line.substringAfter(" ("), scaled.substringAfter(" ("))
+                    assertEquals(line.substringAfter(" (", ""), scaled.substringAfter(" (", ""))
                 }
             }
         }

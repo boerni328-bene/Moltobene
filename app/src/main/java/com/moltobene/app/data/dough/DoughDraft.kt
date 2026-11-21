@@ -106,13 +106,16 @@ interface DoughTexts {
     /** Aufzählung, z. B. „184 g Mehl, 92 g Wasser und 1,2 g Frischhefe“. */
     fun join(parts: List<String>): String
 
+    /** Zeile oben in den Zutaten (Pizza und Brot), z. B. „609 g Mehl · Wasser 60 % · Salz 3,1 % (vom Mehl)“. */
+    fun recipeSummary(flour: String, shares: List<String>): String
+
     /** Anleitung zu einem Schritt der Zubereitung (Wunsch vom 05.11.2026), z. B. „Abgedeckt kalt stellen. Fertig, wenn …“. */
     fun stepDetail(detail: StepDetail): String
 }
 
 /**
  * Das Ergebnis des Teigrechners als normales Rezept (#69, „Als Rezept speichern“): Zutaten als Textzeilen mit der Menge
- * vorn und dem Anteil vom Mehl in Klammern, Zwischenüberschriften für Vorteig und Hauptteig mit dem Gewicht, im
+ * vorn (bei Pizza und Brot seit 0.78.1 die Anteile vom Mehl einmal oben, bei Pasta und Kuchen in Klammern), Zwischenüberschriften für Vorteig und Hauptteig mit dem Gewicht, im
  * Hauptteig zuerst der ganze Vorteig und beim Wasser die Temperatur (Wunsch vom 05.11.2026), Portionsangabe wie
  * „6 Teigkugeln (je 250 g)“, damit „Umrechnen …“ und das Teilen sie verstehen. Bei Pizza und Brot kommt der Zeitplan
  * (#71) mit den gewählten Gehzeiten dazu und als Zubereitung je Schritt eine Anleitung mit Mengen und Temperaturen;
@@ -164,7 +167,7 @@ data class DoughDraft(
             val waterText = water?.let { temperatureUnit.format(it.coerceAtLeast(0.0)) }
             val draft = build(
                 result, texts, language, input.yeastKind, texts.title(input.type, input.preferment),
-                DoughNumbers.weight(result.yield.pieceGrams, 1, language, unit), unit, waterText,
+                DoughNumbers.weight(result.yield.pieceGrams, 1, language, unit), unit, waterText, withSummary = true,
             )
             val effective = DoughProcessRules.effective(process, kitchen, input.type, input.preferment)
             val plan = DoughTimeline.plan(input.type, input.preferment, effective, kitchen.kneading)
@@ -207,9 +210,13 @@ data class DoughDraft(
             detail: String,
             unit: WeightUnit,
             waterText: String? = null,
+            withSummary: Boolean = false,
         ): DoughDraft {
             val lines = mutableListOf<Ingredient>()
             val sections = result.sections
+            // Pizza und Brot (Wunsch vom 21.11.2026): Die Prozente vom Mehl stehen einmal oben für das ganze Rezept, z. B.
+            // „609 g Mehl · Wasser 60 % · Salz 3,1 % · Frischhefe 1,2 % (vom Mehl)“; die Zeilen zeigen nur Mengen.
+            if (withSummary && result.flourGrams > 0) lines += Ingredient(summary(result, texts, language, yeastKind, unit), isHeading = true)
             val prefermentGrams = DoughSummary.prefermentGrams(result)
             for (section in sections) {
                 if (sections.size > 1) {
@@ -224,7 +231,8 @@ data class DoughDraft(
                     val amount = DoughNumbers.weight(line.grams, line.role, language, unit)
                     val percent = DoughNumbers.percent(line.grams / result.flourGrams * 100, language)
                     val warm = if (line.role == LineRole.WATER && section.kind != SectionKind.PREFERMENT && waterText != null) ", $waterText" else ""
-                    lines += Ingredient("$amount ${texts.ingredient(line.role, yeastKind)} ($percent %)$warm")
+                    val share = if (withSummary) "" else " ($percent %)"
+                    lines += Ingredient("$amount ${texts.ingredient(line.role, yeastKind)}$share$warm")
                 }
             }
             return DoughDraft(
@@ -234,6 +242,21 @@ data class DoughDraft(
                 servingsUnit = texts.servingsUnit(result.yield.kind, detail),
                 ingredients = lines,
             )
+        }
+
+        private val FLOUR_ROLES = setOf(LineRole.FLOUR, LineRole.WHEAT, LineRole.RYE, LineRole.WHOLE, LineRole.SPELT, LineRole.SEMOLINA)
+
+        /** Mehl gesamt und jede andere Zutat (über Vorteig und Hauptteig zusammengezählt) in Prozent vom Mehl. */
+        private fun summary(result: DoughResult.Success, texts: DoughTexts, language: String, yeastKind: YeastKind, unit: WeightUnit): String {
+            val totals = linkedMapOf<LineRole, Double>()
+            for (line in result.sections.flatMap { it.lines }) {
+                if (line.role !in FLOUR_ROLES) totals[line.role] = (totals[line.role] ?: 0.0) + line.grams
+            }
+            val flour = "${DoughNumbers.weight(result.flourGrams, 0, language, unit)} ${texts.ingredient(LineRole.FLOUR, yeastKind)}"
+            val shares = totals.map { (role, grams) ->
+                "${texts.ingredient(role, yeastKind)} ${DoughNumbers.percent(grams / result.flourGrams * 100, language)} %"
+            }
+            return texts.recipeSummary(flour, shares)
         }
     }
 }

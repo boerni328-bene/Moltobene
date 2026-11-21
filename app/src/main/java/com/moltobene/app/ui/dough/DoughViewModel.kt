@@ -144,6 +144,9 @@ class AndroidDoughTexts(private val context: Context) : DoughTexts {
     }
 
     /** „a und b“, „a, b und c“ (englisch mit Komma vor „and“), aus ganzen Texten in strings.xml. */
+    override fun recipeSummary(flour: String, shares: List<String>): String =
+        context.getString(R.string.dough_recipe_summary, flour, shares.joinToString(" · "))
+
     override fun join(parts: List<String>): String = when (parts.size) {
         0 -> ""
         1 -> parts[0]

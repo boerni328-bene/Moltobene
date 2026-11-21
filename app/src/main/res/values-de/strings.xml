@@ -669,6 +669,7 @@
     <string name="dough_heading_preferment">Für den Vorteig (%1$s %2$s)</string>
     <string name="dough_heading_main">Für den Hauptteig (%1$s)</string>
     <string name="dough_whole_preferment">%1$s %2$s (der ganze Vorteig)</string>
+    <string name="dough_recipe_summary">%1$s · %2$s (vom Mehl)</string>
     <string name="place_room_at">bei Raumtemperatur, %1$s</string>
     <string name="place_fridge_at">im Kühlschrank, %1$s</string>
     <string name="place_oven_at">im Backofen, %1$s</string>
