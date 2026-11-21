@@ -3,6 +3,11 @@
 Alle wichtigen Änderungen an der App werden hier festgehalten.
 Die neueste Version steht oben. Versionsschema: Major.Minor.Patch.
 
+## [0.78.1] – 2026-11-21 (versionCode 136)
+
+### Behoben
+- **Zeitplan im Dunkelmodus:** „Zurück“ und „Abbrechen“ haben einen kräftigeren Rahmen und sind auf dem hervorgehobenen Schritt jetzt gut als Knöpfe zu erkennen.
+
 ## [0.78.0] – 2026-11-20 (versionCode 135)
 
 ### Neu
