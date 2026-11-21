@@ -1,11 +1,14 @@
 # Moltobene – Übergabe (einzige Datei, wird laufend überschrieben)
 
-Stand: 21.11.2026 · `main` = **Version 0.78.0** (erschienen, Build 44736579403 grün) · Wartet auf Freigabe für `main`: Zweig `rahmen-dunkel` = **0.78.1** (Build 44885422315 grün, Fotos geprüft: kräftiger Rahmen für Zurück/Abbrechen; Pizza/Brot-Rezepte mit einer Zeile „609 g Mehl · Wasser 60 % · … (vom Mehl)“ oben, Zeilen ohne Prozente, `DoughDraft.summary`, Pasta/Kuchen unverändert) · Kein Arbeitszweig offen; `zeitplan-kompakt` (ein alter Versuch liegt im Stash „Zeitplan kompakt, erster Versuch“, kann weg), `uhrzeiten`, `hefe-hauptteig`, `mengen-antippen` sind vollständig auf `main` und können gelöscht werden · Alte Zweige `verbesserungen-0741`, `guava-sicherheit`, `guava-sicherheit-2`, `hefe-automatik`, `hefe-summe` sind auf `main` und können gelöscht werden · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
+Stand: 21.11.2026 · `main` = **Version 0.78.1** (erschienen, Build 44896070809 grün) · Kein Arbeitszweig offen; `rahmen-dunkel`, `zeitplan-kompakt` (ein alter Versuch liegt im Stash „Zeitplan kompakt, erster Versuch“, kann weg), `uhrzeiten`, `hefe-hauptteig`, `mengen-antippen` sind vollständig auf `main` und können gelöscht werden · Alte Zweige `verbesserungen-0741`, `guava-sicherheit`, `guava-sicherheit-2`, `hefe-automatik`, `hefe-summe` sind auf `main` und können gelöscht werden · Regeln in `CLAUDE.md`, Codeaufbau in `docs/aufbau.md`, Verlauf in Git und `CHANGELOG.md`.
 
 ## Projekt in drei Sätzen
 Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die Kochrezepte aus allen Quellen sammelt, lokal gespeichert, ohne Cloud. Kostenlos, GPL-3.0, GitHub Releases (`boerni328-bene/Moltobene`, öffentlich). Gebaut nur über GitHub Actions (kein Android Studio/Java auf dem PC). Projektinhaber ist kein Entwickler: Deutsch, kurz, vor größeren Entscheidungen fragen.
 
-## Zuletzt erschienen: 0.78.0 (20.11.2026)
+## Zuletzt erschienen: 0.78.1 (21.11.2026)
+- Kräftiger Rahmen (`strongBorder`, colorScheme.outline) für Zurück/Abbrechen; Pizza/Brot-Rezepte aus dem Teigrechner mit einer Zeile „609 g Mehl · Wasser 60 % · … (vom Mehl)“ oben, Zeilen ohne Prozente (`DoughDraft`, `withSummary`), Pasta/Kuchen unverändert. Bestehende Rezepte ändern sich erst beim neuen Speichern.
+
+## Davor: 0.78.0 (20.11.2026)
 - Zeitplan als Zeitleiste (Entwurf G4 nach vier Runden, Entwürfe: https://claude.ai/artifact/4ZJDbC3goetgwjr61vhj4w): `ui/schedule/StepList` (Tag als Trenner, eine Zeile je Schritt, Punkt = Zustand, aktueller Schritt aufgeklappt mit Ort, „Weiter um …“, Dauer-Eingabe und „Fertig“/„Zurück“/„Abbrechen“ in einer Reihe). Künftige Schritte: Antippen → Dauer ändern; erledigte: Antippen → Uhrzeit korrigieren (`DoughRunPlanner.setDuration`/`setDoneAt`). Datenbank 6: `dough_runs.durations` („Phase:Minuten“). Feste Begriffe Fertig/Zurück/Abbrechen in `CLAUDE.md`.
 
 ## Davor: 0.77.0 (19.11.2026)
@@ -23,7 +26,7 @@ Moltobene: Android-App (Kotlin, Compose, `com.moltobene.app`, ab Android 8), die
 - Bewusst noch groß: `DoughScreen.kt` (~1770 Zeilen), `EditViewModel.kt` (~1660).
 
 ## Offene Entscheidungen des Inhabers
-- Nach 0.78.0: Weg zu 1.0?
+- Nach 0.78.1: Weg zu 1.0?
 - Teigrechner in zwei Stufen („einfach“ und „Feinheiten“), erst als Entwurf?
 - Zwischenstände als Vorabversion statt als „neueste Version“?
 - Frühe Prüfung auf einem echten Gerät (0.75.1 auf dem Handy, besonders die Hefemengen).
